@@ -27,6 +27,7 @@ public interface Constants {
 	public static final int UPDATE = 2;       //00000010
 	public static final int ANALYSE = 3;      //00000011
 	public static final int CONSOLE = 4;      //00000100
+	public static final int ENDGAME = 5;      //00000101
 	public static final int PLAYER = 128;     //10000000
 	public static final int PLAYER_INC = 16;  //00010000
 	

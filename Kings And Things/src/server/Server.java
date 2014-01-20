@@ -35,16 +35,15 @@ public class Server {
 			} catch ( InterruptedException e) {}
 		}
 
-		Logic logic;
 		try {
-			logic = new Logic();
-			serverGUI.setEnd( logic);
+			Logic logic = new Logic();
 			new Thread( logic, "GAME LOGIC").start();
 		} catch ( Exception e) {
+			e.printStackTrace();
 			try {
 				Thread.sleep( 2000);
 			} catch ( InterruptedException e1) {}
-			serverGUI.setVisible( false);
+			serverGUI.dispose();
 		}
 	}
 }

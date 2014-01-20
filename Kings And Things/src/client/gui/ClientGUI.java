@@ -44,6 +44,9 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 	 */
 	public ClientGUI( String title){
 		super( title);
+		control = new InputControl();
+		connection = new Connection( CONSOLE);
+		EventMonitor.register( CONSOLE, this);
 	}
 
 	/**
@@ -51,9 +54,6 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 	 */
 	@Override
 	public void run() {
-		connection = new Connection();
-		control = new InputControl();
-		EventMonitor.register( CONSOLE, this);
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		addWindowListener( new WindowListener());
 		setContentPane( createGUI());

@@ -9,14 +9,15 @@ import java.awt.event.WindowAdapter;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.BorderFactory;
 
-import server.logic.EndOfGame;
 import common.Console;
 import common.Logger;
 import common.event.EventHandler;
 import common.event.EventMonitor;
 import static common.Constants.Level;
 import static common.Constants.PLAYER;
+import static common.Constants.ENDGAME;
 import static common.Constants.CONSOLE;
 import static common.Constants.PLAYER_INC;
 import static common.Constants.MAX_PLAYERS;
@@ -28,7 +29,6 @@ import static common.Constants.CONSOLE_SIZE;
 @SuppressWarnings("serial")
 public class ServerGUI extends JFrame implements Runnable, EventHandler{
 
-	private EndOfGame end;
 	private Console console;
 	
 	/**
@@ -37,6 +37,7 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 	 */
 	public ServerGUI( String title){
 		super( title);
+		EventMonitor.register( CONSOLE, this);
 	}
 
 	/**
@@ -44,7 +45,6 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 	 */
 	@Override
 	public void run() {
-		EventMonitor.register( CONSOLE, this);
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		addWindowListener( new WindowListener());
 		setContentPane( createGUI());
@@ -72,13 +72,16 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 		}
 		jpMain.add( jpPlayers, BorderLayout.CENTER);
 		
+		JPanel jpConsol = new JPanel( new BorderLayout());
+		jpConsol.setBorder( BorderFactory.createEmptyBorder( 0, 5, 5, 5));
 		console = new Console();
 		console.setEditable( false);
 		console.setPreferredSize( CONSOLE_SIZE);
 		JScrollPane jsp = new JScrollPane( console);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		jpMain.add( jsp, BorderLayout.SOUTH);
+		jpConsol.add( jsp, BorderLayout.CENTER);
+		jpMain.add( jpConsol, BorderLayout.SOUTH);
 		
 		return jpMain;
 	}
@@ -87,7 +90,7 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 		
 		@Override
 		public void windowClosed(WindowEvent e){
-			end.endGame();
+			EventMonitor.fireEvent( ENDGAME, null, null);
 			Logger.flush( "Server", console.getText());
 		}
 	}
@@ -95,9 +98,5 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 	@Override
 	public void handel( String message, Level level) {
 		console.add( message, level);
-	}
-
-	public void setEnd( EndOfGame end) {
-		this.end = end;
 	}
 }

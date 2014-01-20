@@ -1,21 +1,19 @@
 package server.logic;
 
-import java.io.PrintWriter;
 import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
-import java.net.Socket;
 import java.net.ServerSocket;
 import java.net.SocketTimeoutException;
 
+import common.Constants.Level;
+import common.network.Connection;
+import common.event.EventHandler;
 import common.event.EventMonitor;
-import static common.Constants.Level;
+import static common.Constants.ENDGAME;
 import static common.Constants.CONSOLE;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
 
-public class Logic implements Runnable, EndOfGame {
+public class Logic implements Runnable, EventHandler {
 
 	private boolean close = false;
 	private ServerSocket serverSocket;
@@ -28,32 +26,20 @@ public class Logic implements Runnable, EndOfGame {
 		} catch ( IOException e) {
 			EventMonitor.fireEvent( CONSOLE, "Failed to open port " + SERVER_PORT, Level.Error);
 			EventMonitor.fireEvent( CONSOLE, e.getMessage(), Level.Error);
-			e.printStackTrace();
 			throw e;
 		}
 	}
 
 	@Override
 	public void run() {
+		EventMonitor.register( ENDGAME, this);
 		while( !close){
-            try (Socket clientSocket = serverSocket.accept();
-            		PrintWriter output = new PrintWriter( clientSocket.getOutputStream(), true);
-            		BufferedReader input = new BufferedReader( new InputStreamReader( clientSocket.getInputStream()));){
-            	
-	    		EventMonitor.fireEvent( CONSOLE, "Recieved connection from " + clientSocket, Level.Notice);
+            try (Connection connection = new Connection( serverSocket.accept(), CONSOLE)){
+	    		EventMonitor.fireEvent( CONSOLE, "Recieved connection from " + connection, Level.Notice);
 	    		String str;
-	    		do{	
-	    			str = input.readLine();
-	    			if( str!=null){
-		    			EventMonitor.fireEvent( CONSOLE, "Recieved: " + str, Level.Plain);
-		    			
-		    			str = new StringBuilder( str).reverse().toString();
-		    			output.println( str);
-		    			EventMonitor.fireEvent( CONSOLE, "Send: " + str, Level.Plain);
-	    			}
-            	}while( clientSocket.isConnected() && str!=null);
-	    		EventMonitor.fireEvent( CONSOLE, "Lost connection from " + clientSocket, Level.Warning);
-    			
+	    		while ((str = connection.recieve())!=null){
+	    			connection.send( new StringBuilder( str).reverse().toString());
+	    		}
             } catch( SocketTimeoutException ex){
                 //try again for incoming connections
             } catch ( IOException e) {
@@ -70,7 +56,7 @@ public class Logic implements Runnable, EndOfGame {
 	}
 
 	@Override
-	public void endGame() {
+	public void handel( String message, Level level) {
 		close = true;
 	}
 }

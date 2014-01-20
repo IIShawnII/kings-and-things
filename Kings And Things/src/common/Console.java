@@ -3,7 +3,6 @@ package common;
 import java.util.Date;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -69,11 +68,7 @@ public class Console extends JTextPane {
 		Document doc = getDocument();
 		try {
 			doc.insertString( doc.getLength(), dateFormat.format( new Date()) + message+"\r\n", attribute);
-			//find position of scroll bar
-			Rectangle r = modelToView( doc.getLength());
-			if (r != null) {
-				scrollRectToVisible(r);
-			}
+			setCaretPosition( doc.getLength());
 		} catch (BadLocationException e) {}
 	}
 }
