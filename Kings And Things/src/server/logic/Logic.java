@@ -45,7 +45,7 @@ public class Logic implements Runnable, EventHandler {
             	EventMonitor.fireEvent( CONSOLE, "Still need minimum of " + (MIN_PLAYERS-count) + " players", Level.Notice);
 	    		EventMonitor.fireEvent( CONSOLE, "Recieved connection from " + connection, Level.Notice);
 	    		EventMonitor.fireEvent( CONSOLE, connection + " is assigned to Player " + count, Level.Notice);
-	    		new PlayerThread( playerID, connection).start();
+	    		new PlayerConnection( playerID, connection).start();
             	count++;
             	playerID+=PLAYER_INC;
             } catch( SocketTimeoutException ex){

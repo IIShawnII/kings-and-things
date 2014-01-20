@@ -22,7 +22,7 @@ public class Client {
 		if( args!=null && args.length>=1){
 			ClientGUI = new ClientGUI( args[0]);
 		}else{
-			ClientGUI = new ClientGUI( "Kings And Things Server");
+			ClientGUI = new ClientGUI( "Kings And Things");
 		}
 		//start GUI on AWT Thread
 		SwingUtilities.invokeLater( ClientGUI);

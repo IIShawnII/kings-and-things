@@ -6,12 +6,12 @@ import common.network.Connection;
 
 import static common.Constants.CONSOLE;
 
-public class PlayerThread extends Thread{
+public class PlayerConnection extends Thread{
 	
 	private final int PLAYER_ID;
 	private Connection connection;
 	
-	public PlayerThread( final int PLAYER_ID, Connection connection){
+	public PlayerConnection( final int PLAYER_ID, Connection connection){
 		this.PLAYER_ID = PLAYER_ID;
 		this.connection = connection;
 	}

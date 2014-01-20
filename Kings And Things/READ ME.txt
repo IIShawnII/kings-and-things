@@ -1,0 +1,21 @@
+Team 28
+COMP 3004
+IDE: eclipse
+JDK: 1.7+
+      
+NOTE:
+	do not activate build.bat file if you do not have ant
+	application on your system, because it will damage jar
+	files in Server and Client folder.
+
+NOTE:
+	you must run server and client through batch files provided.
+
+	
+Running Server and Client with batch file
+	1) run server.bat or Server/server.bat
+	2) now click on client.bat or Client/client.bat or mac maximum of 4 and minimum of 2 times
+
+	
+Updating Jar Files (MUST Have apache-ant-1.9.3 for this part)
+	1)Click on build.bat

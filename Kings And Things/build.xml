@@ -1,0 +1,55 @@
+<!-- ant srcipt for building jar files -->
+<project name="YouSendIt" basedir="." default="build">
+	<tstamp>
+		<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
+	<!-- removing old build files -->
+	<target name="initCleanUp">
+		<delete dir="${build}" />
+		<delete file="Server/server.jar" />
+		<delete file="Client/client.jar" />
+	</target>
+	<!-- create build folders -->
+	<target name="buildFolder" depends="initCleanUp">
+		<mkdir dir="${build}" />
+		<mkdir dir="${build}/bin" />
+	</target>
+	<!-- compile code -->
+	<target name="compile" depends="buildFolder">
+		<javac srcdir="src" destdir="${build}/bin" />
+	</target>
+	<!-- create server manifest and build a jar file for server -->
+	<target name="server">
+		<manifest file="${build}/MANIFEST.MF">
+			<attribute name="Built-By" value="Team 28" />
+			<attribute name="Main-Class" value="server.Server" />
+			<attribute name="Built-Date" value="${TODAY}" />
+		</manifest>
+
+		<jar destfile="Server/server.jar"
+			 basedir="${build}/bin" 
+			 includes="**" 
+			 excludes="client/" 
+			 manifest="${build}/MANIFEST.MF" />
+	</target>
+	<!-- create server manifest and build a jar file for client -->
+	<target name="client">
+		<manifest file="${build}/MANIFEST.MF">
+			<attribute name="Built-By" value="Team 28" />
+			<attribute name="Main-Class" value="client.Client" />
+			<attribute name="Built-Date" value="${TODAY}" />
+		</manifest>
+
+		<jar destfile="Client/client.jar"
+			 basedir="${build}/bin"
+		     includes="**"
+			 excludes="server/"
+			 manifest="${build}/MANIFEST.MF" />
+	</target>
+	<!-- remove new build folder -->
+	<target name="finalCleanUp">
+		<delete dir="${build}" />
+	</target>
+	<!-- main command for building the whole project -->
+	<target name="build" depends="compile,server,client,finalCleanUp" />
+</project>
