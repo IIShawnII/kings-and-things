@@ -8,8 +8,12 @@ import common.Constants.Level;
 import common.network.Connection;
 import common.event.EventHandler;
 import common.event.EventMonitor;
+import static common.Constants.PLAYER;
 import static common.Constants.ENDGAME;
 import static common.Constants.CONSOLE;
+import static common.Constants.PLAYER_INC;
+import static common.Constants.MIN_PLAYERS;
+import static common.Constants.MAX_PLAYERS;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
 
@@ -33,13 +37,17 @@ public class Logic implements Runnable, EventHandler {
 	@Override
 	public void run() {
 		EventMonitor.register( ENDGAME, this);
-		while( !close){
-            try (Connection connection = new Connection( serverSocket.accept(), CONSOLE)){
+		int count=0, playerID = PLAYER;
+		while( !close && count<MAX_PLAYERS){
+            try {
+            	Connection connection = new Connection( serverSocket.accept(), playerID+CONSOLE);
+            	EventMonitor.fireEvent( CONSOLE, "Player count is " + count + " out of " + MAX_PLAYERS + " players", Level.Notice);
+            	EventMonitor.fireEvent( CONSOLE, "Still need minimum of " + (MIN_PLAYERS-count) + " players", Level.Notice);
 	    		EventMonitor.fireEvent( CONSOLE, "Recieved connection from " + connection, Level.Notice);
-	    		String str;
-	    		while ((str = connection.recieve())!=null){
-	    			connection.send( new StringBuilder( str).reverse().toString());
-	    		}
+	    		EventMonitor.fireEvent( CONSOLE, connection + " is assigned to Player " + count, Level.Notice);
+	    		new PlayerThread( playerID, connection).start();
+            	count++;
+            	playerID+=PLAYER_INC;
             } catch( SocketTimeoutException ex){
                 //try again for incoming connections
             } catch ( IOException e) {

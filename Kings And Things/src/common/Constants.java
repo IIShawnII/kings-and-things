@@ -5,7 +5,7 @@ import java.awt.Dimension;
 
 public interface Constants {
 	
-	enum Level { Error, Warning, Notice, Plain}
+	enum Level { Error, Warning, Notice, Plain, END}
 
 	//Colors
 	public static final Color RED = new Color( 255, 0, 0);
@@ -38,12 +38,10 @@ public interface Constants {
 	public static final int MIN_PLAYERS = 2;
 	
 	//Sizes
-	public static final int CONSOLE_COL = 70;
-	public static final int CONSOLE_ROW = 10;
 	public static final int LABEL_FONT_SIZE = 25;
 	public static final int PLAYER_FONT_SIZE = 12;
 	public static final Dimension LABEL_SIZE = new Dimension( 50,50);
-	public static final Dimension CONSOLE_SIZE = new Dimension( 450,250);
+	public static final Dimension CONSOLE_SIZE = new Dimension( 400,150);
 	
 	//Defaults
 	public static final int SERVER_TIMEOUT = 10;

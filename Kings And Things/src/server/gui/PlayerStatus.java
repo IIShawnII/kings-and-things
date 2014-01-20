@@ -7,10 +7,10 @@ import java.awt.GridBagConstraints;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
 
+import common.Console;
 import common.event.EventHandler;
 import common.event.EventMonitor;
 import static common.Constants.RED;
@@ -30,8 +30,7 @@ import static common.Constants.ANALYSE;
 import static common.Constants.CONSOLE;
 import static common.Constants.PLAYER_INC;
 import static common.Constants.LABEL_SIZE;
-import static common.Constants.CONSOLE_ROW;
-import static common.Constants.CONSOLE_COL;
+import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.LABEL_FONT_SIZE;
 import static common.Constants.PLAYER_FONT_SIZE;
 
@@ -44,7 +43,7 @@ public class PlayerStatus extends JPanel implements EventHandler{
 	private final int PLAYER_ID;
 
 	private Font font;
-	private JTextArea jtaConsole;
+	private Console console;
 	
 	/**
 	 * @param PLAYER_ID - player id used in even monitor, must be a positive integer bigger or equal to common.Constants.PLAYER
@@ -76,10 +75,11 @@ public class PlayerStatus extends JPanel implements EventHandler{
 	 */
 	private JPanel createConsole(){
 		JPanel jpMain = new JPanel( new BorderLayout());
-		jtaConsole = new JTextArea( CONSOLE_ROW, CONSOLE_COL);
-		jtaConsole.setEditable( false);
-		jtaConsole.setEnabled( false);
-		JScrollPane jsp = new JScrollPane( jtaConsole);
+		console = new Console();
+		console.setEnabled( false);
+		console.setEditable( false);
+		console.setPreferredSize( CONSOLE_SIZE);
+		JScrollPane jsp = new JScrollPane( console);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		jpMain.add( jsp, BorderLayout.CENTER);
@@ -135,9 +135,10 @@ public class PlayerStatus extends JPanel implements EventHandler{
 	@Override
 	public void handel( String message, Level level) {
 		if( message!=null){
-			jtaConsole.setEnabled( true);
-			jtaConsole.append( message);
-			jtaConsole.append( "\r\n");
+			console.setEnabled( true);
+			console.add( message, level);
+		}else if (level==Level.END){
+			console.setEnabled( false);
 		}
 	}
 }
