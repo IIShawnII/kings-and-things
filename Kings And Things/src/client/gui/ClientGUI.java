@@ -85,11 +85,11 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 		constraints.gridy = 0;
 		jpMain.add( board, constraints);
 
-		/*constraints.weighty = 1;
+		constraints.weighty = 1;
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		jpMain.add( createTempPanel(), constraints);*/
+		jpMain.add( createTempPanel(), constraints);
 		
 		return jpMain;
 	}

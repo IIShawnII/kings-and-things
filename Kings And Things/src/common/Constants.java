@@ -58,7 +58,7 @@ public interface Constants {
 	public static final double HEX_RATIO = 752.0/658.0;
 	public static final int BOARD_BOTTOM_PADDING = 120;
 	public static final Dimension LABEL_SIZE = new Dimension( 50,50);
-	public static final Dimension CONSOLE_SIZE = new Dimension( 100,75);
+	public static final Dimension CONSOLE_SIZE = new Dimension( 100,40);
 	public static final Dimension HEX_SIZE = new Dimension( (int)(90*HEX_RATIO),90);
 	public static final Dimension HEX_BOARD_SIZE = new Dimension( HEX_SIZE.height*BOARD_HEIGHT_SEGMENT/2 + HEX_SPACING, HEX_SIZE.height*BOARD_HEIGHT_SEGMENT/2 + HEX_SPACING);
 	public static final Dimension BOARD_SIZE = new Dimension( HEX_BOARD_SIZE.width + BOARD_PLAYERS_STATE, HEX_BOARD_SIZE.height + BOARD_BOTTOM_PADDING);
