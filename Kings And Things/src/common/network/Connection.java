@@ -61,8 +61,8 @@ public class Connection implements Closeable{
 	
 	/**
 	 * connect to a specific address and create in out streams
-	 * @param ip - distension IP address
-	 * @param port - distension port
+	 * @param ip - destination IP address
+	 * @param port - destination port
 	 * @return true if all streams are created and connection established, otherwise false
 	 */
 	public boolean connectTo( String ip, int port){
@@ -128,7 +128,7 @@ public class Connection implements Closeable{
 	}
 	
 	/**
-	 * send a text message to distension
+	 * send a text message to destination
 	 * @param message - information to be sent
 	 * @return true if information has been sent, else false
 	 */
@@ -144,7 +144,7 @@ public class Connection implements Closeable{
 	}
 	
 	/**
-	 * Receive response from distension in form of a text
+	 * Receive response from destination in form of a text
 	 * @return a string if message is received, otherwise null
 	 */
 	public String recieve(){
