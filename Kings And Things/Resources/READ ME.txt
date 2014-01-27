@@ -1,0 +1,10 @@
+
+-n first line of tile, being name of tile
+
+-c number of times a tile is present
+
+-t second line on the tile, could be Terrain, Magic or Treasure
+
+-s symbol at bottom right of tile, could be Fly, Range, Magic, Charge
+
+-a number at bottom right of tile, could be attack, gold or income

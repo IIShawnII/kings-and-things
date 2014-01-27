@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+
 import java.net.Socket;
 import java.net.InetSocketAddress;
 
@@ -44,6 +45,15 @@ public class Connection implements Closeable{
 		connectTo( null, 0);
 	}
 	
+	/**
+	 * state of the current connection
+	 * @return true if connectTo() has been successfully called
+	 * 			and false if disconnect has been called
+	 */
+	public boolean isConnected(){
+		return isConnected;
+	}
+	
 	@Override
 	public String toString(){
 		return socket.toString();
@@ -72,7 +82,9 @@ public class Connection implements Closeable{
             input = new BufferedReader( new InputStreamReader( socket.getInputStream()));
             EventMonitor.fireEvent( EVENT_ID, "Input stream established", Level.Notice);
 			isConnected = true;
-		} catch ( Exception e){
+		//} catch( ConnectException e){
+			
+		} catch( Exception e){
 			EventMonitor.fireEvent( EVENT_ID, e.getMessage(), Level.Error);
 			EventMonitor.fireEvent( EVENT_ID, "Disconnecting", Level.Warning);
 			disconnect();
@@ -85,7 +97,7 @@ public class Connection implements Closeable{
 	 * close all streams and socket
 	 */
 	public void disconnect() {
-		if( isConnected){
+		if( socket!=null){
 			if( input!=null){
 				try {
 					input.close();
