@@ -59,15 +59,15 @@ public interface Constants {
 	public static final int BOARD_BOTTOM_PADDING = 120;
 	public static final Dimension LABEL_SIZE = new Dimension( 50,50);
 	public static final Dimension CONSOLE_SIZE = new Dimension( 100,40);
-	public static final Dimension HEX_SIZE = new Dimension( (int)(90*HEX_RATIO),90);
+	public static final Dimension HEX_SIZE = new Dimension( (int)(70*HEX_RATIO),70);
 	public static final Dimension HEX_BOARD_SIZE = new Dimension( HEX_SIZE.height*BOARD_HEIGHT_SEGMENT/2 + HEX_SPACING, HEX_SIZE.height*BOARD_HEIGHT_SEGMENT/2 + HEX_SPACING);
 	public static final Dimension BOARD_SIZE = new Dimension( HEX_BOARD_SIZE.width + BOARD_PLAYERS_STATE, HEX_BOARD_SIZE.height + BOARD_BOTTOM_PADDING);
 	
 	//Defaults
-	public static final int SPIRAL_DELAY = 3;
+	public static final int SPIRAL_DELAY = 15;
 	public static final int SERVER_TIMEOUT = 10;
 	public static final int SERVER_PORT = 12345;
-	public static final int HEX_MOVE_DISTANCE = 15;
+	public static final int HEX_MOVE_DISTANCE = 25;
 	public static final String SERVER_IP = "127.0.0.1";
 	public static final int BOARD_LOAD_ROW[][] = { { 7, 5, 6, 8, 9, 8, 6},
 													{4, 3, 4, 5, 7, 9, 10, 11, 10, 9, 7, 5},

@@ -75,11 +75,11 @@ public class Board extends JPanel{
 		lockList = new ArrayList<>();
 		hexLock = new Rectangle( (int)(8+HEX_SIZE.getWidth()/2-LOCK_SIZE/2), (int)(8+HEX_SIZE.getHeight()/2-LOCK_SIZE/2), LOCK_SIZE, LOCK_SIZE);
 		for( int i=0; i<MAX_HEXES; i++){
-			addHex( 8, 8);
+			addHex( 8, 8, false);
 		}
 	}
 	
-	public void addHex( int x, int y){
+	public void addHex( int x, int y, boolean repaint){
 		Hex hex = new Hex();
 		hex.addMouseListener( mouseInput);
 		hex.addMouseMotionListener( mouseInput);
@@ -87,8 +87,10 @@ public class Board extends JPanel{
 		hex.setLockArea( hexLock);
 		hex.init();
 		add( hex);
-		revalidate();
-		repaint();
+		if(repaint){
+			revalidate();
+			repaint();
+		}
 	}
 	
 	@Override
