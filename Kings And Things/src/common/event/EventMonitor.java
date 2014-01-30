@@ -22,6 +22,6 @@ public class EventMonitor {
 	}
 	
 	public synchronized static void fireEvent( final int ID, String message, Level level){
-		dispatch.handlers.get( ID).handel( message, level);
+		dispatch.handlers.get( ID).handle( message, level);
 	}
 }

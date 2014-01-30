@@ -133,7 +133,7 @@ public class PlayerStatus extends JPanel implements EventHandler{
 	 * @param message - new message to be added to display
 	 */
 	@Override
-	public void handel( String message, Level level) {
+	public void handle( String message, Level level) {
 		if( message!=null){
 			console.setEnabled( true);
 			console.add( message, level);

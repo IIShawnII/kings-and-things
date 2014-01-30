@@ -77,7 +77,7 @@ public class StatusLabel extends JLabel implements EventHandler{
 	 * triggered when appropriate event is fired
 	 */
 	@Override
-	public void handel( String message, Level level) {
+	public void handle( String message, Level level) {
 		changeState();
 	}
 }

@@ -209,7 +209,7 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 	}
 
 	@Override
-	public void handel( String message, Level level) {
+	public void handle( String message, Level level) {
 		if( console!=null){
 			console.add( message, level);
 		}
