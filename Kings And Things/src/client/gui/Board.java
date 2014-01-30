@@ -23,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
 import client.gui.tiles.Hex;
 import static common.Constants.HEX_SIZE;
@@ -40,8 +41,10 @@ import static common.Constants.BOARD_HEIGHT_SEGMENT;
 @SuppressWarnings("serial")
 public class Board extends JPanel{
 	
-	private static Image image;
+	private static BufferedImage image;
 	private static final Polygon HEX_OUTLINE;
+	private static final int heightSegment = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
+	private static final int widthSegment = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
 	static{
 		int w = (int) (HEX_SIZE.getWidth()/4)+1;
 		int h = (int) (HEX_SIZE.getHeight()/2)+2;
@@ -51,7 +54,30 @@ public class Board extends JPanel{
 			image = ImageIO.read( file);
 		} catch ( IOException e) {
 			e.printStackTrace();
+			System.err.println("Board");
 		}
+		
+		Graphics2D g2d = image.createGraphics();
+		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		int x=0, y=0;
+		Stroke old = g2d.getStroke();
+		g2d.setStroke( new BasicStroke( 5));
+		g2d.setColor( Color.BLACK);
+		HEX_OUTLINE.translate( 8-2, 8-3);
+		g2d.drawPolygon( HEX_OUTLINE);
+		HEX_OUTLINE.translate( -(8-2), -(8-3));
+		for( int ring=0; ring<BOARD_LOAD_ROW.length; ring++){
+			for( int count=0; count<BOARD_LOAD_ROW[ring].length; count++){
+				x = (widthSegment*BOARD_LOAD_COL[ring][count]);
+				y = (heightSegment*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
+				HEX_OUTLINE.translate( ((int) (x-HEX_SIZE.getWidth()/2))-2, ((int) (y-HEX_SIZE.getHeight()/2)-3));
+				g2d.drawPolygon( HEX_OUTLINE);
+				HEX_OUTLINE.translate( -((int) (x-HEX_SIZE.getWidth()/2)-2), -((int) (y-HEX_SIZE.getHeight()/2)-3));
+			}
+		}
+		g2d.setStroke( old);
+		g2d.dispose();
 	}
 	
 	private boolean interactWithHexes = false;
@@ -60,8 +86,6 @@ public class Board extends JPanel{
 	private MouseInput mouseInput;
 	private ArrayList< Rectangle> lockList;
 	private Rectangle hexLock;
-	int heightSegment = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
-	int widthSegment = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
 	
 	public Board( LayoutManager layout, boolean isDoubleBuffered){
 		super( layout, isDoubleBuffered);
@@ -100,23 +124,6 @@ public class Board extends JPanel{
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		g2d.drawImage( image, 0, 0, getWidth(), getHeight(), null);
-		int x=0, y=0;
-		Stroke old = g2d.getStroke();
-		g2d.setStroke( new BasicStroke( 5));
-		g2d.setColor( Color.BLACK);
-		HEX_OUTLINE.translate( 8-2, 8-3);
-		g2d.drawPolygon( HEX_OUTLINE);
-		HEX_OUTLINE.translate( -(8-2), -(8-3));
-		for( int ring=0; ring<BOARD_LOAD_ROW.length; ring++){
-			for( int count=0; count<BOARD_LOAD_ROW[ring].length; count++){
-				x = (widthSegment*BOARD_LOAD_COL[ring][count]);
-				y = (heightSegment*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
-				HEX_OUTLINE.translate( ((int) (x-HEX_SIZE.getWidth()/2))-2, ((int) (y-HEX_SIZE.getHeight()/2)-3));
-				g2d.drawPolygon( HEX_OUTLINE);
-				HEX_OUTLINE.translate( -((int) (x-HEX_SIZE.getWidth()/2)-2), -((int) (y-HEX_SIZE.getHeight()/2)-3));
-			}
-		}
-		g2d.setStroke( old);
 	}
 	
 	private class SpiralPlacement implements ActionListener{
@@ -165,10 +172,11 @@ public class Board extends JPanel{
 		private Rectangle bound, boardBound;
 		private int xDiff, yDiff;
 		private int xPressed, yPressed;
+		private boolean ignore = false;
 
 		@Override
 	    public void mouseDragged(MouseEvent e){
-			if(	e.getSource() instanceof Hex && interactWithHexes){
+			if(	!ignore && e.getSource() instanceof Hex && interactWithHexes){
 				Hex hex = (Hex)e.getSource();
 				boardBound = getBounds();
 				bound = new Rectangle( hex.getBounds());
@@ -217,13 +225,18 @@ public class Board extends JPanel{
 		@Override
 		public void mousePressed( MouseEvent e){
 			Object source = e.getSource();
-			xPressed = e.getX();
-			yPressed = e.getY();
 			if( interactWithHexes && source instanceof Hex){
-				remove( (Hex)source);
-				add( (Hex)source, 0);
-				revalidate();
-				repaint();
+				xPressed = e.getX();
+				yPressed = e.getY();
+				if( ((Hex)source).isInside( xPressed, yPressed)){
+					remove( (Hex)source);
+					add( (Hex)source, 0);
+					revalidate();
+					repaint();
+					ignore = false;
+				}else{
+					ignore = true;
+				}
 			}
 		}
 
@@ -231,7 +244,9 @@ public class Board extends JPanel{
 		public void mouseClicked( MouseEvent e){
 			Object source = e.getSource();
 			if( interactWithHexes && source instanceof Hex && e.getButton()==MouseEvent.BUTTON3){
-				((Hex)source).flip();
+				if( ((Hex)source).isInside( xPressed, yPressed)){
+					((Hex)source).flip();
+				}
 			}else if( interactWithHexes && !(source instanceof Hex) && e.getButton()==MouseEvent.BUTTON2){
 				for( Component hex : getComponents()){
 					((Hex)hex).flip();

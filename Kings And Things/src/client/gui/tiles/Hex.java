@@ -1,10 +1,8 @@
 package client.gui.tiles;
 
 import java.util.Random;
-
 import java.io.File;
 import java.io.IOException;
-
 import java.awt.Polygon;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -25,6 +23,7 @@ public class Hex extends JComponent{
 				HEX_IMAGES[i] = ImageIO.read( images[i]);
 			} catch ( IOException e) {
 				e.printStackTrace();
+				System.err.println("Hex");
 			}
 		}
 	}
@@ -66,8 +65,7 @@ public class Hex extends JComponent{
 		repaint();
 	}
 	
-	@Override
-	public boolean contains( int x, int y){
+	public boolean isInside( int x, int y){
 		return bound.contains( x, y);
 	}
 	

@@ -64,10 +64,10 @@ public interface Constants {
 	public static final Dimension BOARD_SIZE = new Dimension( HEX_BOARD_SIZE.width + BOARD_PLAYERS_STATE, HEX_BOARD_SIZE.height + BOARD_BOTTOM_PADDING);
 	
 	//Defaults
-	public static final int SPIRAL_DELAY = 15;
+	public static final int SPIRAL_DELAY = 2;
 	public static final int SERVER_TIMEOUT = 10;
 	public static final int SERVER_PORT = 12345;
-	public static final int HEX_MOVE_DISTANCE = 25;
+	public static final int HEX_MOVE_DISTANCE = 30;
 	public static final String SERVER_IP = "127.0.0.1";
 	public static final int BOARD_LOAD_ROW[][] = { { 7, 5, 6, 8, 9, 8, 6},
 													{4, 3, 4, 5, 7, 9, 10, 11, 10, 9, 7, 5},
