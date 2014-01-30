@@ -2,14 +2,10 @@ package common;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.image.BufferedImage;
 
 public interface Constants {
 	
 	enum Level { Error, Warning, Notice, Plain, END}
-
-	//Hex images
-	public static final BufferedImage[] HEX_IMAGES = new BufferedImage[9];
 	
 	//Colors
 	public static final Color RED = new Color( 255, 0, 0);
@@ -46,6 +42,7 @@ public interface Constants {
 	
 	//Sizes
 	public static final int LOCK_SIZE = 28;
+	public static final int HEX_HEIGHT = 70;
 	public static final int HEX_SPACING = 16;
 	public static final int LABEL_FONT_SIZE = 25;
 	public static final int IP_COLUMN_COUNT = 12;
@@ -59,16 +56,16 @@ public interface Constants {
 	public static final int BOARD_BOTTOM_PADDING = 120;
 	public static final Dimension LABEL_SIZE = new Dimension( 50,50);
 	public static final Dimension CONSOLE_SIZE = new Dimension( 100,40);
-	public static final Dimension HEX_SIZE = new Dimension( (int)(70*HEX_RATIO),70);
+	public static final Dimension HEX_SIZE = new Dimension( (int)(HEX_HEIGHT*HEX_RATIO),HEX_HEIGHT);
 	public static final Dimension HEX_BOARD_SIZE = new Dimension( HEX_SIZE.height*BOARD_HEIGHT_SEGMENT/2 + HEX_SPACING, HEX_SIZE.height*BOARD_HEIGHT_SEGMENT/2 + HEX_SPACING);
 	public static final Dimension BOARD_SIZE = new Dimension( HEX_BOARD_SIZE.width + BOARD_PLAYERS_STATE, HEX_BOARD_SIZE.height + BOARD_BOTTOM_PADDING);
 	
 	//Defaults
-	public static final int SPIRAL_DELAY = 2;
+	public static final int SPIRAL_DELAY = 5;
 	public static final int SERVER_TIMEOUT = 10;
 	public static final int SERVER_PORT = 12345;
-	public static final int HEX_MOVE_DISTANCE = 30;
 	public static final String SERVER_IP = "127.0.0.1";
+	public static final int HEX_MOVE_DISTANCE = (int) (HEX_HEIGHT*0.5);
 	public static final int BOARD_LOAD_ROW[][] = { { 7, 5, 6, 8, 9, 8, 6},
 													{4, 3, 4, 5, 7, 9, 10, 11, 10, 9, 7, 5},
 													{3, 2, 1, 2, 3, 4, 6, 8, 10, 11, 12, 13, 12, 11, 10, 8, 6, 4}};
