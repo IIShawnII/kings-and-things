@@ -1,7 +1,11 @@
 package client;
 
+import static common.Constants.CONSOLE;
+
 import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
+
+import common.network.Connection;
 
 import client.gui.ClientGUI;
 
@@ -18,13 +22,15 @@ public class Client {
 			//failed to change look and feel
 		}
 		
-		ClientGUI ClientGUI;
+		ClientGUI clientGUI;
+		Connection connection = new Connection( CONSOLE);
 		if( args!=null && args.length>=1){
-			ClientGUI = new ClientGUI( args[0]);
+			clientGUI = new ClientGUI( args[0]);
 		}else{
-			ClientGUI = new ClientGUI( "Kings And Things");
+			clientGUI = new ClientGUI( "Kings And Things");
 		}
+		clientGUI.setConnection( connection);
 		//start GUI on AWT Thread
-		SwingUtilities.invokeLater( ClientGUI);
+		SwingUtilities.invokeLater( clientGUI);
 	}
 }

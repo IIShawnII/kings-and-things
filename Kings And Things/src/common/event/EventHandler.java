@@ -1,6 +1,6 @@
 package common.event;
 
-import static common.Constants.Level;
+import common.Constants.Level;
 
 /**
  * any GUI object that must responds to events must implement this interface

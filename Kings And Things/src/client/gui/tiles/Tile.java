@@ -1,27 +1,16 @@
 package client.gui.tiles;
 
-import java.io.File;
-import java.io.IOException;
 import java.awt.Image;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Graphics2D;
 
-import javax.imageio.ImageIO;
 import javax.swing.JComponent;
+
+import static common.Constants.TILE_REVERSE;
 
 @SuppressWarnings("serial")
 public class Tile extends JComponent{
-	
-	public static Image image;
-	static{
-		try {
-			image = ImageIO.read( new File( "Resources\\Extra\\-n 0Reverse.png"));
-		} catch ( IOException e) {
-			e.printStackTrace();
-			System.err.println("Hex");
-		}
-	}
 	
 	private Rectangle lockArea = null;
 	private boolean hasLock = false;
@@ -32,7 +21,7 @@ public class Tile extends JComponent{
 	}
 	
 	public void init(){
-		drawTile = image;
+		drawTile = TILE_REVERSE;
 	}
 	
 	public void setLockArea( Rectangle lock){
