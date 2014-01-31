@@ -11,10 +11,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.GraphicsConfiguration;
 
-import static mycode.engine.collision.Constants.LOADING_WIDTH;
-import static mycode.engine.collision.Constants.LOADING_HEIGHT;
-import static mycode.engine.collision.Constants.CONTROLLER_COUNT;
-import static mycode.engine.collision.Constants.MAX_MOVING_OBJECTS;
+import static common.Constants.LOADING_WIDTH;
+import static common.Constants.LOADING_HEIGHT;
 
 @SuppressWarnings("serial")
 public class LoadingDialog extends JDialog implements Runnable{

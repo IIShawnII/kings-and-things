@@ -45,6 +45,8 @@ public interface Constants {
 	public static final int LOCK_SIZE = 28;
 	public static final int HEX_HEIGHT = 70;
 	public static final int HEX_SPACING = 16;
+	public static final int LOADING_WIDTH = 400;
+	public static final int LOADING_HEIGHT = 150;
 	public static final int LABEL_FONT_SIZE = 25;
 	public static final int IP_COLUMN_COUNT = 12;
 	public static final int PLAYER_FONT_SIZE = 12;

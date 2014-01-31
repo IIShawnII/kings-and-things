@@ -6,8 +6,8 @@
 	<!-- removing old build files -->
 	<target name="initCleanUp">
 		<delete dir="${build}" />
-		<delete file="Server/server.jar" />
-		<delete file="Client/client.jar" />
+		<delete file="server.jar" />
+		<delete file="client.jar" />
 	</target>
 	<!-- create build folders -->
 	<target name="buildFolder" depends="initCleanUp">
@@ -26,7 +26,7 @@
 			<attribute name="Built-Date" value="${TODAY}" />
 		</manifest>
 
-		<jar destfile="Server/server.jar"
+		<jar destfile="server.jar"
 			 basedir="${build}/bin" 
 			 includes="**" 
 			 excludes="client/" 
@@ -40,7 +40,7 @@
 			<attribute name="Built-Date" value="${TODAY}" />
 		</manifest>
 
-		<jar destfile="Client/client.jar"
+		<jar destfile="client.jar"
 			 basedir="${build}/bin"
 		     includes="**"
 			 excludes="server/"
