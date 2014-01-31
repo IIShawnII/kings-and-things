@@ -39,6 +39,7 @@ public interface Constants {
 	//Minimums
 	public static final int MIN_PLAYERS = 2;
 	public static final int MIN_HEXES_ON_BOARD = 19;
+	public static final Dimension MIN_CLIENT_SIZE = new Dimension( 1300,720);
 	
 	//Sizes
 	public static final int LOCK_SIZE = 28;

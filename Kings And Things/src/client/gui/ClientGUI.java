@@ -1,14 +1,18 @@
 package client.gui;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.ActionListener;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,6 +32,7 @@ import static common.Constants.BOARD_SIZE;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.IP_COLUMN_COUNT;
+import static common.Constants.MIN_CLIENT_SIZE;
 import static common.Constants.PORT_COLUMN_COUNT;
 
 /**
@@ -59,20 +64,26 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 	public void run() {
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		addWindowListener( new WindowListener());
-		setContentPane( createGUI());
+		//setContentPane( createGUI());
 		pack();
-		Dimension size = new Dimension( getWidth(), getHeight());
-		setMinimumSize( size);
-		setSize( size);
+		setMinimumSize( MIN_CLIENT_SIZE);
 		setLocationRelativeTo( null);
+		setExtendedState( MAXIMIZED_BOTH);
 		setVisible( true);
+		Rectangle bound = getBounds();
+		System.out.println(bound);
+		bound.width -= bound.x*2;
+		bound.height -= bound.y*2;
+		bound.x = bound.y = 0;
+		System.out.println(bound);
+		repaint();
 	}
 
 	/**
 	 * create all component of server GUI
 	 * @return collection of created components in a JPanel
 	 */
-	private JPanel createGUI() {
+	private JComponent createGUI() {
 		JPanel jpMain = new JPanel( new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
@@ -80,20 +91,27 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 
 		Board board = new Board( null, true);
 		board.setPreferredSize( BOARD_SIZE);
-		board.init();
+		//board.init();
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		jpMain.add( board, constraints);
 
-		constraints.weighty = 1;
+		/*constraints.weighty = 1;
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		jpMain.add( createTempPanel(), constraints);
+		jpMain.add( createTempPanel(), constraints);*/
 		
-		return jpMain;
+
+		JScrollPane jsp = new JScrollPane( jpMain);
+		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		
+		return jsp;
 	}
 	
+	//TODO Add console to a seprate dialog
+	@SuppressWarnings("unused")
 	private JPanel createTempPanel(){
 		JPanel jpMain = new JPanel( new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
