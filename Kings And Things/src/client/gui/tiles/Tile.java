@@ -7,7 +7,7 @@ import java.awt.Graphics2D;
 
 import javax.swing.JComponent;
 
-import static common.Constants.TILE_REVERSE;
+import static common.Constants.IMAGE_TILE_REVERSE;
 
 @SuppressWarnings("serial")
 public class Tile extends JComponent{
@@ -21,7 +21,7 @@ public class Tile extends JComponent{
 	}
 	
 	public void init(){
-		drawTile = TILE_REVERSE;
+		drawTile = IMAGE_TILE_REVERSE;
 	}
 	
 	public void setLockArea( Rectangle lock){

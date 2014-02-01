@@ -2,17 +2,11 @@ package client.gui;
 
 import java.util.ArrayList;
 
-import java.io.File;
-import java.io.IOException;
-
 import javax.swing.Timer;
 import javax.swing.JPanel;
-import javax.imageio.ImageIO;
 
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.Stroke;
-import java.awt.Polygon;
 import java.awt.Graphics;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -31,10 +25,12 @@ import client.gui.tiles.Tile;
 import static common.Constants.HEX_SIZE;
 import static common.Constants.LOCK_SIZE;
 import static common.Constants.BOARD_SIZE;
+import static common.Constants.HEX_OUTLINE;
 import static common.Constants.SPIRAL_DELAY;
 import static common.Constants.HEX_BOARD_SIZE;
 import static common.Constants.BOARD_LOAD_ROW;
 import static common.Constants.BOARD_LOAD_COL;
+import static common.Constants.IMAGE_BACKGROUND;
 import static common.Constants.BOARD_TOP_PADDING;
 import static common.Constants.HEX_MOVE_DISTANCE;
 import static common.Constants.BOARD_WIDTH_SEGMENT;
@@ -44,27 +40,14 @@ import static common.Constants.BOARD_HEIGHT_SEGMENT;
 public class Board extends JPanel{
 	
 	private static final BufferedImage image;
-	private static final Polygon HEX_OUTLINE;
 	private static final int heightSegment = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
 	private static final int widthSegment = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
 	static{
-		int w = (int) (HEX_SIZE.getWidth()/4)+1;
-		int h = (int) (HEX_SIZE.getHeight()/2)+2;
-		HEX_OUTLINE = new Polygon( new int[]{w,0,w,w*3,w*4,w*3}, new int[]{h*2,h,0,0,h,h*2}, 6);
-		File file = new File( "Resources\\Extra\\-n Woodboard.jpg");
-		Image background = null;
-		try {
-			background = ImageIO.read( file);
-		} catch ( IOException e) {
-			e.printStackTrace();
-			System.err.println("Board");
-		}
-		
 		image = new BufferedImage( BOARD_SIZE.width, BOARD_SIZE.height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2d = image.createGraphics();
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		g2d.drawImage( background, 0, 0, BOARD_SIZE.width, BOARD_SIZE.height, null);
+		g2d.drawImage( IMAGE_BACKGROUND, 0, 0, BOARD_SIZE.width, BOARD_SIZE.height, null);
 		int x=0, y=0;
 		Stroke old = g2d.getStroke();
 		g2d.setStroke( new BasicStroke( 5));

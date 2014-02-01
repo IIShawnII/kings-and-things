@@ -7,12 +7,20 @@ import java.nio.file.FileVisitor;
 import java.nio.file.FileVisitResult;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import common.Constants.Ability;
 import common.Constants.Category;
-
+import common.Constants.Restriction;
+import static common.Constants.CUP;
+import static common.Constants.HEX;
+import static common.Constants.GOLD;
+import static common.Constants.STATE;
+import static common.Constants.SPECIAL;
+import static common.Constants.BUILDING;
 import static common.Constants.RESOURCE_PATH;
 
 public class LoadResources implements Runnable, FileVisitor< Path>{
 
+	private int copyTile = 0;
 	private Category currentCategory = null;
 	
 	@Override
@@ -31,7 +39,9 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	@Override
 	public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs) throws IOException {
 		try{
-			currentCategory = Category.valueOf( dir.getFileName().toString());
+			if( !(currentCategory!=null && currentCategory==Category.Cup && dir.toString().contains( Category.Cup.name()))){
+				currentCategory = Category.valueOf( dir.getFileName().toString());
+			}
 		}catch( IllegalArgumentException e){
 			currentCategory = null;
 		}
@@ -40,27 +50,50 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	@Override
 	public FileVisitResult visitFile( Path file, BasicFileAttributes attrs) throws IOException {
-		if( currentCategory!=null){
-			System.out.print( "Visit\t" + currentCategory + "\t\t");
-			createTile( file.getFileName().toString());
+		if( currentCategory!=null && currentCategory!=Category.Resources){
+			TileProperties tile = createTile( file.getFileName().toString());
 			switch( currentCategory){
 				case Building:
+					tile.setInfinite();
+					tile.setSpecialFlip();
+					BUILDING.put( tile.hashCode(), tile);
 					break;
 				case Cup:
-					break;
-				case Extra:
+					if( copyTile==0){
+						CUP.put( tile.hashCode(), tile);
+					}else{
+						for( int i=0; i<copyTile; i++){
+							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
+							CUP.put( tileCopy.hashCode(), tileCopy);
+						}
+					}
 					break;
 				case Gold:
+					tile.setNoFlip();
+					tile.setInfinite();
+					GOLD.put( tile.hashCode(), tile);
 					break;
 				case Hex:
+					for( int i=0; i<copyTile; i++){
+						TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
+						HEX.put( tileCopy.hashCode(), tileCopy);
+					}
 					break;
 				case Special:
+					tile.setSpecialFlip();
+					SPECIAL.put( tile.hashCode(), tile);
 					break;
 				case State:
+					tile.setNoFlip();
+					tile.setInfinite();
+					STATE.put( tile.getRestriction()[0], tile);
 					break;
+					
+				case Resources:
 				default:
-					break;
+					//will never be called
 			}
+			copyTile = 0;
 		}
 		return FileVisitResult.CONTINUE;
 	}
@@ -68,14 +101,15 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	private TileProperties createTile( String name){
 		String[] array = name.substring( 0, name.lastIndexOf( ".")).split( " ");
 		TileProperties tile = new TileProperties();
-		for( String token : array){
-			switch( token){
-				case "-n": System.out.print( token);break;
-				case "-t": System.out.print( token);break;
-				case "-c": System.out.print( token);break;
-				case "-s": System.out.print( token);break;
-				case "-a": System.out.print( token);break;
-				default: System.out.print( " " + token + " ");
+		for( int i=0; i<array.length-1; i++){
+			switch( array[i]){
+				case "-n": tile.setName( array[++i]);break;
+				case "-t": tile.addRestriction( Restriction.valueOf( array[++i]));break;
+				case "-c": copyTile = Integer.parseInt( array[++i]);break;
+				case "-s": tile.addAbilities( Ability.valueOf( array[++i]));break;
+				case "-a": tile.setAttack( Integer.parseInt( array[++i]));break;
+				default: 
+					throw new IllegalArgumentException("ERROR - incorrect file name \"" + name + "\n");
 			}
 		}
 		return tile;
@@ -83,17 +117,11 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	@Override
 	public FileVisitResult visitFileFailed( Path file, IOException exc) throws IOException {
-		if( exc!=null){
-			throw exc;
-		}
 		return FileVisitResult.CONTINUE;
 	}
 
 	@Override
 	public FileVisitResult postVisitDirectory( Path dir, IOException exc) throws IOException {
-		if( exc!=null){
-			throw exc;
-		}
 		return FileVisitResult.CONTINUE;
 	}
 }

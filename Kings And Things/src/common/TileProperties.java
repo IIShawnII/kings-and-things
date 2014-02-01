@@ -1,42 +1,59 @@
 package common;
 
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import common.Constants.Ability;
 import common.Constants.Restriction;
 
+import static common.Constants.FACE_UP;
+import static common.Constants.FACE_DOWN;
+import static common.Constants.INFINITE_TILE;
+
 public class TileProperties {
 
+	private int number;
 	private int attack;
 	private Image image;
 	private String name;
-	private Restriction restriction;
+	private boolean hasFlip;
+	private boolean specialFlip;
 	private ArrayList< Ability> abilities;
+	private ArrayList< Restriction> restrictions;
 	
 	public TileProperties(){
-		this( 0, null, "none", null, (Ability)null);
+		this( 1, 0, null, "none", null, null);
 	}
 	
-	public TileProperties( int attack, Image image, String name, Restriction restriction, Ability...ability) {
-		super();
-		this.attack = attack;
-		this.image = image;
+	public TileProperties( TileProperties tile, int number){
+		this( number, tile.attack, tile.image, tile.name, tile.abilities, tile.restrictions);
+	}
+	
+	private TileProperties( int number, int attack, Image image, String name, ArrayList< Ability> abilities, ArrayList< Restriction> restrictions){
 		this.name = name;
-		this.restriction = restriction;
-		if( ability==null || ability.length==0){
-			abilities = new ArrayList<>();
-		}else{
-			abilities = new ArrayList<>( Arrays.asList(ability));
-		}
+		this.image = image;
+		this.hasFlip = true;
+		this.attack = attack;
+		this.number = number;
+		this.specialFlip = false;
+		this.abilities = abilities==null? new ArrayList<Ability>() : new ArrayList<>( abilities);
+		this.restrictions = restrictions==null? new ArrayList<Restriction>() : new ArrayList<>( restrictions);
+	}
+
+	public int getNumber() {
+		return number;
+	}
+
+	protected void setNumber( int number) {
+		this.number = number;
 	}
 
 	public int getAttack() {
 		return attack;
 	}
 	
-	public void setAttack( int attack) {
+	protected void setAttack( int attack) {
 		this.attack = attack;
 	}
 	
@@ -44,16 +61,18 @@ public class TileProperties {
 		return name;
 	}
 	
-	public void setName( String name) {
+	protected void setName( String name) {
 		this.name = name;
 	}
 	
-	public Restriction getRestriction() {
-		return restriction;
+	public Restriction[] getRestriction() {
+		Restriction[] array = new Restriction[ restrictions.size()];
+		restrictions.toArray( array);
+		return array;
 	}
 	
-	public void setRestriction( Restriction restriction) {
-		this.restriction = restriction;
+	protected void addRestriction( Restriction restriction) {
+		restrictions.add( restriction);
 	}
 	
 	public Ability[] getAbilities() {
@@ -62,7 +81,7 @@ public class TileProperties {
 		return array;
 	}
 	
-	public void setAbilities( Ability ability) {
+	protected void addAbilities( Ability ability) {
 		abilities.add( ability);
 	}
 	
@@ -70,7 +89,63 @@ public class TileProperties {
 		return image;
 	}
 	
-	public void setImage( Image image){
+	protected void setImage( Image image){
 		this.image = image;
+	}
+
+	protected void setSpecialFlip() {
+		specialFlip = true;
+	}
+	
+	public Rectangle getFlip(){
+		return specialFlip? FACE_UP: FACE_DOWN;
+	}
+
+	protected void setNoFlip() {
+		hasFlip = false;
+	}
+	
+	public boolean hasFlip(){
+		return hasFlip;
+	}
+
+	protected void setInfinite() {
+		number = INFINITE_TILE;
+	}
+	
+	public boolean isInfinit(){
+		return number == INFINITE_TILE;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + number;
+		result = prime * result + attack;
+		result = prime * result + name.hashCode();
+		result = prime * result + abilities.hashCode();
+		result = prime * result + restrictions.hashCode();
+		return result;
+	}
+
+	@Override
+	public boolean equals( Object obj) {
+		if ( this == obj) {
+			return true;
+		}
+		if ( obj == null || !(obj instanceof TileProperties)) {
+			return false;
+		}
+		TileProperties other = (TileProperties) obj;
+		if ( number != other.number || attack != other.attack || !name.equals( other.name)  || !(restrictions.equals( other.restrictions)) || !(abilities.equals( other.abilities))) {
+			return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public String toString(){
+		return name + ", " + attack;
 	}
 }

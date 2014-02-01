@@ -2,31 +2,38 @@ package common;
 
 import java.util.HashMap;
 
+import javax.imageio.ImageIO;
+
 import java.io.File;
 import java.io.IOException;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.awt.Color;
 import java.awt.Image;
+import java.awt.Polygon;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 
-import javax.imageio.ImageIO;
 
 public final class Constants {
 	
 	public enum Level { Error, Warning, Notice, Plain, END}
-	public enum Category { Building, Cup, Extra, Gold, Hex, Special, State}
+	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State}
 	public enum Ability { Charge, Fly, Range, Special, Magic, Armor, Neutralised}
-	public enum Restriction { Gold, Magic, Income, Building, Event, Special, State}
+	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle,
+		Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp}
 	
 	//Resources
-	public static final Image HEX_REVERSE; 
-	public static final Image TILE_REVERSE; 
-	public static final HashMap< Integer, TileProperties> cup = new HashMap<>();
-	public static final HashMap< Integer, TileProperties> bank = new HashMap<>();
+	public static final Image IMAGE_BACKGROUND;
+	public static final Image IMAGE_HEX_REVERSE; 
+	public static final Image IMAGE_TILE_REVERSE;
+	public static final HashMap< Integer, TileProperties> HEX = new HashMap<>();
+	public static final HashMap< Integer, TileProperties> CUP = new HashMap<>();
+	public static final HashMap< Integer, TileProperties> GOLD = new HashMap<>();
+	public static final HashMap< Integer, TileProperties> SPECIAL = new HashMap<>();
+	public static final HashMap< Integer, TileProperties> BUILDING = new HashMap<>();
+	public static final HashMap< Restriction, TileProperties> STATE = new HashMap<>();
 	
 	//Colors
 	public static final Color RED = new Color( 255, 0, 0);
@@ -65,6 +72,7 @@ public final class Constants {
 	//Sizes
 	public static final int LOCK_SIZE = 28;
 	public static final int HEX_HEIGHT = 70;
+	public static final Polygon HEX_OUTLINE;
 	public static final int HEX_SPACING = 16;
 	public static final int LABEL_FONT_SIZE = 25;
 	public static final int IP_COLUMN_COUNT = 12;
@@ -77,19 +85,23 @@ public final class Constants {
 	public static final double HEX_RATIO = 752.0/658.0;
 	public static final int BOARD_BOTTOM_PADDING = 120;
 	public static final Dimension LABEL_SIZE = new Dimension( 50,50);
+	public static final Dimension TILE_SIZE = new Dimension( 430,440);
 	public static final Dimension CONSOLE_SIZE = new Dimension( 100,40);
 	public static final Dimension LOADING_SIZE = new Dimension( 350,425);
 	public static final Dimension PROGRESS_SIZE = new Dimension( LOADING_SIZE.width,170);
+	public static final Rectangle FACE_DOWN = new Rectangle( 0,0,TILE_SIZE.width,TILE_SIZE.height);
 	public static final Dimension HEX_SIZE = new Dimension( (int)(HEX_HEIGHT*HEX_RATIO),HEX_HEIGHT);
+	public static final Rectangle FACE_UP = new Rectangle( TILE_SIZE.width/2,0,TILE_SIZE.width,TILE_SIZE.height);
 	public static final Dimension HEX_BOARD_SIZE = new Dimension( HEX_SIZE.height*BOARD_HEIGHT_SEGMENT/2 + HEX_SPACING, HEX_SIZE.height*BOARD_HEIGHT_SEGMENT/2 + HEX_SPACING);
 	public static final Dimension BOARD_SIZE = new Dimension( HEX_BOARD_SIZE.width + BOARD_PLAYERS_STATE, HEX_BOARD_SIZE.height + BOARD_BOTTOM_PADDING);
 	
 	//Defaults
-	public static final Path RESOURCE_PATH = Paths.get( "Resources/");
 	public static final int SPIRAL_DELAY = 5;
+	public static final int INFINITE_TILE = -1;
 	public static final int SERVER_TIMEOUT = 10;
 	public static final int SERVER_PORT = 12345;
 	public static final String SERVER_IP = "127.0.0.1";
+	public static final Path RESOURCE_PATH = Paths.get( "Resources/");
 	public static final int HEX_MOVE_DISTANCE = (int) (HEX_HEIGHT*0.5);
 	public static final int BOARD_LOAD_ROW[][] = { { 7, 5, 6, 8, 9, 8, 6},
 													{4, 3, 4, 5, 7, 9, 10, 11, 10, 9, 7, 5},
@@ -99,8 +111,12 @@ public final class Constants {
 													{2, 3, 4, 5, 6, 7, 7, 7, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1}};
 	
 	static{
-		HEX_REVERSE = loadImage( "Resources\\-n HexReverse.png");
-		TILE_REVERSE = loadImage( "Resources\\-n TileReverse.png");
+		int w = (int) (HEX_SIZE.getWidth()/4)+1;
+		int h = (int) (HEX_SIZE.getHeight()/2)+2;
+		HEX_OUTLINE = new Polygon( new int[]{w,0,w,w*3,w*4,w*3}, new int[]{h*2,h,0,0,h,h*2}, 6);
+		IMAGE_BACKGROUND = loadImage( "Resources\\-n Woodboard.png");
+		IMAGE_HEX_REVERSE = loadImage( "Resources\\-n Hex_Reverse.png");
+		IMAGE_TILE_REVERSE = loadImage( "Resources\\-n Tile_Reverse.png");
 	}
 	
 	private static Image loadImage( String path){
