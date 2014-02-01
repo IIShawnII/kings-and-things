@@ -1,9 +1,9 @@
 package server.logic;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import server.exceptions.NoMoreTilesException;
+
 import common.Constants;
 import common.Constants.Biome;
 import common.TileProperties;
@@ -12,11 +12,10 @@ import common.TileProperties;
  * this class encapsulates the logic of drawing hex tiles from the bank, and placing
  * previously drawn ones back into the bank.
  */
-public class HexTileManager
+public class HexTileManager extends AbstractTileManager
 {
 	private final boolean isDemoMode;
 	private int numDraws;
-	private final ArrayList<TileProperties> hexes;
 	
 	/**
 	 * Create new HexTileManager.
@@ -25,13 +24,9 @@ public class HexTileManager
 	 */
 	public HexTileManager(boolean isDemoMode)
 	{
+		super(Constants.HEX.values(), "hex");
 		this.isDemoMode = isDemoMode;
 		numDraws = 0;
-		hexes = new ArrayList<TileProperties>();
-		for(TileProperties tp : Constants.HEX.values())
-		{
-			hexes.add(tp);
-		}
 	}
 	
 	/**
@@ -39,11 +34,16 @@ public class HexTileManager
 	 * @return A hex tile.
 	 * @throws NoMoreTilesException If there are no more tiles left to draw.
 	 */
-	public TileProperties drawHexTile() throws NoMoreTilesException
+	@Override
+	public TileProperties drawTile() throws NoMoreTilesException
 	{
-		synchronized(hexes)
+		if(!isDemoMode)
 		{
-			if(isDemoMode)
+			return super.drawTile();
+		}
+		else
+		{
+			synchronized(tiles)
 			{
 				//In demo mode we stack the deck to match the test script
 				switch(numDraws)
@@ -101,43 +101,18 @@ public class HexTileManager
 					case 36:
 						numDraws++;
 						return removeHexTileByType(Biome.Desert);
+					default:
+						throw new NoMoreTilesException("A hex tile could not be drawn because there are no more available.");
 				}
-				
-				throw new NoMoreTilesException("A hex tile could not be drawn because there are no more available.");
 			}
-			else
-			{
-				//if not in demo mode draw a random hex
-				int index = (int) Math.round(Math.random() * (hexes.size() - 1));
-				TileProperties hex = hexes.remove(index);
-				return hex;
-			}
-		}
-	}
-	
-	/**
-	 * Use this method to re-add a previously drawn out hex, can be used to implement
-	 * the rules for exchanging sea hexes later on.
-	 * @param hex The hex to add back in.
-	 * @throws IllegalArgumentException if hex is null.
-	 */
-	public void reInsertHexTile(TileProperties hex)
-	{
-		if(hex==null)
-		{
-			throw new IllegalArgumentException("Can not insert null hex.");
-		}
-		synchronized(hexes)
-		{
-			hexes.add(hex);
 		}
 	}
 	
 	private TileProperties removeHexTileByType(Biome hexType) throws NoMoreTilesException
 	{
-		synchronized(hexes)
+		synchronized(tiles)
 		{
-			Iterator<TileProperties> it = hexes.iterator();
+			Iterator<TileProperties> it = tiles.iterator();
 			while(it.hasNext())
 			{
 				TileProperties hex = it.next();
