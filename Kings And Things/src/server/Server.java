@@ -22,13 +22,30 @@ public class Server {
 			//failed to change look and feel
 		}
 		
-		ServerGUI serverGUI;
-		if( args!=null && args.length>=1){
-			serverGUI = new ServerGUI( args[0]);
-		}else{
-			serverGUI = new ServerGUI( "Kings And Things Server");
-		}
+		boolean isDemoMode = false;
+		String serverGUITitle = "Kings And Things Server";
 		
+		ServerGUI serverGUI;
+		if( args!=null && args.length>=1)
+		{
+			for(int i=0; i<args.length; i++)
+			{
+				switch(args[i])
+				{
+					case "-title":
+						serverGUITitle = args[i+1];
+						break;
+					case "-demo":
+						isDemoMode = true;
+						break;
+					default:
+						break;
+				}
+			}
+			serverGUI = new ServerGUI( args[0]);
+		}
+
+		serverGUI = new ServerGUI( serverGUITitle);
 		//start GUI on AWT Thread
 		SwingUtilities.invokeLater( serverGUI);
 		while( !serverGUI.isVisible()){
@@ -39,7 +56,7 @@ public class Server {
 		}
 
 		try {
-			Logic logic = new Logic();
+			Logic logic = new Logic(isDemoMode);
 			new Thread( logic, "GAME LOGIC").start();
 		} catch ( Exception e) {
 			e.printStackTrace();

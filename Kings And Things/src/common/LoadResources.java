@@ -53,7 +53,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	@Override
 	public FileVisitResult visitFile( Path file, BasicFileAttributes attrs) throws IOException {
-		if( currentCategory!=null && currentCategory!=Category.Resources){
+		if( currentCategory!=null && currentCategory!=Category.Resources  && currentCategory!=Category.Misc){
 			TileProperties tile = createTile( file.getFileName().toString());
 			switch( currentCategory){
 				case Building:

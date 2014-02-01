@@ -21,8 +21,14 @@ public class Logic implements Runnable, EventHandler {
 
 	private boolean close = false;
 	private ServerSocket serverSocket;
+	private final HexTileManager hexManager;
 	
-	public Logic() throws IOException{
+	public Logic(boolean isDemoMode) throws IOException{
+		hexManager = new HexTileManager(isDemoMode);
+		if(isDemoMode)
+		{
+			Logger.getStandardLogger().info("Server started in demo mode.");
+		}
 		try {
 			serverSocket = new ServerSocket( SERVER_PORT);
             serverSocket.setSoTimeout( SERVER_TIMEOUT*1000);
