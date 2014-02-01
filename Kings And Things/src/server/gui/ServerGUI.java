@@ -1,27 +1,27 @@
 package server.gui;
 
+import static common.Constants.CONSOLE;
+import static common.Constants.CONSOLE_SIZE;
+import static common.Constants.ENDGAME;
+import static common.Constants.MAX_PLAYERS;
+import static common.Constants.PLAYER;
+import static common.Constants.PLAYER_INC;
+
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.BorderLayout;
-import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.BorderFactory;
 
 import common.Console;
-import common.Logger;
+import common.Constants.Level;
 import common.event.EventHandler;
 import common.event.EventMonitor;
-import static common.Constants.Level;
-import static common.Constants.PLAYER;
-import static common.Constants.ENDGAME;
-import static common.Constants.CONSOLE;
-import static common.Constants.PLAYER_INC;
-import static common.Constants.MAX_PLAYERS;
-import static common.Constants.CONSOLE_SIZE;
 
 /**
  * server GUI to hold all and display all server related information
@@ -91,7 +91,6 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 		@Override
 		public void windowClosed(WindowEvent e){
 			EventMonitor.fireEvent( ENDGAME, null, null);
-			Logger.flush( "Server", console.getText());
 		}
 	}
 

@@ -1,10 +1,12 @@
 package server;
 
-import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
-import server.logic.Logic;
+import org.apache.log4j.PropertyConfigurator;
+
 import server.gui.ServerGUI;
+import server.logic.Logic;
 
 /**
  * main class for starting the server
@@ -12,6 +14,7 @@ import server.gui.ServerGUI;
 public class Server {
 	
 	public static void main( String[] args) {
+		PropertyConfigurator.configure("Log Settings\\serverLog4j.properties");
 		//update look and feeling of application to its operating system
 		try {
 			UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName());

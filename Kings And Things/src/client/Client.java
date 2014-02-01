@@ -2,12 +2,14 @@ package client;
 
 import static common.Constants.CONSOLE;
 
-import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
-import common.network.Connection;
+import org.apache.log4j.PropertyConfigurator;
 
 import client.gui.ClientGUI;
+
+import common.network.Connection;
 
 /**
  * main class for starting the server
@@ -15,6 +17,7 @@ import client.gui.ClientGUI;
 public class Client {
 	
 	public static void main( String[] args) {
+		PropertyConfigurator.configure("Log Settings\\clientLog4j.properties");
 		//update look and feeling of application to its operating system
 		try {
 			UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName());

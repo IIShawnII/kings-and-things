@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.SocketTimeoutException;
 
 import common.Constants.Level;
+import common.Logger;
 import common.network.Connection;
 import common.event.EventHandler;
 import common.event.EventMonitor;
@@ -26,10 +27,9 @@ public class Logic implements Runnable, EventHandler {
 		try {
 			serverSocket = new ServerSocket( SERVER_PORT);
             serverSocket.setSoTimeout( SERVER_TIMEOUT*1000);
-			EventMonitor.fireEvent( CONSOLE, "Listening on port " + SERVER_PORT, Level.Notice);
+			Logger.getStandardLogger().info("Listening on port " + SERVER_PORT);
 		} catch ( IOException e) {
-			EventMonitor.fireEvent( CONSOLE, "Failed to open port " + SERVER_PORT, Level.Error);
-			EventMonitor.fireEvent( CONSOLE, e.getMessage(), Level.Error);
+			Logger.getErrorLogger().error("Failed to open port " + SERVER_PORT, e);
 			throw e;
 		}
 	}
@@ -41,25 +41,25 @@ public class Logic implements Runnable, EventHandler {
 		while( !close && count<MAX_PLAYERS){
             try {
             	Connection connection = new Connection( serverSocket.accept(), playerID+CONSOLE);
-            	EventMonitor.fireEvent( CONSOLE, "Player count is " + count + " out of " + MAX_PLAYERS + " players", Level.Notice);
-            	EventMonitor.fireEvent( CONSOLE, "Still need minimum of " + (MIN_PLAYERS-count) + " players", Level.Notice);
-	    		EventMonitor.fireEvent( CONSOLE, "Recieved connection from " + connection, Level.Notice);
-	    		EventMonitor.fireEvent( CONSOLE, connection + " is assigned to Player " + count, Level.Notice);
+            	
+            	Logger.getStandardLogger().info("Player count is " + count + " out of " + MAX_PLAYERS + " players");
+            	Logger.getStandardLogger().info("Still need minimum of " + (MIN_PLAYERS-count) + " players");
+            	Logger.getStandardLogger().info("Recieved connection from " + connection);
+            	Logger.getStandardLogger().info(connection + " is assigned to Player " + count);
+            	
 	    		new PlayerConnection( playerID, connection).start();
             	count++;
             	playerID+=PLAYER_INC;
             } catch( SocketTimeoutException ex){
                 //try again for incoming connections
             } catch ( IOException e) {
-    			EventMonitor.fireEvent( CONSOLE, e.getMessage(), Level.Error);
-				e.printStackTrace();
+            	Logger.getErrorLogger().error("Problem with player connections: ", e);
 			}
         }
 		try {
 			serverSocket.close();
 		} catch ( IOException e) {
-			EventMonitor.fireEvent( CONSOLE, e.getMessage(), Level.Error);
-			e.printStackTrace();
+			Logger.getErrorLogger().error("Problem closing player connections: ", e);
 		}
 	}
 

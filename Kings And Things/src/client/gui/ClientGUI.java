@@ -1,29 +1,29 @@
 package client.gui;
 
+import static common.Constants.BOARD_SIZE;
+import static common.Constants.CONSOLE;
+import static common.Constants.CONSOLE_SIZE;
+import static common.Constants.MIN_CLIENT_SIZE;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.GridBagLayout;
-import java.awt.event.WindowEvent;
-import java.awt.GridBagConstraints;
 import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
-import common.Logger;
 import common.Console;
-import common.LoadingDialog;
 import common.Constants.Level;
+import common.LoadingDialog;
 import common.event.EventHandler;
 import common.event.EventMonitor;
 import common.network.Connection;
-import static common.Constants.CONSOLE;
-import static common.Constants.BOARD_SIZE;
-import static common.Constants.CONSOLE_SIZE;
-import static common.Constants.MIN_CLIENT_SIZE;
 
 /**
  * client GUI to hold all and display all game related information
@@ -124,9 +124,6 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 		@Override
 		public void windowClosed(WindowEvent e){
 			connection.disconnect();
-			if( console!=null){
-				Logger.flush( "Client", console.getText());
-			}
 		}
 	}
 
