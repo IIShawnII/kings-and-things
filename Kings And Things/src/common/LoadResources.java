@@ -7,9 +7,9 @@ import java.nio.file.FileVisitor;
 import java.nio.file.FileVisitResult;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import common.Constants.Level;
 import common.Constants.Ability;
 import common.Constants.Category;
-import common.Constants.Level;
 import common.Constants.Restriction;
 import common.event.EventMonitor;
 import static common.Constants.CUP;

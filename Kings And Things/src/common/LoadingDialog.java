@@ -8,12 +8,6 @@ import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.JProgressBar;
 
-import common.Constants.Category;
-import common.Constants.Level;
-import common.event.EventHandler;
-import common.event.EventMonitor;
-import common.network.Connection;
-
 import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.Dimension;
@@ -22,6 +16,12 @@ import java.awt.GridBagConstraints;
 import java.awt.GraphicsConfiguration;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import common.Constants.Level;
+import common.Constants.Category;
+import common.event.EventHandler;
+import common.event.EventMonitor;
+import common.network.Connection;
 
 import static common.Constants.UPDATE;
 import static common.Constants.SERVER_IP;
@@ -75,10 +75,14 @@ public class LoadingDialog extends JDialog implements Runnable, EventHandler{
 		constraints.insets = new Insets( 5, 5, 5, 5);
 		
 		JButton jbStart = new JButton( "Start");
+		jbStart.setActionCommand( "Start");
+		jbStart.addActionListener( control);
 		constraints.gridy = 0;
 		jpMain.add( jbStart, constraints);
 		
 		JButton jbCancel = new JButton( "Cancel");
+		jbCancel.setActionCommand( "Cancel");
+		jbCancel.addActionListener( control);
 		constraints.gridy = 1;
 		jpMain.add( jbCancel, constraints);
 		
@@ -259,6 +263,10 @@ public class LoadingDialog extends JDialog implements Runnable, EventHandler{
 						source.setText( "Disconnect");
 					}
 				}
+			}else if( e.getActionCommand().equals( "Start")){
+				
+			}else if( e.getActionCommand().equals( "Cancel")){
+				dispose();
 			}
 		}
 	}

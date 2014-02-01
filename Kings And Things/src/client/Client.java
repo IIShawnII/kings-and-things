@@ -1,7 +1,5 @@
 package client;
 
-import static common.Constants.CONSOLE;
-
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -26,7 +24,7 @@ public class Client {
 		}
 		
 		ClientGUI clientGUI;
-		Connection connection = new Connection( CONSOLE);
+		Connection connection = new Connection();
 		if( args!=null && args.length>=1){
 			clientGUI = new ClientGUI( args[0]);
 		}else{

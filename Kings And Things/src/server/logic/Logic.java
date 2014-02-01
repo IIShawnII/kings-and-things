@@ -11,7 +11,6 @@ import common.event.EventHandler;
 import common.event.EventMonitor;
 import static common.Constants.PLAYER;
 import static common.Constants.ENDGAME;
-import static common.Constants.CONSOLE;
 import static common.Constants.PLAYER_INC;
 import static common.Constants.MIN_PLAYERS;
 import static common.Constants.MAX_PLAYERS;
@@ -40,7 +39,7 @@ public class Logic implements Runnable, EventHandler {
 		int count=0, playerID = PLAYER;
 		while( !close && count<MAX_PLAYERS){
             try {
-            	Connection connection = new Connection( serverSocket.accept(), playerID+CONSOLE);
+            	Connection connection = new Connection( serverSocket.accept());
             	
             	Logger.getStandardLogger().info("Player count is " + count + " out of " + MAX_PLAYERS + " players");
             	Logger.getStandardLogger().info("Still need minimum of " + (MIN_PLAYERS-count) + " players");
