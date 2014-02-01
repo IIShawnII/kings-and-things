@@ -1,30 +1,29 @@
 package client.gui;
 
-import static common.Constants.BOARD_SIZE;
-import static common.Constants.CONSOLE;
-import static common.Constants.CONSOLE_SIZE;
-import static common.Constants.MIN_CLIENT_SIZE;
-
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.event.WindowAdapter;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowAdapter;
 
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JComponent;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 
 import common.Console;
+import common.LoadingDialog;
 import common.LoadResources;
 import common.Constants.Level;
-import common.LoadingDialog;
 import common.event.EventHandler;
 import common.event.EventMonitor;
 import common.network.Connection;
+
+import static common.Constants.CONSOLE;
+import static common.Constants.BOARD_SIZE;
+import static common.Constants.CONSOLE_SIZE;
+import static common.Constants.MIN_CLIENT_SIZE;
 
 /**
  * client GUI to hold all and display all game related information
@@ -51,7 +50,6 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 	public void run() {
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		addWindowListener( new WindowListener());
-		//setContentPane( createGUI());
 		pack();
 		setMinimumSize( MIN_CLIENT_SIZE);
 		setLocationRelativeTo( null);
@@ -63,7 +61,12 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 		bound.x = bound.y = 0;
 		LoadingDialog dialog = new LoadingDialog( new LoadResources(), "Loby", true, true, getGraphicsConfiguration());
 		dialog.setConnection( connection); 
-		SwingUtilities.invokeLater(dialog);
+		if( dialog.run()){
+			setContentPane( createGUI());
+			revalidate();
+		}else{
+			dispose();
+		}
 	}
 
 	/**
@@ -74,7 +77,6 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 		JPanel jpMain = new JPanel( new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
-		//constraints.insets = new Insets( 5, 5, 5, 5);
 
 		Board board = new Board( null, true);
 		board.setPreferredSize( BOARD_SIZE);
@@ -82,13 +84,6 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		jpMain.add( board, constraints);
-
-		/*constraints.weighty = 1;
-		constraints.gridx = 0;
-		constraints.gridy = 1;
-		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		jpMain.add( createTempPanel(), constraints);*/
-		
 
 		JScrollPane jsp = new JScrollPane( jpMain);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -98,7 +93,6 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 	}
 	
 	//TODO Add console to a separate dialog
-	@SuppressWarnings("unused")
 	private JPanel createTempPanel(){
 		JPanel jpMain = new JPanel( new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();

@@ -69,7 +69,7 @@ public class Connection implements Closeable{
 			isConnected = true;
 		} catch( Exception e){
 			disconnect();
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return isConnected;
 	}

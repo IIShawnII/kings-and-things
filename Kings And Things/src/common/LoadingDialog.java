@@ -33,7 +33,7 @@ import static common.Constants.IP_COLUMN_COUNT;
 import static common.Constants.PORT_COLUMN_COUNT;
 
 @SuppressWarnings("serial")
-public class LoadingDialog extends JDialog implements Runnable, EventHandler{
+public class LoadingDialog extends JDialog implements EventHandler{
 
 	private boolean progress;
 	private InputControl control;
@@ -43,8 +43,10 @@ public class LoadingDialog extends JDialog implements Runnable, EventHandler{
 	private Console players;
 	private JPanel jpProgress;
 	private JTextField jtfIP, jtfPort;
+	private JButton jbConnect, jbDisconnect;
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
 	private JProgressBar jpbGold, jpbSpecial, jpbState;
+	private boolean result = false;
 	
 	public LoadingDialog( Runnable task, String title, boolean modal, boolean progress, GraphicsConfiguration gc) {
 		super( (Frame)null, title, modal, gc);
@@ -55,8 +57,7 @@ public class LoadingDialog extends JDialog implements Runnable, EventHandler{
 		EventMonitor.register( UPDATE, this);
 	}
 
-	@Override
-	public void run() {
+	public boolean run() {
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		setContentPane( createGUI());
 		pack();
@@ -66,6 +67,7 @@ public class LoadingDialog extends JDialog implements Runnable, EventHandler{
 		thread.setDaemon( true);
 		thread.start();
 		setVisible( true);
+		return result;
 	}
 	
 	private JPanel createGUI(){
@@ -86,14 +88,21 @@ public class LoadingDialog extends JDialog implements Runnable, EventHandler{
 		constraints.gridy = 1;
 		jpMain.add( jbCancel, constraints);
 		
-		JButton jbConnect = new JButton( "Connect");
+		jbConnect = new JButton( "Connect");
 		jbConnect.setActionCommand( "Connection");
 		jbConnect.addActionListener( control);
 		constraints.gridy = 2;
 		jpMain.add( jbConnect, constraints);
 		
+		jbDisconnect = new JButton( "Disonnect");
+		jbDisconnect.setEnabled( false);
+		jbDisconnect.setActionCommand( "Connection");
+		jbDisconnect.addActionListener( control);
+		constraints.gridy = 3;
+		jpMain.add( jbDisconnect, constraints);
+		
 		JLabel label = new JLabel( "IP:");
-		constraints.gridy = 4;
+		constraints.gridy = 5;
 		constraints.gridx = 1;
 		jpMain.add( label, constraints);
 		
@@ -126,7 +135,7 @@ public class LoadingDialog extends JDialog implements Runnable, EventHandler{
 		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		constraints.weighty = 1;
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		constraints.gridheight = 4;
+		constraints.gridheight = 5;
 		constraints.gridx = 1;
 		constraints.gridy = 0;
 		jpMain.add( jsp, constraints);
@@ -253,20 +262,24 @@ public class LoadingDialog extends JDialog implements Runnable, EventHandler{
 
 		@Override
 		public void actionPerformed( ActionEvent e) {
-			if( connection!=null && e.getActionCommand().equals( "Connection")){
-				JButton source = (JButton)e.getSource();
+			Object source = e.getSource();
+			if( source==jbConnect || source==jbDisconnect){
 				if ( connection.isConnected()){
 					connection.disconnect();
-					source.setText( "Connect   ");
-				}else{
-					if(	connection.connectTo( jtfIP.getText(), Integer.parseInt( jtfPort.getText()))){
-						source.setText( "Disconnect");
-					}
+					jbConnect.setEnabled( true);
+					jbDisconnect.setEnabled( false);
+				}else if( connection.connectTo( jtfIP.getText(), Integer.parseInt( jtfPort.getText()))){
+					jbDisconnect.setEnabled( true);
+					jbConnect.setEnabled( false);
 				}
 			}else if( e.getActionCommand().equals( "Start")){
-				
+				if( connection.isConnected()){
+					result = true;
+					dispose();
+				}
 			}else if( e.getActionCommand().equals( "Cancel")){
 				dispose();
+				result = false;
 			}
 		}
 	}

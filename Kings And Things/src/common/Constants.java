@@ -20,8 +20,8 @@ public final class Constants {
 	public enum Level { Error, Warning, Notice, Plain, END, LOADING_DIALOG}
 	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc}
 	public enum Ability { Charge, Fly, Range, Special, Magic, Armor, Neutralised}
-	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle,
-		Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
+	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea,
+			Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
 	
 	//Resources
@@ -114,7 +114,7 @@ public final class Constants {
 		int w = (int) (HEX_SIZE.getWidth()/4)+1;
 		int h = (int) (HEX_SIZE.getHeight()/2)+2;
 		HEX_OUTLINE = new Polygon( new int[]{w,0,w,w*3,w*4,w*3}, new int[]{h*2,h,0,0,h,h*2}, 6);
-		IMAGE_BACKGROUND = loadImage( "Resources\\Misc\\-n Woodboard.png");
+		IMAGE_BACKGROUND = loadImage( "Resources\\Misc\\-n Woodboard.jpg");
 		IMAGE_HEX_REVERSE = loadImage( "Resources\\Misc\\-n Hex_Reverse.png");
 		IMAGE_TILE_REVERSE = loadImage( "Resources\\Misc\\-n Tile_Reverse.png");
 	}

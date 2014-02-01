@@ -9,7 +9,10 @@ import static common.Constants.PLAYER_INC;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -61,7 +64,13 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 	 * @return collection of created components in a JPanel
 	 */
 	private JPanel createGUI() {
-		JPanel jpMain = new JPanel( new BorderLayout( 5, 5));
+		JPanel jpMain = new JPanel( new GridBagLayout());
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.insets = new Insets( 5, 5, 5, 5);
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.weighty = 1;
+		constraints.weightx = 1;
 		
 		JPanel jpPlayers = new JPanel( new GridLayout( 2, 2, 5, 5));
 		PlayerStatus player;
@@ -70,7 +79,8 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 			player.initialize();
 			jpPlayers.add( player);
 		}
-		jpMain.add( jpPlayers, BorderLayout.CENTER);
+		constraints.gridy = 0;
+		jpMain.add( jpPlayers, constraints);
 		
 		JPanel jpConsol = new JPanel( new BorderLayout());
 		jpConsol.setBorder( BorderFactory.createEmptyBorder( 0, 5, 5, 5));
@@ -81,7 +91,8 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		jpConsol.add( jsp, BorderLayout.CENTER);
-		jpMain.add( jpConsol, BorderLayout.SOUTH);
+		constraints.gridy = 1;
+		jpMain.add( jpConsol, constraints);
 		
 		return jpMain;
 	}
