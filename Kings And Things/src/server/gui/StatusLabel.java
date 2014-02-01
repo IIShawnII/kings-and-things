@@ -8,7 +8,6 @@ import java.awt.Dimension;
 
 import common.event.EventHandler;
 import common.event.EventMonitor;
-
 import static common.Constants.Level;
 
 /**
@@ -77,7 +76,7 @@ public class StatusLabel extends JLabel implements EventHandler{
 	 * triggered when appropriate event is fired
 	 */
 	@Override
-	public void handle( String message, Level level) {
+	public void handle( Object obj, Level level) {
 		changeState();
 	}
 }

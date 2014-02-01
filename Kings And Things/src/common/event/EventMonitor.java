@@ -21,7 +21,11 @@ public class EventMonitor {
 		dispatch.handlers.put( ID, handler);
 	}
 	
-	public synchronized static void fireEvent( final int ID, String message, Level level){
-		dispatch.handlers.get( ID).handle( message, level);
+	public synchronized static void unRegister( final int ID){
+		dispatch.handlers.remove( ID);
+	}
+	
+	public synchronized static void fireEvent( final int ID, Object obj, Level level){
+		dispatch.handlers.get( ID).handle( obj, level);
 	}
 }

@@ -9,11 +9,14 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import common.Constants.Ability;
 import common.Constants.Category;
+import common.Constants.Level;
 import common.Constants.Restriction;
+import common.event.EventMonitor;
 import static common.Constants.CUP;
 import static common.Constants.HEX;
 import static common.Constants.GOLD;
 import static common.Constants.STATE;
+import static common.Constants.UPDATE;
 import static common.Constants.SPECIAL;
 import static common.Constants.BUILDING;
 import static common.Constants.RESOURCE_PATH;
@@ -26,14 +29,14 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	@Override
 	public void run() {
 		try {
+			Thread.sleep( 400);
+		} catch ( InterruptedException e) {}
+		try {
 			Files.walkFileTree( RESOURCE_PATH, this);
 		} catch ( IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public static void main( String[] args){
-		new Thread( new LoadResources(), "Load Resources").start();
+		EventMonitor.fireEvent( UPDATE, currentCategory, Level.END);
 	}
 
 	@Override
@@ -93,6 +96,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 				default:
 					//will never be called
 			}
+			EventMonitor.fireEvent( UPDATE, currentCategory, Level.LOADING_DIALOG);
 			copyTile = 0;
 		}
 		return FileVisitResult.CONTINUE;

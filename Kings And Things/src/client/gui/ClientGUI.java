@@ -19,6 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import common.Console;
+import common.LoadResources;
 import common.Constants.Level;
 import common.LoadingDialog;
 import common.event.EventHandler;
@@ -60,7 +61,7 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 		bound.width -= bound.x*2;
 		bound.height -= bound.y*2;
 		bound.x = bound.y = 0;
-		LoadingDialog dialog = new LoadingDialog( null, "Loby", true, true, getGraphicsConfiguration());
+		LoadingDialog dialog = new LoadingDialog( new LoadResources(), "Loby", true, true, getGraphicsConfiguration());
 		dialog.setConnection( connection); 
 		SwingUtilities.invokeLater(dialog);
 	}
@@ -128,9 +129,9 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 	}
 
 	@Override
-	public void handle( String message, Level level) {
+	public void handle( Object obj, Level level) {
 		if( console!=null){
-			console.add( message, level);
+			console.add( (String)obj, level);
 		}
 	}
 

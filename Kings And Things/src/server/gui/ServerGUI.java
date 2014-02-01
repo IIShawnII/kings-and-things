@@ -95,7 +95,7 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 	}
 
 	@Override
-	public void handle( String message, Level level) {
-		console.add( message, level);
+	public void handle( Object obj, Level level) {
+		console.add( (String)obj, level);
 	}
 }

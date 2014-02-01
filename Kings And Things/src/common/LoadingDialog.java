@@ -8,18 +8,22 @@ import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.JProgressBar;
 
+import common.Constants.Category;
+import common.Constants.Level;
+import common.event.EventHandler;
+import common.event.EventMonitor;
 import common.network.Connection;
 
 import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GraphicsConfiguration;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import static common.Constants.UPDATE;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
@@ -29,7 +33,7 @@ import static common.Constants.IP_COLUMN_COUNT;
 import static common.Constants.PORT_COLUMN_COUNT;
 
 @SuppressWarnings("serial")
-public class LoadingDialog extends JDialog implements Runnable{
+public class LoadingDialog extends JDialog implements Runnable, EventHandler{
 
 	private boolean progress;
 	private InputControl control;
@@ -48,6 +52,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 		this.title = title;
 		this.progress = progress;
 		control = new InputControl();
+		EventMonitor.register( UPDATE, this);
 	}
 
 	@Override
@@ -57,9 +62,9 @@ public class LoadingDialog extends JDialog implements Runnable{
 		pack();
 		setMinimumSize( LOADING_SIZE);
 		setLocationRelativeTo( null);
-		/*Thread thread = new Thread( task, title);
+		Thread thread = new Thread( task, title);
 		thread.setDaemon( true);
-		thread.start();*/
+		thread.start();
 		setVisible( true);
 	}
 	
@@ -126,38 +131,95 @@ public class LoadingDialog extends JDialog implements Runnable{
 	}
 	
 	private JPanel createLoadingPanel(){
-		JPanel jpMain = new JPanel( new GridLayout( 6,1,5,5));
+		JPanel jpMain = new JPanel( new GridBagLayout());
 		jpMain.setPreferredSize( PROGRESS_SIZE);
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.insets = new Insets( 5, 5, 5, 5);
 		
-		jpbHex = new JProgressBar( JProgressBar.HORIZONTAL, 0, 100);
+		JLabel label = new JLabel("HEX");
+		constraints.gridwidth = 1;
+		constraints.weightx = 0;
+		constraints.gridy = 0;
+		constraints.gridx = 0;
+		jpMain.add( label, constraints);
+		
+		jpbHex = new JProgressBar( JProgressBar.HORIZONTAL, 0, 8);
 		jpbHex.setStringPainted( true);
-		jpbHex.setString( "Hex: 0%");
-		jpMain.add( jpbHex);
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.weightx = 1;
+		constraints.gridx = 1;
+		jpMain.add( jpbHex, constraints);
 		
-		jpbCup = new JProgressBar( JProgressBar.HORIZONTAL, 0, 100);
+		label = new JLabel("Cup");
+		constraints.gridwidth = 1;
+		constraints.weightx = 0;
+		constraints.gridy = 1;
+		constraints.gridx = 0;
+		jpMain.add( label, constraints);
+		
+		jpbCup = new JProgressBar( JProgressBar.HORIZONTAL, 0, 158);
 		jpbCup.setStringPainted( true);
-		jpbCup.setString( "Cup: 0%");
-		jpMain.add( jpbCup);
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.weightx = 1;
+		constraints.gridx = 1;
+		jpMain.add( jpbCup, constraints);
 		
-		jpbBuilding = new JProgressBar( JProgressBar.HORIZONTAL, 0, 100);
+		label = new JLabel("Building");
+		constraints.gridwidth = 1;
+		constraints.weightx = 0;
+		constraints.gridy = 2;
+		constraints.gridx = 0;
+		jpMain.add( label, constraints);
+		
+		jpbBuilding = new JProgressBar( JProgressBar.HORIZONTAL, 0, 6);
 		jpbBuilding.setStringPainted( true);
-		jpbBuilding.setString( "Building: 0%");
-		jpMain.add( jpbBuilding);
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.weightx = 1;
+		constraints.gridx = 1;
+		jpMain.add( jpbBuilding, constraints);
 		
-		jpbGold = new JProgressBar( JProgressBar.HORIZONTAL, 0, 100);
+		label = new JLabel("Gold");
+		constraints.gridwidth = 1;
+		constraints.weightx = 0;
+		constraints.gridy = 3;
+		constraints.gridx = 0;
+		jpMain.add( label, constraints);
+		
+		jpbGold = new JProgressBar( JProgressBar.HORIZONTAL, 0, 6);
 		jpbGold.setStringPainted( true);
-		jpbGold.setString( "Gold: 0%");
-		jpMain.add( jpbGold);
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.weightx = 1;
+		constraints.gridx = 1;
+		jpMain.add( jpbGold, constraints);
 		
-		jpbSpecial = new JProgressBar( JProgressBar.HORIZONTAL, 0, 100);
+		label = new JLabel("Special");
+		constraints.gridwidth = 1;
+		constraints.weightx = 0;
+		constraints.gridy = 4;
+		constraints.gridx = 0;
+		jpMain.add( label, constraints);
+		
+		jpbSpecial = new JProgressBar( JProgressBar.HORIZONTAL, 0, 22);
 		jpbSpecial.setStringPainted( true);
-		jpbSpecial.setString( "Special: 0%");
-		jpMain.add( jpbSpecial);
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.weightx = 1;
+		constraints.gridx = 1;
+		jpMain.add( jpbSpecial, constraints);
 		
-		jpbState = new JProgressBar( JProgressBar.HORIZONTAL, 0, 100);
+		label = new JLabel("State");
+		constraints.gridwidth = 1;
+		constraints.weightx = 0;
+		constraints.gridy = 5;
+		constraints.gridx = 0;
+		jpMain.add( label, constraints);
+		
+		jpbState = new JProgressBar( JProgressBar.HORIZONTAL, 0, 4);
 		jpbState.setStringPainted( true);
-		jpbState.setString( "State: 0%");
-		jpMain.add( jpbState);
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.weightx = 1;
+		constraints.gridx = 1;
+		jpMain.add( jpbState, constraints);
 		
 		return jpMain;
 	}
@@ -198,6 +260,42 @@ public class LoadingDialog extends JDialog implements Runnable{
 					}
 				}
 			}
+		}
+	}
+
+	@Override
+	public void handle( Object obj, Level level) {
+		if( level==Level.END){
+			remove( jpProgress);
+			EventMonitor.unRegister( UPDATE);
+			Dimension size = getSize();
+			size.height -= PROGRESS_SIZE.height+10;
+			setMinimumSize( size);
+			setSize( size);
+			revalidate();
+			repaint();
+		}
+		switch( (Category)obj){
+			case Building:
+				jpbBuilding.setValue( jpbBuilding.getValue()+1);
+				break;
+			case Cup:
+				jpbCup.setValue( jpbCup.getValue()+1);
+				break;
+			case Gold:
+				jpbGold.setValue( jpbGold.getValue()+1);
+				break;
+			case Hex:
+				jpbHex.setValue( jpbHex.getValue()+1);
+				break;
+			case Special:
+				jpbSpecial.setValue( jpbSpecial.getValue()+1);
+				break;
+			case State:
+				jpbState.setValue( jpbState.getValue()+1);
+				break;
+			default:
+				break;
 		}
 	}
 }

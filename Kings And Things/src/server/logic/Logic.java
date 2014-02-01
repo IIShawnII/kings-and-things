@@ -64,7 +64,7 @@ public class Logic implements Runnable, EventHandler {
 	}
 
 	@Override
-	public void handle( String message, Level level) {
+	public void handle( Object obj, Level level) {
 		close = true;
 	}
 }
