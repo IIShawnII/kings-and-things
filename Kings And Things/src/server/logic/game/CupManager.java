@@ -1,4 +1,4 @@
-package server.logic;
+package server.logic.game;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,7 +11,7 @@ import common.TileProperties;
  * this class encapsulates the logic of drawing tiles from the cup, and placing
  * previously drawn ones back.
  */
-public class CupManager extends AbstractTileManager
+class CupManager extends AbstractTileManager
 {
 	private final boolean isDemoMode;
 	private int numDraws;

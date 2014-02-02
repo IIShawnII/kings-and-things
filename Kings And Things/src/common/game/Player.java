@@ -1,8 +1,10 @@
-package common;
+package common.game;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import common.TileProperties;
 
 public class Player
 {
@@ -119,6 +121,31 @@ public class Player
 		}
 		removeThingFromTray(tile);
 		addOwnedThingOnBoard(tile);
+	}
+	
+	public boolean ownsThingOnBoard(TileProperties tile)
+	{
+		validateNotNull(tile);
+		return ownedThingsOnBoard.contains(tile);
+	}
+	
+	public boolean ownsHex(TileProperties hex)
+	{
+		validateNotNull(hex);
+		validateIsHex(hex);
+		return ownedHexes.contains(hex);
+	}
+	
+	public boolean ownsThingInTray(TileProperties tile)
+	{
+		validateNotNull(tile);
+		return tray.contains(tile);
+	}
+	
+	public boolean ownsTile(TileProperties tile)
+	{
+		validateNotNull(tile);
+		return ownedThingsOnBoard.contains(tile) || ownedHexes.contains(tile) || tray.contains(tile);
 	}
 	
 	private static void validateIsHex(TileProperties tile)

@@ -21,12 +21,8 @@ public class Logic implements Runnable, EventHandler {
 
 	private boolean close = false;
 	private ServerSocket serverSocket;
-	private final HexTileManager hexManager;
-	private final CupManager cupManager;
 	
 	public Logic(boolean isDemoMode) throws IOException{
-		hexManager = new HexTileManager(isDemoMode);
-		cupManager = new CupManager(isDemoMode);
 		if(isDemoMode)
 		{
 			Logger.getStandardLogger().info("Server started in demo mode.");

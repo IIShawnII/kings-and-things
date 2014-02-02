@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import common.Constants.Ability;
 import common.Constants.Biome;
+import common.Constants.BuildableBuilding;
 import common.Constants.Building;
 import common.Constants.Restriction;
 import static common.Constants.FACE_UP;
@@ -29,6 +30,8 @@ public class TileProperties {
 	
 	public TileProperties( TileProperties tile, int number){
 		this( number, tile.attack, tile.image, tile.name, tile.abilities, tile.restrictions);
+		hasFlip = tile.hasFlip;
+		specialFlip = tile.specialFlip;
 	}
 	
 	private TileProperties( int number, int attack, Image image, String name, ArrayList< Ability> abilities, ArrayList< Restriction> restrictions){
@@ -133,6 +136,18 @@ public class TileProperties {
 	public boolean isBuilding()
 	{
 		for(Building b : Building.values())
+		{
+			if(b.name().equals(getName()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isBuildableBuilding()
+	{
+		for(BuildableBuilding b : BuildableBuilding.values())
 		{
 			if(b.name().equals(getName()))
 			{

@@ -1,18 +1,17 @@
-package server.logic;
+package server.logic.game;
 
 import java.util.Iterator;
 
 import server.exceptions.NoMoreTilesException;
-
 import common.Constants;
-import common.Constants.Biome;
 import common.TileProperties;
+import common.Constants.Biome;
 
 /**
  * this class encapsulates the logic of drawing hex tiles from the bank, and placing
  * previously drawn ones back into the bank.
  */
-public class HexTileManager extends AbstractTileManager
+class HexTileManager extends AbstractTileManager
 {
 	private final boolean isDemoMode;
 	private int numDraws;

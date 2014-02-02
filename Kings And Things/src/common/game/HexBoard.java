@@ -1,4 +1,4 @@
-package common;
+package common.game;
 
 import java.awt.Point;
 import java.util.Collections;
@@ -6,12 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import common.TileProperties;
+
 /**
  * This class provides a convenient mechanism for representing the hex board inside out code.
  */
 public class HexBoard
 {
-	private final Map<Point,TileProperties> board;
+	private final Map<Point,HexState> board;
 	
 	/**
 	 * Create new HexBoard, the entered list is assumed to be ordered according to the spiral layout pattern
@@ -25,7 +27,7 @@ public class HexBoard
 		{
 			throw new IllegalArgumentException("Can not create a board with no tiles");
 		}
-		HashMap<Point,TileProperties> tempBoard = new HashMap<Point,TileProperties>();
+		HashMap<Point,HexState> tempBoard = new HashMap<Point,HexState>();
 		
 		int numRings = 0;
 		int i = 0;
@@ -46,7 +48,7 @@ public class HexBoard
 		}
 		
 		//place middle hex first
-		tempBoard.put(new Point(numRings-1,2*(numRings-1)), tiles.remove(0));
+		tempBoard.put(new Point(numRings-1,2*(numRings-1)), new HexState(tiles.remove(0)));
 		
 		//every other hex is placed relative to the last placed hex
 		Point lastRingPiece = new Point(numRings-1,2*(numRings-1));
@@ -58,14 +60,14 @@ public class HexBoard
 				throw new IllegalArgumentException("The entered board has an incomplete ring of hexes.");
 			}
 			//start by placing one piece above the last placed piece of the last ring
-			tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-1), tiles.remove(0));
+			tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-1), new HexState(tiles.remove(0)));
 			lastRingPiece.y--;
 			
 			//place hexes until you are at the top of the ring
 			int numAwayFromTop = nextRingNumber - 2;
 			for(int j=0; j<numAwayFromTop; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y-1), tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y-1), new HexState(tiles.remove(0)));
 				lastRingPiece.x++;
 				lastRingPiece.y--;
 			}
@@ -76,7 +78,7 @@ public class HexBoard
 			//top right row
 			for(int j=0; j<rowLength; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y+1), tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y+1), new HexState(tiles.remove(0)));
 				lastRingPiece.x++;
 				lastRingPiece.y++;
 			}
@@ -84,14 +86,14 @@ public class HexBoard
 			//right row
 			for(int j=0; j<rowLength; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y+1), tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y+1), new HexState(tiles.remove(0)));
 				lastRingPiece.y++;
 			}
 
 			//bot right row
 			for(int j=0; j<rowLength; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y+1), tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y+1), new HexState(tiles.remove(0)));
 				lastRingPiece.x--;
 				lastRingPiece.y++;
 			}
@@ -99,7 +101,7 @@ public class HexBoard
 			//bot left row
 			for(int j=0; j<rowLength; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y-1), tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y-1), new HexState(tiles.remove(0)));
 				lastRingPiece.x--;
 				lastRingPiece.y--;
 			}
@@ -107,7 +109,7 @@ public class HexBoard
 			//left row
 			for(int j=0; j<rowLength; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-1), tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-1), new HexState(tiles.remove(0)));
 				lastRingPiece.y--;
 			}
 		}
@@ -147,7 +149,7 @@ public class HexBoard
 	 * @throws IllegalArgumentException if no hex exists at the specified
 	 * row,column
 	 */
-	public TileProperties getHexByRowColumn(int row, int col)
+	public HexState getHexByRowColumn(int row, int col)
 	{
 		return getHexByXY(col,row);
 	}
@@ -160,7 +162,7 @@ public class HexBoard
 	 * @throws IllegalArgumentException if no hex exists at the specified
 	 * coordinates
 	 */
-	public TileProperties getHexByXY(int x, int y)
+	public HexState getHexByXY(int x, int y)
 	{
 		if(!hexExistsAtXY(x,y))
 		{

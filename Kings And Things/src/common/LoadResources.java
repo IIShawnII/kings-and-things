@@ -57,7 +57,11 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			TileProperties tile = createTile( file.getFileName().toString());
 			switch( currentCategory){
 				case Building:
-					tile.setInfinite();
+					//TODO need to handle special income counters + actual num of city/village counters
+					if(tile.isBuildableBuilding())
+					{
+						tile.setInfinite();
+					}
 					tile.setSpecialFlip();
 					BUILDING.put( tile.hashCode(), tile);
 					break;

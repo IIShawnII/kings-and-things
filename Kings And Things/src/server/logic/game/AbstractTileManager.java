@@ -1,10 +1,9 @@
-package server.logic;
+package server.logic.game;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import server.exceptions.NoMoreTilesException;
-
 import common.TileProperties;
 
 
@@ -12,7 +11,7 @@ import common.TileProperties;
  * this class encapsulates the logic of drawing tiles from somewhere, and placing
  * previously drawn ones back.
  */
-public abstract class AbstractTileManager
+abstract class AbstractTileManager
 {
 	protected final ArrayList<TileProperties> tiles;
 	private final String tileType;

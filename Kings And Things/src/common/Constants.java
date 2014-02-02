@@ -24,6 +24,7 @@ public final class Constants {
 			Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
 	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
+	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
 	
 	//Resources
 	public static final Image IMAGE_BACKGROUND;
