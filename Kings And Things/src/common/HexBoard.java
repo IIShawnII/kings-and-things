@@ -17,6 +17,7 @@ public class HexBoard
 	 * Create new HexBoard, the entered list is assumed to be ordered according to the spiral layout pattern
 	 * @param tiles The list of tiles to make a board out of, this must be ordered according to the spiral
 	 * layout pattern and can contain any number of rings, but must not contain an incomplete ring.
+	 * @throws IllegalArgumentException if tiles is null, empty, or contains non-hex tiles
 	 */
 	public HexBoard(List<? extends TileProperties> tiles)
 	{
@@ -29,8 +30,12 @@ public class HexBoard
 		int numRings = 0;
 		int i = 0;
 		int nextRingLength = 1;
-		for(int x=0; x<tiles.size(); x++)
+		for(TileProperties tp : tiles)
 		{
+			if(!tp.isHexTile())
+			{
+				throw new IllegalArgumentException("The entered board has non-hex tiles");
+			}
 			i++;
 			if(i - nextRingLength == 0)
 			{

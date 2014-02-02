@@ -23,6 +23,7 @@ public final class Constants {
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea,
 			Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
+	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
 	
 	//Resources
 	public static final Image IMAGE_BACKGROUND;

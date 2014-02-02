@@ -5,8 +5,9 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 
 import common.Constants.Ability;
+import common.Constants.Biome;
+import common.Constants.Building;
 import common.Constants.Restriction;
-
 import static common.Constants.FACE_UP;
 import static common.Constants.FACE_DOWN;
 import static common.Constants.INFINITE_TILE;
@@ -115,6 +116,30 @@ public class TileProperties {
 	
 	public boolean isInfinit(){
 		return number == INFINITE_TILE;
+	}
+	
+	public boolean isHexTile()
+	{
+		for(Biome b : Biome.values())
+		{
+			if(b.name().equals(getName()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isBuilding()
+	{
+		for(Building b : Building.values())
+		{
+			if(b.name().equals(getName()))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
