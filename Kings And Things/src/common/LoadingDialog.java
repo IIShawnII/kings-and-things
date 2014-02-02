@@ -42,8 +42,8 @@ public class LoadingDialog extends JDialog implements EventHandler{
 	private Runnable task;
 	private Console players;
 	private JPanel jpProgress;
-	private JTextField jtfIP, jtfPort;
 	private JButton jbConnect, jbDisconnect;
+	private JTextField jtfIP, jtfPort, jtfName;
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
 	private JProgressBar jpbGold, jpbSpecial, jpbState;
 	private boolean result = false;
@@ -75,54 +75,68 @@ public class LoadingDialog extends JDialog implements EventHandler{
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.insets = new Insets( 5, 5, 5, 5);
+
+		JLabel label = new JLabel( "User Name:");
+		constraints.gridy = 0;
+		jpMain.add( label, constraints);
 		
 		JButton jbStart = new JButton( "Start");
+		jbStart.setEnabled( false);
 		jbStart.setActionCommand( "Start");
 		jbStart.addActionListener( control);
-		constraints.gridy = 0;
+		constraints.gridy = 1;
 		jpMain.add( jbStart, constraints);
 		
 		JButton jbCancel = new JButton( "Cancel");
 		jbCancel.setActionCommand( "Cancel");
 		jbCancel.addActionListener( control);
-		constraints.gridy = 1;
+		constraints.gridy = 2;
 		jpMain.add( jbCancel, constraints);
 		
 		jbConnect = new JButton( "Connect");
 		jbConnect.setActionCommand( "Connection");
 		jbConnect.addActionListener( control);
-		constraints.gridy = 2;
+		constraints.gridy = 3;
 		jpMain.add( jbConnect, constraints);
 		
 		jbDisconnect = new JButton( "Disonnect");
 		jbDisconnect.setEnabled( false);
 		jbDisconnect.setActionCommand( "Connection");
 		jbDisconnect.addActionListener( control);
-		constraints.gridy = 3;
+		constraints.gridy = 4;
 		jpMain.add( jbDisconnect, constraints);
 		
-		JLabel label = new JLabel( "IP:");
-		constraints.gridy = 5;
+		label = new JLabel( "IP:");
+		constraints.gridy = 6;
 		constraints.gridx = 1;
 		jpMain.add( label, constraints);
-		
-		jtfIP = new JTextField( SERVER_IP, IP_COLUMN_COUNT);
-		constraints.gridx = 2;
-		jpMain.add( jtfIP, constraints);
 		
 		label = new JLabel( "Port:");
 		constraints.gridx = 3;
 		jpMain.add( label, constraints);
 		
+		jtfIP = new JTextField( SERVER_IP, IP_COLUMN_COUNT);
+		constraints.gridx = 2;
+		constraints.weightx = .6;
+		jpMain.add( jtfIP, constraints);
+		
 		jtfPort = new JTextField( SERVER_PORT+"", PORT_COLUMN_COUNT);
 		constraints.gridx = 4;
+		constraints.weightx = .4;
 		jpMain.add( jtfPort, constraints);
+		
+		jtfName = new JTextField();
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.gridx = 1;
+		constraints.gridy = 0;
+		constraints.weightx = 1;
+		jpMain.add( jtfName, constraints);
 		
 		if( progress){
 			jpProgress = createLoadingPanel();
 			constraints.gridwidth = GridBagConstraints.REMAINDER;
 			constraints.gridx = 0;
-			constraints.gridy = 6;
+			constraints.gridy = 7;
 			constraints.weightx = 1;
 			jpMain.add( jpProgress, constraints);
 		}
@@ -133,11 +147,10 @@ public class LoadingDialog extends JDialog implements EventHandler{
 		JScrollPane jsp = new JScrollPane( players);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		constraints.weighty = 1;
-		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		constraints.gridheight = 5;
+		constraints.weighty = 1;
 		constraints.gridx = 1;
-		constraints.gridy = 0;
+		constraints.gridy = 1;
 		jpMain.add( jsp, constraints);
 		
 		return jpMain;
@@ -266,14 +279,18 @@ public class LoadingDialog extends JDialog implements EventHandler{
 			if( source==jbConnect || source==jbDisconnect){
 				if ( connection.isConnected()){
 					connection.disconnect();
-					jbConnect.setEnabled( true);
 					jbDisconnect.setEnabled( false);
 				}else if( connection.connectTo( jtfIP.getText(), Integer.parseInt( jtfPort.getText()))){
 					jbDisconnect.setEnabled( true);
-					jbConnect.setEnabled( false);
 				}
+				boolean state = !jbDisconnect.isEnabled();
+				jbConnect.setEnabled( state);
+				jtfIP.setEnabled( state);
+				jtfPort.setEnabled( state);
+				jtfName.setEnabled( state);
 			}else if( e.getActionCommand().equals( "Start")){
 				if( connection.isConnected()){
+					connection.send( "-p "+jtfName.getText().trim());
 					result = true;
 					dispose();
 				}
