@@ -1,6 +1,7 @@
 package common.game;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import common.TileProperties;
 public class HexBoard
 {
 	private final Map<Point,HexState> board;
+	private final List<HexState> boardList;
 	
 	/**
 	 * Create new HexBoard, the entered list is assumed to be ordered according to the spiral layout pattern
@@ -28,6 +30,7 @@ public class HexBoard
 			throw new IllegalArgumentException("Can not create a board with no tiles");
 		}
 		HashMap<Point,HexState> tempBoard = new HashMap<Point,HexState>();
+		ArrayList<HexState> tempBoardList = new ArrayList<HexState>();
 		
 		int numRings = 0;
 		int i = 0;
@@ -48,7 +51,9 @@ public class HexBoard
 		}
 		
 		//place middle hex first
-		tempBoard.put(new Point(numRings-1,2*(numRings-1)), new HexState(tiles.remove(0)));
+		HexState nextHex = new HexState(tiles.remove(0));
+		tempBoard.put(new Point(numRings-1,2*(numRings-1)), nextHex);
+		tempBoardList.add(nextHex);
 		
 		//every other hex is placed relative to the last placed hex
 		Point lastRingPiece = new Point(numRings-1,2*(numRings-1));
@@ -60,14 +65,18 @@ public class HexBoard
 				throw new IllegalArgumentException("The entered board has an incomplete ring of hexes.");
 			}
 			//start by placing one piece above the last placed piece of the last ring
-			tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-1), new HexState(tiles.remove(0)));
+			nextHex = new HexState(tiles.remove(0));
+			tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-1), nextHex);
+			tempBoardList.add(nextHex);
 			lastRingPiece.y--;
 			
 			//place hexes until you are at the top of the ring
 			int numAwayFromTop = nextRingNumber - 2;
 			for(int j=0; j<numAwayFromTop; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y-1), new HexState(tiles.remove(0)));
+				nextHex = new HexState(tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y-1), nextHex);
+				tempBoardList.add(nextHex);
 				lastRingPiece.x++;
 				lastRingPiece.y--;
 			}
@@ -78,7 +87,9 @@ public class HexBoard
 			//top right row
 			for(int j=0; j<rowLength; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y+1), new HexState(tiles.remove(0)));
+				nextHex = new HexState(tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y+1), nextHex);
+				tempBoardList.add(nextHex);
 				lastRingPiece.x++;
 				lastRingPiece.y++;
 			}
@@ -86,14 +97,18 @@ public class HexBoard
 			//right row
 			for(int j=0; j<rowLength; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y+1), new HexState(tiles.remove(0)));
+				nextHex = new HexState(tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y+1), nextHex);
+				tempBoardList.add(nextHex);
 				lastRingPiece.y++;
 			}
 
 			//bot right row
 			for(int j=0; j<rowLength; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y+1), new HexState(tiles.remove(0)));
+				nextHex = new HexState(tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y+1), nextHex);
+				tempBoardList.add(nextHex);
 				lastRingPiece.x--;
 				lastRingPiece.y++;
 			}
@@ -101,7 +116,9 @@ public class HexBoard
 			//bot left row
 			for(int j=0; j<rowLength; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y-1), new HexState(tiles.remove(0)));
+				nextHex = new HexState(tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y-1), nextHex);
+				tempBoardList.add(nextHex);
 				lastRingPiece.x--;
 				lastRingPiece.y--;
 			}
@@ -109,12 +126,15 @@ public class HexBoard
 			//left row
 			for(int j=0; j<rowLength; j++)
 			{
-				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-1), new HexState(tiles.remove(0)));
+				nextHex = new HexState(tiles.remove(0));
+				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-1), nextHex);
+				tempBoardList.add(nextHex);
 				lastRingPiece.y--;
 			}
 		}
 		
 		board = Collections.unmodifiableMap(tempBoard);
+		boardList = Collections.unmodifiableList(tempBoardList);
 	}
 	
 	/**
@@ -169,5 +189,17 @@ public class HexBoard
 			throw new IllegalArgumentException("No hex exists at position (" + x + "," + y + ")");
 		}
 		return board.get(new Point(x,y));
+	}
+	
+	/**
+	 * Use this method if you want to traverse all hexes on the board.
+	 * The returned list is non-modifiable and references the same objects
+	 * returned by the other methods in this class. The list is also in
+	 * 'spiral placement' order
+	 * @return The list of hexes
+	 */
+	public List<HexState> getHexesAsList()
+	{
+		return boardList;
 	}
 }

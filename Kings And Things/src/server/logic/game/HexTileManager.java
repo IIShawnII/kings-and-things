@@ -53,7 +53,7 @@ class HexTileManager extends AbstractTileManager
 					case 27:
 					case 35:
 						numDraws++;
-						return removeHexTileByType(Biome.Frozen_Waste);
+						return drawHexTileByType(Biome.Frozen_Waste);
 					case 1:
 					case 5:
 					case 14:
@@ -61,45 +61,45 @@ class HexTileManager extends AbstractTileManager
 					case 26:
 					case 34:
 						numDraws++;
-						return removeHexTileByType(Biome.Forest);
+						return drawHexTileByType(Biome.Forest);
 					case 2:
 					case 18:
 					case 21:
 					case 28:
 					case 32:
 						numDraws++;
-						return removeHexTileByType(Biome.Jungle);
+						return drawHexTileByType(Biome.Jungle);
 					case 3:
 					case 7:
 					case 16:
 					case 25:
 					case 31:
 						numDraws++;
-						return removeHexTileByType(Biome.Plains);
+						return drawHexTileByType(Biome.Plains);
 					case 4:
 						numDraws++;
-						return removeHexTileByType(Biome.Sea);
+						return drawHexTileByType(Biome.Sea);
 					case 6:
 					case 11:
 					case 13:
 					case 19:
 					case 22:
 						numDraws++;
-						return removeHexTileByType(Biome.Swamp);
+						return drawHexTileByType(Biome.Swamp);
 					case 9:
 					case 17:
 					case 20:
 					case 29:
 					case 33:
 						numDraws++;
-						return removeHexTileByType(Biome.Mountain);
+						return drawHexTileByType(Biome.Mountain);
 					case 12:
 					case 15:
 					case 23:
 					case 30:
 					case 36:
 						numDraws++;
-						return removeHexTileByType(Biome.Desert);
+						return drawHexTileByType(Biome.Desert);
 					default:
 						throw new NoMoreTilesException("A hex tile could not be drawn because there are no more available.");
 				}
@@ -107,7 +107,13 @@ class HexTileManager extends AbstractTileManager
 		}
 	}
 	
-	private TileProperties removeHexTileByType(Biome hexType) throws NoMoreTilesException
+	/**
+	 * Call this method to draw a particular type of hex tile from the bank
+	 * @param hexType The type of hex to draw
+	 * @return A hex tile.
+	 * @throws NoMoreTilesException If there are no more tiles left to draw.
+	 */
+	public TileProperties drawHexTileByType(Biome hexType) throws NoMoreTilesException
 	{
 		synchronized(tiles)
 		{
