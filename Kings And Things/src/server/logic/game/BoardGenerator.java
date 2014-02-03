@@ -46,7 +46,8 @@ public class BoardGenerator
 	}
 	
 	/**
-	 * Call this method to generate a new board to play on.
+	 * Call this method to generate a new board to play on. All hexes
+	 * will be face down.
 	 * @return A HexBoard created according to this BoardGenerator's
 	 * constructor parameters.
 	 * @throws NoMoreTilesException If the board could not be created
@@ -73,7 +74,12 @@ public class BoardGenerator
 		int boardSize = (numPlayers==4)? Constants.MAX_HEXES_ON_BOARD : Constants.MIN_HEXES_ON_BOARD;
 		for(int i=0; i<boardSize; i++)
 		{
-			hexes.add(hexManager.drawTile());
+			TileProperties hex = hexManager.drawTile();
+			if(hex.isFaceUp())
+			{
+				hex.flip();
+			}
+			hexes.add(hex);
 		}
 		
 		return new HexBoard(hexes);
@@ -104,6 +110,26 @@ public class BoardGenerator
 		}
 		
 		temporarilyRemovedHexes.clear();
+	}
+	
+	/**
+	 * Call this method to mark a hex as needing to be put back in the bank.
+	 * The hex will be put back with the next call to setupFinished().
+	 * @param hex The hex to place aside
+	 * @throws IllegalArgumentException if hex is null or does not represent
+	 * a hex tile.
+	 */
+	public void placeHexAside(TileProperties hex)
+	{
+		if(hex == null)
+		{
+			throw new IllegalArgumentException("The entered hex tile must not be null.");
+		}
+		if(hex.isHexTile())
+		{
+			throw new IllegalArgumentException("The entered tile must be a hex tile.");
+		}
+		temporarilyRemovedHexes.add(hex);
 	}
 	
 	private void tempRemoveHexesOfType(Biome type, int num) throws NoMoreTilesException

@@ -9,7 +9,7 @@ import common.TileProperties;
 
 public class HexState
 {
-	private final TileProperties hex;
+	private TileProperties hex;
 	private final HashSet<TileProperties> thingsInHex;
 	
 	public HexState(TileProperties hex)
@@ -20,10 +20,7 @@ public class HexState
 	public HexState(TileProperties hex, Collection<TileProperties> thingsInHex)
 	{
 		validateTileNotNull(hex);
-		if(!hex.isHexTile())
-		{
-			throw new IllegalArgumentException("Must enter a hex tile");
-		}
+		validateIsHexTile(hex);
 		if(thingsInHex==null)
 		{
 			throw new IllegalArgumentException("The entered list of things must not be null");
@@ -42,6 +39,13 @@ public class HexState
 		return hex;
 	}
 	
+	public void setHex(TileProperties hex)
+	{
+		validateTileNotNull(hex);
+		validateIsHexTile(hex);
+		this.hex = hex;
+	}
+	
 	public Set<TileProperties> getThingsInHex()
 	{
 		return Collections.unmodifiableSet(thingsInHex);
@@ -54,8 +58,44 @@ public class HexState
 		{
 			throw new IllegalArgumentException("Can not place hex into another hex");
 		}
+		if(tile.isBuilding() && hasBuilding())
+		{
+			throw new IllegalArgumentException("Can not add more than one building to a hex");
+		}
 		
 		return thingsInHex.add(tile);
+	}
+	
+	public boolean hasBuilding()
+	{
+		for(TileProperties tp : getThingsInHex())
+		{
+			if(tp.isBuilding())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public TileProperties getBuilding()
+	{
+		for(TileProperties tp : getThingsInHex())
+		{
+			if(tp.isBuilding())
+			{
+				return tp;
+			}
+		}
+		return null;
+	}
+	
+	public void removeBuildingFromHex()
+	{
+		if(hasBuilding())
+		{
+			thingsInHex.remove(getBuilding());
+		}
 	}
 	
 	public boolean removeThingFromHex(TileProperties tile)
@@ -89,6 +129,14 @@ public class HexState
 		if(tile==null)
 		{
 			throw new IllegalArgumentException("The entered tile must not be null");
+		}
+	}
+	
+	private static void validateIsHexTile(TileProperties hex)
+	{
+		if(!hex.isHexTile())
+		{
+			throw new IllegalArgumentException("Must enter a hex tile");
 		}
 	}
 }

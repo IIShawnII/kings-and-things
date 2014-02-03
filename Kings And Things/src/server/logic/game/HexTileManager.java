@@ -131,4 +131,24 @@ class HexTileManager extends AbstractTileManager
 			throw new NoMoreTilesException("Unable to draw hex tile of type: " + hexType + ", because there are no more tiles of that type.");
 		}
 	}
+	
+
+	/**
+	 * Use this method to re-add a previously drawn out tile.
+	 * @param tile The tile to add back in.
+	 * @throws IllegalArgumentException if tile is null or is not a hex
+	 */
+	@Override
+	public void reInsertTile(TileProperties tile)
+	{
+		if(tile==null)
+		{
+			throw new IllegalArgumentException("Can not insert null hex tile.");
+		}
+		if(!tile.isHexTile())
+		{
+			throw new IllegalArgumentException("Can not insert non hex tile.");
+		}
+		super.reInsertTile(tile);
+	}
 }

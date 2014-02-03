@@ -21,6 +21,7 @@ public class TileProperties {
 	private String name;
 	private boolean hasFlip;
 	private boolean specialFlip;
+	private boolean isFaceUp;
 	private ArrayList< Ability> abilities;
 	private ArrayList< Restriction> restrictions;
 	
@@ -43,6 +44,7 @@ public class TileProperties {
 		this.specialFlip = false;
 		this.abilities = abilities==null? new ArrayList<Ability>() : new ArrayList<>( abilities);
 		this.restrictions = restrictions==null? new ArrayList<Restriction>() : new ArrayList<>( restrictions);
+		isFaceUp = specialFlip;
 	}
 
 	public int getNumber() {
@@ -102,7 +104,16 @@ public class TileProperties {
 	}
 	
 	public Rectangle getFlip(){
-		return specialFlip? FACE_UP: FACE_DOWN;
+		return isFaceUp? FACE_UP: FACE_DOWN;
+	}
+	
+	public void flip(){
+		isFaceUp = !isFaceUp;
+	}
+	
+	public boolean isFaceUp()
+	{
+		return isFaceUp;
 	}
 
 	protected void setNoFlip() {

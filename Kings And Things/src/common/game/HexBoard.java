@@ -4,8 +4,11 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
+
+import com.google.common.collect.ImmutableBiMap;
 
 import common.TileProperties;
 
@@ -14,7 +17,7 @@ import common.TileProperties;
  */
 public class HexBoard
 {
-	private final Map<Point,HexState> board;
+	private final ImmutableBiMap<Point,HexState> board;
 	private final List<HexState> boardList;
 	
 	/**
@@ -133,7 +136,7 @@ public class HexBoard
 			}
 		}
 		
-		board = Collections.unmodifiableMap(tempBoard);
+		board = new ImmutableBiMap.Builder<Point, HexState>().putAll(tempBoard).build();
 		boardList = Collections.unmodifiableList(tempBoardList);
 	}
 	
@@ -189,6 +192,91 @@ public class HexBoard
 			throw new IllegalArgumentException("No hex exists at position (" + x + "," + y + ")");
 		}
 		return board.get(new Point(x,y));
+	}
+
+	/**
+	 * Given a hex, return the row,column numbers of that hex in this board
+	 * as a Point object.
+	 * @param hex The hex to find
+	 * @return The row,column coordinates of the hex
+	 * @throws IllegalArgumentException if the entered tile is null, is
+	 * not a hex, or doesn't exist in this board
+	 */
+	public Point getRowColumnOfHex(TileProperties hex)
+	{
+		Point xy = getXYCoordinatesOfHex(hex);
+		return new Point(xy.y,xy.x);
+	}
+	
+	/**
+	 * Given a hex, return the x,y position of that hex in this board
+	 * as a Point object.
+	 * @param hex The hex to find
+	 * @return The x,y coordinates of the hex
+	 * @throws IllegalArgumentException if the entered tile is null, is
+	 * not a hex, or doesn't exist in this board
+	 */
+	public Point getXYCoordinatesOfHex(TileProperties hex)
+	{
+		if(hex==null)
+		{
+			throw new IllegalArgumentException("The entered hex must not be null.");
+		}
+		if(!hex.isHexTile())
+		{
+			throw new IllegalArgumentException("The entered tile must be a hex tile.");
+		}
+		for(Entry<Point,HexState> entry : board.entrySet())
+		{
+			if(entry.getValue().getHex().equals(hex))
+			{
+				return new Point(entry.getKey().x, entry.getKey().y);
+			}
+		}
+		
+		throw new IllegalArgumentException("The entered hex could not be found");
+	}
+	
+	/**
+	 * Given a hex from this board, find a list of all adjacent hexes.
+	 * The list may be empty but is guaranteed not to be null. The given
+	 * hex is not returned inside the generated list.
+	 * @param hex The hex to find adjacent hexes for
+	 * @return A list of all hexes that are adjacent to the entered hex
+	 * @throws IllegalArgumentException if the entered tile is null, is
+	 * not a hex, or doesn't exist in this board
+	 */
+	public List<HexState> getAdjacentHexesTo(TileProperties hex)
+	{
+		Point coords = getXYCoordinatesOfHex(hex);
+		int x = coords.x;
+		int y = coords.y;
+		
+		ArrayList<Point> coordsToTest = new ArrayList<Point>();
+		coordsToTest.add(new Point(x,y-1));
+		coordsToTest.add(new Point(x,y+1));
+		coordsToTest.add(new Point(x-1,y-1));
+		coordsToTest.add(new Point(x-1,y+1));
+		coordsToTest.add(new Point(x+1,y-1));
+		coordsToTest.add(new Point(x+1,y+1));
+		
+		Iterator<Point> it = coordsToTest.iterator();
+		while(it.hasNext())
+		{
+			Point nextPoint = it.next();
+			if(!hexExistsAtXY(nextPoint.x, nextPoint.y))
+			{
+				it.remove();
+			}
+		}
+		
+		ArrayList<HexState> adjacentHexes = new ArrayList<HexState>();
+		for(Point p : coordsToTest)
+		{
+			adjacentHexes.add(getHexByXY(p.x, p.y));
+		}
+		
+		return Collections.unmodifiableList(adjacentHexes);
 	}
 	
 	/**

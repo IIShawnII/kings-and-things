@@ -148,6 +148,12 @@ public class Player
 		return ownedThingsOnBoard.contains(tile) || ownedHexes.contains(tile) || tray.contains(tile);
 	}
 	
+	@Override
+	public String toString()
+	{
+		return getPlayerName() + ", #: " + getPlayerNumber();
+	}
+	
 	private static void validateIsHex(TileProperties tile)
 	{
 		validateNotNull(tile);
