@@ -290,7 +290,7 @@ public class LoadingDialog extends JDialog implements EventHandler{
 				jtfName.setEnabled( state);
 			}else if( e.getActionCommand().equals( "Start")){
 				if( connection.isConnected()){
-					connection.send( "-p "+jtfName.getText().trim());
+					connection.send( "-start");
 					result = true;
 					dispose();
 				}

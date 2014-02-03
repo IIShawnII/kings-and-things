@@ -148,6 +148,16 @@ public class Player
 		return ownedThingsOnBoard.contains(tile) || ownedHexes.contains(tile) || tray.contains(tile);
 	}
 	
+	// determines player's income
+	public int getIncome()
+	{
+		//   1 gold per land hex
+		//+  gold per combat value of each fort
+		//+  gold per special income counter on the board
+		//+  1 gold per special character
+		return ownedHexes.size();
+	}
+	
 	@Override
 	public String toString()
 	{
