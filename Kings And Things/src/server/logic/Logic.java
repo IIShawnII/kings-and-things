@@ -9,6 +9,7 @@ import common.Logger;
 import common.network.Connection;
 import common.event.EventHandler;
 import common.event.EventMonitor;
+import common.game.logic.GameFlowManager;
 import static common.Constants.PLAYER;
 import static common.Constants.ENDGAME;
 import static common.Constants.PLAYER_INC;
@@ -21,12 +22,16 @@ public class Logic implements Runnable, EventHandler {
 
 	private boolean close = false;
 	private ServerSocket serverSocket;
+	private final GameFlowManager game;
 	
 	public Logic(boolean isDemoMode) throws IOException{
 		if(isDemoMode)
 		{
 			Logger.getStandardLogger().info("Server started in demo mode.");
 		}
+		
+		game = new GameFlowManager();
+		
 		try {
 			serverSocket = new ServerSocket( SERVER_PORT);
             serverSocket.setSoTimeout( SERVER_TIMEOUT*1000);
@@ -39,6 +44,7 @@ public class Logic implements Runnable, EventHandler {
 
 	@Override
 	public void run() {
+		game.initialize();
 		EventMonitor.register( ENDGAME, this);
 		int count=0, playerID = PLAYER;
 		while( !close && count<MAX_PLAYERS){
@@ -50,7 +56,10 @@ public class Logic implements Runnable, EventHandler {
             	Logger.getStandardLogger().info("Recieved connection from " + connection);
             	Logger.getStandardLogger().info(connection + " is assigned to Player " + count);
             	
-	    		new PlayerConnection( playerID, connection).start();
+            	PlayerConnection pc = new PlayerConnection( playerID, connection);
+            	pc.initialize();
+            	pc.start();
+            	
             	count++;
             	playerID+=PLAYER_INC;
             } catch( SocketTimeoutException ex){

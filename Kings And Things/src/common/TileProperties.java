@@ -4,6 +4,10 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import common.Constants.Ability;
 import common.Constants.Biome;
 import common.Constants.BuildableBuilding;
@@ -13,16 +17,26 @@ import static common.Constants.FACE_UP;
 import static common.Constants.FACE_DOWN;
 import static common.Constants.INFINITE_TILE;
 
+@XmlRootElement
 public class TileProperties {
 
+	@XmlAttribute
 	private int number;
+	@XmlAttribute
 	private int attack;
+	@XmlElement
 	private Image image;
+	@XmlAttribute
 	private String name;
+	@XmlAttribute
 	private boolean hasFlip;
+	@XmlAttribute
 	private boolean specialFlip;
+	@XmlAttribute
 	private boolean isFaceUp;
+	@XmlElement
 	private ArrayList< Ability> abilities;
+	@XmlElement
 	private ArrayList< Restriction> restrictions;
 	
 	public TileProperties(){
@@ -166,6 +180,52 @@ public class TileProperties {
 			}
 		}
 		return false;
+	}
+	
+	public boolean isRestrictedToBiome()
+	{
+		return getBiomeRestriction()!=null;
+	}
+	
+	public boolean isEvent()
+	{
+		return restrictions.contains(Restriction.Event);
+	}
+	
+	public boolean isMagicItem()
+	{
+		return restrictions.contains(Restriction.Magic);
+	}
+	
+	public boolean isTreasure()
+	{
+		return restrictions.contains(Restriction.Treasure) && !isRestrictedToBiome();
+	}
+	
+	public boolean isCreature()
+	{
+		return !isBuilding() && !isEvent() && !isMagicItem() && !isTreasure() && !isSpecialIncomeCounter();
+	}
+	
+	public Biome getBiomeRestriction()
+	{
+		for(Restriction r : restrictions)
+		{
+			if(r == Restriction.Desert || r == Restriction.Forest || r == Restriction.Frozen_Waste ||
+				r == Restriction.Jungle || r == Restriction.Mountain || r == Restriction.Plains ||
+				r == Restriction.Sea || r == Restriction.Swamp)
+			{
+				return Biome.valueOf(r.name());
+			}
+		}
+		
+		return null;
+	}
+	
+	public boolean isSpecialIncomeCounter()
+	{
+		
+		return (restrictions.contains(Restriction.Treasure) && isRestrictedToBiome()) || Building.Village.name().equals(getName()) || Building.City.name().equals(getName());
 	}
 
 	@Override

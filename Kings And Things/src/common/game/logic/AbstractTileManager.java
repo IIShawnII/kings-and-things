@@ -1,10 +1,10 @@
-package server.logic.game;
+package common.game.logic;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import server.exceptions.NoMoreTilesException;
 import common.TileProperties;
+import common.game.exceptions.NoMoreTilesException;
 
 
 /**

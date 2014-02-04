@@ -1,11 +1,11 @@
-package server.logic.game;
+package common.game.logic;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import server.exceptions.NoMoreTilesException;
 import common.Constants;
 import common.TileProperties;
+import common.game.exceptions.NoMoreTilesException;
 
 /**
  * this class encapsulates the logic of drawing tiles from the cup, and placing

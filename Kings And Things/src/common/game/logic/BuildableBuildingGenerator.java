@@ -1,4 +1,4 @@
-package server.logic.game;
+package common.game.logic;
 
 import common.Constants;
 import common.Constants.BuildableBuilding;
