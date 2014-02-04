@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 
 /**
@@ -17,6 +18,7 @@ public class GameState
 	private final HashSet<Player> players;
 	private final ArrayList<Integer> playerOrder;
 	private final SetupPhase currentSetupPhase;
+	private final RegularPhase currentRegularPhase;
 	private final int activePhasePlayerNumber;
 	private final int activeTurnPlayerNumber;
 
@@ -29,12 +31,13 @@ public class GameState
 	 * @param activeTurnPlayerNumber The player id of the player who's turn it is
 	 * @param activePhasePlayerNumber The player id of the next player to act in the current phase
 	 */
-	public GameState(HexBoard board, Set<Player> players, List<Integer> playerOrder, SetupPhase currentSetupPhase, int activeTurnPlayerNumber, int activePhasePlayerNumber)
+	public GameState(HexBoard board, Set<Player> players, List<Integer> playerOrder, SetupPhase currentSetupPhase, RegularPhase currentRegularPhase, int activeTurnPlayerNumber, int activePhasePlayerNumber)
 	{
 		this.board = board;
 		this.players = new HashSet<Player>(players);
 		this.playerOrder = new ArrayList<Integer>(playerOrder);
 		this.currentSetupPhase = currentSetupPhase;
+		this.currentRegularPhase = currentRegularPhase;
 		this.activePhasePlayerNumber = activePhasePlayerNumber;
 		this.activeTurnPlayerNumber = activeTurnPlayerNumber;
 	}
@@ -73,6 +76,15 @@ public class GameState
 	public SetupPhase getCurrentSetupPhase()
 	{
 		return currentSetupPhase;
+	}
+	
+	/**
+	 * Get the current regular phase of the game
+	 * @return The regular phase of the game
+	 */
+	public RegularPhase getCurrentRegularPhase()
+	{
+		return currentRegularPhase;
 	}
 	
 	/**

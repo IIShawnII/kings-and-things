@@ -165,7 +165,7 @@ class CupManager extends AbstractTileManager
 			while(it.hasNext())
 			{
 				TileProperties tp = it.next();
-				if(tp.getName().equals(name) && tp.getAttack() == attack)
+				if(tp.getName().equals(name) && tp.getValue() == attack)
 				{
 					it.remove();
 					return tp;

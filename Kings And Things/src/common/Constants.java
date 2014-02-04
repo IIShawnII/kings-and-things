@@ -29,6 +29,9 @@ public final class Constants {
 	//Note, phase progression is dependent on the order of the declarations in the following enum type
 	public enum SetupPhase {PICK_FIRST_HEX, EXCHANGE_SEA_HEXES, PICK_SECOND_HEX, PICK_THIRD_HEX, PLACE_FREE_TOWER, PLACE_FREE_THINGS, EXCHANGE_THINGS, PLACE_EXCHANGED_THINGS, SETUP_FINISHED}
 	
+	//Regular turn phases
+	public enum RegularPhase {GOLD_COLLECTION, RECRUITING_CHARACTERS, RECRUITING_THINGS, RANDOM_EVENTS, MOVEMENT, COMBAT, CONSTRUCTION, SPECIAL_POWERS}
+	
 	//Resources
 	public static final Image IMAGE_BACKGROUND;
 	public static final Image IMAGE_HEX_REVERSE; 

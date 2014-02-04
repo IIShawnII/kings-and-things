@@ -196,9 +196,13 @@ public class Player
 	 * @return true if tile was added successfully,
 	 * false if this player already had it in their tray
 	 * @throws IllegalArgumentException if tile is null
+	 * or if player has 10 things in his tray
 	 */
 	public boolean addThingToTray(TileProperties tile)
 	{
+		if (tray.size() >= 10) {
+			throw new IllegalArgumentException("You cannot have more than 10 things in your tray!");
+		}
 		validateNotNull(tile);
 		return tray.add(tile);
 	}
@@ -288,15 +292,22 @@ public class Player
 		validateNotNull(tile);
 		return ownedThingsOnBoard.contains(tile) || ownedHexes.contains(tile) || tray.contains(tile);
 	}
-	
-	// determines player's income
+	/**
+	 * Determines income during the gold collection phase
+	 * @return
+	 */
 	public int getIncome()
 	{
-		//   1 gold per land hex
-		//+  gold per combat value of each fort
-		//+  gold per special income counter on the board
-		//+  1 gold per special character
-		return ownedHexes.size();
+		return getIncome(false);
+	}
+	
+	/**
+	 * Determines income during the special events phase
+	 * @return
+	 */
+	public int getSpecialEventIncome()
+	{
+		return getIncome(true);
 	}
 	
 	/**
@@ -325,6 +336,29 @@ public class Player
 	public int hashCode()
 	{
 		return id;
+	}
+	
+	// determines player's income
+	private int getIncome( boolean event)
+	{
+		//   1 gold per land hex
+		//+  gold per combat value of each fort
+		//+  gold per special income counter on the board
+		//+  1 gold per special character
+			
+		int buildingGold = 0;		//keeps track of gold pieces for each fort player controls
+		int specialIncomeGold = 0;	//keeps track of gold pieces for each special income counter
+			
+			//
+		for (TileProperties thing : ownedThingsOnBoard) {
+			if( !event && thing.isSpecialIncomeCounter()) {
+				specialIncomeGold += thing.getValue();
+			} else if (thing.isBuildableBuilding()) {
+				buildingGold += thing.getValue();
+			}
+		}
+			
+		return ownedHexes.size() + buildingGold + specialIncomeGold;
 	}
 	
 	private static void validateIsHex(TileProperties tile)

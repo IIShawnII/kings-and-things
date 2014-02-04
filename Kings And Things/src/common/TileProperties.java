@@ -70,7 +70,7 @@ public class TileProperties {
 		this.number = number;
 	}
 
-	public int getAttack() {
+	public int getValue() {
 		return attack;
 	}
 	

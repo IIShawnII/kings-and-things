@@ -11,6 +11,7 @@ import java.util.Set;
 import com.google.common.eventbus.Subscribe;
 
 import common.Constants.BuildableBuilding;
+import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
 import common.TileProperties;
@@ -25,6 +26,7 @@ import common.game.commands.EndPlayerTurnCommand;
 import common.game.commands.ExchangeSeaHexCommand;
 import common.game.commands.ExchangeThingsCommand;
 import common.game.commands.GiveHexToPlayerCommand;
+import common.game.commands.PaidRecruitsCommand;
 import common.game.commands.PlaceThingOnBoardCommand;
 import common.game.commands.StartGameCommand;
 import common.game.exceptions.NoMoreTilesException;
@@ -62,7 +64,7 @@ public class GameFlowManager
 		bank = new HexTileManager(demoMode);
 		boardGenerator = new BoardGenerator(players.size(),bank);
 		List<Integer> playerOrder = determinePlayerOrder(players,demoMode);
-		currentState = new GameState(boardGenerator.createNewBoard(),players,playerOrder,SetupPhase.PICK_FIRST_HEX,playerOrder.get(0),playerOrder.get(0));
+		currentState = new GameState(boardGenerator.createNewBoard(),players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.GOLD_COLLECTION,playerOrder.get(0),playerOrder.get(0));
 		
 		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new StartGameCommand(demoMode, players)));
 	}
@@ -177,6 +179,22 @@ public class GameFlowManager
 		
 		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new EndPlayerTurnCommand(playerNumber)));
 	}
+	/*
+	 * Player pays gold to the bank in order to recruit things
+	 */
+	public void paidRecruits(int gold, int playerNumber) throws NoMoreTilesException {
+		
+		// retrieve player with the passed in player number
+		Player  player = currentState.getPlayerByPlayerNumber(playerNumber);
+		
+		// removes gold from player
+		player.removeGold(gold);
+		
+		// adds things to the players tray for every 5 gold pieces
+		for(int i = 0; i < (gold/5); i++) {
+			player.addThingToTray(cup.drawTile());
+		}
+	}
 	
 	private void advanceActivePhasePlayer()
 	{
@@ -207,7 +225,7 @@ public class GameFlowManager
 			}
 		}
 		currentState = new GameState(currentState.getBoard(), currentState.getPlayers(), currentState.getPlayerOrder(),
-										nextSetupPhase, currentState.getActiveTurnPlayer().getPlayerNumber(),
+										nextSetupPhase, currentState.getCurrentRegularPhase(), currentState.getActiveTurnPlayer().getPlayerNumber(),
 										currentState.getPlayerOrder().get(++activePhasePlayerOrderIndex % currentState.getPlayers().size()));
 	}
 	
@@ -224,7 +242,7 @@ public class GameFlowManager
 		}
 
 		currentState = new GameState(currentState.getBoard(), currentState.getPlayers(), currentState.getPlayerOrder(),
-									currentState.getCurrentSetupPhase(), nextActiveTurnPlayerNumber, nextActiveTurnPlayerNumber);
+									currentState.getCurrentSetupPhase(), currentState.getCurrentRegularPhase(), nextActiveTurnPlayerNumber, nextActiveTurnPlayerNumber);
 	}
 	
 	private void makeThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex)
@@ -268,8 +286,15 @@ public class GameFlowManager
 	private void makeThingsExchanged(Collection<TileProperties> things, int playerNumber) throws NoMoreTilesException
 	{
 		int newThingCount = things.size();
+		
+		// During the Regular Phase, we draw 1/2 as many stuff as they are throwing away
+		if(currentState.getCurrentRegularPhase() == RegularPhase.RECRUITING_THINGS) {
+			newThingCount /= 2;
+		}
+		
 		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
 		ArrayList<TileProperties> newThings = new ArrayList<TileProperties>(newThingCount);
+		
 		for(int i=0; i<newThingCount; i++)
 		{
 			newThings.add(cup.drawTile());
@@ -517,6 +542,19 @@ public class GameFlowManager
 		try
 		{
 			placeThingOnBoard(command.getThing(), command.getPlayerNumber(), command.getHex());
+		}
+		catch(Throwable t)
+		{
+			Logger.getErrorLogger().error("Unable to process PlaceThingOnBoardCommand due to: ", t);
+		}
+	}
+	
+	@Subscribe
+	public void receivePaidRecruitsCommand(PaidRecruitsCommand command)
+	{
+		try
+		{
+			paidRecruits(command.getGold(), command.getplayerNumber());
 		}
 		catch(Throwable t)
 		{
