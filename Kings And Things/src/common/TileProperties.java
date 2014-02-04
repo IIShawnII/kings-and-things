@@ -1,5 +1,9 @@
 package common;
 
+import static common.Constants.FACE_DOWN;
+import static common.Constants.FACE_UP;
+import static common.Constants.INFINITE_TILE;
+
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -13,9 +17,6 @@ import common.Constants.Biome;
 import common.Constants.BuildableBuilding;
 import common.Constants.Building;
 import common.Constants.Restriction;
-import static common.Constants.FACE_UP;
-import static common.Constants.FACE_DOWN;
-import static common.Constants.INFINITE_TILE;
 
 @XmlRootElement
 public class TileProperties {

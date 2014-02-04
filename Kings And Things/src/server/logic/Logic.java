@@ -3,12 +3,20 @@ package server.logic;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.HashSet;
+
+import com.google.common.eventbus.Subscribe;
 
 import common.Constants.Level;
 import common.Logger;
 import common.network.Connection;
+import common.event.CommandEventBus;
 import common.event.EventHandler;
 import common.event.EventMonitor;
+import common.game.Player;
+import common.game.commands.RequestStartCommand;
+import common.game.commands.StartGameCommand;
 import common.game.logic.GameFlowManager;
 import static common.Constants.PLAYER;
 import static common.Constants.ENDGAME;
@@ -23,6 +31,8 @@ public class Logic implements Runnable, EventHandler {
 	private boolean close = false;
 	private ServerSocket serverSocket;
 	private final GameFlowManager game;
+	private final ArrayList<PlayerConnection> connectedPlayers;
+	private final boolean demoMode;
 	
 	public Logic(boolean isDemoMode) throws IOException{
 		if(isDemoMode)
@@ -30,6 +40,8 @@ public class Logic implements Runnable, EventHandler {
 			Logger.getStandardLogger().info("Server started in demo mode.");
 		}
 		
+		demoMode = isDemoMode;
+		connectedPlayers = new ArrayList<PlayerConnection>();
 		game = new GameFlowManager();
 		
 		try {
@@ -45,6 +57,7 @@ public class Logic implements Runnable, EventHandler {
 	@Override
 	public void run() {
 		game.initialize();
+		CommandEventBus.BUS.register(this);
 		EventMonitor.register( ENDGAME, this);
 		int count=0, playerID = PLAYER;
 		while( !close && count<MAX_PLAYERS){
@@ -59,6 +72,7 @@ public class Logic implements Runnable, EventHandler {
             	PlayerConnection pc = new PlayerConnection( playerID, connection);
             	pc.initialize();
             	pc.start();
+            	connectedPlayers.add(pc);
             	
             	count++;
             	playerID+=PLAYER_INC;
@@ -78,5 +92,32 @@ public class Logic implements Runnable, EventHandler {
 	@Override
 	public void handle( Object obj, Level level) {
 		close = true;
+	}
+	
+	@Subscribe
+	public void handStartRequest(RequestStartCommand command)
+	{
+		boolean unreadyPlayerConnected = false;
+		
+		for(PlayerConnection pc : connectedPlayers)
+		{
+			if(pc.getPlayerId() == command.getPlayerNumber())
+			{
+				pc.setReadyToStart(true);
+			}
+			else if(!pc.isReadyToStart())
+			{
+				unreadyPlayerConnected = true;
+			}
+		}
+		if(!unreadyPlayerConnected)
+		{
+			HashSet<Player> players = new HashSet<Player>();
+			for(PlayerConnection pc : connectedPlayers)
+			{
+				players.add(pc.toPlayerObj());
+			}
+			CommandEventBus.BUS.post(new StartGameCommand(demoMode,players));
+		}
 	}
 }

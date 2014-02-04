@@ -4,19 +4,29 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import common.TileProperties;
 
 /**
  * This class represents a player in the game
  */
+@XmlRootElement
 public class Player
 {
+	@XmlAttribute
 	private String name;
+	@XmlAttribute
 	private final int id;
 	private int gold;
-	
+
+	@XmlElement
 	private final HashSet<TileProperties> ownedHexes;
+	@XmlElement
 	private final HashSet<TileProperties> ownedThingsOnBoard;
+	@XmlElement
 	private final HashSet<TileProperties> tray;
 	
 	/**
@@ -332,5 +342,12 @@ public class Player
 		{
 			throw new IllegalArgumentException("The entered tile must not be null");
 		}
+	}
+	
+	@SuppressWarnings("unused")
+	private Player()
+	{
+		//required by JAXB
+		this("",0);
 	}
 }

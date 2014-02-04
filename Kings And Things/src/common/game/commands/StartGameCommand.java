@@ -16,7 +16,7 @@ public class StartGameCommand extends Command
 	@XmlAttribute
 	private final boolean demoMode;
 	@XmlElement
-	private final Set<Player> players;
+	private final HashSet<Player> players;
 	
 	public StartGameCommand(boolean demoMode, Set<Player> players)
 	{
@@ -24,7 +24,7 @@ public class StartGameCommand extends Command
 		this.players = new HashSet<Player>();
 		for(Player p : players)
 		{
-			players.add(p);
+			this.players.add(p);
 		}
 	}
 	
