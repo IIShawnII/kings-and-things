@@ -417,6 +417,10 @@ public class GameFlowManager
 				}
 				break;
 			}
+			case SETUP_FINISHED:
+			{
+				boardGenerator.setupFinished();
+			}
 			default:
 				break;
 		}
