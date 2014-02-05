@@ -17,13 +17,9 @@ import java.awt.GraphicsConfiguration;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import common.Constants.Level;
 import common.Constants.Category;
-import common.event.EventHandler;
-import common.event.EventMonitor;
+import common.Constants.Level;
 import common.network.Connection;
-
-import static common.Constants.UPDATE;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
@@ -33,7 +29,7 @@ import static common.Constants.IP_COLUMN_COUNT;
 import static common.Constants.PORT_COLUMN_COUNT;
 
 @SuppressWarnings("serial")
-public class LoadingDialog extends JDialog implements EventHandler{
+public class LoadingDialog extends JDialog{
 
 	private boolean progress;
 	private InputControl control;
@@ -54,7 +50,6 @@ public class LoadingDialog extends JDialog implements EventHandler{
 		this.title = title;
 		this.progress = progress;
 		control = new InputControl();
-		EventMonitor.register( UPDATE, this);
 	}
 
 	public boolean run() {
@@ -301,11 +296,9 @@ public class LoadingDialog extends JDialog implements EventHandler{
 		}
 	}
 
-	@Override
-	public void handle( Object obj, Level level) {
+	public void handle( Category category, Level level) {
 		if( level==Level.END){
 			remove( jpProgress);
-			EventMonitor.unRegister( UPDATE);
 			Dimension size = getSize();
 			size.height -= PROGRESS_SIZE.height+10;
 			setMinimumSize( size);
@@ -313,7 +306,7 @@ public class LoadingDialog extends JDialog implements EventHandler{
 			revalidate();
 			repaint();
 		}
-		switch( (Category)obj){
+		switch( category){
 			case Building:
 				jpbBuilding.setValue( jpbBuilding.getValue()+1);
 				break;

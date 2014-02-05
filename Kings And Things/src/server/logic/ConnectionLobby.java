@@ -1,34 +1,30 @@
 package server.logic;
 
-import static common.Constants.ENDGAME;
+import static common.Constants.PLAYER;
 import static common.Constants.MAX_PLAYERS;
 import static common.Constants.MIN_PLAYERS;
-import static common.Constants.PLAYER;
 import static common.Constants.PLAYER_INC;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.ArrayList;
 import java.net.ServerSocket;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.HashSet;
 
 import server.logic.game.GameFlowManager;
-
 import com.google.common.eventbus.Subscribe;
-import common.Constants.Level;
-import common.LoadResources;
-import common.Logger;
-import common.event.CommandEventBus;
-import common.event.EventHandler;
-import common.event.EventMonitor;
-import common.game.Player;
-import common.game.commands.RequestStartCommand;
-import common.game.commands.StartGameCommand;
-import common.network.Connection;
 
-public class ConnectionLobby implements Runnable, EventHandler {
+import common.Logger;
+import common.LoadResources;
+import common.network.Connection;
+import common.event.CommandEventBus;
+import common.game.Player;
+import common.game.commands.StartGameCommand;
+import common.game.commands.RequestStartCommand;
+
+public class ConnectionLobby implements Runnable {
 
 	private boolean close = false;
 	private ServerSocket serverSocket;
@@ -62,7 +58,6 @@ public class ConnectionLobby implements Runnable, EventHandler {
 	public void run() {
 		game.initialize();
 		CommandEventBus.BUS.register(this);
-		EventMonitor.register( ENDGAME, this);
 		int count=0, playerID = PLAYER;
 		while( !close && count<MAX_PLAYERS){
             try {
@@ -93,8 +88,7 @@ public class ConnectionLobby implements Runnable, EventHandler {
 		}
 	}
 
-	@Override
-	public void handle( Object obj, Level level) {
+	public void handle() {
 		close = true;
 	}
 	

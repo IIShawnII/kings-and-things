@@ -4,13 +4,10 @@ import server.event.SendCommandAcrossNetworkEvent;
 
 import com.google.common.eventbus.Subscribe;
 
-import common.Constants.Level;
-import common.event.CommandEventBus;
-import common.event.EventMonitor;
-import common.game.CommandMarshaller;
 import common.game.Player;
+import common.event.CommandEventBus;
+import common.game.CommandMarshaller;
 import common.network.Connection;
-import static common.Constants.CONSOLE;
 
 public class PlayerConnection extends Thread{
 	
@@ -67,7 +64,6 @@ public class PlayerConnection extends Thread{
 		while ((str = connection.recieve())!=null){
 			CommandMarshaller.unmarshalCommand(str).dispatch(getPlayerId());
 		}
-		EventMonitor.fireEvent( PLAYER_ID+CONSOLE, null, Level.END);
 	}
 	
 	@Subscribe

@@ -11,8 +11,7 @@ import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
 
 import common.Console;
-import common.event.EventHandler;
-import common.event.EventMonitor;
+import common.Constants.Level;
 import static common.Constants.RED;
 import static common.Constants.BLUE;
 import static common.Constants.GREEN;
@@ -21,13 +20,7 @@ import static common.Constants.DARK_RED;
 import static common.Constants.DARK_BLUE;
 import static common.Constants.DARK_GREEN;
 import static common.Constants.DARK_YELLOW;
-import static common.Constants.HOLD;
-import static common.Constants.WAIT;
-import static common.Constants.Level;
-import static common.Constants.UPDATE;
 import static common.Constants.PLAYER;
-import static common.Constants.ANALYSE;
-import static common.Constants.CONSOLE;
 import static common.Constants.PLAYER_INC;
 import static common.Constants.LABEL_SIZE;
 import static common.Constants.CONSOLE_SIZE;
@@ -38,7 +31,7 @@ import static common.Constants.PLAYER_FONT_SIZE;
  * complete set of GUI components that represent the current state of a player and related server activities
  */
 @SuppressWarnings("serial")
-public class PlayerStatus extends JPanel implements EventHandler{
+public class PlayerStatus extends JPanel{
 
 	private final int PLAYER_ID;
 
@@ -62,7 +55,6 @@ public class PlayerStatus extends JPanel implements EventHandler{
 	 */
 	protected void initialize(){
 		font = getFont();
-		EventMonitor.register( PLAYER_ID+CONSOLE, this);
 		setLayout( new BorderLayout( 5, 5));
 		setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5));
 		add( createStatusPanel(), BorderLayout.NORTH);
@@ -107,22 +99,22 @@ public class PlayerStatus extends JPanel implements EventHandler{
 		StatusLabel wait = new StatusLabel();
 		wait.setAlignmentX( RIGHT_ALIGNMENT);
 		con.weightx = 0.0;
-		wait.initialize( "Waiting for Players move", "W", YELLOW, DARK_YELLOW, label, PLAYER_ID + WAIT, LABEL_SIZE);
+		wait.initialize( "Waiting for Players move", "W", YELLOW, DARK_YELLOW, label, LABEL_SIZE);
 		jpMain.add( wait, con);
 		
 		StatusLabel analyse = new StatusLabel();
 		analyse.setAlignmentX( RIGHT_ALIGNMENT);
-		analyse.initialize( "Analysing Player Move", "A", BLUE, DARK_BLUE, label, PLAYER_ID + ANALYSE, LABEL_SIZE);
+		analyse.initialize( "Analysing Player Move", "A", BLUE, DARK_BLUE, label, LABEL_SIZE);
 		jpMain.add( analyse, con);
 		
 		StatusLabel hold = new StatusLabel();
 		hold.setAlignmentX( RIGHT_ALIGNMENT);
-		hold.initialize( "Waiting for Players Turn", "H", RED, DARK_RED, label, PLAYER_ID + HOLD, LABEL_SIZE);
+		hold.initialize( "Waiting for Players Turn", "H", RED, DARK_RED, label, LABEL_SIZE);
 		jpMain.add( hold, con);
 		
 		StatusLabel update = new StatusLabel();
 		update.setAlignmentX( RIGHT_ALIGNMENT);
-		update.initialize( "Syncing Data", "U", GREEN, DARK_GREEN, label, PLAYER_ID + UPDATE, LABEL_SIZE);
+		update.initialize( "Syncing Data", "U", GREEN, DARK_GREEN, label, LABEL_SIZE);
 		jpMain.add( update, con);
 		
 		return jpMain;
@@ -132,11 +124,10 @@ public class PlayerStatus extends JPanel implements EventHandler{
 	 * called by event monitor for updating the console
 	 * @param message - new message to be added to display
 	 */
-	@Override
-	public void handle( Object obj, Level level) {
-		if( obj!=null){
+	public void handle( String message, Level level) {
+		if( message!=null){
 			console.setEnabled( true);
-			console.add( (String)obj, level);
+			console.add( message, level);
 		}else if (level==Level.END){
 			console.setEnabled( false);
 		}

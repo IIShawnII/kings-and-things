@@ -1,8 +1,6 @@
 package server.gui;
 
-import static common.Constants.CONSOLE;
 import static common.Constants.CONSOLE_SIZE;
-import static common.Constants.ENDGAME;
 import static common.Constants.MAX_PLAYERS;
 import static common.Constants.PLAYER;
 import static common.Constants.PLAYER_INC;
@@ -23,14 +21,12 @@ import javax.swing.JScrollPane;
 
 import common.Console;
 import common.Constants.Level;
-import common.event.EventHandler;
-import common.event.EventMonitor;
 
 /**
  * server GUI to hold all and display all server related information
  */
 @SuppressWarnings("serial")
-public class ServerGUI extends JFrame implements Runnable, EventHandler{
+public class ServerGUI extends JFrame implements Runnable{
 
 	private Console console;
 	
@@ -40,7 +36,6 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 	 */
 	public ServerGUI( String title){
 		super( title);
-		EventMonitor.register( CONSOLE, this);
 	}
 
 	/**
@@ -101,12 +96,11 @@ public class ServerGUI extends JFrame implements Runnable, EventHandler{
 		
 		@Override
 		public void windowClosed(WindowEvent e){
-			EventMonitor.fireEvent( ENDGAME, null, null);
+			
 		}
 	}
 
-	@Override
-	public void handle( Object obj, Level level) {
-		console.add( (String)obj, level);
+	public void handle( String message, Level level) {
+		console.add( message, level);
 	}
 }

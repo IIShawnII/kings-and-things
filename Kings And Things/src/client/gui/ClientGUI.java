@@ -16,11 +16,8 @@ import common.Console;
 import common.LoadingDialog;
 import common.LoadResources;
 import common.Constants.Level;
-import common.event.EventHandler;
-import common.event.EventMonitor;
 import common.network.Connection;
 
-import static common.Constants.CONSOLE;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.MIN_CLIENT_SIZE;
@@ -29,7 +26,7 @@ import static common.Constants.MIN_CLIENT_SIZE;
  * client GUI to hold all and display all game related information
  */
 @SuppressWarnings("serial")
-public class ClientGUI extends JFrame implements Runnable, EventHandler{
+public class ClientGUI extends JFrame implements Runnable{
 
 	private Console console;
 	private Connection connection;
@@ -40,7 +37,6 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 	 */
 	public ClientGUI( String title){
 		super( title);
-		EventMonitor.register( CONSOLE, this);
 	}
 
 	/**
@@ -122,10 +118,9 @@ public class ClientGUI extends JFrame implements Runnable, EventHandler{
 		}
 	}
 
-	@Override
-	public void handle( Object obj, Level level) {
+	public void handle( String message, Level level) {
 		if( console!=null){
-			console.add( (String)obj, level);
+			console.add( message, level);
 		}
 	}
 

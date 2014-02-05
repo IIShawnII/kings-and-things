@@ -6,15 +6,11 @@ import java.awt.Font;
 import java.awt.Color;
 import java.awt.Dimension;
 
-import common.event.EventHandler;
-import common.event.EventMonitor;
-import static common.Constants.Level;
-
 /**
  * GUI block to show the state of a function being done by server
  */
 @SuppressWarnings("serial")
-public class StatusLabel extends JLabel implements EventHandler{
+public class StatusLabel extends JLabel{
 	
 	private boolean isOff = true;
 	private Color ON, OFF;
@@ -34,11 +30,9 @@ public class StatusLabel extends JLabel implements EventHandler{
 	 * @param size - preferred size of the component
 	 * @throws NullPointerException if either of on or off argument are null
 	 */
-	protected void initialize( String tooltip, String label, Color on, Color off, Font font, final int EVENT_ID, Dimension size){
+	protected void initialize( String tooltip, String label, Color on, Color off, Font font, Dimension size){
 		String message = null;
-		if( EVENT_ID < 0){
-			message = "ERROR - EVENT_ID must be a positve integer";
-		}else if( on==null || off==null){
+		if( on==null || off==null){
 			message = "ERROR - StatusLabel colors for on/off cannot be null";
 		}
 		if(message!=null){
@@ -61,7 +55,6 @@ public class StatusLabel extends JLabel implements EventHandler{
 		}
 		setVerticalAlignment( JLabel.CENTER);
 		setHorizontalAlignment( JLabel.CENTER);
-		EventMonitor.register( EVENT_ID, this);
 	}
 	
 	/**
@@ -75,8 +68,7 @@ public class StatusLabel extends JLabel implements EventHandler{
 	/**
 	 * triggered when appropriate event is fired
 	 */
-	@Override
-	public void handle( Object obj, Level level) {
+	public void handle() {
 		changeState();
 	}
 }
