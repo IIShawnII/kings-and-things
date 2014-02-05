@@ -17,6 +17,8 @@ import common.TileProperties;
 public class Player
 {
 	@XmlAttribute
+	private boolean isPlaying;
+	@XmlAttribute
 	private String name;
 	@XmlAttribute
 	private final int id;
@@ -48,6 +50,14 @@ public class Player
 		ownedHexes = new HashSet<TileProperties>();
 		ownedThingsOnBoard = new HashSet<TileProperties>();
 		tray = new HashSet<TileProperties>();
+	}
+	
+	public void setIsPlaying( boolean isPlaying){
+		this.isPlaying = isPlaying;
+	}
+	
+	public boolean isPlaying(){
+		return isPlaying;
 	}
 	
 	/**

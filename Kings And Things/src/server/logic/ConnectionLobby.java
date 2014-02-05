@@ -99,7 +99,7 @@ public class ConnectionLobby implements Runnable, EventHandler {
 	}
 	
 	@Subscribe
-	public void handStartRequest(RequestStartCommand command)
+	public void handleStartRequest(RequestStartCommand command)
 	{
 		boolean unreadyPlayerConnected = false;
 		
