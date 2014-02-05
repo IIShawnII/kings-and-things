@@ -431,4 +431,27 @@ public abstract class CommandValidator
 			}
 		}
 	}
+	
+	private static void validateMovementConditions(int playerNumber, GameState currentState, Collection<TileProperties> Hexes, Collection<TileProperties> Creatures) {
+		
+		int moveSpeedTotal = 0;
+		
+		for (TileProperties hex : Hexes) {
+			moveSpeedTotal += hex.getMoveSpeed();
+			if (!hex.isHexTile()) {
+				throw new IllegalArgumentException("Can't move through non hexes");
+			}
+		}
+		
+		for (TileProperties creature : Creatures) {
+			currentState.getPlayerByPlayerNumber(playerNumber).ownsThingOnBoard(creature);
+			if (!creature.isCreature()) {
+				throw new IllegalArgumentException("You can only move creatures");
+			}
+			if (creature.getMoveSpeed() < moveSpeedTotal) {
+				throw new IllegalArgumentException("Creature cannot move that far");
+			}
+			
+		}
+	}
 }
