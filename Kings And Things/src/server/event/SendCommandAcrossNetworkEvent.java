@@ -1,4 +1,4 @@
-package common.event;
+package server.event;
 
 import common.game.commands.Command;
 

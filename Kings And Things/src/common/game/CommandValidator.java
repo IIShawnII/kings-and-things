@@ -10,6 +10,7 @@ import common.Constants;
 import common.Constants.Biome;
 import common.Constants.BuildableBuilding;
 import common.Constants.Building;
+import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.game.exceptions.NoMoreTilesException;
 import common.TileProperties;
@@ -95,6 +96,7 @@ public abstract class CommandValidator
 	 */
 	public static void validateCanBuildBuilding(BuildableBuilding building, int playerNumber, TileProperties hex, GameState currentState)
 	{
+		validateIsPlayerActive(playerNumber,currentState);
 		if(building==null)
 		{
 			throw new IllegalArgumentException("Can not create a null building");
@@ -128,9 +130,12 @@ public abstract class CommandValidator
 	 */
 	public static void validateCanExchangeThings(Collection<TileProperties> things, int playerNumber, GameState currentState)
 	{
-		if(currentState.getCurrentSetupPhase() != SetupPhase.EXCHANGE_THINGS)
+		validateIsPlayerActive(playerNumber,currentState);
+		SetupPhase sp = currentState.getCurrentSetupPhase();
+		RegularPhase rp = currentState.getCurrentRegularPhase();
+		if(sp != SetupPhase.EXCHANGE_THINGS && rp != RegularPhase.RECRUITING_THINGS)
 		{
-			throw new IllegalArgumentException("Can not exchange things during the " + currentState.getCurrentSetupPhase() + " phase");
+			throw new IllegalArgumentException("Can not exchange things during the " + (sp==SetupPhase.SETUP_FINISHED? rp : sp) + " phase");
 		}
 		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
 		for(TileProperties tp : things)
@@ -139,6 +144,10 @@ public abstract class CommandValidator
 			{
 				throw new IllegalArgumentException("Can not exchange something not in your tray");
 			}
+		}
+		if(sp == SetupPhase.SETUP_FINISHED && things.size() % 2 > 0)
+		{
+			throw new IllegalArgumentException("Can only exchange things in twos");
 		}
 	}
 
@@ -156,10 +165,12 @@ public abstract class CommandValidator
 	 */
 	public static void validateCanPlaceThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex, GameState currentState)
 	{
+		validateIsPlayerActive(playerNumber,currentState);
 		SetupPhase setupPhase = currentState.getCurrentSetupPhase();
-		if(setupPhase != SetupPhase.PLACE_FREE_THINGS && setupPhase != SetupPhase.PLACE_EXCHANGED_THINGS)
+		RegularPhase regularPhase = currentState.getCurrentRegularPhase();
+		if(setupPhase != SetupPhase.PLACE_FREE_THINGS && setupPhase != SetupPhase.PLACE_EXCHANGED_THINGS && regularPhase != RegularPhase.RECRUITING_THINGS)
 		{
-			throw new IllegalStateException("Can not place things on the board during the " + setupPhase + " phase");
+			throw new IllegalStateException("Can not place things on the board during the " + (setupPhase==SetupPhase.SETUP_FINISHED? regularPhase : setupPhase) + " phase");
 		}
 		Point coords = currentState.getBoard().getXYCoordinatesOfHex(hex);
 		HexState hs = currentState.getBoard().getHexByXY(coords.x, coords.y);
@@ -193,6 +204,40 @@ public abstract class CommandValidator
 		
 		hs.validateCanAddThingToHex(thing);
 	}
+	
+	/**
+	 * Call this method to validate the paid recruits command
+	 * @param amountToSpend The amount of gold the player wants to spend on recruits
+	 * @param playerNumber The player sending the command
+	 * @param currentState The current state of the game
+	 * @throws IllegalStateException If it is not the right phase for purchasing recruits
+	 * @throws IllegalArgumentException if the command is invalid
+	 */
+	public static void validateCanPurchaseRecruits(int amountToSpend, int playerNumber, GameState currentState)
+	{
+		validateIsPlayerActive(playerNumber,currentState);
+		RegularPhase regularPhase = currentState.getCurrentRegularPhase();
+		if(regularPhase != RegularPhase.RECRUITING_THINGS)
+		{
+			throw new IllegalStateException("Can not purchase recruits during the " + regularPhase + " phase");
+		}
+		if(amountToSpend < 0)
+		{
+			throw new IllegalArgumentException("The amount of gold being spent must be positive");
+		}
+		if(amountToSpend > 25)
+		{
+			throw new IllegalArgumentException("Can not purchase more than 5 extra recruits");
+		}
+		if(amountToSpend > currentState.getPlayerByPlayerNumber(playerNumber).getGold())
+		{
+			throw new IllegalArgumentException("Can not spend more than the player's total gold amount");
+		}
+		if(amountToSpend % 5 > 0)
+		{
+			throw new IllegalArgumentException("Gold amount must be divisible by 5");
+		}
+	}
 
 	/**
 	 * Call this method to validate the swap sea hex command
@@ -206,6 +251,7 @@ public abstract class CommandValidator
 	 */
 	public static void validateCanExchangeSeaHex(TileProperties hex, int playerNumber, GameState currentState)
 	{
+		validateIsPlayerActive(playerNumber,currentState);
 		if(hex == null)
 		{
 			throw new IllegalArgumentException("The entered tile must not be null.");

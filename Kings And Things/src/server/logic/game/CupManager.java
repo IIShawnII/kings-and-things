@@ -1,4 +1,4 @@
-package common.game.logic;
+package server.logic.game;
 
 import java.util.ArrayList;
 import java.util.Iterator;

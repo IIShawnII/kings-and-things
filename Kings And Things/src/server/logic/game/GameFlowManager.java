@@ -1,4 +1,4 @@
-package common.game.logic;
+package server.logic.game;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import server.event.SendCommandAcrossNetworkEvent;
+
 import com.google.common.eventbus.Subscribe;
 
 import common.Constants.BuildableBuilding;
@@ -16,7 +18,6 @@ import common.Constants.SetupPhase;
 import common.Logger;
 import common.TileProperties;
 import common.event.CommandEventBus;
-import common.event.SendCommandAcrossNetworkEvent;
 import common.game.CommandValidator;
 import common.game.GameState;
 import common.game.HexState;
@@ -64,7 +65,7 @@ public class GameFlowManager
 		bank = new HexTileManager(demoMode);
 		boardGenerator = new BoardGenerator(players.size(),bank);
 		List<Integer> playerOrder = determinePlayerOrder(players,demoMode);
-		currentState = new GameState(boardGenerator.createNewBoard(),players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.GOLD_COLLECTION,playerOrder.get(0),playerOrder.get(0));
+		currentState = new GameState(boardGenerator.createNewBoard(),players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0));
 		
 		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new StartGameCommand(demoMode, players)));
 	}
@@ -179,10 +180,18 @@ public class GameFlowManager
 		
 		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new EndPlayerTurnCommand(playerNumber)));
 	}
-	/*
+	
+	/**
 	 * Player pays gold to the bank in order to recruit things
+	 * @param gold The gold amount the player wants to spend
+	 * @param playerNumber The player who sent the command
+	 * @throws NoMoreTilesException If there are no more tiles in the cup
+	 * @throws IllegalArgumentException If the command can not be done
+	 * according to the game rules
+	 * @throws IllegalStateException If it is not the right phase for recruiting things
 	 */
 	public void paidRecruits(int gold, int playerNumber) throws NoMoreTilesException {
+		CommandValidator.validateCanPurchaseRecruits(gold, playerNumber, currentState);
 		
 		// retrieve player with the passed in player number
 		Player  player = currentState.getPlayerByPlayerNumber(playerNumber);
@@ -199,33 +208,25 @@ public class GameFlowManager
 	private void advanceActivePhasePlayer()
 	{
 		SetupPhase nextSetupPhase = currentState.getCurrentSetupPhase();
+		RegularPhase nextRegularPhase = currentState.getCurrentRegularPhase();
 		
 		int activePhasePlayerNumber = currentState.getActivePhasePlayer().getPlayerNumber();
 		int activePhasePlayerOrderIndex = currentState.getPlayerOrder().indexOf(activePhasePlayerNumber);
 		
 		if(currentState.getPlayerOrder().size()-1 == activePhasePlayerOrderIndex)
 		{
-			if(currentState.getCurrentSetupPhase() == SetupPhase.SETUP_FINISHED)
+			if(nextSetupPhase != SetupPhase.SETUP_FINISHED)
 			{
-				nextSetupPhase = SetupPhase.SETUP_FINISHED;
-				//TODO enter regular play
+				nextSetupPhase = getNextSetupPhase();
 			}
 			else
 			{
-				int currentSetupPhaseIndex = nextSetupPhase.ordinal();
-				for(SetupPhase sp : SetupPhase.values())
-				{
-					if(sp.ordinal() == (currentSetupPhaseIndex + 1))
-					{
-						nextSetupPhase = sp;
-						setupPhaseChanged(nextSetupPhase);
-						break;
-					}
-				}
+				nextRegularPhase = getNextRegularPhase();
+				regularPhaseChanged(nextRegularPhase);
 			}
 		}
 		currentState = new GameState(currentState.getBoard(), currentState.getPlayers(), currentState.getPlayerOrder(),
-										nextSetupPhase, currentState.getCurrentRegularPhase(), currentState.getActiveTurnPlayer().getPlayerNumber(),
+										nextSetupPhase, nextRegularPhase, currentState.getActiveTurnPlayer().getPlayerNumber(),
 										currentState.getPlayerOrder().get(++activePhasePlayerOrderIndex % currentState.getPlayers().size()));
 	}
 	
@@ -243,6 +244,54 @@ public class GameFlowManager
 
 		currentState = new GameState(currentState.getBoard(), currentState.getPlayers(), currentState.getPlayerOrder(),
 									currentState.getCurrentSetupPhase(), currentState.getCurrentRegularPhase(), nextActiveTurnPlayerNumber, nextActiveTurnPlayerNumber);
+	}
+	
+	private SetupPhase getNextSetupPhase()
+	{
+		SetupPhase nextSetupPhase = currentState.getCurrentSetupPhase();
+		
+		if(nextSetupPhase == SetupPhase.SETUP_FINISHED)
+		{
+			return SetupPhase.SETUP_FINISHED;
+		}
+		else
+		{
+			int currentSetupPhaseIndex = nextSetupPhase.ordinal();
+			for(SetupPhase sp : SetupPhase.values())
+			{
+				if(sp.ordinal() == (currentSetupPhaseIndex + 1))
+				{
+					setupPhaseChanged(sp);
+					return sp;
+				}
+			}
+		}
+		
+		throw new IllegalStateException("GameState contained invalid SetupPhase constant");
+	}
+
+	private RegularPhase getNextRegularPhase()
+	{
+		RegularPhase nextRegularPhase = currentState.getCurrentRegularPhase();
+		
+		if(nextRegularPhase == RegularPhase.SPECIAL_POWERS)
+		{
+			advanceActiveTurnPlayer();
+			return RegularPhase.RECRUITING_CHARACTERS;
+		}
+		else
+		{
+			int currentRegularPhaseIndex = nextRegularPhase.ordinal();
+			for(RegularPhase rp : RegularPhase.values())
+			{
+				if(rp.ordinal() == (currentRegularPhaseIndex + 1))
+				{
+					return rp;
+				}
+			}
+		}
+		
+		throw new IllegalStateException("GameState contained invalid RegularPhase constant");
 	}
 	
 	private void makeThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex)
@@ -281,6 +330,14 @@ public class GameFlowManager
 		hs.removeBuildingFromHex();
 		hs.addThingToHex(buildingTile);
 		currentState.getPlayerByPlayerNumber(playerNumber).addOwnedThingOnBoard(buildingTile);
+	}
+	
+	private void makeGoldCollected()
+	{
+		for(Player p : currentState.getPlayers())
+		{
+			p.addGold(p.getIncome());
+		}
 	}
 	
 	private void makeThingsExchanged(Collection<TileProperties> things, int playerNumber) throws NoMoreTilesException
@@ -445,6 +502,22 @@ public class GameFlowManager
 			case SETUP_FINISHED:
 			{
 				boardGenerator.setupFinished();
+				regularPhaseChanged(currentState.getCurrentRegularPhase());
+			}
+			default:
+				break;
+		}
+	}
+
+	private void regularPhaseChanged(RegularPhase regularPhase)
+	{
+		switch(regularPhase)
+		{
+			case RECRUITING_CHARACTERS:
+			{
+				//do income phase automagically
+				makeGoldCollected();
+				break;
 			}
 			default:
 				break;
@@ -558,7 +631,7 @@ public class GameFlowManager
 		}
 		catch(Throwable t)
 		{
-			Logger.getErrorLogger().error("Unable to process PlaceThingOnBoardCommand due to: ", t);
+			Logger.getErrorLogger().error("Unable to process PaidRecruitsCommand due to: ", t);
 		}
 	}
 }

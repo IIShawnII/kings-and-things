@@ -6,6 +6,8 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import server.logic.game.GameFlowManager;
+
 import com.google.common.eventbus.Subscribe;
 
 import common.Constants.Level;
@@ -17,7 +19,6 @@ import common.event.EventMonitor;
 import common.game.Player;
 import common.game.commands.RequestStartCommand;
 import common.game.commands.StartGameCommand;
-import common.game.logic.GameFlowManager;
 import static common.Constants.PLAYER;
 import static common.Constants.ENDGAME;
 import static common.Constants.PLAYER_INC;
