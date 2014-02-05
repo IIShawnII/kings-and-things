@@ -238,6 +238,30 @@ public abstract class CommandValidator
 			throw new IllegalArgumentException("Gold amount must be divisible by 5");
 		}
 	}
+	
+	/**
+	 * Call this method to validate the move command
+	 * @param
+	 * @param
+	 * @param
+	 * @throws
+	 * @throws
+	 * @throws
+	 */
+	public static void validateCanMove(int playerNumber, GameState currentState, Collection<TileProperties> Hexes, Collection<TileProperties> Creatures) {
+		
+		// checks if it's player's turn
+		validateIsPlayerActive(playerNumber, currentState);
+		
+		// the following conditional statement checks if it is the movement
+		if (currentState.getCurrentSetupPhase() != SetupPhase.SETUP_FINISHED) {
+			throw new IllegalStateException("Can't move during the setup phase");
+		} else if (currentState.getCurrentRegularPhase() != RegularPhase.MOVEMENT) {
+			throw new IllegalStateException("Can't move during the " + currentState.getCurrentRegularPhase() + " phase");
+		} else {
+			
+		}
+	}
 
 	/**
 	 * Call this method to validate the swap sea hex command
