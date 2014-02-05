@@ -33,20 +33,10 @@ public abstract class CommandValidator
 	 */
 	public static void validateStartNewGame(boolean demoMode, Set<Player> players)
 	{
-		if(players==null)
-		{
-			throw new IllegalArgumentException("The entered list of players must not be null");
-		}
+		validateCollection(players,"players");
 		if(players.size() < 2 || 4 < players.size())
 		{
 			throw new IllegalArgumentException("Can only start a game with 2 to 4 players");
-		}
-		for(Player p : players)
-		{
-			if(p==null)
-			{
-				throw new IllegalArgumentException("The entered list of players must not contain null values");
-			}
 		}
 	}
 	
@@ -131,6 +121,8 @@ public abstract class CommandValidator
 	public static void validateCanExchangeThings(Collection<TileProperties> things, int playerNumber, GameState currentState)
 	{
 		validateIsPlayerActive(playerNumber,currentState);
+		validateCollection(things,"things");
+		
 		SetupPhase sp = currentState.getCurrentSetupPhase();
 		RegularPhase rp = currentState.getCurrentRegularPhase();
 		if(sp != SetupPhase.EXCHANGE_THINGS && rp != RegularPhase.RECRUITING_THINGS)
@@ -252,6 +244,8 @@ public abstract class CommandValidator
 		
 		// checks if it's player's turn
 		validateIsPlayerActive(playerNumber, currentState);
+		validateCollection(Hexes,"hexes");
+		validateCollection(Creatures,"creatures");
 		
 		// the following conditional statement checks if it is the movement
 		if (currentState.getCurrentSetupPhase() != SetupPhase.SETUP_FINISHED) {
@@ -363,10 +357,29 @@ public abstract class CommandValidator
 	 * Call this to validate the end the current players turn command
 	 * @param playerNumber The player who sent the command
 	 * @param currentState The current state of the game to do the validation check on
-	 * @throws IllegalArgumentException If it is not the entered player's turn
+	 * @throws IllegalArgumentException If it is not the entered player's turn, or if
+	 * the player can not end their turn (this is only true during the setup phase)
 	 */
 	public static void validateCanEndPlayerTurn(int playerNumber, GameState currentState)
 	{
+		switch(currentState.getCurrentSetupPhase())
+		{
+			case PICK_FIRST_HEX:
+			{
+				throw new IllegalArgumentException("You must select a starting hex.");
+			}
+			case PICK_SECOND_HEX:
+			case PICK_THIRD_HEX:
+			{
+				throw new IllegalArgumentException("You must select a hex to take ownership of.");
+			}
+			case PLACE_FREE_TOWER:
+			{
+				throw new IllegalArgumentException("You must select a hex to place your tower in.");
+			}
+			default:
+				break;
+		}
 		validateIsPlayerActive(playerNumber, currentState);
 	}
 
@@ -401,6 +414,21 @@ public abstract class CommandValidator
 		if(currentState.getActivePhasePlayer().getPlayerNumber() != playerNumber)
 		{
 			throw new IllegalArgumentException("It is still: " + currentState.getActivePhasePlayer() + "'s turn to move.");
+		}
+	}
+	
+	private static void validateCollection(Collection<?> things, String typeInCollection)
+	{
+		if(things==null)
+		{
+			throw new IllegalArgumentException("The list of " + typeInCollection + " must not be null");
+		}
+		for(Object o : things)
+		{
+			if(o==null)
+			{
+				throw new IllegalArgumentException("The list of " + typeInCollection + " must not contain null elements");
+			}
 		}
 	}
 }
