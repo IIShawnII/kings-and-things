@@ -115,7 +115,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 				case "-t": tile.addRestriction( Restriction.valueOf( array[++i]));break;
 				case "-c": copyTile = Integer.parseInt( array[++i]);break;
 				case "-s": tile.addAbilities( Ability.valueOf( array[++i]));break;
-				case "-a": tile.setAttack( Integer.parseInt( array[++i]));break;
+				case "-a": tile.setValue( Integer.parseInt( array[++i]));break;
 				default: 
 					throw new IllegalArgumentException("ERROR - incorrect file name \"" + name + "\n");
 			}

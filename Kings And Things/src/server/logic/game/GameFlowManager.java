@@ -512,7 +512,16 @@ public class GameFlowManager
 		}
 	}
 	
-	
+	/**
+	 * This method is useful for unit testing purposes,
+	 * which does not use our event driven architecture
+	 * @return The current state of the game, in it's
+	 * entirety
+	 */
+	GameState getCurrentState()
+	{
+		return currentState;
+	}
 	
 	/*
 	 * The methods below recieve commands that are posted to the event bus and

@@ -1,5 +1,13 @@
 package server.logic;
 
+import static common.Constants.ENDGAME;
+import static common.Constants.MAX_PLAYERS;
+import static common.Constants.MIN_PLAYERS;
+import static common.Constants.PLAYER;
+import static common.Constants.PLAYER_INC;
+import static common.Constants.SERVER_PORT;
+import static common.Constants.SERVER_TIMEOUT;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketTimeoutException;
@@ -9,23 +17,16 @@ import java.util.HashSet;
 import server.logic.game.GameFlowManager;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants.Level;
+import common.LoadResources;
 import common.Logger;
-import common.network.Connection;
 import common.event.CommandEventBus;
 import common.event.EventHandler;
 import common.event.EventMonitor;
 import common.game.Player;
 import common.game.commands.RequestStartCommand;
 import common.game.commands.StartGameCommand;
-import static common.Constants.PLAYER;
-import static common.Constants.ENDGAME;
-import static common.Constants.PLAYER_INC;
-import static common.Constants.MIN_PLAYERS;
-import static common.Constants.MAX_PLAYERS;
-import static common.Constants.SERVER_PORT;
-import static common.Constants.SERVER_TIMEOUT;
+import common.network.Connection;
 
 public class ConnectionLobby implements Runnable, EventHandler {
 
@@ -40,6 +41,8 @@ public class ConnectionLobby implements Runnable, EventHandler {
 		{
 			Logger.getStandardLogger().info("Server started in demo mode.");
 		}
+		LoadResources lr = new LoadResources();
+		lr.run();
 		
 		demoMode = isDemoMode;
 		connectedPlayers = new ArrayList<PlayerConnection>();

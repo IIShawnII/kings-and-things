@@ -24,7 +24,7 @@ public class TileProperties {
 	@XmlAttribute
 	private int number;
 	@XmlAttribute
-	private int attack;
+	private int value;
 	@XmlAttribute
 	private int moveSpeed;
 	@XmlElement
@@ -47,7 +47,7 @@ public class TileProperties {
 	}
 	
 	public TileProperties( TileProperties tile, int number){
-		this( number, tile.attack, tile.image, tile.name, tile.abilities, tile.restrictions);
+		this( number, tile.value, tile.image, tile.name, tile.abilities, tile.restrictions);
 		hasFlip = tile.hasFlip;
 		specialFlip = tile.specialFlip;
 	}
@@ -56,7 +56,7 @@ public class TileProperties {
 		this.name = name;
 		this.image = image;
 		this.hasFlip = true;
-		this.attack = attack;
+		this.value = attack;
 		this.number = number;
 		this.specialFlip = false;
 		this.abilities = abilities==null? new ArrayList<Ability>() : new ArrayList<>( abilities);
@@ -73,11 +73,11 @@ public class TileProperties {
 	}
 
 	public int getValue() {
-		return attack;
+		return value;
 	}
 	
-	protected void setAttack( int attack) {
-		this.attack = attack;
+	protected void setValue( int value) {
+		this.value = value;
 	}
 	
 	// retrieves moveSpeed
@@ -246,7 +246,7 @@ public class TileProperties {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + number;
-		result = prime * result + attack;
+		result = prime * result + value;
 		result = prime * result + name.hashCode();
 		result = prime * result + abilities.hashCode();
 		result = prime * result + restrictions.hashCode();
@@ -262,7 +262,7 @@ public class TileProperties {
 			return false;
 		}
 		TileProperties other = (TileProperties) obj;
-		if ( number != other.number || attack != other.attack || !name.equals( other.name)  || !(restrictions.equals( other.restrictions)) || !(abilities.equals( other.abilities))) {
+		if ( number != other.number || value != other.value || !name.equals( other.name)  || !(restrictions.equals( other.restrictions)) || !(abilities.equals( other.abilities))) {
 			return false;
 		}
 		return true;
@@ -270,6 +270,6 @@ public class TileProperties {
 	
 	@Override
 	public String toString(){
-		return name + ", " + attack;
+		return name + ", " + value;
 	}
 }

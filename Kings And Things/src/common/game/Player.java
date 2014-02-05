@@ -33,9 +33,14 @@ public class Player
 	 * Create a new player with the given name and id number
 	 * @param name The player's name
 	 * @param playerNumber The player's id
+	 * @throws IllegalArgumentException if name is null
 	 */
 	public Player(String name, int playerNumber)
 	{
+		if(name == null)
+		{
+			throw new IllegalArgumentException("The entered player name must not be null.");
+		}
 		this.name = name;
 		id = playerNumber;
 		gold = 0;
@@ -79,19 +84,19 @@ public class Player
 	 */
 	public void setGold(int newVal)
 	{
-		if(newVal < 0)
-		{
-			throw new IllegalArgumentException("Player gold value must not be negative.");
-		}
+		validateEnteredGoldPositive(newVal);
 		gold = newVal;
 	}
 	
 	/**
 	 * Add to this player's gold amount
 	 * @param amount The amount of gold to add
+	 * @throws IllegalArgumentException if amount is
+	 * negative
 	 */
 	public void addGold(int amount)
 	{
+		validateEnteredGoldPositive(amount);
 		gold+=amount;
 	}
 	
@@ -99,10 +104,12 @@ public class Player
 	 * Reduce this player's gold amount
 	 * @param amount The amount to reduce
 	 * @throws IllegalArgumentException if amount
-	 * is higher then the player's current gold amount
+	 * is higher then the player's current gold amount,
+	 * or if amount is negative
 	 */
 	public void removeGold(int amount)
 	{
+		validateEnteredGoldPositive(amount);
 		setGold(gold-amount);
 	}
 	
@@ -375,6 +382,14 @@ public class Player
 		if(tile == null)
 		{
 			throw new IllegalArgumentException("The entered tile must not be null");
+		}
+	}
+	
+	private void validateEnteredGoldPositive(int amount)
+	{
+		if(amount < 0)
+		{
+			throw new IllegalArgumentException("The entered gold amount must be positive");
 		}
 	}
 	

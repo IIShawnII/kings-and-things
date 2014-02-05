@@ -15,6 +15,7 @@ import common.game.commands.EndPlayerTurnCommand;
 import common.game.commands.ExchangeSeaHexCommand;
 import common.game.commands.ExchangeThingsCommand;
 import common.game.commands.GiveHexToPlayerCommand;
+import common.game.commands.MovementCommand;
 import common.game.commands.PaidRecruitsCommand;
 import common.game.commands.PlaceThingOnBoardCommand;
 import common.game.commands.RequestStartCommand;
@@ -77,8 +78,9 @@ public abstract class CommandMarshaller
 		try
 		{
 			return JAXBContext.newInstance(ConstructBuildingCommand.class, EndPlayerTurnCommand.class, ExchangeSeaHexCommand.class,
-											ExchangeThingsCommand.class, GiveHexToPlayerCommand.class, PaidRecruitsCommand.class, 
-											PlaceThingOnBoardCommand.class, StartGameCommand.class, RequestStartCommand.class);
+											ExchangeThingsCommand.class, GiveHexToPlayerCommand.class, MovementCommand.class,
+											PaidRecruitsCommand.class, PlaceThingOnBoardCommand.class, StartGameCommand.class,
+											RequestStartCommand.class);
 		}
 		catch (JAXBException e)
 		{
