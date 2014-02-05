@@ -65,7 +65,7 @@ public class PlayerConnection extends Thread{
 	public void run(){
 		String str;
 		while ((str = connection.recieve())!=null){
-			CommandMarshaller.unmarshalCommand(str).dispatch();
+			CommandMarshaller.unmarshalCommand(str).dispatch(getPlayerId());
 		}
 		EventMonitor.fireEvent( PLAYER_ID+CONSOLE, null, Level.END);
 	}

@@ -1,6 +1,5 @@
 package common.game.commands;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -12,16 +11,13 @@ public class ConstructBuildingCommand extends Command
 {
 	@XmlElement
 	private final BuildableBuilding building;
-	@XmlAttribute
-	private final int playerNumber;
 	@XmlElement
 	private final TileProperties hex;
 	
-	public ConstructBuildingCommand(BuildableBuilding building, int playerNumber, TileProperties hex)
+	public ConstructBuildingCommand(BuildableBuilding building, TileProperties hex)
 	{
 		this.building = building;
 		this.hex = hex;
-		this.playerNumber = playerNumber;
 	}
 	
 	public BuildableBuilding getBuilding()
@@ -34,17 +30,11 @@ public class ConstructBuildingCommand extends Command
 		return hex;
 	}
 	
-	public int getPlayerNumber()
-	{
-		return playerNumber;
-	}
-	
 	@SuppressWarnings("unused")
 	private ConstructBuildingCommand()
 	{
 		//required by JAXB
 		building = null;
 		hex = null;
-		playerNumber = 0;
 	}
 }

@@ -7,12 +7,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class PaidRecruitsCommand extends Command {
 	@XmlAttribute
 	private int gold;
-	@XmlAttribute
-	private int playerNumber;
 	
-	public PaidRecruitsCommand(int newGold, int newPlayerNumber) {
+	public PaidRecruitsCommand(int newGold) {
 		this.gold = newGold;
-		this.playerNumber = newPlayerNumber;
 	}
 	
 	// Getter Methods
@@ -24,14 +21,4 @@ public class PaidRecruitsCommand extends Command {
 	public int getGold () {
 		return gold;
 	}
-	
-	/**
-	 * Retrieves player number
-	 * @return The player number
-	 */
-	public int getplayerNumber () {
-		return playerNumber;
-	}
-	
-	
 }

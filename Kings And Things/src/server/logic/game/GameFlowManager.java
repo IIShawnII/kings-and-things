@@ -88,8 +88,6 @@ public class GameFlowManager
 			pickSecondPlayersHex();
 		}
 		advanceActivePhasePlayer();
-		
-		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new GiveHexToPlayerCommand(hex,playerNumber)));
 	}
 	
 	/**
@@ -109,8 +107,6 @@ public class GameFlowManager
 		{
 			advanceActivePhasePlayer();
 		}
-		
-		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new ConstructBuildingCommand(building, playerNumber, hex)));
 	}
 	
 	/**
@@ -128,8 +124,6 @@ public class GameFlowManager
 	{
 		CommandValidator.validateCanPlaceThingOnBoard(thing, playerNumber, hex, currentState);
 		makeThingOnBoard(thing, playerNumber, hex);
-		
-		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new PlaceThingOnBoardCommand(thing,playerNumber,hex)));
 	}
 	
 	/**
@@ -147,8 +141,6 @@ public class GameFlowManager
 		CommandValidator.validateCanExchangeThings(things, playerNumber, currentState);
 		makeThingsExchanged(things,playerNumber);
 		advanceActivePhasePlayer();
-		
-		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new ExchangeThingsCommand(things, playerNumber)));
 	}
 	
 	/**
@@ -164,8 +156,6 @@ public class GameFlowManager
 	{
 		CommandValidator.validateCanExchangeSeaHex(hex, playerNumber, currentState);
 		makeSeaHexExchanged(hex, playerNumber);
-		
-		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new ExchangeSeaHexCommand(hex, playerNumber)));
 	}
 	
 	/**
@@ -177,8 +167,6 @@ public class GameFlowManager
 	{
 		CommandValidator.validateCanEndPlayerTurn(playerNumber, currentState);
 		advanceActivePhasePlayer();
-		
-		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new EndPlayerTurnCommand(playerNumber)));
 	}
 	
 	/**
@@ -627,7 +615,7 @@ public class GameFlowManager
 	{
 		try
 		{
-			paidRecruits(command.getGold(), command.getplayerNumber());
+			paidRecruits(command.getGold(), command.getPlayerNumber());
 		}
 		catch(Throwable t)
 		{
