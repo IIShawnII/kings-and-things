@@ -25,6 +25,8 @@ public class TileProperties {
 	private int number;
 	@XmlAttribute
 	private int attack;
+	@XmlAttribute
+	private int moveSpeed;
 	@XmlElement
 	private Image image;
 	@XmlAttribute
@@ -76,6 +78,16 @@ public class TileProperties {
 	
 	protected void setAttack( int attack) {
 		this.attack = attack;
+	}
+	
+	// retrieves moveSpeed
+	public int getMoveSpeed () {
+		return moveSpeed;
+	}
+	
+	// assigns new moveSpeed
+	public void setMoveSpeed(int moveSpeed) {
+		this.moveSpeed = moveSpeed;
 	}
 	
 	public String getName() {
