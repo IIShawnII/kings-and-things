@@ -27,7 +27,7 @@ import static common.Constants.MAX_PLAYERS;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
 
-public class Logic implements Runnable, EventHandler {
+public class ConnectionLobby implements Runnable, EventHandler {
 
 	private boolean close = false;
 	private ServerSocket serverSocket;
@@ -35,7 +35,7 @@ public class Logic implements Runnable, EventHandler {
 	private final ArrayList<PlayerConnection> connectedPlayers;
 	private final boolean demoMode;
 	
-	public Logic(boolean isDemoMode) throws IOException{
+	public ConnectionLobby(boolean isDemoMode) throws IOException{
 		if(isDemoMode)
 		{
 			Logger.getStandardLogger().info("Server started in demo mode.");

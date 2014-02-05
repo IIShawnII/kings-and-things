@@ -6,7 +6,7 @@ import javax.swing.UIManager;
 import org.apache.log4j.PropertyConfigurator;
 
 import server.gui.ServerGUI;
-import server.logic.Logic;
+import server.logic.ConnectionLobby;
 
 /**
  * main class for starting the server
@@ -56,8 +56,8 @@ public class Server {
 		}
 
 		try {
-			Logic logic = new Logic(isDemoMode);
-			new Thread( logic, "GAME LOGIC").start();
+			ConnectionLobby lobby = new ConnectionLobby(isDemoMode);
+			new Thread( lobby, "GAME LOGIC").start();
 		} catch ( Exception e) {
 			e.printStackTrace();
 			try {
