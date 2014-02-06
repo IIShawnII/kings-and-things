@@ -3,8 +3,8 @@ package server.logic.game;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import server.logic.exceptions.NoMoreTilesException;
 import common.TileProperties;
-import common.game.exceptions.NoMoreTilesException;
 
 
 /**

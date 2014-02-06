@@ -1,4 +1,4 @@
-package common.game;
+package server.logic.game;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -6,13 +6,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import server.logic.exceptions.NoMoreTilesException;
 import common.Constants;
 import common.Constants.Biome;
 import common.Constants.BuildableBuilding;
 import common.Constants.Building;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
-import common.game.exceptions.NoMoreTilesException;
 import common.TileProperties;
 
 /**

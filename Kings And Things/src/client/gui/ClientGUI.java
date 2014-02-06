@@ -13,10 +13,8 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 
 import common.Console;
-import common.LoadingDialog;
 import common.LoadResources;
 import common.Constants.Level;
-
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.MIN_CLIENT_SIZE;

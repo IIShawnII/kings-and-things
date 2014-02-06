@@ -8,18 +8,18 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import server.event.commands.Command;
+import server.event.commands.ConstructBuildingCommand;
+import server.event.commands.EndPlayerTurnCommand;
+import server.event.commands.ExchangeSeaHexCommand;
+import server.event.commands.ExchangeThingsCommand;
+import server.event.commands.GiveHexToPlayerCommand;
+import server.event.commands.MovementCommand;
+import server.event.commands.PaidRecruitsCommand;
+import server.event.commands.PlaceThingOnBoardCommand;
+import server.event.commands.RequestStartCommand;
+import server.event.commands.StartGameCommand;
 import common.Logger;
-import common.event.commands.Command;
-import common.event.commands.ConstructBuildingCommand;
-import common.event.commands.EndPlayerTurnCommand;
-import common.event.commands.ExchangeSeaHexCommand;
-import common.event.commands.ExchangeThingsCommand;
-import common.event.commands.GiveHexToPlayerCommand;
-import common.event.commands.MovementCommand;
-import common.event.commands.PaidRecruitsCommand;
-import common.event.commands.PlaceThingOnBoardCommand;
-import common.event.commands.RequestStartCommand;
-import common.event.commands.StartGameCommand;
 
 /**
  * This class handles converting commands back and forth to Strings so they

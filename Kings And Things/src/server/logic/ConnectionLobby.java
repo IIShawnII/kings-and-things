@@ -13,7 +13,10 @@ import java.util.ArrayList;
 import java.net.ServerSocket;
 import java.net.SocketTimeoutException;
 
+import server.event.commands.RequestStartCommand;
+import server.event.commands.StartGameCommand;
 import server.logic.game.GameFlowManager;
+import server.logic.game.Player;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -21,9 +24,6 @@ import common.Logger;
 import common.LoadResources;
 import common.network.Connection;
 import common.event.CommandEventBus;
-import common.event.commands.RequestStartCommand;
-import common.event.commands.StartGameCommand;
-import common.game.Player;
 
 public class ConnectionLobby implements Runnable {
 

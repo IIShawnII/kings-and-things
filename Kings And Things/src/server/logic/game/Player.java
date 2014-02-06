@@ -1,4 +1,4 @@
-package common.game;
+package server.logic.game;
 
 import java.util.Collections;
 import java.util.HashSet;

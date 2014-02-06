@@ -1,4 +1,4 @@
-package common.event.commands;
+package server.event.commands;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -6,12 +6,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import common.TileProperties;
 
 @XmlRootElement
-public class ExchangeSeaHexCommand extends Command
+public class GiveHexToPlayerCommand extends Command
 {
 	@XmlElement
 	private final TileProperties hex;
 	
-	public ExchangeSeaHexCommand(TileProperties hex)
+	public GiveHexToPlayerCommand(TileProperties hex)
 	{
 		this.hex = hex;
 	}
@@ -22,7 +22,7 @@ public class ExchangeSeaHexCommand extends Command
 	}
 
 	@SuppressWarnings("unused")
-	private ExchangeSeaHexCommand()
+	private GiveHexToPlayerCommand()
 	{
 		//required by JAXB
 		hex = null;

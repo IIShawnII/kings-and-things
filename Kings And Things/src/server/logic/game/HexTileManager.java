@@ -2,10 +2,10 @@ package server.logic.game;
 
 import java.util.Iterator;
 
+import server.logic.exceptions.NoMoreTilesException;
 import common.Constants;
 import common.TileProperties;
 import common.Constants.Biome;
-import common.game.exceptions.NoMoreTilesException;
 
 /**
  * this class encapsulates the logic of drawing hex tiles from the bank, and placing

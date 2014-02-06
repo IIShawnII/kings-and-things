@@ -1,4 +1,4 @@
-package common.game.exceptions;
+package server.logic.exceptions;
 
 public class NoMoreTilesException extends Exception
 {

@@ -1,4 +1,4 @@
-package common.event.commands;
+package server.event.commands;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import common.game.Player;
+import server.logic.game.Player;
 
 @XmlRootElement
 public class StartGameCommand extends Command

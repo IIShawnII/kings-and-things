@@ -1,4 +1,4 @@
-package common.game;
+package server.logic.game;
 
 import java.util.Collection;
 import java.util.Collections;

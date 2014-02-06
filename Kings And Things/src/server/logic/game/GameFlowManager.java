@@ -8,7 +8,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import server.event.SendCommandAcrossNetworkEvent;
+import server.event.commands.ConstructBuildingCommand;
+import server.event.commands.EndPlayerTurnCommand;
+import server.event.commands.ExchangeSeaHexCommand;
+import server.event.commands.ExchangeThingsCommand;
+import server.event.commands.GiveHexToPlayerCommand;
+import server.event.commands.PaidRecruitsCommand;
+import server.event.commands.PlaceThingOnBoardCommand;
+import server.event.commands.SendCommandAcrossNetworkEvent;
+import server.event.commands.StartGameCommand;
+import server.logic.exceptions.NoMoreTilesException;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -18,19 +27,6 @@ import common.Constants.SetupPhase;
 import common.Logger;
 import common.TileProperties;
 import common.event.CommandEventBus;
-import common.event.commands.ConstructBuildingCommand;
-import common.event.commands.EndPlayerTurnCommand;
-import common.event.commands.ExchangeSeaHexCommand;
-import common.event.commands.ExchangeThingsCommand;
-import common.event.commands.GiveHexToPlayerCommand;
-import common.event.commands.PaidRecruitsCommand;
-import common.event.commands.PlaceThingOnBoardCommand;
-import common.event.commands.StartGameCommand;
-import common.game.CommandValidator;
-import common.game.GameState;
-import common.game.HexState;
-import common.game.Player;
-import common.game.exceptions.NoMoreTilesException;
 
 /**
  * This class is used to execute commands that change the state of a game

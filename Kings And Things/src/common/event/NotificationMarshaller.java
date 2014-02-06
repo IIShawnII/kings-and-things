@@ -8,8 +8,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import server.event.commands.Command;
 import common.Logger;
-import common.event.commands.Command;
 
 public class NotificationMarshaller
 {

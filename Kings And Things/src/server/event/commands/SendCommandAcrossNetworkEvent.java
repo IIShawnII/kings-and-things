@@ -1,6 +1,5 @@
-package server.event;
+package server.event.commands;
 
-import common.event.commands.Command;
 
 public class SendCommandAcrossNetworkEvent
 {

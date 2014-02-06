@@ -1,4 +1,4 @@
-package common;
+package client.gui;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -17,6 +17,8 @@ import java.awt.GraphicsConfiguration;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import common.Console;
+import common.Constants;
 import common.Constants.Category;
 import common.Constants.Level;
 import common.network.Connection;

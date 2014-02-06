@@ -3,11 +3,10 @@ package server.logic.game;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import server.logic.exceptions.NoMoreTilesException;
 import common.Constants;
 import common.Constants.Biome;
 import common.TileProperties;
-import common.game.HexBoard;
-import common.game.exceptions.NoMoreTilesException;
 
 /**
  * This class creates a playing board according to the rules for removing

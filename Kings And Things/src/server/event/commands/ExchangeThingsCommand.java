@@ -1,4 +1,4 @@
-package common.event.commands;
+package server.event.commands;
 
 import java.util.Collection;
 import java.util.Collections;

@@ -1,10 +1,10 @@
 package server.logic;
 
-import server.event.SendCommandAcrossNetworkEvent;
+import server.event.commands.SendCommandAcrossNetworkEvent;
+import server.logic.game.Player;
 
 import com.google.common.eventbus.Subscribe;
 
-import common.game.Player;
 import common.event.CommandEventBus;
 import common.event.CommandMarshaller;
 import common.network.Connection;
