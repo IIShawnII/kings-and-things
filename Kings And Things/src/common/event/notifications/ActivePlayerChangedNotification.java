@@ -13,7 +13,6 @@ public class ActivePlayerChangedNotification extends AbstractNotification
 	
 	public ActivePlayerChangedNotification(int activePhasePlayer, int activeTurnPlayer)
 	{
-		super();
 		this.activePhasePlayer = activePhasePlayer;
 		this.activeTurnPlayer = activeTurnPlayer;
 	}

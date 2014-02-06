@@ -6,6 +6,5 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class RequestStartCommand extends AbstractCommand
 {
 	public RequestStartCommand(){
-		super();
 	}
 }

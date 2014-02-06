@@ -16,7 +16,6 @@ public class ConstructBuildingCommand extends AbstractCommand
 	
 	public ConstructBuildingCommand(BuildableBuilding building, TileProperties hex)
 	{
-		super();
 		this.building = building;
 		this.hex = hex;
 	}

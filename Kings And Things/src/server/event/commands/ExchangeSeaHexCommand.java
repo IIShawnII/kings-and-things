@@ -13,7 +13,6 @@ public class ExchangeSeaHexCommand extends AbstractCommand
 	
 	public ExchangeSeaHexCommand(TileProperties hex)
 	{
-		super();
 		this.hex = hex;
 	}
 	

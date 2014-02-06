@@ -1,16 +1,14 @@
 package client.logic;
 
 import client.event.ConnectToServer;
+import common.network.Connection;
+import common.event.EventDispatch;
 
 import com.google.common.eventbus.Subscribe;
-
-import common.event.CommandEventBus;
-import common.network.Connection;
 
 public class Logic implements Runnable {
 
 	private Connection connection;
-	private boolean stayAlive = true;
 	
 	public Logic( Connection connection){
 		this.connection = connection;
@@ -18,22 +16,16 @@ public class Logic implements Runnable {
 	
 	@Override
 	public void run() {
-		CommandEventBus.BUS.register( this);
-		while(stayAlive){
-			try {
-				System.out.println( "Going to sleep");
-				Thread.sleep( 1000);
-			} catch ( InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		EventDispatch.COMMAND.register( this);
 	}
 	
 	@Subscribe
-	private void connectToServer( ConnectToServer connect){
-		System.out.println( "Connecting");
-		connection.connectTo( connect.getAddress(), connect.getPort());
+	public void connectToServer( ConnectToServer connect){
+		System.out.println( "test");
+		try{
+			connection.connectTo( connect.getAddress(), connect.getPort());
+		}catch(IllegalArgumentException ex){
+		}
 	}
 	
 	/*public void actionPerformed( ActionEvent e) {

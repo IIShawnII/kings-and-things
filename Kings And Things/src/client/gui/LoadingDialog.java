@@ -22,7 +22,6 @@ import java.awt.event.ActionListener;
 import common.Console;
 import common.Constants.Level;
 import common.Constants.Category;
-import common.event.CommandEventBus;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;

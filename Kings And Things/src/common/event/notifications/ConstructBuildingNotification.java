@@ -19,7 +19,6 @@ public class ConstructBuildingNotification extends AbstractNotification
 	
 	public ConstructBuildingNotification(BuildableBuilding building, int playerNumber, TileProperties hex)
 	{
-		super();
 		this.building = building;
 		this.hex = hex;
 		this.playerNumber = playerNumber;
@@ -43,7 +42,6 @@ public class ConstructBuildingNotification extends AbstractNotification
 	@SuppressWarnings("unused")
 	private ConstructBuildingNotification()
 	{
-		super();
 		//required by JAXB
 		building = null;
 		hex = null;

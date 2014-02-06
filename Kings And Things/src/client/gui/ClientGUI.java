@@ -84,6 +84,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	}
 	
 	//TODO Add console to a separate dialog
+	@SuppressWarnings("unused")
 	private JPanel createTempPanel(){
 		JPanel jpMain = new JPanel( new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();

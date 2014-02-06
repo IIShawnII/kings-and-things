@@ -15,7 +15,6 @@ public class PlaceThingOnBoardCommand extends AbstractCommand
 	
 	public PlaceThingOnBoardCommand(TileProperties thing, TileProperties hex)
 	{
-		super();
 		this.thing = thing;
 		this.hex = hex;
 	}

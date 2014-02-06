@@ -1,12 +1,12 @@
 package common.event.notifications;
 
 import common.event.AbstractEvent;
-import common.event.NotificationEventBus;
+import common.event.EventDispatch;
 
 
 public class AbstractNotification extends AbstractEvent {
 	
 	protected AbstractNotification(){
-		super( NotificationEventBus.BUS);
+		super( EventDispatch.NOTIFICATION);
 	}
 }

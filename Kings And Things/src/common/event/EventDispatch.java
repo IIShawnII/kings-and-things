@@ -2,7 +2,7 @@ package common.event;
 
 import com.google.common.eventbus.EventBus;
 
-public abstract class NotificationEventBus
+public abstract class EventDispatch
 {
 	/**
 	 * This is Google's implementation of an Event Bus, it allows objects to pass events around
@@ -16,5 +16,6 @@ public abstract class NotificationEventBus
 	 * See GameFlowManager for an example on registering for events and handling them, see Command
 	 * for an example on posting events.
 	 */
-	public static final EventBus BUS = new EventBus();
+	public static final EventBus COMMAND = new EventBus();
+	public static final EventBus NOTIFICATION = new EventBus();
 }

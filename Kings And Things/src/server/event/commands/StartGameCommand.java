@@ -20,7 +20,6 @@ public class StartGameCommand extends AbstractCommand
 	
 	public StartGameCommand(boolean demoMode, Set<Player> players)
 	{
-		super();
 		this.demoMode = demoMode;
 		this.players = new HashSet<Player>();
 		for(Player p : players)

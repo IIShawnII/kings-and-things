@@ -3,7 +3,7 @@ package server.event.commands;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import common.event.AbstractEvent;
-import common.event.CommandEventBus;
+import common.event.EventDispatch;
 
 /**
  * This is the super class of all commands that can be sent across
@@ -15,7 +15,7 @@ public abstract class AbstractCommand extends AbstractEvent
 	private int playerNumber;
 	
 	protected AbstractCommand(){
-		super( CommandEventBus.BUS);
+		super( EventDispatch.COMMAND);
 	}
 	
 	/**

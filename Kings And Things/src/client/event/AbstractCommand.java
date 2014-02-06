@@ -1,12 +1,11 @@
 package client.event;
 
 import common.event.AbstractEvent;
-import common.event.CommandEventBus;
+import common.event.EventDispatch;
 
 public class AbstractCommand extends AbstractEvent {
 
 	protected AbstractCommand() {
-		super( CommandEventBus.BUS);
+		super( EventDispatch.COMMAND);
 	}
-
 }

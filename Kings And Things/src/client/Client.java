@@ -37,7 +37,9 @@ public class Client {
 				Thread.sleep( 500);
 			} catch ( InterruptedException e) {}
 		}
-
+		
+		//CommandEventBus.BUS.register( new Logic( new Connection()));
+		
 		try {
 			Logic logic = new Logic( new Connection());
 			new Thread( logic, "Client Logic").start();

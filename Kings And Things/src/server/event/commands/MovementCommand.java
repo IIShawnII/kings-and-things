@@ -22,7 +22,6 @@ public class MovementCommand extends AbstractCommand {
 	 * Constructor
 	 */
 	public MovementCommand(Collection<TileProperties> newHexes, Collection<TileProperties> newCreatures) {
-		super();
 		// initializes Hexes
 		this.Hexes = new HashSet<TileProperties>();
 		for (TileProperties tp : newHexes) {

@@ -18,7 +18,6 @@ public class ExchangeThingsCommand extends AbstractCommand
 	
 	public ExchangeThingsCommand(Collection<TileProperties> things)
 	{
-		super();
 		this.things = new HashSet<TileProperties>();
 		for(TileProperties thing : things)
 		{

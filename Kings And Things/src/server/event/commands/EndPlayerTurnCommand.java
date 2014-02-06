@@ -7,6 +7,5 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class EndPlayerTurnCommand extends AbstractCommand
 {
 	public EndPlayerTurnCommand(){
-		super();
 	}
 }

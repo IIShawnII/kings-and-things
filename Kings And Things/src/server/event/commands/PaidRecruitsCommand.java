@@ -9,7 +9,6 @@ public class PaidRecruitsCommand extends AbstractCommand {
 	private int gold;
 	
 	public PaidRecruitsCommand(int newGold) {
-		super();
 		this.gold = newGold;
 	}
 	

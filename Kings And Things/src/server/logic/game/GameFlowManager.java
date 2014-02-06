@@ -26,7 +26,7 @@ import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
 import common.TileProperties;
-import common.event.CommandEventBus;
+import common.event.EventDispatch;
 
 /**
  * This class is used to execute commands that change the state of a game
@@ -43,7 +43,7 @@ public class GameFlowManager
 	 */
 	public void initialize()
 	{
-		CommandEventBus.BUS.register(this);
+		EventDispatch.COMMAND.register(this);
 	}
 	
 	/**
@@ -63,7 +63,7 @@ public class GameFlowManager
 		List<Integer> playerOrder = determinePlayerOrder(players,demoMode);
 		currentState = new GameState(boardGenerator.createNewBoard(),players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0));
 		
-		CommandEventBus.BUS.post(new SendCommandAcrossNetworkEvent(new StartGameCommand(demoMode, players)));
+		EventDispatch.COMMAND.post(new SendCommandAcrossNetworkEvent(new StartGameCommand(demoMode, players)));
 	}
 	
 	/**

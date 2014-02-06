@@ -432,6 +432,8 @@ public abstract class CommandValidator
 		}
 	}
 	
+	@SuppressWarnings("unused")
+	//TODO add functionality
 	private static void validateMovementConditions(int playerNumber, GameState currentState, Collection<TileProperties> Hexes, Collection<TileProperties> Creatures) {
 		
 		int moveSpeedTotal = 0;

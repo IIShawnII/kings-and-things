@@ -5,8 +5,8 @@ import server.logic.game.Player;
 
 import com.google.common.eventbus.Subscribe;
 
-import common.event.CommandEventBus;
 import common.event.CommandMarshaller;
+import common.event.EventDispatch;
 import common.network.Connection;
 
 public class PlayerConnection extends Thread{
@@ -25,7 +25,7 @@ public class PlayerConnection extends Thread{
 	
 	public void initialize()
 	{
-		CommandEventBus.BUS.register(this);
+		EventDispatch.COMMAND.register(this);
 	}
 	
 	public boolean isReadyToStart()

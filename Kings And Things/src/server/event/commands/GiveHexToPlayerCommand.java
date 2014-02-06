@@ -13,7 +13,6 @@ public class GiveHexToPlayerCommand extends AbstractCommand
 	
 	public GiveHexToPlayerCommand(TileProperties hex)
 	{
-		super();
 		this.hex = hex;
 	}
 	

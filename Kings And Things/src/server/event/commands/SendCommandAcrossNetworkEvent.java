@@ -12,7 +12,6 @@ public class SendCommandAcrossNetworkEvent extends AbstractCommand
 	 */
 	public SendCommandAcrossNetworkEvent(AbstractCommand command)
 	{
-		super();
 		this.command = command;
 	}
 	

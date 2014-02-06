@@ -23,7 +23,7 @@ import com.google.common.eventbus.Subscribe;
 import common.Logger;
 import common.LoadResources;
 import common.network.Connection;
-import common.event.CommandEventBus;
+import common.event.EventDispatch;
 
 public class ConnectionLobby implements Runnable {
 
@@ -58,7 +58,7 @@ public class ConnectionLobby implements Runnable {
 	@Override
 	public void run() {
 		game.initialize();
-		CommandEventBus.BUS.register(this);
+		EventDispatch.COMMAND.register(this);
 		int count=0, playerID = PLAYER;
 		while( !close && count<MAX_PLAYERS){
             try {
@@ -116,7 +116,7 @@ public class ConnectionLobby implements Runnable {
 			{
 				players.add(pc.toPlayerObj());
 			}
-			CommandEventBus.BUS.post(new StartGameCommand(demoMode,players));
+			EventDispatch.COMMAND.post(new StartGameCommand(demoMode,players));
 		}
 	}
 }
