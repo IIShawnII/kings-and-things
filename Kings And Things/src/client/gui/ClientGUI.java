@@ -12,9 +12,9 @@ import javax.swing.JPanel;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 
+import client.event.EndClient;
 import common.Console;
 import common.LoadResources;
-import common.Constants.Level;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.MIN_CLIENT_SIZE;
@@ -51,12 +51,12 @@ public class ClientGUI extends JFrame implements Runnable{
 		bound.width -= bound.x*2;
 		bound.height -= bound.y*2;
 		bound.x = bound.y = 0;
-		LoadingDialog dialog = new LoadingDialog( new LoadResources(), "Loby", true, true, getGraphicsConfiguration());
+		LoadingDialog dialog = new LoadingDialog( new LoadResources(), "Lobby", true, true, getGraphicsConfiguration());
 		if( dialog.run()){
 			setContentPane( createGUI());
 			revalidate();
 		}else{
-			dispose();
+			close();
 		}
 	}
 
@@ -110,13 +110,12 @@ public class ClientGUI extends JFrame implements Runnable{
 		
 		@Override
 		public void windowClosed(WindowEvent e){
-			//TODO close client gui
+			close();
 		}
 	}
-
-	public void handle( String message, Level level) {
-		if( console!=null){
-			console.add( message, level);
-		}
+	
+	private void close(){
+		new EndClient().postCommand();
+		dispose();
 	}
 }

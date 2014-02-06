@@ -291,7 +291,6 @@ public class LoadingDialog extends JDialog{
 	
 	@Subscribe
 	public void updateJList( UpdatePlayerNames names){
-		System.out.println("updatting");
 		players.setListData( names.getPlayers().toArray( new Player[1]));
 	}
 

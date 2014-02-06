@@ -89,7 +89,7 @@ public final class Constants {
 	public static final int BOARD_BOTTOM_PADDING = 120;
 	public static final Dimension LABEL_SIZE = new Dimension( 50,50);
 	public static final Dimension TILE_SIZE = new Dimension( 430,440);
-	public static final Dimension CONSOLE_SIZE = new Dimension( 100,40);
+	public static final Dimension CONSOLE_SIZE = new Dimension( 100,80);
 	public static final Dimension LOADING_SIZE = new Dimension( 350,425);
 	public static final Dimension PROGRESS_SIZE = new Dimension( LOADING_SIZE.width,170);
 	public static final Rectangle FACE_DOWN = new Rectangle( 0,0,TILE_SIZE.width,TILE_SIZE.height);
@@ -101,7 +101,7 @@ public final class Constants {
 	//Defaults
 	public static final int SPIRAL_DELAY = 5;
 	public static final int INFINITE_TILE = -1;
-	public static final int SERVER_TIMEOUT = 10;
+	public static final int SERVER_TIMEOUT = 5;
 	public static final int SERVER_PORT = 12345;
 	public static final String SERVER_IP = "127.0.0.1";
 	public static final Path RESOURCE_PATH = Paths.get( "Resources/");

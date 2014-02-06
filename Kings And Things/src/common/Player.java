@@ -53,6 +53,11 @@ public class Player implements Serializable{
 		return name;
 	}
 	
+	public void setName( String name)
+	{
+		this.name = name;
+	}
+	
 	/**
 	 * Get the player's number
 	 * @return The player's number
@@ -317,7 +322,7 @@ public class Player implements Serializable{
 	@Override
 	public String toString()
 	{
-		return getPlayerName() + ", #: " + getPlayerNumber();
+		return getPlayerName() + ", #: " + getPlayerNumber() + "Ready: " + isPlaying;
 	}
 	
 	@Override

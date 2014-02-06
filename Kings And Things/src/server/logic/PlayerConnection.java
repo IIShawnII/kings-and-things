@@ -38,7 +38,7 @@ public class PlayerConnection extends Thread{
 		while ((notification = connection.recieve())!=null){
 			Logger.getStandardLogger().info( notification);
 			if( notification instanceof PlayerReady){
-				setName( ((PlayerReady)notification).getName());
+				player.setName( ((PlayerReady)notification).getName());
 				player.setIsPlaying( false);
 			}
 			if( notification instanceof PlayerUnReady){

@@ -2,6 +2,7 @@ package client.logic;
 
 import client.event.ConnectionAction;
 import client.event.ConnectionState;
+import client.event.EndClient;
 import client.event.UpdatePlayerNames;
 import common.Logger;
 import common.network.Connection;
@@ -14,6 +15,7 @@ import com.google.common.eventbus.Subscribe;
 public class Logic implements Runnable {
 
 	private Connection connection;
+	private boolean finish = false;
 	
 	public Logic( Connection connection){
 		this.connection = connection;
@@ -23,14 +25,14 @@ public class Logic implements Runnable {
 	public void run() {
 		EventDispatch.registerForCommandEvents( this);
 		AbstractNetwrokEvent notification = null;
-		while( !connection.isConnected()){
+		while( !finish && !connection.isConnected()){
 			try {
-				Thread.sleep( 500);
+				Thread.sleep( 10);
 			} catch ( InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		while( (notification = connection.recieve())!=null){
+		while( !finish && (notification = connection.recieve())!=null){
 			if( notification instanceof PlayerConnected){
 				System.out.println( "list");
 				new UpdatePlayerNames( ((PlayerConnected)notification).getPlayers()).postCommand();
@@ -59,5 +61,11 @@ public class Logic implements Runnable {
 	@Subscribe
 	public void sendToServer( AbstractNetwrokEvent notification){
 		connection.send( notification);
+	}
+	
+	@Subscribe
+	public void endClient( EndClient end){
+		connection.disconnect();
+		finish = true;
 	}
 }

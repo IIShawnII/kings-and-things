@@ -19,8 +19,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import server.event.commands.EndServer;
+
 import common.Console;
-import common.Constants.Level;
 
 /**
  * server GUI to hold all and display all server related information
@@ -96,11 +97,7 @@ public class ServerGUI extends JFrame implements Runnable{
 		
 		@Override
 		public void windowClosed(WindowEvent e){
-			
+			new EndServer().postCommand();
 		}
-	}
-
-	public void handle( String message, Level level) {
-		console.add( message, level);
 	}
 }

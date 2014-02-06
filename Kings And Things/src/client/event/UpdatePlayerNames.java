@@ -9,13 +9,13 @@ public class UpdatePlayerNames extends AbstractEvent {
 	
 	private static final long serialVersionUID = -4621893742217122759L;
 	
-	HashSet< Player> players;
+	HashSet<Player> players;
 	
-	public UpdatePlayerNames( HashSet< Player> players) {
+	public UpdatePlayerNames( HashSet<Player> players) {
 		this.players = players;
 	}
 	
-	public HashSet< Player> getPlayers(){
+	public HashSet<Player> getPlayers(){
 		return players;
 	}
 }
