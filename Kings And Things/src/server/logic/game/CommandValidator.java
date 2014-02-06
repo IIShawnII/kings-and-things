@@ -156,7 +156,7 @@ public abstract class CommandValidator
 	 * @throws IllegalStateException If it is not the right phase for placing things on
 	 * the board
 	 */
-	public static void validateCanPlaceThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex, GameState currentState)
+	public static void validateCanPlaceThingOnBoard(final TileProperties thing, int playerNumber, TileProperties hex, GameState currentState)
 	{
 		validateIsPlayerActive(playerNumber,currentState);
 		SetupPhase setupPhase = currentState.getCurrentSetupPhase();
@@ -176,24 +176,10 @@ public abstract class CommandValidator
 		{
 			throw new IllegalArgumentException("Can only place things that the player owns in their tray");
 		}
-
-		if(thing.isCreature() && !(hs.hasBuilding() && hs.getBuilding().getName().equals(Building.Citadel.name())))
-		{
-			Set<TileProperties> existingCreatures = hs.getCreaturesInHex();
-			int ownedCreatureCount = 0;
-			for(TileProperties tp : existingCreatures)
-			{
-				if(player.ownsThingOnBoard(tp))
-				{
-					ownedCreatureCount++;
-				}
-			}
-			
-			if(ownedCreatureCount >= Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX)
-			{
-				throw new IllegalArgumentException("Can not place more than " + ownedCreatureCount + " friendly creatures in the same hex, unless it contains a Citadel.");
-			}
-		}
+		
+		ArrayList<TileProperties> stuff = new ArrayList<>();
+		stuff.add(thing);
+		validateCreatureLimitInHexNotExceeded(playerNumber,hex,currentState,stuff);
 		
 		hs.validateCanAddThingToHex(thing);
 	}
@@ -433,14 +419,41 @@ public abstract class CommandValidator
 		}
 	}
 	
+	private static void validateCreatureLimitInHexNotExceeded(int playerNumber, TileProperties hex, GameState currentState, Collection<TileProperties> toAdd)
+	{
+		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
+		Point xy = currentState.getBoard().getXYCoordinatesOfHex(hex);
+		HexState hs = currentState.getBoard().getHexByXY(xy.x, xy.y);
+		
+		for(TileProperties thing : toAdd)
+		{
+			if(thing.isCreature() && !(hs.hasBuilding() && hs.getBuilding().getName().equals(Building.Citadel.name())))
+			{
+				Set<TileProperties> existingCreatures = hs.getCreaturesInHex();
+				int ownedCreatureCount = 0;
+				for(TileProperties tp : existingCreatures)
+				{
+					if(player.ownsThingOnBoard(tp))
+					{
+						ownedCreatureCount++;
+					}
+				}
+				
+				if(ownedCreatureCount >= Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX)
+				{
+					throw new IllegalArgumentException("Can not place more than " + ownedCreatureCount + " friendly creatures in the same hex, unless it contains a Citadel.");
+				}
+			}
+		}
+	}
+	
 	@SuppressWarnings("unused")
 	//TODO add functionality
-	private static void validateMovementConditions(int playerNumber, GameState currentState, List<TileProperties> Hexes, Collection<TileProperties> Creatures) {
+	private static void validateMovementConditions(int playerNumber, GameState currentState, Collection<TileProperties> Hexes, Collection<TileProperties> Creatures) {
 		
 		int moveSpeedTotal = 0;
 		
-		for (int i = 1; i < Hexes.size(); i++) {
-			TileProperties hex = Hexes.get(i);
+		for (TileProperties hex : Hexes) {
 			moveSpeedTotal += hex.getMoveSpeed();
 			if (!hex.isHexTile()) {
 				throw new IllegalArgumentException("Can't move through non hexes");
@@ -455,7 +468,7 @@ public abstract class CommandValidator
 			if (creature.getMoveSpeed() < moveSpeedTotal) {
 				throw new IllegalArgumentException("Creature cannot move that far");
 			}
+			
 		}
-		
 	}
 }

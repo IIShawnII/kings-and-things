@@ -33,8 +33,7 @@ public class ConnectionLobby implements Runnable {
 	private final boolean demoMode;
 	
 	public ConnectionLobby(boolean isDemoMode) throws IOException{
-		if(isDemoMode)
-		{
+		if(isDemoMode){
 			Logger.getStandardLogger().info("Server started in demo mode.");
 		}
 		LoadResources lr = new LoadResources();

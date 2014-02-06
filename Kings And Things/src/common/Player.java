@@ -17,9 +17,9 @@ public class Player implements Serializable{
 	private final int id;
 	private int gold;
 
+	private final HashSet<TileProperties> tray;
 	private final HashSet<TileProperties> ownedHexes;
 	private final HashSet<TileProperties> ownedThingsOnBoard;
-	private final HashSet<TileProperties> tray;
 	
 	/**
 	 * Create a new player with the given name and id number
