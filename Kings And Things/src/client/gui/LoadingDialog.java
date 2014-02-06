@@ -18,9 +18,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import common.Console;
-import common.Constants;
-import common.Constants.Category;
 import common.Constants.Level;
+import common.Constants.Category;
 import common.network.Connection;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
