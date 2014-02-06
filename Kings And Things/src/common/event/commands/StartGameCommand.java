@@ -1,4 +1,4 @@
-package common.game.commands;
+package common.event.commands;
 
 import java.util.Collections;
 import java.util.HashSet;

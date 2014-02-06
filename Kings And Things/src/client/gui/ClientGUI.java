@@ -16,7 +16,6 @@ import common.Console;
 import common.LoadingDialog;
 import common.LoadResources;
 import common.Constants.Level;
-import common.network.Connection;
 
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.CONSOLE_SIZE;
@@ -29,7 +28,6 @@ import static common.Constants.MIN_CLIENT_SIZE;
 public class ClientGUI extends JFrame implements Runnable{
 
 	private Console console;
-	private Connection connection;
 	
 	/**
 	 * construct Client GUI
@@ -56,7 +54,6 @@ public class ClientGUI extends JFrame implements Runnable{
 		bound.height -= bound.y*2;
 		bound.x = bound.y = 0;
 		LoadingDialog dialog = new LoadingDialog( new LoadResources(), "Loby", true, true, getGraphicsConfiguration());
-		dialog.setConnection( connection); 
 		if( dialog.run()){
 			setContentPane( createGUI());
 			revalidate();
@@ -114,7 +111,7 @@ public class ClientGUI extends JFrame implements Runnable{
 		
 		@Override
 		public void windowClosed(WindowEvent e){
-			connection.disconnect();
+			//TODO close client gui
 		}
 	}
 
@@ -122,9 +119,5 @@ public class ClientGUI extends JFrame implements Runnable{
 		if( console!=null){
 			console.add( message, level);
 		}
-	}
-
-	public void setConnection( Connection connection) {
-		this.connection = connection;
 	}
 }

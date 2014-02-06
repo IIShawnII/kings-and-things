@@ -1,4 +1,4 @@
-package common.game.notifications;
+package common.event.notifications;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;

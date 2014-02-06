@@ -18,18 +18,18 @@ import common.Constants.SetupPhase;
 import common.Logger;
 import common.TileProperties;
 import common.event.CommandEventBus;
+import common.event.commands.ConstructBuildingCommand;
+import common.event.commands.EndPlayerTurnCommand;
+import common.event.commands.ExchangeSeaHexCommand;
+import common.event.commands.ExchangeThingsCommand;
+import common.event.commands.GiveHexToPlayerCommand;
+import common.event.commands.PaidRecruitsCommand;
+import common.event.commands.PlaceThingOnBoardCommand;
+import common.event.commands.StartGameCommand;
 import common.game.CommandValidator;
 import common.game.GameState;
 import common.game.HexState;
 import common.game.Player;
-import common.game.commands.ConstructBuildingCommand;
-import common.game.commands.EndPlayerTurnCommand;
-import common.game.commands.ExchangeSeaHexCommand;
-import common.game.commands.ExchangeThingsCommand;
-import common.game.commands.GiveHexToPlayerCommand;
-import common.game.commands.PaidRecruitsCommand;
-import common.game.commands.PlaceThingOnBoardCommand;
-import common.game.commands.StartGameCommand;
 import common.game.exceptions.NoMoreTilesException;
 
 /**

@@ -6,7 +6,7 @@ import com.google.common.eventbus.Subscribe;
 
 import common.game.Player;
 import common.event.CommandEventBus;
-import common.game.CommandMarshaller;
+import common.event.CommandMarshaller;
 import common.network.Connection;
 
 public class PlayerConnection extends Thread{

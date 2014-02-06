@@ -1,4 +1,4 @@
-package common.game.commands;
+package common.event.commands;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;

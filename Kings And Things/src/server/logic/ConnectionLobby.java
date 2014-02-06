@@ -14,15 +14,16 @@ import java.net.ServerSocket;
 import java.net.SocketTimeoutException;
 
 import server.logic.game.GameFlowManager;
+
 import com.google.common.eventbus.Subscribe;
 
 import common.Logger;
 import common.LoadResources;
 import common.network.Connection;
 import common.event.CommandEventBus;
+import common.event.commands.RequestStartCommand;
+import common.event.commands.StartGameCommand;
 import common.game.Player;
-import common.game.commands.StartGameCommand;
-import common.game.commands.RequestStartCommand;
 
 public class ConnectionLobby implements Runnable {
 

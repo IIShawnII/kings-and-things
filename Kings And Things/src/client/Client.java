@@ -1,12 +1,12 @@
 package client;
 
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.SwingUtilities;
 
 import org.apache.log4j.PropertyConfigurator;
 
+import client.logic.Logic;
 import client.gui.ClientGUI;
-
 import common.network.Connection;
 
 /**
@@ -24,14 +24,29 @@ public class Client {
 		}
 		
 		ClientGUI clientGUI;
-		Connection connection = new Connection();
 		if( args!=null && args.length>=1){
 			clientGUI = new ClientGUI( args[0]);
 		}else{
 			clientGUI = new ClientGUI( "Kings And Things");
 		}
-		clientGUI.setConnection( connection);
 		//start GUI on AWT Thread
 		SwingUtilities.invokeLater( clientGUI);
+		while( !clientGUI.isVisible()){
+			try {
+				//wait for server to become visible
+				Thread.sleep( 500);
+			} catch ( InterruptedException e) {}
+		}
+
+		try {
+			Logic logic = new Logic( new Connection());
+			new Thread( logic, "Client Logic").start();
+		} catch ( Exception e) {
+			e.printStackTrace();
+			try {
+				Thread.sleep( 2000);
+			} catch ( InterruptedException e1) {}
+			clientGUI.dispose();
+		}
 	}
 }

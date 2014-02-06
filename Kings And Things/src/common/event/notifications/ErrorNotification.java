@@ -1,4 +1,4 @@
-package common.game.notifications;
+package common.event.notifications;
 
 
 public class ErrorNotification extends Notification {

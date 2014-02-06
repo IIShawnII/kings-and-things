@@ -1,23 +1,27 @@
-package common.game.commands;
+package common.event.notifications;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import common.Constants.BuildableBuilding;
 import common.TileProperties;
+import common.Constants.BuildableBuilding;
 
 @XmlRootElement
-public class ConstructBuildingCommand extends Command
+public class ConstructBuildingNotification extends Notification
 {
 	@XmlElement
 	private final BuildableBuilding building;
+	@XmlAttribute
+	private final int playerNumber;
 	@XmlElement
 	private final TileProperties hex;
 	
-	public ConstructBuildingCommand(BuildableBuilding building, TileProperties hex)
+	public ConstructBuildingNotification(BuildableBuilding building, int playerNumber, TileProperties hex)
 	{
 		this.building = building;
 		this.hex = hex;
+		this.playerNumber = playerNumber;
 	}
 	
 	public BuildableBuilding getBuilding()
@@ -30,11 +34,17 @@ public class ConstructBuildingCommand extends Command
 		return hex;
 	}
 	
+	public int getPlayerNumber()
+	{
+		return playerNumber;
+	}
+	
 	@SuppressWarnings("unused")
-	private ConstructBuildingCommand()
+	private ConstructBuildingNotification()
 	{
 		//required by JAXB
 		building = null;
 		hex = null;
+		playerNumber = 0;
 	}
 }

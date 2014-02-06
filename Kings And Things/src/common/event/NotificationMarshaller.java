@@ -1,4 +1,4 @@
-package common.game;
+package common.event;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -9,29 +9,14 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import common.Logger;
-import common.game.commands.Command;
-import common.game.commands.ConstructBuildingCommand;
-import common.game.commands.EndPlayerTurnCommand;
-import common.game.commands.ExchangeSeaHexCommand;
-import common.game.commands.ExchangeThingsCommand;
-import common.game.commands.GiveHexToPlayerCommand;
-import common.game.commands.MovementCommand;
-import common.game.commands.PaidRecruitsCommand;
-import common.game.commands.PlaceThingOnBoardCommand;
-import common.game.commands.RequestStartCommand;
-import common.game.commands.StartGameCommand;
+import common.event.commands.Command;
 
-/**
- * This class handles converting commands back and forth to Strings so they
- * can be sent across the network
- */
-public abstract class CommandMarshaller
+public class NotificationMarshaller
 {
 	private static final JAXBContext JC = createJaxbContext();
 	
 	/**
-	 * Use this method to convert any command to a String to be sent from client to server
-	 * or vice versa
+	 * Use this method to convert any notification to a String to be sent from server to client
 	 * @param command The command to send
 	 * @return The entered command in String format
 	 */
@@ -77,10 +62,7 @@ public abstract class CommandMarshaller
 	{
 		try
 		{
-			return JAXBContext.newInstance(ConstructBuildingCommand.class, EndPlayerTurnCommand.class, ExchangeSeaHexCommand.class,
-											ExchangeThingsCommand.class, GiveHexToPlayerCommand.class, MovementCommand.class,
-											PaidRecruitsCommand.class, PlaceThingOnBoardCommand.class, StartGameCommand.class,
-											RequestStartCommand.class);
+			return JAXBContext.newInstance();
 		}
 		catch (JAXBException e)
 		{

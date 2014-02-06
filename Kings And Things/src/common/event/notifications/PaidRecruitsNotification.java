@@ -1,4 +1,4 @@
-package common.game.notifications;
+package common.event.notifications;
 
 public class PaidRecruitsNotification extends Notification
 {
