@@ -449,11 +449,12 @@ public abstract class CommandValidator
 	
 	@SuppressWarnings("unused")
 	//TODO add functionality
-	private static void validateMovementConditions(int playerNumber, GameState currentState, Collection<TileProperties> Hexes, Collection<TileProperties> Creatures) {
+	private static void validateMovementConditions(int playerNumber, GameState currentState, List<TileProperties> Hexes, Collection<TileProperties> Creatures) {
 		
 		int moveSpeedTotal = 0;
 		
-		for (TileProperties hex : Hexes) {
+		for (int i = 1; i < Hexes.size(); i++) {
+			TileProperties hex = Hexes.get(i);
 			moveSpeedTotal += hex.getMoveSpeed();
 			if (!hex.isHexTile()) {
 				throw new IllegalArgumentException("Can't move through non hexes");
