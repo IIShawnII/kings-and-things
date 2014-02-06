@@ -11,7 +11,7 @@ import java.util.Set;
 
 import common.TileProperties;
 
-public class MovementCommand extends Command {
+public class MovementCommand extends AbstractCommand {
 	
 	// List of hexes that creatures want to move through
 	private final HashSet<TileProperties> Hexes;
@@ -22,7 +22,7 @@ public class MovementCommand extends Command {
 	 * Constructor
 	 */
 	public MovementCommand(Collection<TileProperties> newHexes, Collection<TileProperties> newCreatures) {
-		
+		super();
 		// initializes Hexes
 		this.Hexes = new HashSet<TileProperties>();
 		for (TileProperties tp : newHexes) {

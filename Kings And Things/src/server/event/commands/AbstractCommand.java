@@ -2,16 +2,21 @@ package server.event.commands;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
+import common.event.AbstractEvent;
 import common.event.CommandEventBus;
 
 /**
  * This is the super class of all commands that can be sent across
  * the network
  */
-public abstract class Command
+public abstract class AbstractCommand extends AbstractEvent
 {
 	@XmlAttribute
 	private int playerNumber;
+	
+	protected AbstractCommand(){
+		super( CommandEventBus.BUS);
+	}
 	
 	/**
 	 * Post this command to the CommandEventBus so any registered
@@ -22,7 +27,7 @@ public abstract class Command
 	public void dispatch(int playerNumber)
 	{
 		this.playerNumber = playerNumber;
-		CommandEventBus.BUS.post(this);
+		super.dispatch();
 	}
 	
 	/**

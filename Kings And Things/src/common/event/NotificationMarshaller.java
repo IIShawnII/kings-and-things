@@ -8,7 +8,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import server.event.commands.Command;
+import server.event.commands.AbstractCommand;
 import common.Logger;
 
 public class NotificationMarshaller
@@ -20,7 +20,7 @@ public class NotificationMarshaller
 	 * @param command The command to send
 	 * @return The entered command in String format
 	 */
-	public static String marshalCommand(Command command)
+	public static String marshalCommand(AbstractCommand command)
 	{
 		try
 		{
@@ -44,12 +44,12 @@ public class NotificationMarshaller
 	 * @param command The command in String format
 	 * @return The original command
 	 */
-	public static Command unmarshalCommand(String command)
+	public static AbstractCommand unmarshalCommand(String command)
 	{
 		try
 		{
 			Unmarshaller um = JC.createUnmarshaller();
-			return (Command) um.unmarshal(new StringReader(command));
+			return (AbstractCommand) um.unmarshal(new StringReader(command));
 		}
 		catch (JAXBException e)
 		{

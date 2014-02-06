@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import server.logic.game.Player;
 
 @XmlRootElement
-public class StartGameCommand extends Command
+public class StartGameCommand extends AbstractCommand
 {
 	@XmlAttribute
 	private final boolean demoMode;
@@ -20,6 +20,7 @@ public class StartGameCommand extends Command
 	
 	public StartGameCommand(boolean demoMode, Set<Player> players)
 	{
+		super();
 		this.demoMode = demoMode;
 		this.players = new HashSet<Player>();
 		for(Player p : players)

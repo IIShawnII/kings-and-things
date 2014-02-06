@@ -7,7 +7,7 @@ import common.Constants.BuildableBuilding;
 import common.TileProperties;
 
 @XmlRootElement
-public class ConstructBuildingCommand extends Command
+public class ConstructBuildingCommand extends AbstractCommand
 {
 	@XmlElement
 	private final BuildableBuilding building;
@@ -16,6 +16,7 @@ public class ConstructBuildingCommand extends Command
 	
 	public ConstructBuildingCommand(BuildableBuilding building, TileProperties hex)
 	{
+		super();
 		this.building = building;
 		this.hex = hex;
 	}

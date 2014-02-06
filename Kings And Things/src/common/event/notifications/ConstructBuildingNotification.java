@@ -8,7 +8,7 @@ import common.TileProperties;
 import common.Constants.BuildableBuilding;
 
 @XmlRootElement
-public class ConstructBuildingNotification extends Notification
+public class ConstructBuildingNotification extends AbstractNotification
 {
 	@XmlElement
 	private final BuildableBuilding building;
@@ -19,6 +19,7 @@ public class ConstructBuildingNotification extends Notification
 	
 	public ConstructBuildingNotification(BuildableBuilding building, int playerNumber, TileProperties hex)
 	{
+		super();
 		this.building = building;
 		this.hex = hex;
 		this.playerNumber = playerNumber;
@@ -42,6 +43,7 @@ public class ConstructBuildingNotification extends Notification
 	@SuppressWarnings("unused")
 	private ConstructBuildingNotification()
 	{
+		super();
 		//required by JAXB
 		building = null;
 		hex = null;

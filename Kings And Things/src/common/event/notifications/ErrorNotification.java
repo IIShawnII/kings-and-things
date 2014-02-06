@@ -1,10 +1,10 @@
 package common.event.notifications;
 
-
-public class ErrorNotification extends Notification {
+public class ErrorNotification extends AbstractNotification {
 	private final String message;
 	
 	public ErrorNotification( String message){
+		super();
 		this.message = message;
 	}
 	

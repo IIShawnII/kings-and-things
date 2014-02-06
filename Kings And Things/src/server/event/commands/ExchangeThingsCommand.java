@@ -11,13 +11,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import common.TileProperties;
 
 @XmlRootElement
-public class ExchangeThingsCommand extends Command
+public class ExchangeThingsCommand extends AbstractCommand
 {
 	@XmlElement
 	private final HashSet<TileProperties> things;
 	
 	public ExchangeThingsCommand(Collection<TileProperties> things)
 	{
+		super();
 		this.things = new HashSet<TileProperties>();
 		for(TileProperties thing : things)
 		{

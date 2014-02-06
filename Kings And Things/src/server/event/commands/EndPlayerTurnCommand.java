@@ -4,6 +4,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 
 @XmlRootElement
-public class EndPlayerTurnCommand extends Command
+public class EndPlayerTurnCommand extends AbstractCommand
 {
+	public EndPlayerTurnCommand(){
+		super();
+	}
 }

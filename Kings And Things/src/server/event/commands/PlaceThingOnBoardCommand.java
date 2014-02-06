@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import common.TileProperties;
 
 @XmlRootElement
-public class PlaceThingOnBoardCommand extends Command
+public class PlaceThingOnBoardCommand extends AbstractCommand
 {
 	@XmlElement
 	private final TileProperties hex;
@@ -15,6 +15,7 @@ public class PlaceThingOnBoardCommand extends Command
 	
 	public PlaceThingOnBoardCommand(TileProperties thing, TileProperties hex)
 	{
+		super();
 		this.thing = thing;
 		this.hex = hex;
 	}

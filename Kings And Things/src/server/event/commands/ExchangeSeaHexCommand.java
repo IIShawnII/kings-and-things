@@ -6,13 +6,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import common.TileProperties;
 
 @XmlRootElement
-public class ExchangeSeaHexCommand extends Command
+public class ExchangeSeaHexCommand extends AbstractCommand
 {
 	@XmlElement
 	private final TileProperties hex;
 	
 	public ExchangeSeaHexCommand(TileProperties hex)
 	{
+		super();
 		this.hex = hex;
 	}
 	

@@ -8,6 +8,8 @@ import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.JProgressBar;
 
+import client.event.ConnectToServer;
+
 import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.Dimension;
@@ -20,7 +22,7 @@ import java.awt.event.ActionListener;
 import common.Console;
 import common.Constants.Level;
 import common.Constants.Category;
-import common.network.Connection;
+import common.event.CommandEventBus;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
@@ -34,7 +36,6 @@ public class LoadingDialog extends JDialog{
 
 	private boolean progress;
 	private InputControl control;
-	private Connection connection;
 	private String title;
 	private Runnable task;
 	private Console players;
@@ -262,21 +263,19 @@ public class LoadingDialog extends JDialog{
 		task = null;
 		dispose();
 	}
-
-	public void setConnection( Connection connection) {
-		this.connection = connection;
-	}
 	
 	private class InputControl implements ActionListener {
 
 		@Override
 		public void actionPerformed( ActionEvent e) {
 			Object source = e.getSource();
-			if( source==jbConnect || source==jbDisconnect){
+			if( source==jbConnect){
+				new ConnectToServer( jtfIP.getText(), Integer.parseInt( jtfPort.getText())).dispatch();
+			}/*else if( source==jbDisconnect){
 				if ( connection.isConnected()){
 					connection.disconnect();
 					jbDisconnect.setEnabled( false);
-				}else if( connection.connectTo( jtfIP.getText(), Integer.parseInt( jtfPort.getText()))){
+				}else if( connection.connectTo( )){
 					jbDisconnect.setEnabled( true);
 				}
 				boolean state = !jbDisconnect.isEnabled();
@@ -290,7 +289,7 @@ public class LoadingDialog extends JDialog{
 					result = true;
 					dispose();
 				}
-			}else if( e.getActionCommand().equals( "Cancel")){
+			}*/else if( e.getActionCommand().equals( "Cancel")){
 				dispose();
 				result = false;
 			}

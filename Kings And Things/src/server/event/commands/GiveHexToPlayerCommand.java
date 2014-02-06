@@ -6,13 +6,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import common.TileProperties;
 
 @XmlRootElement
-public class GiveHexToPlayerCommand extends Command
+public class GiveHexToPlayerCommand extends AbstractCommand
 {
 	@XmlElement
 	private final TileProperties hex;
 	
 	public GiveHexToPlayerCommand(TileProperties hex)
 	{
+		super();
 		this.hex = hex;
 	}
 	
