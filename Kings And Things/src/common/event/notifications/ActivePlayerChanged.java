@@ -4,14 +4,14 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class ActivePlayerChangedNotification extends AbstractNotification
+public class ActivePlayerChanged extends AbstractNotification
 {
 	@XmlAttribute
 	private final int activePhasePlayer;
 	@XmlAttribute
 	private final int activeTurnPlayer;
 	
-	public ActivePlayerChangedNotification(int activePhasePlayer, int activeTurnPlayer)
+	public ActivePlayerChanged(int activePhasePlayer, int activeTurnPlayer)
 	{
 		this.activePhasePlayer = activePhasePlayer;
 		this.activeTurnPlayer = activeTurnPlayer;

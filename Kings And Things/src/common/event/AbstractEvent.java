@@ -18,7 +18,7 @@ public abstract class AbstractEvent
 	 * Post this notification to the CommandEventBus so any registered
 	 * listeners can handle it
 	 */
-	public void dispatch(){
+	public void post(){
 		bus.post( this);
 	}
 }

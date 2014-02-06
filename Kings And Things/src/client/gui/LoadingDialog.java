@@ -6,9 +6,13 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
-import client.event.ConnectToServer;
+import com.google.common.eventbus.Subscribe;
+
+import client.event.ConnectionAction;
+import client.event.ConnectionState;
 
 import java.awt.Frame;
 import java.awt.Insets;
@@ -22,6 +26,8 @@ import java.awt.event.ActionListener;
 import common.Console;
 import common.Constants.Level;
 import common.Constants.Category;
+import common.event.EventDispatch;
+import common.event.notifications.PlayerReady;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
@@ -39,11 +45,11 @@ public class LoadingDialog extends JDialog{
 	private Runnable task;
 	private Console players;
 	private JPanel jpProgress;
-	private JButton jbConnect, jbDisconnect;
 	private JTextField jtfIP, jtfPort, jtfName;
+	private JButton jbConnect, jbDisconnect, jbReady;
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
 	private JProgressBar jpbGold, jpbSpecial, jpbState;
-	private boolean result = false;
+	private boolean result = false, isConnected = false;
 	
 	public LoadingDialog( Runnable task, String title, boolean modal, boolean progress, GraphicsConfiguration gc) {
 		super( (Frame)null, title, modal, gc);
@@ -54,6 +60,7 @@ public class LoadingDialog extends JDialog{
 	}
 
 	public boolean run() {
+		EventDispatch.COMMAND.register( this);
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		setContentPane( createGUI());
 		pack();
@@ -76,12 +83,11 @@ public class LoadingDialog extends JDialog{
 		constraints.gridy = 0;
 		jpMain.add( label, constraints);
 		
-		JButton jbStart = new JButton( "Start");
-		jbStart.setEnabled( false);
-		jbStart.setActionCommand( "Start");
-		jbStart.addActionListener( control);
+		jbReady = new JButton( "Ready");
+		jbReady.setEnabled( false);
+		jbReady.addActionListener( control);
 		constraints.gridy = 1;
-		jpMain.add( jbStart, constraints);
+		jpMain.add( jbReady, constraints);
 		
 		JButton jbCancel = new JButton( "Cancel");
 		jbCancel.setActionCommand( "Cancel");
@@ -90,14 +96,12 @@ public class LoadingDialog extends JDialog{
 		jpMain.add( jbCancel, constraints);
 		
 		jbConnect = new JButton( "Connect");
-		jbConnect.setActionCommand( "Connection");
 		jbConnect.addActionListener( control);
 		constraints.gridy = 3;
 		jpMain.add( jbConnect, constraints);
 		
 		jbDisconnect = new JButton( "Disonnect");
 		jbDisconnect.setEnabled( false);
-		jbDisconnect.setActionCommand( "Connection");
 		jbDisconnect.addActionListener( control);
 		constraints.gridy = 4;
 		jpMain.add( jbDisconnect, constraints);
@@ -269,32 +273,35 @@ public class LoadingDialog extends JDialog{
 		public void actionPerformed( ActionEvent e) {
 			Object source = e.getSource();
 			if( source==jbConnect){
-				new ConnectToServer( jtfIP.getText(), Integer.parseInt( jtfPort.getText())).dispatch();
-			}/*else if( source==jbDisconnect){
-				if ( connection.isConnected()){
-					connection.disconnect();
-					jbDisconnect.setEnabled( false);
-				}else if( connection.connectTo( )){
-					jbDisconnect.setEnabled( true);
-				}
-				boolean state = !jbDisconnect.isEnabled();
-				jbConnect.setEnabled( state);
-				jtfIP.setEnabled( state);
-				jtfPort.setEnabled( state);
-				jtfName.setEnabled( state);
-			}else if( e.getActionCommand().equals( "Start")){
-				if( connection.isConnected()){
-					connection.send( "-start");
-					result = true;
-					dispose();
-				}
-			}*/else if( e.getActionCommand().equals( "Cancel")){
+				new ConnectionAction( jtfIP.getText().trim(), Integer.parseInt( jtfPort.getText().trim())).post();
+			}else if( source==jbDisconnect){
+				new ConnectionAction().post();
+			}else if( isConnected && source==jbReady){
+				new PlayerReady( jtfName.getText().trim()).post();
+				result = true;
+				//dispose();
+			}else if( e.getActionCommand().equals( "Cancel")){
 				dispose();
 				result = false;
 			}
 		}
 	}
 
+	@Subscribe
+	public void ConnectionState( ConnectionState conncetion){
+		if( !conncetion.isConnected()){
+			if( conncetion.getMessage()!=null){
+				JOptionPane.showMessageDialog( this, conncetion.getMessage(), "Connection", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		isConnected = conncetion.isConnected();
+		jbReady.setEnabled( isConnected);
+		jbDisconnect.setEnabled( isConnected);
+		jbConnect.setEnabled( !isConnected);
+		jtfIP.setEnabled( !isConnected);
+		jtfPort.setEnabled( !isConnected);
+	}
+	
 	public void handle( Category category, Level level) {
 		if( level==Level.END){
 			remove( jpProgress);

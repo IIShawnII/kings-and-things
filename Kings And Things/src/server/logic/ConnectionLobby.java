@@ -116,7 +116,7 @@ public class ConnectionLobby implements Runnable {
 			{
 				players.add(pc.toPlayerObj());
 			}
-			EventDispatch.COMMAND.post(new StartGameCommand(demoMode,players));
+			EventDispatch.COMMAND.post( new StartGameCommand( demoMode, players));
 		}
 	}
 }

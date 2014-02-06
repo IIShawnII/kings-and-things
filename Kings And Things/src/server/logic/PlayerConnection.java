@@ -1,12 +1,12 @@
 package server.logic;
 
-import server.event.commands.SendCommandAcrossNetworkEvent;
+import server.event.commands.SendNotificationAcrossNetworkEvent;
 import server.logic.game.Player;
 
 import com.google.common.eventbus.Subscribe;
 
-import common.event.CommandMarshaller;
 import common.event.EventDispatch;
+import common.event.notifications.AbstractNotification;
 import common.network.Connection;
 
 public class PlayerConnection extends Thread{
@@ -60,15 +60,15 @@ public class PlayerConnection extends Thread{
 	
 	@Override
 	public void run(){
-		String str;
-		while ((str = connection.recieve())!=null){
-			CommandMarshaller.unmarshalCommand(str).dispatch(getPlayerId());
+		AbstractNotification notification = null;
+		while ((notification = connection.recieve())!=null){
+			notification.post();//.dispatch(getPlayerId());
 		}
 	}
 	
 	@Subscribe
-	public void sendCommandToClient(SendCommandAcrossNetworkEvent command)
+	public void sendNotificationToClient( SendNotificationAcrossNetworkEvent command)
 	{
-		connection.send(CommandMarshaller.marshalCommand(command.getCommand()));
+		connection.send( command.getNotification());
 	}
 }

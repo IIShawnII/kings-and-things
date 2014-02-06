@@ -1,8 +1,11 @@
 package client.logic;
 
-import client.event.ConnectToServer;
+import client.event.ConnectionAction;
+import client.event.ConnectionState;
 import common.network.Connection;
 import common.event.EventDispatch;
+import common.event.notifications.AbstractNotification;
+import common.event.notifications.PlayerReady;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -20,37 +23,26 @@ public class Logic implements Runnable {
 	}
 	
 	@Subscribe
-	public void connectToServer( ConnectToServer connect){
+	public void connectionAction( ConnectionAction action){
 		System.out.println( "test");
-		try{
-			connection.connectTo( connect.getAddress(), connect.getPort());
-		}catch(IllegalArgumentException ex){
+		boolean isConnected = false;
+		String message = "Unable To Connect, Try Again";
+		if( action.shouldConnect()){
+			try{
+				isConnected = connection.connectTo( action.getAddress(), action.getPort());
+			}catch(IllegalArgumentException ex){
+				message += " \n" + ex.getMessage();
+			}
+		}else{
+			connection.disconnect();
+			message = null;
 		}
+		new ConnectionState( message, isConnected).post();
 	}
 	
-	/*public void actionPerformed( ActionEvent e) {
-		Object source = e.getSource();
-		if( source==jbConnect || source==jbDisconnect){
-			if ( connection.isConnected()){
-				connection.disconnect();
-				jbDisconnect.setEnabled( false);
-			}else if( connection.connectTo( jtfIP.getText(), Integer.parseInt( jtfPort.getText()))){
-				jbDisconnect.setEnabled( true);
-			}
-			boolean state = !jbDisconnect.isEnabled();
-			jbConnect.setEnabled( state);
-			jtfIP.setEnabled( state);
-			jtfPort.setEnabled( state);
-			jtfName.setEnabled( state);
-		}else if( e.getActionCommand().equals( "Start")){
-			if( connection.isConnected()){
-				connection.send( "-start");
-				result = true;
-				dispose();
-			}
-		}else if( e.getActionCommand().equals( "Cancel")){
-			dispose();
-			result = false;
-		}
-	}*/
+	@Subscribe
+	public void sendToServer( PlayerReady notification){
+		connection.send( notification);
+		connection.recieve();
+	}
 }

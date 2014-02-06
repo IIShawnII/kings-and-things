@@ -24,10 +24,10 @@ public abstract class AbstractCommand extends AbstractEvent
 	 * injected at this stage, so that the client doesn't need to specify it.
 	 * @param playerNumber The number of the player who sent the command
 	 */
-	public void dispatch(int playerNumber)
+	public void post(int playerNumber)
 	{
 		this.playerNumber = playerNumber;
-		super.dispatch();
+		super.post();
 	}
 	
 	/**

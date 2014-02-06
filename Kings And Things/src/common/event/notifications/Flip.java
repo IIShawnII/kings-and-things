@@ -2,7 +2,7 @@ package common.event.notifications;
 
 import common.TileProperties;
 
-public final class FlipNotification extends AbstractNotification {
+public final class Flip extends AbstractNotification {
 	TileProperties tile = null;
 	
 	public boolean flipAll(){

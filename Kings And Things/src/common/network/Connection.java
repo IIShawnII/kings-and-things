@@ -2,12 +2,12 @@ package common.network;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.InetSocketAddress;
+
+import common.event.notifications.AbstractNotification;
 
 /**
  * primary class for sending and receiving text from client or server
@@ -15,8 +15,8 @@ import java.net.InetSocketAddress;
 public class Connection implements Closeable{
 	
 	private Socket socket = null;
-	private PrintWriter output;
-	private BufferedReader input;
+	private ObjectInputStream input;
+	private ObjectOutputStream output;
 	private InetSocketAddress address;
 	private boolean isConnected = false;
 	
@@ -64,12 +64,11 @@ public class Connection implements Closeable{
 				socket = new Socket();
 				socket.connect( address);
 			}
-			output = new PrintWriter( socket.getOutputStream(), true);
-            input = new BufferedReader( new InputStreamReader( socket.getInputStream()));
+			output = new ObjectOutputStream( socket.getOutputStream());
+            input = new ObjectInputStream( socket.getInputStream());
 			isConnected = true;
 		} catch( Exception e){
 			disconnect();
-			//e.printStackTrace();
 		}
 		return isConnected;
 	}
@@ -87,7 +86,11 @@ public class Connection implements Closeable{
 				}
 			}
 			if( output!=null){
-				output.close();
+				try {
+					output.close();
+				} catch ( IOException e) {
+					e.printStackTrace();
+				}
 			}
 			if( socket!=null){
 				try {
@@ -96,9 +99,10 @@ public class Connection implements Closeable{
 					e.printStackTrace();
 				}
 			}
+			input = null;
+			output = null;
 			socket = null;
 			isConnected = false;
-		} else{
 		}
 	}
 	
@@ -107,29 +111,32 @@ public class Connection implements Closeable{
 	 * @param message - information to be sent
 	 * @return true if information has been sent, else false
 	 */
-	public boolean send( String message){
+	public boolean send( AbstractNotification event){
 		if( isConnected){
-			output.println( message);
-			return true;
-		} else{
-			return false;
+			try {
+				output.writeObject( event);
+				return true;
+			} catch ( IOException e) {
+				e.printStackTrace();
+			}
 		}
+		return false;
 	}
 	
 	/**
 	 * Receive response from destination in form of a text
 	 * @return a string if message is received, otherwise null
 	 */
-	public String recieve(){
+	public AbstractNotification recieve(){
 		if( isConnected){
-			String message = null;
+			AbstractNotification event = null;
 			try {
-				message = input.readLine();
-			} catch ( IOException e) {
+				event = (AbstractNotification) input.readObject();
+			} catch ( IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
-			if( message!=null){
-				return message;
+			if( event!=null){
+				return event;
 			}else{
 				isConnected = false;
 			}
