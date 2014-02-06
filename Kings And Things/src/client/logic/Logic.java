@@ -14,7 +14,6 @@ import com.google.common.eventbus.Subscribe;
 public class Logic implements Runnable {
 
 	private Connection connection;
-	private boolean finish = false;
 	
 	public Logic( Connection connection){
 		this.connection = connection;
@@ -24,13 +23,17 @@ public class Logic implements Runnable {
 	public void run() {
 		EventDispatch.registerForCommandEvents( this);
 		AbstractNetwrokEvent notification = null;
-		while ( !finish){
-			notification = connection.recieve();
-			if( notification!=null){
-				if( notification instanceof PlayerConnected){
-					System.out.println( "list");
-					new UpdatePlayerNames( ((PlayerConnected)notification).getPlayers()).postCommand();
-				}
+		while( !connection.isConnected()){
+			try {
+				Thread.sleep( 500);
+			} catch ( InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		while( (notification = connection.recieve())!=null){
+			if( notification instanceof PlayerConnected){
+				System.out.println( "list");
+				new UpdatePlayerNames( ((PlayerConnected)notification).getPlayers()).postCommand();
 			}
 		}
 		Logger.getStandardLogger().info( "logic disconnected");
