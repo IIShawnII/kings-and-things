@@ -3,6 +3,7 @@ package server.logic.game;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -369,6 +370,8 @@ public abstract class CommandValidator
 		}
 		validateIsPlayerActive(playerNumber, currentState);
 	}
+	
+	// private methods
 
 	private static void validateCanPickSetupPhaseHex(TileProperties hex, int playerNumber, GameState currentState)
 	{
@@ -419,6 +422,9 @@ public abstract class CommandValidator
 		}
 	}
 	
+	/*
+	 * Checks to see if the number of creatures exceeds the limit
+	 */
 	private static void validateCreatureLimitInHexNotExceeded(int playerNumber, TileProperties hex, GameState currentState, Collection<TileProperties> toAdd)
 	{
 		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
@@ -448,18 +454,19 @@ public abstract class CommandValidator
 	}
 	
 	@SuppressWarnings("unused")
-	//TODO add functionality
+	/*
+	 * Checks to see if player can move through hexes
+	 */
 	private static void validateMovementConditions(int playerNumber, GameState currentState, List<TileProperties> Hexes, Collection<TileProperties> Creatures) {
 		
 		int moveSpeedTotal = 0;
+		HashSet<HexState> pathOfHexes = new HashSet<>();
+		Point coordinates = null;
+		HexState nextHex = null;
 		
-		for (int i = 1; i < Hexes.size(); i++) {
-			TileProperties hex = Hexes.get(i);
-			moveSpeedTotal += hex.getMoveSpeed();
-			if (!hex.isHexTile()) {
-				throw new IllegalArgumentException("Can't move through non hexes");
-			}
-		}
+		validateCreatureLimitInHexNotExceeded(playerNumber, Hexes.get(Hexes.size() - 1), currentState, Creatures);
+		
+		boolean landCreaturesExist = false;
 		
 		for (TileProperties creature : Creatures) {
 			currentState.getPlayerByPlayerNumber(playerNumber).ownsThingOnBoard(creature);
@@ -469,7 +476,58 @@ public abstract class CommandValidator
 			if (creature.getMoveSpeed() < moveSpeedTotal) {
 				throw new IllegalArgumentException("Creature cannot move that far");
 			}
+			if (creature.getAbilities().) {
+				
+			}
+		}
+		
+		for (int i = 1; i < Hexes.size(); i++) {
+			TileProperties hex = Hexes.get(i);
 			
+			if (i < Hexes.size() - 1) {
+				coordinates = currentState.getBoard().getXYCoordinatesOfHex(Hexes.get(i));
+				nextHex = currentState.getBoard().getHexByXY(coordinates.x, coordinates.y);
+				pathOfHexes.add(nextHex);
+			}
+			
+			moveSpeedTotal += hex.getMoveSpeed();
+			
+			if (!hex.isHexTile()) {
+				throw new IllegalArgumentException("Can't move through non hexes");
+			}
+			
+			if (Biome.Sea.name().equals(hex.getName())) {
+				throw new IllegalArgumentException("Can't move through sea hexes");
+			}
+		}
+		
+		List<Player> players = new ArrayList<>();
+		
+		for (Player player : currentState.getPlayers()) {
+			if (player.getPlayerNumber() != playerNumber) {
+				players.add(player);
+			}
+		}
+		
+		coordinates = currentState.getBoard().getXYCoordinatesOfHex(Hexes.get(0));
+		HexState firstHex = currentState.getBoard().getHexByXY(coordinates.x, coordinates.y);
+		pathOfHexes.add(firstHex);
+		Player playerMoving = currentState.getPlayerByPlayerNumber(playerNumber);
+		
+		HashSet<TileProperties> thingsInHex = new HashSet<>();
+		for (HexState newHex : pathOfHexes) {
+			thingsInHex.clear();
+			thingsInHex.addAll(newHex.getCreaturesInHex());
+			
+			if (newHex.hasBuilding()) {
+				thingsInHex.add(newHex.getBuilding());
+			}
+		
+			for (TileProperties creature : thingsInHex) {
+				if (!playerMoving.ownsThingOnBoard(creature)) {
+					throw new IllegalArgumentException("Can't move out of hex with enemy creatures");
+				}
+			}
 		}
 	}
 }
