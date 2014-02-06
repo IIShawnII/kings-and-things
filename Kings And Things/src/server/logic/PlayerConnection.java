@@ -18,8 +18,8 @@ public class PlayerConnection extends Thread{
 	private Player player;
 	private Connection connection;
 	
-	public PlayerConnection( final int PLAYER_ID, Connection connection){
-		player = new Player( PLAYER_ID);
+	public PlayerConnection(String name, final int PLAYER_ID, Connection connection){
+		player = new Player(name, PLAYER_ID);
 		this.connection = connection;
 	}
 	

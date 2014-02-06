@@ -68,7 +68,7 @@ public class ConnectionLobby implements Runnable {
             	Logger.getStandardLogger().info("Recieved connection from " + connection);
             	Logger.getStandardLogger().info(connection + " is assigned to Player " + count);
             	
-            	PlayerConnection pc = new PlayerConnection( playerID, connection);
+            	PlayerConnection pc = new PlayerConnection("Player " + playerID, playerID, connection);
             	pc.start();
             	if( connectedPlayers.size()>=1){
             		//update player list for new players who just joined but not ready yet
