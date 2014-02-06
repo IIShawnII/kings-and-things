@@ -9,6 +9,7 @@ import java.util.Set;
 
 import server.logic.exceptions.NoMoreTilesException;
 import common.Constants;
+import common.Constants.Ability;
 import common.Player;
 import common.Constants.Biome;
 import common.Constants.BuildableBuilding;
@@ -476,10 +477,12 @@ public abstract class CommandValidator
 			if (creature.getMoveSpeed() < moveSpeedTotal) {
 				throw new IllegalArgumentException("Creature cannot move that far");
 			}
-			if (creature.getAbilities().) {
-				
+			if (!creature.isSpecialCreatureWithAbility(Ability.Fly)) {
+				landCreaturesExist = true;
 			}
 		}
+		
+		boolean hexNotOwned = true;
 		
 		for (int i = 1; i < Hexes.size(); i++) {
 			TileProperties hex = Hexes.get(i);
@@ -488,6 +491,14 @@ public abstract class CommandValidator
 				coordinates = currentState.getBoard().getXYCoordinatesOfHex(Hexes.get(i));
 				nextHex = currentState.getBoard().getHexByXY(coordinates.x, coordinates.y);
 				pathOfHexes.add(nextHex);
+				for (Player p : currentState.getPlayers()) {
+					if (p.ownsHex(hex)) {
+						hexNotOwned = false;
+					}
+				}
+				if (hexNotOwned) {
+					throw new IllegalArgumentException("Can't move through unexplored hexes");
+				}
 			}
 			
 			moveSpeedTotal += hex.getMoveSpeed();
@@ -496,7 +507,7 @@ public abstract class CommandValidator
 				throw new IllegalArgumentException("Can't move through non hexes");
 			}
 			
-			if (Biome.Sea.name().equals(hex.getName())) {
+			if (Biome.Sea.name().equals(hex.getName()) && landCreaturesExist) {
 				throw new IllegalArgumentException("Can't move through sea hexes");
 			}
 		}
@@ -528,6 +539,10 @@ public abstract class CommandValidator
 					throw new IllegalArgumentException("Can't move out of hex with enemy creatures");
 				}
 			}
+		}
+		
+		if (Biome.Sea.name().equals(Hexes.get(Hexes.size() - 1).getName())) {
+			throw new IllegalArgumentException("Can't end movement on sea hex");
 		}
 	}
 }
