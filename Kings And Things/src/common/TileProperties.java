@@ -220,6 +220,23 @@ public class TileProperties {
 		return !isBuilding() && !isEvent() && !isMagicItem() && !isTreasure() && !isSpecialIncomeCounter();
 	}
 	
+	public boolean hasAbility(Ability ability)
+	{
+		for(Ability a : getAbilities())
+		{
+			if(a == ability)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isSpecialCreatureWithAbility(Ability ability)
+	{
+		return isCreature() && hasAbility(ability);
+	}
+	
 	public Biome getBiomeRestriction()
 	{
 		for(Restriction r : restrictions)

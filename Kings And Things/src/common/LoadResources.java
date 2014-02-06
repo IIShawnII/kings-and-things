@@ -1,27 +1,39 @@
 package common;
 
+import static common.Constants.BUILDING;
+import static common.Constants.CUP;
+import static common.Constants.GOLD;
+import static common.Constants.HEX;
+import static common.Constants.SPECIAL;
+import static common.Constants.STATE;
+
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Files;
-import java.nio.file.FileVisitor;
 import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import common.Constants.Ability;
 import common.Constants.Category;
 import common.Constants.Restriction;
-import static common.Constants.CUP;
-import static common.Constants.HEX;
-import static common.Constants.GOLD;
-import static common.Constants.STATE;
-import static common.Constants.SPECIAL;
-import static common.Constants.BUILDING;
-import static common.Constants.RESOURCE_PATH;
 
 public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	private int copyTile = 0;
 	private Category currentCategory = null;
+	private final Path RESOURCES_DIRECTORY;
+	
+	public LoadResources()
+	{
+		this(Constants.RESOURCE_PATH.toString());
+	}
+	
+	public LoadResources(String directory)
+	{
+		RESOURCES_DIRECTORY = Paths.get(directory);
+	}
 	
 	@Override
 	public void run() {
@@ -29,7 +41,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			Thread.sleep( 400);
 		} catch ( InterruptedException e) {}
 		try {
-			Files.walkFileTree( RESOURCE_PATH, this);
+			Files.walkFileTree( RESOURCES_DIRECTORY, this);
 		} catch ( IOException e) {
 			e.printStackTrace();
 		}
