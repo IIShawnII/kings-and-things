@@ -1,39 +1,25 @@
 package server.event.commands;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import common.TileProperties;
+import common.event.AbstractEvent;
 
-@XmlRootElement
-public class PlaceThingOnBoardCommand extends AbstractCommand
-{
-	@XmlElement
+public class PlaceThingOnBoardCommand extends AbstractEvent{
+	
+	private static final long serialVersionUID = 2202311714278703144L;
+	
 	private final TileProperties hex;
-	@XmlElement
 	private final TileProperties thing;
 	
-	public PlaceThingOnBoardCommand(TileProperties thing, TileProperties hex)
-	{
+	public PlaceThingOnBoardCommand(TileProperties thing, TileProperties hex){
 		this.thing = thing;
 		this.hex = hex;
 	}
 	
-	public TileProperties getThing()
-	{
+	public TileProperties getThing(){
 		return thing;
 	}
 	
-	public TileProperties getHex()
-	{
+	public TileProperties getHex(){
 		return hex;
-	}
-	
-	@SuppressWarnings("unused")
-	private PlaceThingOnBoardCommand()
-	{
-		//required by JAXB
-		hex = null;
-		thing = null;
 	}
 }

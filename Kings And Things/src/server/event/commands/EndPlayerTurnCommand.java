@@ -1,11 +1,12 @@
 package server.event.commands;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import common.event.AbstractEvent;
 
+public class EndPlayerTurnCommand extends AbstractEvent{
+	
+	private static final long serialVersionUID = -2327077971107739414L;
 
-@XmlRootElement
-public class EndPlayerTurnCommand extends AbstractCommand
-{
 	public EndPlayerTurnCommand(){
+		
 	}
 }

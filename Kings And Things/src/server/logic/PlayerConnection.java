@@ -1,12 +1,13 @@
 package server.logic;
 
-import server.event.commands.SendNotificationAcrossNetworkEvent;
-import server.logic.game.Player;
-
 import com.google.common.eventbus.Subscribe;
 
+import common.Player;
+import common.event.AbstractEvent;
 import common.event.EventDispatch;
-import common.event.notifications.AbstractNotification;
+import common.event.notifications.PlayerConnected;
+import common.event.notifications.PlayerReady;
+import common.event.notifications.PlayerUnReady;
 import common.network.Connection;
 
 public class PlayerConnection extends Thread{
@@ -23,52 +24,44 @@ public class PlayerConnection extends Thread{
 		playerName = "Player " + PLAYER_ID;
 	}
 	
-	public void initialize()
-	{
-		EventDispatch.COMMAND.register(this);
-	}
-	
-	public boolean isReadyToStart()
-	{
+	public boolean isReadyToStart(){
 		return readyToStart;
 	}
 	
-	public void setReadyToStart(boolean newVal)
-	{
+	public void setReadyToStart(boolean newVal){
 		readyToStart = newVal;
 	}
 	
-	public int getPlayerId()
-	{
+	public int getPlayerID(){
 		return PLAYER_ID;
 	}
 	
-	public String getPlayerName()
-	{
+	public String getPlayerName(){
 		return playerName;
 	}
 	
-	public void setPlayerName(String newName)
-	{
+	public void setPlayerName(String newName){
 		playerName = newName;
 	}
 	
-	public Player toPlayerObj()
-	{
+	public Player toPlayerObj(){
 		return new Player(playerName, PLAYER_ID);
 	}
 	
 	@Override
 	public void run(){
-		AbstractNotification notification = null;
+		EventDispatch.registerForCommandEvents(this);
+		AbstractEvent notification = null;
 		while ((notification = connection.recieve())!=null){
-			notification.post();//.dispatch(getPlayerId());
+			if( notification instanceof PlayerReady || notification instanceof PlayerUnReady){
+				setReadyToStart( !(notification instanceof PlayerUnReady));
+				notification.postNotification( getPlayerID());
+			}
 		}
 	}
 	
 	@Subscribe
-	public void sendNotificationToClient( SendNotificationAcrossNetworkEvent command)
-	{
-		connection.send( command.getNotification());
+	public void sendNotificationToClient( PlayerConnected event){
+		connection.send( event);
 	}
 }

@@ -8,22 +8,21 @@ import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.ArrayList;
 import java.net.ServerSocket;
 import java.net.SocketTimeoutException;
 
-import server.event.commands.RequestStartCommand;
-import server.event.commands.StartGameCommand;
-import server.logic.game.GameFlowManager;
-import server.logic.game.Player;
-
 import com.google.common.eventbus.Subscribe;
 
+import server.event.commands.StartGameCommand;
+import server.logic.game.GameFlowManager;
 import common.Logger;
 import common.LoadResources;
 import common.network.Connection;
 import common.event.EventDispatch;
+import common.event.notifications.PlayerConnected;
+import common.event.notifications.PlayerReady;
+import common.event.notifications.PlayerUnReady;
 
 public class ConnectionLobby implements Runnable {
 
@@ -42,7 +41,7 @@ public class ConnectionLobby implements Runnable {
 		lr.run();
 		
 		demoMode = isDemoMode;
-		connectedPlayers = new ArrayList<PlayerConnection>();
+		connectedPlayers = new ArrayList<>();
 		game = new GameFlowManager();
 		
 		try {
@@ -57,8 +56,8 @@ public class ConnectionLobby implements Runnable {
 
 	@Override
 	public void run() {
+		EventDispatch.registerForCommandEvents(this);
 		game.initialize();
-		EventDispatch.COMMAND.register(this);
 		int count=0, playerID = PLAYER;
 		while( !close && count<MAX_PLAYERS){
             try {
@@ -70,7 +69,6 @@ public class ConnectionLobby implements Runnable {
             	Logger.getStandardLogger().info(connection + " is assigned to Player " + count);
             	
             	PlayerConnection pc = new PlayerConnection( playerID, connection);
-            	pc.initialize();
             	pc.start();
             	connectedPlayers.add(pc);
             	
@@ -88,35 +86,29 @@ public class ConnectionLobby implements Runnable {
 			Logger.getErrorLogger().error("Problem closing player connections: ", e);
 		}
 	}
-
-	public void handle() {
-		close = true;
+	
+	@Subscribe
+	public void handleReadyRequest( PlayerUnReady start){
+		handleNewState();
 	}
 	
 	@Subscribe
-	public void handleStartRequest(RequestStartCommand command)
-	{
+	public void handleStartRequest( PlayerReady ready){
+		handleNewState();
+	}
+
+	private void handleNewState() {
 		boolean unreadyPlayerConnected = false;
-		
-		for(PlayerConnection pc : connectedPlayers)
-		{
-			if(pc.getPlayerId() == command.getPlayerNumber())
-			{
-				pc.setReadyToStart(true);
-			}
-			else if(!pc.isReadyToStart())
-			{
+		PlayerConnected connections = new PlayerConnected();
+		for( PlayerConnection pc : connectedPlayers){
+			if( !pc.isReadyToStart()){
 				unreadyPlayerConnected = true;
+				connections.addPlayer( pc.toPlayerObj());
 			}
 		}
-		if(!unreadyPlayerConnected)
-		{
-			HashSet<Player> players = new HashSet<Player>();
-			for(PlayerConnection pc : connectedPlayers)
-			{
-				players.add(pc.toPlayerObj());
-			}
-			EventDispatch.COMMAND.post( new StartGameCommand( demoMode, players));
+		connections.postCommand();
+		if( !unreadyPlayerConnected){
+			new StartGameCommand( demoMode, connections.getPlayers()).postCommand();
 		}
 	}
 }

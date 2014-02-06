@@ -1,6 +1,10 @@
 package client.event;
 
-public class ConnectionAction extends AbstractCommand {
+import common.event.AbstractEvent;
+
+public class ConnectionAction extends AbstractEvent {
+	
+	private static final long serialVersionUID = 3228653739084697727L;
 	
 	private int port;
 	private String address;

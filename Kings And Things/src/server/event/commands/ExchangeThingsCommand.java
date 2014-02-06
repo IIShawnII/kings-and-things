@@ -5,35 +5,23 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import common.TileProperties;
+import common.event.AbstractEvent;
 
-@XmlRootElement
-public class ExchangeThingsCommand extends AbstractCommand
-{
-	@XmlElement
+public class ExchangeThingsCommand extends AbstractEvent{
+	
+	private static final long serialVersionUID = 6694868452857851218L;
+	
 	private final HashSet<TileProperties> things;
 	
-	public ExchangeThingsCommand(Collection<TileProperties> things)
-	{
+	public ExchangeThingsCommand(Collection<TileProperties> things){
 		this.things = new HashSet<TileProperties>();
-		for(TileProperties thing : things)
-		{
+		for(TileProperties thing : things){
 			this.things.add(thing);
 		}
 	}
 	
-	public Set<TileProperties> getThings()
-	{
+	public Set<TileProperties> getThings(){
 		return Collections.unmodifiableSet(things);
-	}
-
-	@SuppressWarnings("unused")
-	private ExchangeThingsCommand()
-	{
-		//required by JAXB
-		things = null;
 	}
 }

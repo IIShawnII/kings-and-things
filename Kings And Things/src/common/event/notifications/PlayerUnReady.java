@@ -2,13 +2,13 @@ package common.event.notifications;
 
 import common.event.AbstractEvent;
 
-public class PlayerReady extends AbstractEvent{
+public class PlayerUnReady extends AbstractEvent{
 	
-	private static final long serialVersionUID = 749685506391697600L;
+	private static final long serialVersionUID = -6660391742771135640L;
 	
 	private String name;
 	
-	public PlayerReady( String playerName){
+	public PlayerUnReady( String playerName){
 		name = playerName;
 	}
 

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import common.Player;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 

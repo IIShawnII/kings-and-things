@@ -1,11 +1,12 @@
 package common.event.notifications;
 
-public class PlaceThingOnBoard extends AbstractNotification
-{
+import common.event.AbstractEvent;
 
-	public PlaceThingOnBoard()
-	{
+public class PlaceThingOnBoard extends AbstractEvent{
+
+	private static final long serialVersionUID = 1725361097682444894L;
+
+	public PlaceThingOnBoard(){
 		// TODO Auto-generated constructor stub
 	}
-
 }

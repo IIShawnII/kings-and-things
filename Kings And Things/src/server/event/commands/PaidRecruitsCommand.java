@@ -1,18 +1,17 @@
 package server.event.commands;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import common.event.AbstractEvent;
 
-@XmlRootElement
-public class PaidRecruitsCommand extends AbstractCommand {
-	@XmlAttribute
+
+public class PaidRecruitsCommand extends AbstractEvent {
+
+	private static final long serialVersionUID = -8959418919090060123L;
+	
 	private int gold;
 	
 	public PaidRecruitsCommand(int newGold) {
 		this.gold = newGold;
 	}
-	
-	// Getter Methods
 	
 	/**
 	 * Retrieves gold

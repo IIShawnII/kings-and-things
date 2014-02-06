@@ -1,11 +1,12 @@
 package common.event.notifications;
 
-public class ExchangeSeaHex extends AbstractNotification
-{
+import common.event.AbstractEvent;
 
-	public ExchangeSeaHex()
-	{
+public class ExchangeSeaHex extends AbstractEvent{
+
+	private static final long serialVersionUID = 6585985986093663420L;
+
+	public ExchangeSeaHex(){
 		// TODO Auto-generated constructor stub
 	}
-
 }

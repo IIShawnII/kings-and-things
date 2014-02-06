@@ -1,6 +1,7 @@
 package client.gui;
 
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -23,10 +24,11 @@ import java.awt.GraphicsConfiguration;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import common.Console;
+import common.Player;
 import common.Constants.Level;
 import common.Constants.Category;
 import common.event.EventDispatch;
+import common.event.notifications.PlayerConnected;
 import common.event.notifications.PlayerReady;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
@@ -43,7 +45,7 @@ public class LoadingDialog extends JDialog{
 	private InputControl control;
 	private String title;
 	private Runnable task;
-	private Console players;
+	private JList< Player> players;
 	private JPanel jpProgress;
 	private JTextField jtfIP, jtfPort, jtfName;
 	private JButton jbConnect, jbDisconnect, jbReady;
@@ -60,7 +62,7 @@ public class LoadingDialog extends JDialog{
 	}
 
 	public boolean run() {
-		EventDispatch.COMMAND.register( this);
+		EventDispatch.registerForCommandEvents( this);
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		setContentPane( createGUI());
 		pack();
@@ -141,8 +143,7 @@ public class LoadingDialog extends JDialog{
 			jpMain.add( jpProgress, constraints);
 		}
 		
-		players = new Console();
-		players.setEditable( false);
+		players = new JList<>();
 		players.setPreferredSize( CONSOLE_SIZE);
 		JScrollPane jsp = new JScrollPane( players);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -273,11 +274,11 @@ public class LoadingDialog extends JDialog{
 		public void actionPerformed( ActionEvent e) {
 			Object source = e.getSource();
 			if( source==jbConnect){
-				new ConnectionAction( jtfIP.getText().trim(), Integer.parseInt( jtfPort.getText().trim())).post();
+				new ConnectionAction( jtfIP.getText().trim(), Integer.parseInt( jtfPort.getText().trim())).postCommand();
 			}else if( source==jbDisconnect){
-				new ConnectionAction().post();
+				new ConnectionAction().postCommand();
 			}else if( isConnected && source==jbReady){
-				new PlayerReady( jtfName.getText().trim()).post();
+				new PlayerReady( jtfName.getText().trim()).postCommand();
 				result = true;
 				//dispose();
 			}else if( e.getActionCommand().equals( "Cancel")){
@@ -285,6 +286,11 @@ public class LoadingDialog extends JDialog{
 				result = false;
 			}
 		}
+	}
+	
+	@Subscribe
+	public void updateJList( PlayerConnected connected){
+		players.setListData( connected.getPlayers().toArray( new Player[1]));
 	}
 
 	@Subscribe

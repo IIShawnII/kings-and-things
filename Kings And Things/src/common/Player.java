@@ -1,34 +1,24 @@
-package server.logic.game;
+package common;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import common.TileProperties;
-
 /**
  * This class represents a player in the game
  */
-@XmlRootElement
-public class Player
-{
-	@XmlAttribute
+public class Player implements Serializable{
+
+	private static final long serialVersionUID = -458021976956323899L;
+	
 	private boolean isPlaying;
-	@XmlAttribute
 	private String name;
-	@XmlAttribute
 	private final int id;
 	private int gold;
 
-	@XmlElement
 	private final HashSet<TileProperties> ownedHexes;
-	@XmlElement
 	private final HashSet<TileProperties> ownedThingsOnBoard;
-	@XmlElement
 	private final HashSet<TileProperties> tray;
 	
 	/**
@@ -401,12 +391,5 @@ public class Player
 		{
 			throw new IllegalArgumentException("The entered gold amount must be positive");
 		}
-	}
-	
-	@SuppressWarnings("unused")
-	private Player()
-	{
-		//required by JAXB
-		this("",0);
 	}
 }

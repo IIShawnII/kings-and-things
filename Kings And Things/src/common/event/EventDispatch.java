@@ -16,6 +16,14 @@ public abstract class EventDispatch
 	 * See GameFlowManager for an example on registering for events and handling them, see Command
 	 * for an example on posting events.
 	 */
-	public static final EventBus COMMAND = new EventBus();
-	public static final EventBus NOTIFICATION = new EventBus();
+	static final EventBus COMMAND = new EventBus();
+	static final EventBus NOTIFICATION = new EventBus();
+	
+	public static void registerForCommandEvents( Object obj){
+		COMMAND.register( obj);
+	}
+	
+	public static void registerForNotificationEvents( Object obj){
+		NOTIFICATION.register( obj);
+	}
 }

@@ -1,6 +1,10 @@
 package client.event;
 
-public class ConnectionState extends AbstractCommand {
+import common.event.AbstractEvent;
+
+public class ConnectionState extends AbstractEvent {
+	
+	private static final long serialVersionUID = 8361038387154903329L;
 	
 	private String message;
 	private boolean isConnected = false;

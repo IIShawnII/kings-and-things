@@ -1,11 +1,12 @@
 package common.event.notifications;
 
-public class PaidRecruits extends AbstractNotification
-{
+import common.event.AbstractEvent;
 
-	public PaidRecruits()
-	{
+public class PaidRecruits extends AbstractEvent{
+
+	private static final long serialVersionUID = 8492621264479523951L;
+
+	public PaidRecruits(){
 		// TODO Auto-generated constructor stub
 	}
-
 }

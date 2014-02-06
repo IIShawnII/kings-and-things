@@ -1,40 +1,26 @@
 package server.event.commands;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import common.Constants.BuildableBuilding;
+import common.event.AbstractEvent;
 import common.TileProperties;
 
-@XmlRootElement
-public class ConstructBuildingCommand extends AbstractCommand
-{
-	@XmlElement
+public class ConstructBuildingCommand extends AbstractEvent{
+	
+	private static final long serialVersionUID = -6111450266321762088L;
+	
 	private final BuildableBuilding building;
-	@XmlElement
 	private final TileProperties hex;
 	
-	public ConstructBuildingCommand(BuildableBuilding building, TileProperties hex)
-	{
+	public ConstructBuildingCommand(BuildableBuilding building, TileProperties hex){
 		this.building = building;
 		this.hex = hex;
 	}
 	
-	public BuildableBuilding getBuilding()
-	{
+	public BuildableBuilding getBuilding(){
 		return building;
 	}
 	
-	public TileProperties getHex()
-	{
+	public TileProperties getHex(){
 		return hex;
-	}
-	
-	@SuppressWarnings("unused")
-	private ConstructBuildingCommand()
-	{
-		//required by JAXB
-		building = null;
-		hex = null;
 	}
 }

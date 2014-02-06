@@ -4,18 +4,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import common.Player;
+import common.event.AbstractEvent;
 
-import server.logic.game.Player;
+public class StartGameCommand extends AbstractEvent{
+	
+	private static final long serialVersionUID = 5919685855315175876L;
 
-@XmlRootElement
-public class StartGameCommand extends AbstractCommand
-{
-	@XmlAttribute
 	private final boolean demoMode;
-	@XmlElement
+	
 	private final HashSet<Player> players;
 	
 	public StartGameCommand(boolean demoMode, Set<Player> players)
@@ -36,13 +33,5 @@ public class StartGameCommand extends AbstractCommand
 	public boolean getDemoMode()
 	{
 		return demoMode;
-	}
-
-	@SuppressWarnings("unused")
-	private StartGameCommand()
-	{
-		//required by JAXB
-		demoMode = false;
-		players = null;
 	}
 }

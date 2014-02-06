@@ -15,7 +15,6 @@ import server.event.commands.ExchangeThingsCommand;
 import server.event.commands.GiveHexToPlayerCommand;
 import server.event.commands.PaidRecruitsCommand;
 import server.event.commands.PlaceThingOnBoardCommand;
-import server.event.commands.SendNotificationAcrossNetworkEvent;
 import server.event.commands.StartGameCommand;
 import server.logic.exceptions.NoMoreTilesException;
 
@@ -25,6 +24,7 @@ import common.Constants.BuildableBuilding;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
+import common.Player;
 import common.TileProperties;
 import common.event.EventDispatch;
 import common.event.notifications.StartGame;
@@ -32,8 +32,8 @@ import common.event.notifications.StartGame;
 /**
  * This class is used to execute commands that change the state of a game
  */
-public class GameFlowManager
-{
+public class GameFlowManager{
+	
 	private CupManager cup;
 	private HexTileManager bank;
 	private BoardGenerator boardGenerator;
@@ -42,9 +42,8 @@ public class GameFlowManager
 	/**
 	 * call this method to initialize this class before sending it commands
 	 */
-	public void initialize()
-	{
-		EventDispatch.COMMAND.register(this);
+	public void initialize(){
+		EventDispatch.registerForCommandEvents(this);
 	}
 	
 	/**
@@ -55,8 +54,7 @@ public class GameFlowManager
 	 * to set up another board
 	 * @throws IllegalArgumentException if the entered list of players is invalid
 	 */
-	public void startNewGame(boolean demoMode, Set<Player> players) throws NoMoreTilesException
-	{
+	public void startNewGame(boolean demoMode, Set<Player> players) throws NoMoreTilesException{
 		CommandValidator.validateStartNewGame(demoMode, players);
 		cup = new CupManager(demoMode);
 		bank = new HexTileManager(demoMode);
@@ -64,7 +62,7 @@ public class GameFlowManager
 		List<Integer> playerOrder = determinePlayerOrder(players,demoMode);
 		currentState = new GameState(boardGenerator.createNewBoard(),players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0));
 		
-		EventDispatch.COMMAND.post( new SendNotificationAcrossNetworkEvent( new StartGame()));
+		new StartGame().postCommand();
 	}
 	
 	/**
@@ -76,8 +74,7 @@ public class GameFlowManager
 	 * @throws IllegalStateException if it is not the correct phase for selecting
 	 * starting hexes
 	 */
-	public void giveHexToPlayer(TileProperties hex, int playerNumber)
-	{
+	public void giveHexToPlayer(TileProperties hex, int playerNumber){
 		CommandValidator.validateCanGiveHexToPlayer(hex, playerNumber, currentState);
 		makeHexOwnedByPlayer(hex,playerNumber);
 		if(currentState.getCurrentSetupPhase() == SetupPhase.PICK_FIRST_HEX && currentState.getPlayers().size() == 2)
@@ -96,8 +93,7 @@ public class GameFlowManager
 	 * building or hex tile is invalid, or if construction can not be done due to game rules
 	 * @throws IllegalStateException if it is not the correct phase for building things
 	 */
-	public void constructBuilding(BuildableBuilding building, int playerNumber, TileProperties hex)
-	{
+	public void constructBuilding(BuildableBuilding building, int playerNumber, TileProperties hex){
 		CommandValidator.validateCanBuildBuilding(building, playerNumber, hex, currentState);
 		makeBuildingConstructed(building, playerNumber, hex);
 		if(currentState.getCurrentSetupPhase() == SetupPhase.PLACE_FREE_TOWER)
@@ -117,8 +113,7 @@ public class GameFlowManager
 	 * @throws IllegalStateException If it is not the right phase for placing things on
 	 * the board
 	 */
-	public void placeThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex)
-	{
+	public void placeThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex){
 		CommandValidator.validateCanPlaceThingOnBoard(thing, playerNumber, hex, currentState);
 		makeThingOnBoard(thing, playerNumber, hex);
 	}
@@ -133,8 +128,7 @@ public class GameFlowManager
 	 * of things is invalid
 	 * @throws IllegalStateException If it is nor the proper phase for exchanging things
 	 */
-	public void exchangeThings(Collection<TileProperties> things, int playerNumber) throws NoMoreTilesException
-	{
+	public void exchangeThings(Collection<TileProperties> things, int playerNumber) throws NoMoreTilesException{
 		CommandValidator.validateCanExchangeThings(things, playerNumber, currentState);
 		makeThingsExchanged(things,playerNumber);
 		advanceActivePhasePlayer();
@@ -149,8 +143,7 @@ public class GameFlowManager
 	 * sea hex can not be exchanged according to game rules
 	 * @throws IllegalStateException If it is nor the proper phase for exchanging sea hexes
 	 */
-	public void exchangeSeaHex(TileProperties hex, int playerNumber) throws NoMoreTilesException
-	{
+	public void exchangeSeaHex(TileProperties hex, int playerNumber) throws NoMoreTilesException{
 		CommandValidator.validateCanExchangeSeaHex(hex, playerNumber, currentState);
 		makeSeaHexExchanged(hex, playerNumber);
 	}
@@ -160,8 +153,7 @@ public class GameFlowManager
 	 * @param playerNumber The player who sent the command
 	 * @throws IllegalArgumentException If it is not the entered player's turn
 	 */
-	public void endPlayerTurn(int playerNumber)
-	{
+	public void endPlayerTurn(int playerNumber){
 		CommandValidator.validateCanEndPlayerTurn(playerNumber, currentState);
 		advanceActivePhasePlayer();
 	}
@@ -190,8 +182,7 @@ public class GameFlowManager
 		}
 	}
 	
-	private void advanceActivePhasePlayer()
-	{
+	private void advanceActivePhasePlayer(){
 		SetupPhase nextSetupPhase = currentState.getCurrentSetupPhase();
 		RegularPhase nextRegularPhase = currentState.getCurrentRegularPhase();
 		
@@ -215,8 +206,7 @@ public class GameFlowManager
 										currentState.getPlayerOrder().get(++activePhasePlayerOrderIndex % currentState.getPlayers().size()));
 	}
 	
-	private void advanceActiveTurnPlayer()
-	{
+	private void advanceActiveTurnPlayer(){
 		int activeTurnPlayerNumber = currentState.getActiveTurnPlayer().getPlayerNumber();
 		int activeTurnPlayerOrderIndex = currentState.getPlayerOrder().indexOf(activeTurnPlayerNumber);
 		int nextActiveTurnPlayerNumber = currentState.getPlayerOrder().get(++activeTurnPlayerOrderIndex % currentState.getPlayers().size());
@@ -231,8 +221,7 @@ public class GameFlowManager
 									currentState.getCurrentSetupPhase(), currentState.getCurrentRegularPhase(), nextActiveTurnPlayerNumber, nextActiveTurnPlayerNumber);
 	}
 	
-	private SetupPhase getNextSetupPhase()
-	{
+	private SetupPhase getNextSetupPhase(){
 		SetupPhase nextSetupPhase = currentState.getCurrentSetupPhase();
 		
 		if(nextSetupPhase == SetupPhase.SETUP_FINISHED)
@@ -255,8 +244,7 @@ public class GameFlowManager
 		throw new IllegalStateException("GameState contained invalid SetupPhase constant");
 	}
 
-	private RegularPhase getNextRegularPhase()
-	{
+	private RegularPhase getNextRegularPhase(){
 		RegularPhase nextRegularPhase = currentState.getCurrentRegularPhase();
 		
 		if(nextRegularPhase == RegularPhase.SPECIAL_POWERS)
@@ -279,8 +267,7 @@ public class GameFlowManager
 		throw new IllegalStateException("GameState contained invalid RegularPhase constant");
 	}
 	
-	private void makeThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex)
-	{
+	private void makeThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex){
 		Point coords = currentState.getBoard().getXYCoordinatesOfHex(hex);
 		HexState hs = currentState.getBoard().getHexByXY(coords.x, coords.y);
 		if(thing.isCreature() && thing.isFaceUp())
@@ -543,7 +530,7 @@ public class GameFlowManager
 	{
 		try
 		{
-			constructBuilding(command.getBuilding(), command.getPlayerNumber(), command.getHex());
+			constructBuilding(command.getBuilding(), command.getPlayerID(), command.getHex());
 		}
 		catch(Throwable t)
 		{
@@ -556,7 +543,7 @@ public class GameFlowManager
 	{
 		try
 		{
-			endPlayerTurn(command.getPlayerNumber());
+			endPlayerTurn(command.getPlayerID());
 		}
 		catch(Throwable t)
 		{
@@ -569,7 +556,7 @@ public class GameFlowManager
 	{
 		try
 		{
-			exchangeSeaHex(command.getHex(), command.getPlayerNumber());
+			exchangeSeaHex(command.getHex(), command.getPlayerID());
 		}
 		catch(Throwable t)
 		{
@@ -582,7 +569,7 @@ public class GameFlowManager
 	{
 		try
 		{
-			exchangeThings(command.getThings(), command.getPlayerNumber());
+			exchangeThings(command.getThings(), command.getPlayerID());
 		}
 		catch(Throwable t)
 		{
@@ -595,7 +582,7 @@ public class GameFlowManager
 	{
 		try
 		{
-			giveHexToPlayer(command.getHex(), command.getPlayerNumber());
+			giveHexToPlayer(command.getHex(), command.getPlayerID());
 		}
 		catch(Throwable t)
 		{
@@ -608,7 +595,7 @@ public class GameFlowManager
 	{
 		try
 		{
-			placeThingOnBoard(command.getThing(), command.getPlayerNumber(), command.getHex());
+			placeThingOnBoard(command.getThing(), command.getPlayerID(), command.getHex());
 		}
 		catch(Throwable t)
 		{
@@ -621,7 +608,7 @@ public class GameFlowManager
 	{
 		try
 		{
-			paidRecruits(command.getGold(), command.getPlayerNumber());
+			paidRecruits(command.getGold(), command.getPlayerID());
 		}
 		catch(Throwable t)
 		{

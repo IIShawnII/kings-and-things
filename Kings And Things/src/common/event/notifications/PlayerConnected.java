@@ -1,11 +1,25 @@
 package common.event.notifications;
 
-public class PlayerConnected extends AbstractNotification
-{
+import java.util.HashSet;
 
-	public PlayerConnected()
-	{
-		// TODO Auto-generated constructor stub
+import common.Player;
+import common.event.AbstractEvent;
+
+public class PlayerConnected extends AbstractEvent{
+	
+	private static final long serialVersionUID = -2436121223229723837L;
+	
+	HashSet<Player> players = new HashSet<>();
+	
+	public PlayerConnected(){
+		players = new HashSet<>();
 	}
-
+	
+	public void addPlayer( Player player){
+		players.add( player);
+	}
+	
+	public HashSet<Player> getPlayers(){
+		return players;
+	}
 }

@@ -1,30 +1,19 @@
 package server.event.commands;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import common.TileProperties;
+import common.event.AbstractEvent;
 
-@XmlRootElement
-public class GiveHexToPlayerCommand extends AbstractCommand
-{
-	@XmlElement
+public class GiveHexToPlayerCommand extends AbstractEvent{
+	
+	private static final long serialVersionUID = -2046312797845461616L;
+	
 	private final TileProperties hex;
 	
-	public GiveHexToPlayerCommand(TileProperties hex)
-	{
+	public GiveHexToPlayerCommand(TileProperties hex){
 		this.hex = hex;
 	}
 	
-	public TileProperties getHex()
-	{
+	public TileProperties getHex(){
 		return hex;
-	}
-
-	@SuppressWarnings("unused")
-	private GiveHexToPlayerCommand()
-	{
-		//required by JAXB
-		hex = null;
 	}
 }

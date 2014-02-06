@@ -1,30 +1,19 @@
 package server.event.commands;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import common.TileProperties;
+import common.event.AbstractEvent;
 
-@XmlRootElement
-public class ExchangeSeaHexCommand extends AbstractCommand
-{
-	@XmlElement
+public class ExchangeSeaHexCommand extends AbstractEvent{
+
+	private static final long serialVersionUID = -8431537364031114053L;
+	
 	private final TileProperties hex;
 	
-	public ExchangeSeaHexCommand(TileProperties hex)
-	{
+	public ExchangeSeaHexCommand(TileProperties hex){
 		this.hex = hex;
 	}
 	
-	public TileProperties getHex()
-	{
+	public TileProperties getHex(){
 		return hex;
-	}
-
-	@SuppressWarnings("unused")
-	private ExchangeSeaHexCommand()
-	{
-		//required by JAXB
-		hex = null;
 	}
 }

@@ -1,11 +1,12 @@
 package common.event.notifications;
 
-public class GiveHexToPlayer extends AbstractNotification
-{
+import common.event.AbstractEvent;
 
-	public GiveHexToPlayer()
-	{
+public class GiveHexToPlayer extends AbstractEvent{
+
+	private static final long serialVersionUID = 3819737659836819576L;
+
+	public GiveHexToPlayer(){
 		// TODO Auto-generated constructor stub
 	}
-
 }

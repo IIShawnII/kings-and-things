@@ -6,10 +6,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import common.TileProperties;
 import common.Constants.BuildableBuilding;
+import common.event.AbstractEvent;
 
 @XmlRootElement
-public class ConstructBuilding extends AbstractNotification
-{
+public class ConstructBuilding extends AbstractEvent{
+	
+	private static final long serialVersionUID = -4181661306118643571L;
+	
 	@XmlElement
 	private final BuildableBuilding building;
 	@XmlAttribute

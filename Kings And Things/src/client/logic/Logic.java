@@ -4,7 +4,7 @@ import client.event.ConnectionAction;
 import client.event.ConnectionState;
 import common.network.Connection;
 import common.event.EventDispatch;
-import common.event.notifications.AbstractNotification;
+import common.event.notifications.PlayerConnected;
 import common.event.notifications.PlayerReady;
 
 import com.google.common.eventbus.Subscribe;
@@ -19,7 +19,7 @@ public class Logic implements Runnable {
 	
 	@Override
 	public void run() {
-		EventDispatch.COMMAND.register( this);
+		EventDispatch.registerForCommandEvents( this);
 	}
 	
 	@Subscribe
@@ -37,12 +37,13 @@ public class Logic implements Runnable {
 			connection.disconnect();
 			message = null;
 		}
-		new ConnectionState( message, isConnected).post();
+		new ConnectionState( message, isConnected).postCommand();
 	}
 	
 	@Subscribe
 	public void sendToServer( PlayerReady notification){
 		connection.send( notification);
-		connection.recieve();
+		PlayerConnected connected = (PlayerConnected)connection.recieve();
+		connected.postCommand();
 	}
 }

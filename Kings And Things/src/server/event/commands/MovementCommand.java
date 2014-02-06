@@ -4,14 +4,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
-//import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
-
-
 import java.util.Set;
 
 import common.TileProperties;
+import common.event.AbstractEvent;
 
-public class MovementCommand extends AbstractCommand {
+public class MovementCommand extends AbstractEvent {
+
+	private static final long serialVersionUID = 8819377477924584212L;
 	
 	// List of hexes that creatures want to move through
 	private final HashSet<TileProperties> Hexes;
@@ -50,6 +50,4 @@ public class MovementCommand extends AbstractCommand {
 	public Set<TileProperties> getCreatures () {
 		return Collections.unmodifiableSet(Creatures);
 	}
-	
-	
 }
