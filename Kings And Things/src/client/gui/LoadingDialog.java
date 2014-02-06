@@ -14,6 +14,7 @@ import com.google.common.eventbus.Subscribe;
 
 import client.event.ConnectionAction;
 import client.event.ConnectionState;
+import client.event.UpdatePlayerNames;
 
 import java.awt.Frame;
 import java.awt.Insets;
@@ -28,7 +29,6 @@ import common.Player;
 import common.Constants.Level;
 import common.Constants.Category;
 import common.event.EventDispatch;
-import common.event.notifications.PlayerConnected;
 import common.event.notifications.PlayerReady;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
@@ -85,7 +85,7 @@ public class LoadingDialog extends JDialog{
 		constraints.gridy = 0;
 		jpMain.add( label, constraints);
 		
-		jbReady = new JButton( "Ready");
+		jbReady = new JButton( "(Un)Ready");
 		jbReady.setEnabled( false);
 		jbReady.addActionListener( control);
 		constraints.gridy = 1;
@@ -279,6 +279,7 @@ public class LoadingDialog extends JDialog{
 				new ConnectionAction().postCommand();
 			}else if( isConnected && source==jbReady){
 				new PlayerReady( jtfName.getText().trim()).postCommand();
+				jbReady.setName( "(Un)Ready");
 				result = true;
 				//dispose();
 			}else if( e.getActionCommand().equals( "Cancel")){
@@ -289,8 +290,9 @@ public class LoadingDialog extends JDialog{
 	}
 	
 	@Subscribe
-	public void updateJList( PlayerConnected connected){
-		players.setListData( connected.getPlayers().toArray( new Player[1]));
+	public void updateJList( UpdatePlayerNames names){
+		System.out.println("updatting");
+		players.setListData( names.getPlayers().toArray( new Player[1]));
 	}
 
 	@Subscribe

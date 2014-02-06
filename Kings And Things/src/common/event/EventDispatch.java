@@ -26,4 +26,12 @@ public abstract class EventDispatch
 	public static void registerForNotificationEvents( Object obj){
 		NOTIFICATION.register( obj);
 	}
+
+	public static void unregisterForCommandEvents( Object obj) {
+		COMMAND.unregister( obj);
+	}
+
+	public static void unregisterForNotificationEvents( Object obj) {
+		NOTIFICATION.unregister( obj);
+	}
 }

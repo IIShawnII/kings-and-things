@@ -1,51 +1,34 @@
 package server.logic;
 
+import server.event.commands.PlayerUpdated;
+
 import com.google.common.eventbus.Subscribe;
 
+import common.Logger;
 import common.Player;
 import common.event.AbstractEvent;
+import common.event.AbstractNetwrokEvent;
 import common.event.EventDispatch;
-import common.event.notifications.PlayerConnected;
 import common.event.notifications.PlayerReady;
 import common.event.notifications.PlayerUnReady;
 import common.network.Connection;
 
 public class PlayerConnection extends Thread{
 	
-	private final int PLAYER_ID;
+	private Player player;
 	private Connection connection;
-	private boolean readyToStart;
-	private String playerName;
 	
 	public PlayerConnection( final int PLAYER_ID, Connection connection){
-		this.PLAYER_ID = PLAYER_ID;
+		player = new Player( PLAYER_ID);
 		this.connection = connection;
-		readyToStart = false;
-		playerName = "Player " + PLAYER_ID;
 	}
 	
 	public boolean isReadyToStart(){
-		return readyToStart;
+		return player.isPlaying();
 	}
 	
-	public void setReadyToStart(boolean newVal){
-		readyToStart = newVal;
-	}
-	
-	public int getPlayerID(){
-		return PLAYER_ID;
-	}
-	
-	public String getPlayerName(){
-		return playerName;
-	}
-	
-	public void setPlayerName(String newName){
-		playerName = newName;
-	}
-	
-	public Player toPlayerObj(){
-		return new Player(playerName, PLAYER_ID);
+	public Player getPlayer(){
+		return player;
 	}
 	
 	@Override
@@ -53,15 +36,20 @@ public class PlayerConnection extends Thread{
 		EventDispatch.registerForCommandEvents(this);
 		AbstractEvent notification = null;
 		while ((notification = connection.recieve())!=null){
-			if( notification instanceof PlayerReady || notification instanceof PlayerUnReady){
-				setReadyToStart( !(notification instanceof PlayerUnReady));
-				notification.postNotification( getPlayerID());
+			Logger.getStandardLogger().info( notification);
+			if( notification instanceof PlayerReady){
+				setName( ((PlayerReady)notification).getName());
+				player.setIsPlaying( false);
 			}
+			if( notification instanceof PlayerUnReady){
+				player.setIsPlaying( false);
+			}
+			new PlayerUpdated( player).postCommand();
 		}
 	}
 	
 	@Subscribe
-	public void sendNotificationToClient( PlayerConnected event){
+	public void sendNotificationToClient( AbstractNetwrokEvent event){
 		connection.send( event);
 	}
 }

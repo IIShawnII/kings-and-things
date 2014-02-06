@@ -27,13 +27,7 @@ public class Player implements Serializable{
 	 * @param playerNumber The player's id
 	 * @throws IllegalArgumentException if name is null
 	 */
-	public Player(String name, int playerNumber)
-	{
-		if(name == null)
-		{
-			throw new IllegalArgumentException("The entered player name must not be null.");
-		}
-		this.name = name;
+	public Player( int playerNumber){
 		id = playerNumber;
 		gold = 0;
 		

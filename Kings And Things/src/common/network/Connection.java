@@ -7,7 +7,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.InetSocketAddress;
 
-import common.event.AbstractEvent;
+import common.event.AbstractNetwrokEvent;
 
 /**
  * primary class for sending and receiving text from client or server
@@ -111,7 +111,7 @@ public class Connection implements Closeable{
 	 * @param message - information to be sent
 	 * @return true if information has been sent, else false
 	 */
-	public boolean send( AbstractEvent event){
+	public boolean send( AbstractNetwrokEvent event){
 		if( isConnected){
 			try {
 				output.writeObject( event);
@@ -127,11 +127,11 @@ public class Connection implements Closeable{
 	 * Receive response from destination in form of a text
 	 * @return a string if message is received, otherwise null
 	 */
-	public AbstractEvent recieve(){
+	public AbstractNetwrokEvent recieve(){
 		if( isConnected){
-			AbstractEvent event = null;
+			AbstractNetwrokEvent event = null;
 			try {
-				event = (AbstractEvent) input.readObject();
+				event = (AbstractNetwrokEvent) input.readObject();
 			} catch ( IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}

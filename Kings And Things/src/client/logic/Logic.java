@@ -2,16 +2,19 @@ package client.logic;
 
 import client.event.ConnectionAction;
 import client.event.ConnectionState;
+import client.event.UpdatePlayerNames;
+import common.Logger;
 import common.network.Connection;
+import common.event.AbstractNetwrokEvent;
 import common.event.EventDispatch;
 import common.event.notifications.PlayerConnected;
-import common.event.notifications.PlayerReady;
 
 import com.google.common.eventbus.Subscribe;
 
 public class Logic implements Runnable {
 
 	private Connection connection;
+	private boolean finish = false;
 	
 	public Logic( Connection connection){
 		this.connection = connection;
@@ -20,11 +23,21 @@ public class Logic implements Runnable {
 	@Override
 	public void run() {
 		EventDispatch.registerForCommandEvents( this);
+		AbstractNetwrokEvent notification = null;
+		while ( !finish){
+			notification = connection.recieve();
+			if( notification!=null){
+				if( notification instanceof PlayerConnected){
+					System.out.println( "list");
+					new UpdatePlayerNames( ((PlayerConnected)notification).getPlayers()).postCommand();
+				}
+			}
+		}
+		Logger.getStandardLogger().info( "logic disconnected");
 	}
 	
 	@Subscribe
 	public void connectionAction( ConnectionAction action){
-		System.out.println( "test");
 		boolean isConnected = false;
 		String message = "Unable To Connect, Try Again";
 		if( action.shouldConnect()){
@@ -41,9 +54,7 @@ public class Logic implements Runnable {
 	}
 	
 	@Subscribe
-	public void sendToServer( PlayerReady notification){
+	public void sendToServer( AbstractNetwrokEvent notification){
 		connection.send( notification);
-		PlayerConnected connected = (PlayerConnected)connection.recieve();
-		connected.postCommand();
 	}
 }

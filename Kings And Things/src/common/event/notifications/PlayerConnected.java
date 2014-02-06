@@ -3,9 +3,9 @@ package common.event.notifications;
 import java.util.HashSet;
 
 import common.Player;
-import common.event.AbstractEvent;
+import common.event.AbstractNetwrokEvent;
 
-public class PlayerConnected extends AbstractEvent{
+public class PlayerConnected extends AbstractNetwrokEvent{
 	
 	private static final long serialVersionUID = -2436121223229723837L;
 	

@@ -14,6 +14,7 @@ import java.net.SocketTimeoutException;
 
 import com.google.common.eventbus.Subscribe;
 
+import server.event.commands.PlayerUpdated;
 import server.event.commands.StartGameCommand;
 import server.logic.game.GameFlowManager;
 import common.Logger;
@@ -21,8 +22,6 @@ import common.LoadResources;
 import common.network.Connection;
 import common.event.EventDispatch;
 import common.event.notifications.PlayerConnected;
-import common.event.notifications.PlayerReady;
-import common.event.notifications.PlayerUnReady;
 
 public class ConnectionLobby implements Runnable {
 
@@ -88,26 +87,18 @@ public class ConnectionLobby implements Runnable {
 	}
 	
 	@Subscribe
-	public void handleReadyRequest( PlayerUnReady start){
-		handleNewState();
-	}
-	
-	@Subscribe
-	public void handleStartRequest( PlayerReady ready){
-		handleNewState();
-	}
-
-	private void handleNewState() {
+	public void playerUpdated( PlayerUpdated player){
 		boolean unreadyPlayerConnected = false;
 		PlayerConnected connections = new PlayerConnected();
 		for( PlayerConnection pc : connectedPlayers){
 			if( !pc.isReadyToStart()){
 				unreadyPlayerConnected = true;
-				connections.addPlayer( pc.toPlayerObj());
+				connections.addPlayer( pc.getPlayer());
 			}
 		}
 		connections.postCommand();
 		if( !unreadyPlayerConnected){
+			EventDispatch.unregisterForCommandEvents(this);
 			new StartGameCommand( demoMode, connections.getPlayers()).postCommand();
 		}
 	}
