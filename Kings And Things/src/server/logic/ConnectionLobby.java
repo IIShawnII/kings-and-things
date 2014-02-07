@@ -39,7 +39,7 @@ public class ConnectionLobby implements Runnable {
 		if(isDemoMode){
 			Logger.getStandardLogger().info("Server started in demo mode.");
 		}
-		LoadResources lr = new LoadResources();
+		LoadResources lr = new LoadResources( false);
 		lr.run();
 		
 		demoMode = isDemoMode;

@@ -106,8 +106,8 @@ public final class Constants {
 	public static final int SERVER_PORT = 12345;
 	public static final boolean PLAYER_READY = true;
 	public static final String SERVER_IP = "127.0.0.1";
+	public static final String RESOURCE_PATH = "Resources/";
 	public static final String GAME_TITLE = "Kings & Things";
-	public static final Path RESOURCE_PATH = Paths.get( "Resources/");
 	public static final int HEX_MOVE_DISTANCE = (int) (HEX_HEIGHT*0.5);
 	public static final int BOARD_LOAD_ROW[][] = { { 7, 5, 6, 8, 9, 8, 6},
 													{4, 3, 4, 5, 7, 9, 10, 11, 10, 9, 7, 5},

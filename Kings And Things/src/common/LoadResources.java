@@ -1,5 +1,6 @@
 package common;
 
+import static common.Constants.RESOURCE_PATH;
 import static common.Constants.BUILDING;
 import static common.Constants.CUP;
 import static common.Constants.GOLD;
@@ -15,6 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import javax.imageio.ImageIO;
+
 import client.gui.LoadProgress;
 import common.Constants.Ability;
 import common.Constants.Category;
@@ -23,33 +26,27 @@ import common.Constants.Restriction;
 public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	private int copyTile = 0;
+	private boolean loadImages;
 	private Category currentCategory = null;
 	private final Path RESOURCES_DIRECTORY;
 	
-	public LoadResources()
-	{
-		this(Constants.RESOURCE_PATH.toString());
+	public LoadResources( boolean loadImages){
+		this( RESOURCE_PATH, loadImages);
 	}
 	
-	public LoadResources(String directory)
-	{
+	private LoadResources(String directory, boolean loadImages){
 		RESOURCES_DIRECTORY = Paths.get(directory);
+		this.loadImages = loadImages;
 	}
 	
 	@Override
 	public void run() {
 		try {
-			Thread.sleep( 200);
-		} catch ( InterruptedException e) {}
-		try {
 			Files.walkFileTree( RESOURCES_DIRECTORY, this);
+			new LoadProgress( Category.END).postCommand();
 		} catch ( IOException e) {
 			e.printStackTrace();
 		}
-		try {
-			Thread.sleep( 400);
-		} catch ( InterruptedException e) {}
-		new LoadProgress( Category.END).postCommand();
 	}
 
 	@Override
@@ -68,6 +65,9 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	public FileVisitResult visitFile( Path file, BasicFileAttributes attrs) throws IOException {
 		if( currentCategory!=null && currentCategory!=Category.Resources  && currentCategory!=Category.Misc){
 			TileProperties tile = createTile( file.getFileName().toString());
+			if( loadImages){
+				tile.setImage( ImageIO.read( file.toFile()));
+			}
 			switch( currentCategory){
 				case Building:
 					//TODO need to handle special income counters + actual num of city/village counters
