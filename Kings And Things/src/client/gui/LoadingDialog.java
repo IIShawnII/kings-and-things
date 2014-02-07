@@ -274,7 +274,7 @@ public class LoadingDialog extends JDialog{
 		public void actionPerformed( ActionEvent e) {
 			Object source = e.getSource();
 			if( source==jbConnect){
-				new ConnectionAction( jtfIP.getText().trim(), Integer.parseInt( jtfPort.getText().trim())).postCommand();
+				new ConnectionAction( jtfName.getText().trim(), jtfIP.getText().trim(), Integer.parseInt( jtfPort.getText().trim())).postCommand();
 			}else if( source==jbDisconnect){
 				new ConnectionAction().postCommand();
 			}else if( isConnected && source==jbReady){

@@ -4,15 +4,16 @@ import common.event.AbstractEvent;
 
 public class ConnectionAction extends AbstractEvent {
 	
-	private static final long serialVersionUID = 3228653739084697727L;
+	private static final long serialVersionUID = -5747178692150513523L;
 	
 	private int port;
-	private String address;
+	private String address, name;
 	private boolean shouldConnect;
 	
-	public ConnectionAction( String address, int port){
+	public ConnectionAction( String name, String address, int port){
 		this.port = port;
 		this.address = address;
+		this.name = name;
 		shouldConnect = true;
 	}
 	
@@ -30,5 +31,9 @@ public class ConnectionAction extends AbstractEvent {
 	
 	public boolean shouldConnect(){
 		return shouldConnect;
+	}
+	
+	public String getName(){
+		return name;
 	}
 }

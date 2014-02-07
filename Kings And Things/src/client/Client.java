@@ -9,6 +9,8 @@ import client.logic.Logic;
 import client.gui.ClientGUI;
 import common.network.Connection;
 
+import static common.Constants.GAME_TITLE;
+
 /**
  * main class for starting the server
  */
@@ -23,12 +25,8 @@ public class Client {
 			//failed to change look and feel
 		}
 		
-		ClientGUI clientGUI;
-		if( args!=null && args.length>=1){
-			clientGUI = new ClientGUI( args[0]);
-		}else{
-			clientGUI = new ClientGUI( "Kings And Things");
-		}
+		ClientGUI clientGUI = new ClientGUI( GAME_TITLE);
+
 		//start GUI on AWT Thread
 		SwingUtilities.invokeLater( clientGUI);
 		while( !clientGUI.isVisible()){
@@ -37,8 +35,6 @@ public class Client {
 				Thread.sleep( 500);
 			} catch ( InterruptedException e) {}
 		}
-		
-		//CommandEventBus.BUS.register( new Logic( new Connection()));
 		
 		try {
 			Logic logic = new Logic( new Connection());

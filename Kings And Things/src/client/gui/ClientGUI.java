@@ -25,7 +25,7 @@ import static common.Constants.MIN_CLIENT_SIZE;
 @SuppressWarnings("serial")
 public class ClientGUI extends JFrame implements Runnable{
 
-	private Console console;
+	//private Console console;
 	
 	/**
 	 * construct Client GUI
@@ -40,21 +40,19 @@ public class ClientGUI extends JFrame implements Runnable{
 	 */
 	@Override
 	public void run() {
-		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
-		addWindowListener( new WindowListener());
-		pack();
-		setMinimumSize( MIN_CLIENT_SIZE);
-		setLocationRelativeTo( null);
-		setExtendedState( MAXIMIZED_BOTH);
-		setVisible( true);
-		Rectangle bound = getBounds();
-		bound.width -= bound.x*2;
-		bound.height -= bound.y*2;
-		bound.x = bound.y = 0;
 		LoadingDialog dialog = new LoadingDialog( new LoadResources(), "Lobby", true, true, getGraphicsConfiguration());
-		if( dialog.run()){
+		if( dialog.run()){setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 			setContentPane( createGUI());
-			revalidate();
+			addWindowListener( new WindowListener());
+			pack();
+			setMinimumSize( MIN_CLIENT_SIZE);
+			setLocationRelativeTo( null);
+			setExtendedState( MAXIMIZED_BOTH);
+			Rectangle bound = getBounds();
+			bound.width -= bound.x*2;
+			bound.height -= bound.y*2;
+			bound.x = bound.y = 0;
+			setVisible( true);
 		}else{
 			close();
 		}
@@ -91,7 +89,7 @@ public class ClientGUI extends JFrame implements Runnable{
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.insets = new Insets( 5, 5, 5, 5);
 
-		console = new Console();
+		Console console = new Console();
 		console.setEditable( false);
 		console.setPreferredSize( CONSOLE_SIZE);
 		JScrollPane jsp = new JScrollPane( console);
@@ -109,13 +107,14 @@ public class ClientGUI extends JFrame implements Runnable{
 	private class WindowListener extends WindowAdapter{
 		
 		@Override
-		public void windowClosed(WindowEvent e){
+		public void windowClosing(WindowEvent e){
 			close();
 		}
 	}
 	
 	private void close(){
 		new EndClient().postCommand();
+		setVisible( false);
 		dispose();
 	}
 }
