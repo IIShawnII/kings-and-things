@@ -16,9 +16,10 @@ import java.awt.Rectangle;
 
 
 public final class Constants {
-	
+
+	public enum NetwrokAction { Connect, Disconnect, ReadyState, StartGame}
 	public enum Level { Error, Warning, Notice, Plain, END, LOADING_DIALOG}
-	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc}
+	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END}
 	public enum Ability { Charge, Fly, Range, Special, Magic, Armor, Neutralised}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea,
 			Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}

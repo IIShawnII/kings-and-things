@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import client.gui.LoadProgress;
 import common.Constants.Ability;
 import common.Constants.Category;
 import common.Constants.Restriction;
@@ -38,13 +39,17 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	@Override
 	public void run() {
 		try {
-			Thread.sleep( 400);
+			Thread.sleep( 200);
 		} catch ( InterruptedException e) {}
 		try {
 			Files.walkFileTree( RESOURCES_DIRECTORY, this);
 		} catch ( IOException e) {
 			e.printStackTrace();
 		}
+		try {
+			Thread.sleep( 400);
+		} catch ( InterruptedException e) {}
+		new LoadProgress( Category.END).postCommand();
 	}
 
 	@Override
@@ -110,6 +115,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			}
 			copyTile = 0;
 		}
+		new LoadProgress( currentCategory).postCommand();
 		return FileVisitResult.CONTINUE;
 	}
 	

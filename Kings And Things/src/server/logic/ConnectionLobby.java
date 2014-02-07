@@ -2,25 +2,26 @@ package server.logic;
 
 import static common.Constants.PLAYER;
 import static common.Constants.MAX_PLAYERS;
-import static common.Constants.MIN_PLAYERS;
 import static common.Constants.PLAYER_INC;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.net.ServerSocket;
 import java.net.SocketTimeoutException;
 
 import com.google.common.eventbus.Subscribe;
 
 import server.logic.game.GameFlowManager;
+import server.logic.game.Player;
 import server.event.commands.EndServer;
 import server.event.commands.PlayerUpdated;
 import server.event.commands.StartGameCommand;
-
 import common.Logger;
 import common.LoadResources;
+import common.PlayerInfo;
 import common.network.Connection;
 import common.event.EventDispatch;
 import common.event.notifications.PlayerState;
@@ -31,7 +32,7 @@ public class ConnectionLobby implements Runnable {
 	private boolean close = false;
 	private ServerSocket serverSocket;
 	private final GameFlowManager game;
-	private final ArrayList<PlayerConnection> connectedPlayers;
+	private final ArrayList< PlayerConnection> connectedPlayers;
 	private final boolean demoMode;
 	
 	public ConnectionLobby(boolean isDemoMode) throws IOException{
@@ -60,22 +61,35 @@ public class ConnectionLobby implements Runnable {
 		EventDispatch.registerForCommandEvents(this);
 		game.initialize();
 		int count=0, playerID = PLAYER;
+		boolean oldClient = false;
 		while( !close && count<MAX_PLAYERS){
             try {
+            	oldClient = false;
             	Connection connection = new Connection( serverSocket.accept());
-            	PlayerState player = (PlayerState)connection.recieve();
-            	PlayerConnection pc = new PlayerConnection( player.getName(), playerID, player.isReady(), connection);
-            	EventDispatch.registerForCommandEvents( pc);
-            	pc.start();
-            	
-            	Logger.getStandardLogger().info("Player count is " + count + " out of " + MAX_PLAYERS + " players, minimum players: " + (MIN_PLAYERS-count));
-            	Logger.getStandardLogger().info("Recieved connection from " + connection + ", assigned to " + pc.getPlayer() );
-
-            	connectedPlayers.add(pc);
+            	PlayerInfo info = ((PlayerState)connection.recieve()).getPlayer();
+            	for( PlayerConnection pc : connectedPlayers){
+            		if( pc.equals( info)){
+            			oldClient = true;
+            			pc.setConnection( connection);
+            			startTask( pc, pc.getName());
+            			Logger.getStandardLogger().info("Restablished connection from " + connection + ", assigned to " + pc.getPlayer());
+            			break;
+            		}
+            	}
+            	if( !oldClient){
+            		info = new PlayerInfo( info, playerID);
+	            	Player player = new Player( new PlayerInfo( info, playerID));
+	            	PlayerConnection pc = new PlayerConnection( player, connection);
+	            	EventDispatch.registerForCommandEvents( pc);
+	            	startTask( pc, pc.getName());
+	            	pc.sendNotificationToClient( new PlayerState( info));
+	            	connectedPlayers.add( pc);
+	            	count++;
+	            	playerID+=PLAYER_INC;
+	            	Logger.getStandardLogger().info("Recieved connection from " + connection + ", assigned to " + pc.getPlayer());
+            	}
+            	Logger.getStandardLogger().info("Player count is " + count + " out of " + MAX_PLAYERS + " players, need players: " + (MAX_PLAYERS-count));
             	playerUpdated( null);
-            	
-            	count++;
-            	playerID+=PLAYER_INC;
             } catch( SocketTimeoutException ex){
                 //try again for incoming connections
             } catch ( IOException e) {
@@ -89,17 +103,29 @@ public class ConnectionLobby implements Runnable {
 		}
 	}
 	
+	private void startTask( Runnable task, String name){
+		new Thread( task, name).start();
+	}
+	
 	@Subscribe
 	public void playerUpdated( PlayerUpdated player){
-		boolean unreadyPlayerConnected = false;
+		boolean anyUnReady = false;
 		PlayersList connections = new PlayersList();
 		for( PlayerConnection pc : connectedPlayers){
-			unreadyPlayerConnected = !pc.isReadyToStart();
-			connections.addPlayer( pc.getPlayer());
+			anyUnReady = anyUnReady? true : !pc.isReadyToStart();
+			if( pc.isConnected()){
+				connections.addPlayer( pc.getPlayerInfo());
+			}
 		}
-		connections.postCommand();
-		if( !unreadyPlayerConnected && connectedPlayers.size()==MAX_PLAYERS){
-			new StartGameCommand( demoMode, connections.getPlayers()).postCommand();
+		if( connections.getPlayers().size()>0){
+			connections.postCommand();
+		}
+		if( !anyUnReady && connectedPlayers.size()==MAX_PLAYERS){
+			HashSet< Player> set = new HashSet<>();
+			for( PlayerConnection pc : connectedPlayers){
+				set.add( pc.getPlayer());
+			}
+			new StartGameCommand( demoMode, set).postCommand();
 		}
 	}
 	

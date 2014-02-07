@@ -15,6 +15,7 @@ import javax.swing.JScrollPane;
 import client.event.EndClient;
 import common.Console;
 import common.LoadResources;
+import common.event.EventDispatch;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.MIN_CLIENT_SIZE;
@@ -46,6 +47,7 @@ public class ClientGUI extends JFrame implements Runnable{
         setUndecorated(true);
         setVisible(true);
 		LoadingDialog dialog = new LoadingDialog( new LoadResources(), "Lobby", true, true, getGraphicsConfiguration());
+		EventDispatch.registerForCommandEvents( dialog);
 		if( dialog.run()){
         	dispose();
             setUndecorated(false);

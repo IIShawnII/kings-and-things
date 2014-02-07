@@ -24,7 +24,6 @@ import common.Constants.BuildableBuilding;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
-import common.Player;
 import common.TileProperties;
 import common.event.EventDispatch;
 import common.event.notifications.StartGame;

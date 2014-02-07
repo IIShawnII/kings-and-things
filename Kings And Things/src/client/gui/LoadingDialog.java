@@ -1,5 +1,6 @@
 package client.gui;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -25,16 +26,12 @@ import java.awt.GraphicsConfiguration;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import common.Player;
-import common.Constants.Level;
-import common.Constants.Category;
-import common.event.EventDispatch;
-import common.event.notifications.PlayerState;
+import common.Constants.NetwrokAction;
+import common.PlayerInfo;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.LOADING_SIZE;
-import static common.Constants.PLAYER_READY;
 import static common.Constants.PROGRESS_SIZE;
 import static common.Constants.IP_COLUMN_COUNT;
 import static common.Constants.PORT_COLUMN_COUNT;
@@ -46,8 +43,8 @@ public class LoadingDialog extends JDialog{
 	private InputControl control;
 	private String title;
 	private Runnable task;
-	private JList< Player> players;
 	private JPanel jpProgress;
+	private DefaultListModel< PlayerInfo> listModel;
 	private JTextField jtfIP, jtfPort, jtfName;
 	private JButton jbConnect, jbDisconnect, jbReady;
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
@@ -63,7 +60,6 @@ public class LoadingDialog extends JDialog{
 	}
 
 	public boolean run() {
-		EventDispatch.registerForCommandEvents( this);
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		setContentPane( createGUI());
 		pack();
@@ -143,10 +139,11 @@ public class LoadingDialog extends JDialog{
 			constraints.weightx = 1;
 			jpMain.add( jpProgress, constraints);
 		}
-		
-		players = new JList<>();
-		players.setPreferredSize( CONSOLE_SIZE);
-		JScrollPane jsp = new JScrollPane( players);
+
+		listModel = new DefaultListModel<>();
+		JList<PlayerInfo> jlPlayers = new JList<>( listModel);
+		jlPlayers.setPreferredSize( CONSOLE_SIZE);
+		JScrollPane jsp = new JScrollPane( jlPlayers);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		constraints.gridheight = 5;
@@ -270,8 +267,6 @@ public class LoadingDialog extends JDialog{
 	}
 	
 	private class InputControl implements ActionListener {
-
-		private boolean ready = PLAYER_READY;
 		
 		@Override
 		public void actionPerformed( ActionEvent e) {
@@ -279,11 +274,9 @@ public class LoadingDialog extends JDialog{
 			if( source==jbConnect){
 				new ConnectionAction( jtfName.getText().trim(), jtfIP.getText().trim(), Integer.parseInt( jtfPort.getText().trim())).postCommand();
 			}else if( source==jbDisconnect){
-				new ConnectionAction().postCommand();
+				new ConnectionAction( NetwrokAction.Disconnect).postCommand();
 			}else if( isConnected && source==jbReady){
-				ready = !ready;
-				new PlayerState( jtfName.getText().trim(), ready).postCommand();
-				jbReady.setName( "(Un)Ready");
+				new ConnectionAction( NetwrokAction.ReadyState).postCommand();
 			}else if( e.getActionCommand().equals( "Cancel")){
 				result = false;
 				dispose();
@@ -293,41 +286,43 @@ public class LoadingDialog extends JDialog{
 	
 	@Subscribe
 	public void updateJList( UpdatePlayerNames names){
-		players.setListData( names.getPlayers().toArray( new Player[1]));
+		listModel.removeAllElements();
+		for( PlayerInfo player: names.getPlayers()){
+			listModel.addElement( player);
+		}
 	}
 
 	@Subscribe
 	public void ConnectionState( ConnectionState conncetion){
-		if( !conncetion.isConnected()){
-			if( conncetion.getMessage()!=null){
-				JOptionPane.showMessageDialog( this, conncetion.getMessage(), "Connection", JOptionPane.ERROR_MESSAGE);
-			}
+		switch( conncetion.getAction()){
+			case Connect:
+				isConnected = true;
+				jtfName.setEnabled( false);
+				jtfIP.setEnabled( false);
+				jtfPort.setEnabled( false);
+				break;
+			case Disconnect:
+				isConnected = false;
+				if( conncetion.getMessage()!=null){
+					JOptionPane.showMessageDialog( this, conncetion.getMessage(), "Connection", JOptionPane.ERROR_MESSAGE);
+				}
+				listModel.removeAllElements();
+				break;
+			case StartGame:
+				result = true;
+				dispose();
+			case ReadyState:
+			default:
+				return;
 		}
-		if( conncetion.startGame()){
-			result = true;
-			dispose();
-		}else{
-			isConnected = conncetion.isConnected();
-			jbReady.setEnabled( isConnected);
-			jbDisconnect.setEnabled( isConnected);
-			jtfName.setEnabled( !isConnected);
-			jbConnect.setEnabled( !isConnected);
-			jtfIP.setEnabled( !isConnected);
-			jtfPort.setEnabled( !isConnected);
-		}
+		jbReady.setEnabled( isConnected);
+		jbDisconnect.setEnabled( isConnected);
+		jbConnect.setEnabled( !isConnected);
 	}
 	
-	public void handle( Category category, Level level) {
-		if( level==Level.END){
-			remove( jpProgress);
-			Dimension size = getSize();
-			size.height -= PROGRESS_SIZE.height+10;
-			setMinimumSize( size);
-			setSize( size);
-			revalidate();
-			repaint();
-		}
-		switch( category){
+	@Subscribe
+	public void loadProgress( LoadProgress load) {
+		switch( load.getCategory()){
 			case Building:
 				jpbBuilding.setValue( jpbBuilding.getValue()+1);
 				break;
@@ -346,6 +341,14 @@ public class LoadingDialog extends JDialog{
 			case State:
 				jpbState.setValue( jpbState.getValue()+1);
 				break;
+			case END:
+				remove( jpProgress);
+				Dimension size = getSize();
+				size.height -= PROGRESS_SIZE.height+10;
+				setMinimumSize( size);
+				setSize( size);
+				revalidate();
+				repaint();
 			default:
 				break;
 		}

@@ -1,6 +1,6 @@
 package server.event.commands;
 
-import common.Player;
+import server.logic.game.Player;
 import common.event.AbstractEvent;
 
 public class PlayerUpdated extends AbstractEvent {

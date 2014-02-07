@@ -1,33 +1,32 @@
 package common.event.notifications;
 
+import common.PlayerInfo;
 import common.event.AbstractNetwrokEvent;
 
 public class PlayerState extends AbstractNetwrokEvent{
 	
-	private static final long serialVersionUID = -4607289867949344767L;
+	private static final long serialVersionUID = -4342116267397416570L;
 	
-	private String name;
-	private boolean isReady;
+	private PlayerInfo player;
 	
-	public PlayerState( String name){
-		this( name, false);
+	public PlayerState( PlayerInfo player){
+		this.player = player;
 	}
 	
-	public PlayerState( String name, boolean isReady){
-		this.name = name;
-		this.isReady = isReady;
+	public PlayerState( String name, final int ID, boolean ready){
+		this( new PlayerInfo( name, ID, ready));
 	}
-
-	public String getName(){
-		return name;
+	
+	public PlayerState( String name, boolean ready){
+		this( name, -1, ready);
 	}
 
-	public boolean isReady(){
-		return isReady;
+	public PlayerInfo getPlayer(){
+		return player;
 	}
 
 	@Override
 	public String toString(){
-		return "Network/PlayerReady: " + name + (isReady?" is Ready":" is Not Ready");
+		return "Network/PlayerReady: " + player;
 	}
 }

@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.Player;
+import server.logic.game.Player;
 import common.event.AbstractEvent;
 
 public class StartGameCommand extends AbstractEvent{

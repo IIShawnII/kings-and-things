@@ -1,19 +1,19 @@
 package client.event;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
-import common.Player;
+import common.PlayerInfo;
 import common.event.AbstractEvent;
 
 public class UpdatePlayerNames extends AbstractEvent {
 	
-	HashSet<Player> players;
+	private ArrayList<PlayerInfo> players;
 	
-	public UpdatePlayerNames( HashSet<Player> players) {
+	public UpdatePlayerNames( ArrayList<PlayerInfo> players) {
 		this.players = players;
 	}
 	
-	public HashSet<Player> getPlayers(){
+	public ArrayList<PlayerInfo> getPlayers(){
 		return players;
 	}
 }

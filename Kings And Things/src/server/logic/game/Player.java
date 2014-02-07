@@ -1,9 +1,12 @@
-package common;
+package server.logic.game;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import common.PlayerInfo;
+import common.TileProperties;
 
 /**
  * This class represents a player in the game
@@ -12,10 +15,7 @@ public class Player implements Serializable{
 
 	private static final long serialVersionUID = -458021976956323899L;
 	
-	private boolean isPlaying;
-	private String name;
-	private final int ID;
-	private int gold;
+	private PlayerInfo info;
 
 	private final HashSet<TileProperties> tray;
 	private final HashSet<TileProperties> ownedHexes;
@@ -27,22 +27,31 @@ public class Player implements Serializable{
 	 * @param playerNumber The player's id
 	 * @throws IllegalArgumentException if name is null
 	 */
-	public Player( String name, int playerNumber, boolean ready){
-		setName( name);
-		ID = playerNumber;
-		isPlaying = ready;
-		gold = 0;
+	public Player( PlayerInfo player){
+		this.info = player;
 		ownedHexes = new HashSet<TileProperties>();
 		ownedThingsOnBoard = new HashSet<TileProperties>();
 		tray = new HashSet<TileProperties>();
 	}
-	
-	public void setIsPlaying( boolean isPlaying){
-		this.isPlaying = isPlaying;
+
+	public void setIsPlaying( boolean ready) {
+		info.setReady( ready);
 	}
 	
 	public boolean isPlaying(){
-		return isPlaying;
+		return info.isReady();
+	}
+
+	public boolean isConnected() {
+		return info.isConnected();
+	}
+
+	public void setConnected( boolean connected) {
+		info.setConnected( connected);
+	}
+
+	public PlayerInfo getPlayerInfo() {
+		return info;
 	}
 	
 	/**
@@ -50,14 +59,7 @@ public class Player implements Serializable{
 	 * @return The player's name
 	 */
 	public String getName(){
-		return name;
-	}
-	
-	private void setName( String name){
-		if( name==null || name.length()==0){
-			throw new IllegalArgumentException("The player name must not be null");
-		}
-		this.name = name;
+		return info.getName();
 	}
 	
 	/**
@@ -66,7 +68,7 @@ public class Player implements Serializable{
 	 */
 	public int getID()
 	{
-		return ID;
+		return info.getID();
 	}
 	
 	/**
@@ -75,7 +77,7 @@ public class Player implements Serializable{
 	 */
 	public int getGold()
 	{
-		return gold;
+		return info.getGold();
 	}
 	
 	/**
@@ -83,10 +85,9 @@ public class Player implements Serializable{
 	 * @param newVal The new gold amount
 	 * @throws IllegalArgumentException if newVal is negative
 	 */
-	public void setGold(int newVal)
-	{
+	private void setGold(int newVal){
 		validateEnteredGoldPositive(newVal);
-		gold = newVal;
+		info.setGold( newVal);
 	}
 	
 	/**
@@ -95,10 +96,8 @@ public class Player implements Serializable{
 	 * @throws IllegalArgumentException if amount is
 	 * negative
 	 */
-	public void addGold(int amount)
-	{
-		validateEnteredGoldPositive(amount);
-		gold+=amount;
+	public void addGold(int amount){
+		setGold( info.getGold()+amount);
 	}
 	
 	/**
@@ -108,10 +107,8 @@ public class Player implements Serializable{
 	 * is higher then the player's current gold amount,
 	 * or if amount is negative
 	 */
-	public void removeGold(int amount)
-	{
-		validateEnteredGoldPositive(amount);
-		setGold(gold-amount);
+	public void removeGold(int amount){
+		setGold( info.getGold()-amount);
 	}
 	
 	/**
@@ -322,30 +319,35 @@ public class Player implements Serializable{
 	 * Return a string representation of this player
 	 */
 	@Override
-	public String toString()
-	{
-		return name + ", ID: " + ID + ", Ready: " + isPlaying;
+	public String toString(){
+		return info.toString();
 	}
 	
 	@Override
-	public boolean equals(Object other)
-	{
-		if(other==null || other.getClass() != getClass())
-		{
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((info == null) ? 0 : info.hashCode());
+		result = prime * result + ((ownedHexes == null) ? 0 : ownedHexes.hashCode());
+		result = prime * result + ((ownedThingsOnBoard == null) ? 0 : ownedThingsOnBoard.hashCode());
+		result = prime * result + ((tray == null) ? 0 : tray.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object other){
+		if ( this == other) {
+			return true;
+		}
+		if( other==null){
 			return false;
 		}
-		
-		Player p = (Player) other;
-		
-		return ID==p.ID;
+		if( other instanceof Player || other instanceof PlayerInfo){
+			return info.equals( (other instanceof PlayerInfo)? other: ((Player)other).info);
+		}
+		return false;
 	}
-	
-	@Override
-	public int hashCode()
-	{
-		return ID;
-	}
-	
+
 	// determines player's income
 	private int getIncome( boolean event)
 	{

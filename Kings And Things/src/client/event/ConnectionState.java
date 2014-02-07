@@ -1,32 +1,28 @@
 package client.event;
 
+import common.Constants.NetwrokAction;
 import common.event.AbstractEvent;
 
 public class ConnectionState extends AbstractEvent {
 	
-	private String message;
-	private boolean startGame = false;
-	private boolean isConnected = false;
+	private NetwrokAction action;
 	
-	public ConnectionState( String message, boolean isConnected){
+	private String message;
+	
+	public ConnectionState( String message, NetwrokAction action){
 		this.message = message;
-		this.isConnected = isConnected;
+		this.action = action;
 	}
 	
-	public ConnectionState( boolean startGame){
-		this( null, true);
-		this.startGame = startGame;
+	public ConnectionState( NetwrokAction action){
+		this( null, action);
 	}
 	
 	public String getMessage() {
 		return message;
 	}
-
-	public boolean isConnected() {
-		return isConnected;
-	}
 	
-	public boolean startGame(){
-		return startGame;
+	public NetwrokAction getAction(){
+		return action;
 	}
 }
