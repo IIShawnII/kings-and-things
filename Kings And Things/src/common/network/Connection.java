@@ -115,6 +115,7 @@ public class Connection implements Closeable{
 	public boolean send( AbstractNetwrokEvent event){
 		if( isConnected){
 			try {
+				output.reset();
 				output.writeObject( event);
 				return true;
 			} catch ( IOException e) {
