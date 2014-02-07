@@ -304,6 +304,7 @@ public class LoadingDialog extends JDialog{
 		isConnected = conncetion.isConnected();
 		jbReady.setEnabled( isConnected);
 		jbDisconnect.setEnabled( isConnected);
+		jtfName.setEnabled( !isConnected);
 		jbConnect.setEnabled( !isConnected);
 		jtfIP.setEnabled( !isConnected);
 		jtfPort.setEnabled( !isConnected);

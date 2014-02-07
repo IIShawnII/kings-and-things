@@ -25,7 +25,7 @@ import static common.Constants.MIN_CLIENT_SIZE;
 @SuppressWarnings("serial")
 public class ClientGUI extends JFrame implements Runnable{
 
-	//private Console console;
+	private Console console;
 	
 	/**
 	 * construct Client GUI
@@ -89,7 +89,7 @@ public class ClientGUI extends JFrame implements Runnable{
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.insets = new Insets( 5, 5, 5, 5);
 
-		Console console = new Console();
+		console = new Console();
 		console.setEditable( false);
 		console.setPreferredSize( CONSOLE_SIZE);
 		JScrollPane jsp = new JScrollPane( console);

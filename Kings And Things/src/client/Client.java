@@ -25,26 +25,13 @@ public class Client {
 			//failed to change look and feel
 		}
 		
-		ClientGUI clientGUI = new ClientGUI( GAME_TITLE);
-
-		//start GUI on AWT Thread
-		SwingUtilities.invokeLater( clientGUI);
-		while( !clientGUI.isVisible()){
-			try {
-				//wait for server to become visible
-				Thread.sleep( 500);
-			} catch ( InterruptedException e) {}
-		}
-		
 		try {
 			Logic logic = new Logic( new Connection());
 			new Thread( logic, "Client Logic").start();
+			ClientGUI clientGUI = new ClientGUI( GAME_TITLE);
+			SwingUtilities.invokeLater( clientGUI);
 		} catch ( Exception e) {
 			e.printStackTrace();
-			try {
-				Thread.sleep( 2000);
-			} catch ( InterruptedException e1) {}
-			clientGUI.dispose();
 		}
 	}
 }
