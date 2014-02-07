@@ -40,13 +40,18 @@ public class ClientGUI extends JFrame implements Runnable{
 	 */
 	@Override
 	public void run() {
+		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
+		addWindowListener( new WindowListener());
+        setLocationRelativeTo(null);
+        setUndecorated(true);
+        setVisible(true);
 		LoadingDialog dialog = new LoadingDialog( new LoadResources(), "Lobby", true, true, getGraphicsConfiguration());
-		if( dialog.run()){setDefaultCloseOperation( DISPOSE_ON_CLOSE);
+		if( !dialog.run()){
+        	dispose();
+            setUndecorated(false);
 			setContentPane( createGUI());
-			addWindowListener( new WindowListener());
 			pack();
 			setMinimumSize( MIN_CLIENT_SIZE);
-			setLocationRelativeTo( null);
 			setExtendedState( MAXIMIZED_BOTH);
 			Rectangle bound = getBounds();
 			bound.width -= bound.x*2;
@@ -114,7 +119,6 @@ public class ClientGUI extends JFrame implements Runnable{
 	
 	private void close(){
 		new EndClient().postCommand();
-		setVisible( false);
 		dispose();
 	}
 }
