@@ -383,7 +383,7 @@ public abstract class CommandValidator
 			{
 				if(p.ownsHex(hs.getHex()))
 				{
-					if(p.getPlayerNumber() == playerNumber)
+					if(p.getID() == playerNumber)
 					{
 						playerHasOneAdjacentHex = true;
 					}
@@ -402,7 +402,7 @@ public abstract class CommandValidator
 
 	private static void validateIsPlayerActive(int playerNumber, GameState currentState)
 	{
-		if(currentState.getActivePhasePlayer().getPlayerNumber() != playerNumber)
+		if(currentState.getActivePhasePlayer().getID() != playerNumber)
 		{
 			throw new IllegalArgumentException("It is still: " + currentState.getActivePhasePlayer() + "'s turn to move.");
 		}
@@ -515,7 +515,7 @@ public abstract class CommandValidator
 		List<Player> players = new ArrayList<>();
 		
 		for (Player player : currentState.getPlayers()) {
-			if (player.getPlayerNumber() != playerNumber) {
+			if (player.getID() != playerNumber) {
 				players.add(player);
 			}
 		}

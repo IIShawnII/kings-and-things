@@ -186,7 +186,7 @@ public class GameFlowManager{
 		SetupPhase nextSetupPhase = currentState.getCurrentSetupPhase();
 		RegularPhase nextRegularPhase = currentState.getCurrentRegularPhase();
 		
-		int activePhasePlayerNumber = currentState.getActivePhasePlayer().getPlayerNumber();
+		int activePhasePlayerNumber = currentState.getActivePhasePlayer().getID();
 		int activePhasePlayerOrderIndex = currentState.getPlayerOrder().indexOf(activePhasePlayerNumber);
 		
 		if(currentState.getPlayerOrder().size()-1 == activePhasePlayerOrderIndex)
@@ -202,12 +202,12 @@ public class GameFlowManager{
 			}
 		}
 		currentState = new GameState(currentState.getBoard(), currentState.getPlayers(), currentState.getPlayerOrder(),
-										nextSetupPhase, nextRegularPhase, currentState.getActiveTurnPlayer().getPlayerNumber(),
+										nextSetupPhase, nextRegularPhase, currentState.getActiveTurnPlayer().getID(),
 										currentState.getPlayerOrder().get(++activePhasePlayerOrderIndex % currentState.getPlayers().size()));
 	}
 	
 	private void advanceActiveTurnPlayer(){
-		int activeTurnPlayerNumber = currentState.getActiveTurnPlayer().getPlayerNumber();
+		int activeTurnPlayerNumber = currentState.getActiveTurnPlayer().getID();
 		int activeTurnPlayerOrderIndex = currentState.getPlayerOrder().indexOf(activeTurnPlayerNumber);
 		int nextActiveTurnPlayerNumber = currentState.getPlayerOrder().get(++activeTurnPlayerOrderIndex % currentState.getPlayers().size());
 		
@@ -352,20 +352,20 @@ public class GameFlowManager{
 			if(!demoMode)
 			{
 				int nextPlayerIndex = (int) Math.round(Math.random() * (players.size()-1));
-				playerOrder.add(players.remove(nextPlayerIndex).getPlayerNumber());
+				playerOrder.add(players.remove(nextPlayerIndex).getID());
 			}
 			else
 			{
 				int nextPlayerNumber = Integer.MAX_VALUE;
 				for(Player p : players)
 				{
-					nextPlayerNumber = Math.min(nextPlayerNumber, p.getPlayerNumber());
+					nextPlayerNumber = Math.min(nextPlayerNumber, p.getID());
 				}
 				Iterator<Player> it = players.iterator();
 				while(it.hasNext())
 				{
 					Player nextPlayer = it.next();
-					if(nextPlayer.getPlayerNumber() == nextPlayerNumber)
+					if(nextPlayer.getID() == nextPlayerNumber)
 					{
 						it.remove();
 						playerOrder.add(nextPlayerNumber);
@@ -403,7 +403,7 @@ public class GameFlowManager{
 		{
 			if(!p.getOwnedHexes().isEmpty())
 			{
-				firstPlayerNumber = p.getPlayerNumber();
+				firstPlayerNumber = p.getID();
 				TileProperties firstHex = p.getOwnedHexes().iterator().next();
 				firstHexLocation = currentState.getBoard().getXYCoordinatesOfHex(firstHex);
 			}
@@ -419,9 +419,9 @@ public class GameFlowManager{
 
 		for(Player p : currentState.getPlayers())
 		{
-			if(p.getPlayerNumber() != firstPlayerNumber)
+			if(p.getID() != firstPlayerNumber)
 			{
-				secondPlayerNumber = p.getPlayerNumber();
+				secondPlayerNumber = p.getID();
 				break;
 			}
 		}

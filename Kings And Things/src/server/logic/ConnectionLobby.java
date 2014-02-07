@@ -14,15 +14,17 @@ import java.net.SocketTimeoutException;
 
 import com.google.common.eventbus.Subscribe;
 
+import server.logic.game.GameFlowManager;
 import server.event.commands.EndServer;
 import server.event.commands.PlayerUpdated;
 import server.event.commands.StartGameCommand;
-import server.logic.game.GameFlowManager;
+
 import common.Logger;
 import common.LoadResources;
 import common.network.Connection;
 import common.event.EventDispatch;
-import common.event.notifications.PlayerConnected;
+import common.event.notifications.PlayerState;
+import common.event.notifications.PlayersList;
 
 public class ConnectionLobby implements Runnable {
 
@@ -61,19 +63,16 @@ public class ConnectionLobby implements Runnable {
 		while( !close && count<MAX_PLAYERS){
             try {
             	Connection connection = new Connection( serverSocket.accept());
-            	
-            	Logger.getStandardLogger().info("Player count is " + count + " out of " + MAX_PLAYERS + " players");
-            	Logger.getStandardLogger().info("Still need minimum of " + (MIN_PLAYERS-count) + " players");
-            	Logger.getStandardLogger().info("Recieved connection from " + connection);
-            	Logger.getStandardLogger().info(connection + " is assigned to Player " + count);
-            	
             	PlayerConnection pc = new PlayerConnection("Player " + playerID, playerID, connection);
+            	pc.setPlayerName(((PlayerState)connection.recieve()).getName());
+            	EventDispatch.registerForCommandEvents( pc);
             	pc.start();
-            	if( connectedPlayers.size()>=1){
-            		//update player list for new players who just joined but not ready yet
-            		playerUpdated( null);
-            	}
+            	
+            	Logger.getStandardLogger().info("Player count is " + count + " out of " + MAX_PLAYERS + " players, minimum players: " + (MIN_PLAYERS-count));
+            	Logger.getStandardLogger().info("Recieved connection from " + connection + ", assigned to " + pc.getPlayer() );
+
             	connectedPlayers.add(pc);
+            	playerUpdated( null);
             	
             	count++;
             	playerID+=PLAYER_INC;
@@ -93,13 +92,13 @@ public class ConnectionLobby implements Runnable {
 	@Subscribe
 	public void playerUpdated( PlayerUpdated player){
 		boolean unreadyPlayerConnected = false;
-		PlayerConnected connections = new PlayerConnected();
+		PlayersList connections = new PlayersList();
 		for( PlayerConnection pc : connectedPlayers){
 			unreadyPlayerConnected = !pc.isReadyToStart();
 			connections.addPlayer( pc.getPlayer());
 		}
 		connections.postCommand();
-		if( !unreadyPlayerConnected){
+		if( !unreadyPlayerConnected && connectedPlayers.size()>=MIN_PLAYERS){
 			new StartGameCommand( demoMode, connections.getPlayers()).postCommand();
 		}
 	}

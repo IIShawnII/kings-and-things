@@ -5,13 +5,13 @@ import java.util.HashSet;
 import common.Player;
 import common.event.AbstractNetwrokEvent;
 
-public class PlayerConnected extends AbstractNetwrokEvent{
+public class PlayersList extends AbstractNetwrokEvent{
 	
-	private static final long serialVersionUID = -2436121223229723837L;
+	private static final long serialVersionUID = 1901897562363128873L;
 	
 	HashSet<Player> players = new HashSet<>();
 	
-	public PlayerConnected(){
+	public PlayersList(){
 		players = new HashSet<>();
 	}
 	
@@ -21,5 +21,10 @@ public class PlayerConnected extends AbstractNetwrokEvent{
 	
 	public HashSet<Player> getPlayers(){
 		return players;
+	}
+	
+	@Override
+	public String toString(){
+		return "Network/PlayerList: " + players;
 	}
 }

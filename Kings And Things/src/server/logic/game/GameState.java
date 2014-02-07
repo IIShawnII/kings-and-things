@@ -118,7 +118,7 @@ public class GameState
 	{
 		for(Player p : getPlayers())
 		{
-			if(p.getPlayerNumber() == playerNumber)
+			if(p.getID() == playerNumber)
 			{
 				return p;
 			}

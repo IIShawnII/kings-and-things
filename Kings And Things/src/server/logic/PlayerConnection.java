@@ -8,9 +8,7 @@ import common.Logger;
 import common.Player;
 import common.event.AbstractEvent;
 import common.event.AbstractNetwrokEvent;
-import common.event.EventDispatch;
-import common.event.notifications.PlayerReady;
-import common.event.notifications.PlayerUnReady;
+import common.event.notifications.PlayerState;
 import common.network.Connection;
 
 public class PlayerConnection extends Thread{
@@ -31,25 +29,27 @@ public class PlayerConnection extends Thread{
 		return player;
 	}
 	
+	public void setPlayerName( String name){
+		setName( name);
+		player.setName( name);
+	}
+	
 	@Override
 	public void run(){
-		EventDispatch.registerForCommandEvents(this);
 		AbstractEvent notification = null;
 		while ((notification = connection.recieve())!=null){
-			Logger.getStandardLogger().info( notification);
-			if( notification instanceof PlayerReady){
-				player.setName( ((PlayerReady)notification).getName());
-				player.setIsPlaying( false);
-			}
-			if( notification instanceof PlayerUnReady){
-				player.setIsPlaying( false);
+			Logger.getStandardLogger().info( "(" + player + ")Received: " +notification);
+			if( notification instanceof PlayerState){
+				player.setIsPlaying( ((PlayerState)notification).isReady());
 			}
 			new PlayerUpdated( player).postCommand();
 		}
+		Logger.getStandardLogger().warn( player + " lost connection");
 	}
 	
 	@Subscribe
 	public void sendNotificationToClient( AbstractNetwrokEvent event){
 		connection.send( event);
+		Logger.getStandardLogger().info( "(" + player + ")Sent: " +event);
 	}
 }

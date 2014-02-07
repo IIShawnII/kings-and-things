@@ -46,7 +46,7 @@ public class ClientGUI extends JFrame implements Runnable{
         setUndecorated(true);
         setVisible(true);
 		LoadingDialog dialog = new LoadingDialog( new LoadResources(), "Lobby", true, true, getGraphicsConfiguration());
-		if( !dialog.run()){
+		if( dialog.run()){
         	dispose();
             setUndecorated(false);
 			setContentPane( createGUI());

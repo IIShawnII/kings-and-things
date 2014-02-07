@@ -29,7 +29,7 @@ import common.Player;
 import common.Constants.Level;
 import common.Constants.Category;
 import common.event.EventDispatch;
-import common.event.notifications.PlayerReady;
+import common.event.notifications.PlayerState;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
@@ -270,6 +270,8 @@ public class LoadingDialog extends JDialog{
 	
 	private class InputControl implements ActionListener {
 
+		private boolean ready = false;
+		
 		@Override
 		public void actionPerformed( ActionEvent e) {
 			Object source = e.getSource();
@@ -278,10 +280,9 @@ public class LoadingDialog extends JDialog{
 			}else if( source==jbDisconnect){
 				new ConnectionAction().postCommand();
 			}else if( isConnected && source==jbReady){
-				new PlayerReady( jtfName.getText().trim()).postCommand();
+				ready = !ready;
+				new PlayerState( jtfName.getText().trim(), ready).postCommand();
 				jbReady.setName( "(Un)Ready");
-				result = true;
-				//dispose();
 			}else if( e.getActionCommand().equals( "Cancel")){
 				dispose();
 				result = false;

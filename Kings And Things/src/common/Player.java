@@ -14,7 +14,7 @@ public class Player implements Serializable{
 	
 	private boolean isPlaying;
 	private String name;
-	private final int id;
+	private final int ID;
 	private int gold;
 
 	private final HashSet<TileProperties> tray;
@@ -27,15 +27,15 @@ public class Player implements Serializable{
 	 * @param playerNumber The player's id
 	 * @throws IllegalArgumentException if name is null
 	 */
-	public Player(String name, int playerNumber){
-		if(name == null)
-		{
-			throw new IllegalArgumentException("The player name must not be null");
-		}
-		this.name = name;
-		id = playerNumber;
-		gold = 0;
-		
+	public Player( String name, int playerNumber){
+		this( name, playerNumber, false, 0);
+	}
+	
+	public Player( String name, int playerNumber, boolean ready, int gold){
+		setName( name);
+		ID = playerNumber;
+		isPlaying = ready;
+		this.gold = gold;
 		ownedHexes = new HashSet<TileProperties>();
 		ownedThingsOnBoard = new HashSet<TileProperties>();
 		tray = new HashSet<TileProperties>();
@@ -53,13 +53,14 @@ public class Player implements Serializable{
 	 * Get the player name
 	 * @return The player's name
 	 */
-	public String getPlayerName()
-	{
+	public String getName(){
 		return name;
 	}
 	
-	public void setName( String name)
-	{
+	public void setName( String name){
+		if( name==null || name.length()==0){
+			throw new IllegalArgumentException("The player name must not be null");
+		}
 		this.name = name;
 	}
 	
@@ -67,9 +68,9 @@ public class Player implements Serializable{
 	 * Get the player's number
 	 * @return The player's number
 	 */
-	public int getPlayerNumber()
+	public int getID()
 	{
-		return id;
+		return ID;
 	}
 	
 	/**
@@ -327,7 +328,7 @@ public class Player implements Serializable{
 	@Override
 	public String toString()
 	{
-		return getPlayerName() + ", #: " + getPlayerNumber() + "Ready: " + isPlaying;
+		return name + ", ID: " + ID + ", Ready: " + isPlaying;
 	}
 	
 	@Override
@@ -340,13 +341,13 @@ public class Player implements Serializable{
 		
 		Player p = (Player) other;
 		
-		return id==p.id;
+		return ID==p.ID;
 	}
 	
 	@Override
 	public int hashCode()
 	{
-		return id;
+		return ID;
 	}
 	
 	// determines player's income

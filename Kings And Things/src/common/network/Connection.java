@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.InetSocketAddress;
 
+import common.Logger;
 import common.event.AbstractNetwrokEvent;
 
 /**
@@ -132,8 +133,10 @@ public class Connection implements Closeable{
 			AbstractNetwrokEvent event = null;
 			try {
 				event = (AbstractNetwrokEvent) input.readObject();
-			} catch ( IOException | ClassNotFoundException e) {
-				e.printStackTrace();
+			} catch ( IOException e) {
+				Logger.getStandardLogger().warn( "lost connection", e);
+			} catch ( ClassNotFoundException e) {
+				Logger.getErrorLogger().error( "invalied package received", e);
 			}
 			if( event!=null){
 				return event;
