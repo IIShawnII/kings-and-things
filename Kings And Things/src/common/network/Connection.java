@@ -135,7 +135,7 @@ public class Connection implements Closeable{
 			try {
 				event = (AbstractNetwrokEvent) input.readObject();
 			} catch ( IOException e) {
-				Logger.getStandardLogger().warn( "lost connection", e);
+				//Logger.getStandardLogger().warn( "lost connection", e);
 			} catch ( ClassNotFoundException e) {
 				Logger.getErrorLogger().error( "invalied package received", e);
 			}

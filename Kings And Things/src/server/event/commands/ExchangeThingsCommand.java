@@ -10,8 +10,6 @@ import common.event.AbstractEvent;
 
 public class ExchangeThingsCommand extends AbstractEvent{
 	
-	private static final long serialVersionUID = 6694868452857851218L;
-	
 	private final HashSet<TileProperties> things;
 	
 	public ExchangeThingsCommand(Collection<TileProperties> things){

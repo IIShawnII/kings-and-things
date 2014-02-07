@@ -63,8 +63,8 @@ public class ConnectionLobby implements Runnable {
 		while( !close && count<MAX_PLAYERS){
             try {
             	Connection connection = new Connection( serverSocket.accept());
-            	PlayerConnection pc = new PlayerConnection("Player " + playerID, playerID, connection);
-            	pc.setPlayerName(((PlayerState)connection.recieve()).getName());
+            	PlayerState player = (PlayerState)connection.recieve();
+            	PlayerConnection pc = new PlayerConnection( player.getName(), playerID, player.isReady(), connection);
             	EventDispatch.registerForCommandEvents( pc);
             	pc.start();
             	
@@ -98,7 +98,7 @@ public class ConnectionLobby implements Runnable {
 			connections.addPlayer( pc.getPlayer());
 		}
 		connections.postCommand();
-		if( !unreadyPlayerConnected && connectedPlayers.size()>=MIN_PLAYERS){
+		if( !unreadyPlayerConnected && connectedPlayers.size()==MAX_PLAYERS){
 			new StartGameCommand( demoMode, connections.getPlayers()).postCommand();
 		}
 	}

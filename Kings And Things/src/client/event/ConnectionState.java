@@ -4,14 +4,18 @@ import common.event.AbstractEvent;
 
 public class ConnectionState extends AbstractEvent {
 	
-	private static final long serialVersionUID = 8361038387154903329L;
-	
 	private String message;
+	private boolean startGame = false;
 	private boolean isConnected = false;
 	
 	public ConnectionState( String message, boolean isConnected){
 		this.message = message;
 		this.isConnected = isConnected;
+	}
+	
+	public ConnectionState( boolean startGame){
+		this( null, true);
+		this.startGame = startGame;
 	}
 	
 	public String getMessage() {
@@ -20,5 +24,9 @@ public class ConnectionState extends AbstractEvent {
 
 	public boolean isConnected() {
 		return isConnected;
+	}
+	
+	public boolean startGame(){
+		return startGame;
 	}
 }

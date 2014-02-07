@@ -4,8 +4,6 @@ import common.event.AbstractEvent;
 
 public class ConnectionAction extends AbstractEvent {
 	
-	private static final long serialVersionUID = -5747178692150513523L;
-	
 	private int port;
 	private String address, name;
 	private boolean shouldConnect;

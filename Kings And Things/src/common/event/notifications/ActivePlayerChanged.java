@@ -7,8 +7,6 @@ import common.event.AbstractEvent;
 
 @XmlRootElement
 public class ActivePlayerChanged extends AbstractEvent{
-
-	private static final long serialVersionUID = -6193606863154860188L;
 	
 	@XmlAttribute
 	private final int activePhasePlayer;

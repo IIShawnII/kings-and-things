@@ -8,10 +8,12 @@ import common.Logger;
 import common.network.Connection;
 import common.event.EventDispatch;
 import common.event.AbstractNetwrokEvent;
+import common.event.notifications.StartGame;
 import common.event.notifications.PlayersList;
 import common.event.notifications.PlayerState;
 
 import com.google.common.eventbus.Subscribe;
+import static common.Constants.PLAYER_READY;
 
 public class Logic implements Runnable {
 
@@ -38,6 +40,8 @@ public class Logic implements Runnable {
 			Logger.getStandardLogger().info( "Received: " + notification);
 			if( notification instanceof PlayersList){
 				new UpdatePlayerNames( ((PlayersList)notification).getPlayers()).postCommand();
+			} else if( notification instanceof StartGame){
+				new ConnectionState( true).postCommand();
 			}
 		}
 		Logger.getStandardLogger().warn( "logic disconnected");
@@ -48,10 +52,14 @@ public class Logic implements Runnable {
 		boolean isConnected = false;
 		String message = "Unable To Connect, Try Again";
 		if( action.shouldConnect()){
-			try{
-				isConnected = connection.connectTo( action.getAddress(), action.getPort());
-			}catch(IllegalArgumentException ex){
-				message += " \n" + ex.getMessage();
+			if( action.getName()==null || action.getName().length()<=0){
+				message += "\nThere Must Be a Name";
+			}else{ 
+				try{
+					isConnected = connection.connectTo( action.getAddress(), action.getPort());
+				}catch(IllegalArgumentException ex){
+					message += "\n" + ex.getMessage();
+				}
 			}
 		}else{
 			connection.disconnect();
@@ -59,7 +67,7 @@ public class Logic implements Runnable {
 		}
 		new ConnectionState( message, isConnected).postCommand();
 		if( isConnected){
-			sendToServer( new PlayerState( action.getName()));
+			sendToServer( new PlayerState( action.getName(), PLAYER_READY));
 		}
 	}
 	

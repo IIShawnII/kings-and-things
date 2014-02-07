@@ -27,15 +27,11 @@ public class Player implements Serializable{
 	 * @param playerNumber The player's id
 	 * @throws IllegalArgumentException if name is null
 	 */
-	public Player( String name, int playerNumber){
-		this( name, playerNumber, false, 0);
-	}
-	
-	public Player( String name, int playerNumber, boolean ready, int gold){
+	public Player( String name, int playerNumber, boolean ready){
 		setName( name);
 		ID = playerNumber;
 		isPlaying = ready;
-		this.gold = gold;
+		gold = 0;
 		ownedHexes = new HashSet<TileProperties>();
 		ownedThingsOnBoard = new HashSet<TileProperties>();
 		tray = new HashSet<TileProperties>();
@@ -57,7 +53,7 @@ public class Player implements Serializable{
 		return name;
 	}
 	
-	public void setName( String name){
+	private void setName( String name){
 		if( name==null || name.length()==0){
 			throw new IllegalArgumentException("The player name must not be null");
 		}

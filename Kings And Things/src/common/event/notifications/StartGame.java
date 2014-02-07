@@ -6,7 +6,8 @@ public class StartGame extends AbstractNetwrokEvent{
 
 	private static final long serialVersionUID = -7949177339580975129L;
 
-	public StartGame(){
-		
+	@Override
+	public String toString(){
+		return "Network/StartGame: Start Game";
 	}
 }

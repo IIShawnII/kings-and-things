@@ -8,8 +8,6 @@ import common.Player;
 import common.event.AbstractEvent;
 
 public class StartGameCommand extends AbstractEvent{
-	
-	private static final long serialVersionUID = 5919685855315175876L;
 
 	private final boolean demoMode;
 	

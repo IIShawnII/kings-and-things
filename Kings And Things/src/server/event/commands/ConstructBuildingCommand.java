@@ -6,8 +6,6 @@ import common.TileProperties;
 
 public class ConstructBuildingCommand extends AbstractEvent{
 	
-	private static final long serialVersionUID = -6111450266321762088L;
-	
 	private final BuildableBuilding building;
 	private final TileProperties hex;
 	

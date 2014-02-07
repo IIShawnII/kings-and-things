@@ -4,8 +4,6 @@ import common.event.AbstractEvent;
 
 public class Error extends AbstractEvent {
 	
-	private static final long serialVersionUID = 1860898514523397849L;
-	
 	final String message, title;
 	
 	public Error( String message, String title){

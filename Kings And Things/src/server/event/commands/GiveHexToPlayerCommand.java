@@ -5,8 +5,6 @@ import common.event.AbstractEvent;
 
 public class GiveHexToPlayerCommand extends AbstractEvent{
 	
-	private static final long serialVersionUID = -2046312797845461616L;
-	
 	private final TileProperties hex;
 	
 	public GiveHexToPlayerCommand(TileProperties hex){

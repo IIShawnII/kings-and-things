@@ -1,13 +1,9 @@
 package common.event;
 
-import java.io.Serializable;
-
 /**
  * This is the abstract super class of all events
  */
-public abstract class AbstractEvent implements Serializable{
-	
-	private static final long serialVersionUID = -6511635541890750180L;
+public abstract class AbstractEvent{
 	
 	int playerID;
 

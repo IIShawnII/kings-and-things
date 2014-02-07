@@ -34,6 +34,7 @@ import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.LOADING_SIZE;
+import static common.Constants.PLAYER_READY;
 import static common.Constants.PROGRESS_SIZE;
 import static common.Constants.IP_COLUMN_COUNT;
 import static common.Constants.PORT_COLUMN_COUNT;
@@ -270,7 +271,7 @@ public class LoadingDialog extends JDialog{
 	
 	private class InputControl implements ActionListener {
 
-		private boolean ready = false;
+		private boolean ready = PLAYER_READY;
 		
 		@Override
 		public void actionPerformed( ActionEvent e) {
@@ -284,8 +285,8 @@ public class LoadingDialog extends JDialog{
 				new PlayerState( jtfName.getText().trim(), ready).postCommand();
 				jbReady.setName( "(Un)Ready");
 			}else if( e.getActionCommand().equals( "Cancel")){
-				dispose();
 				result = false;
+				dispose();
 			}
 		}
 	}
@@ -302,13 +303,18 @@ public class LoadingDialog extends JDialog{
 				JOptionPane.showMessageDialog( this, conncetion.getMessage(), "Connection", JOptionPane.ERROR_MESSAGE);
 			}
 		}
-		isConnected = conncetion.isConnected();
-		jbReady.setEnabled( isConnected);
-		jbDisconnect.setEnabled( isConnected);
-		jtfName.setEnabled( !isConnected);
-		jbConnect.setEnabled( !isConnected);
-		jtfIP.setEnabled( !isConnected);
-		jtfPort.setEnabled( !isConnected);
+		if( conncetion.startGame()){
+			result = true;
+			dispose();
+		}else{
+			isConnected = conncetion.isConnected();
+			jbReady.setEnabled( isConnected);
+			jbDisconnect.setEnabled( isConnected);
+			jtfName.setEnabled( !isConnected);
+			jbConnect.setEnabled( !isConnected);
+			jtfIP.setEnabled( !isConnected);
+			jtfPort.setEnabled( !isConnected);
+		}
 	}
 	
 	public void handle( Category category, Level level) {

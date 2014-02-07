@@ -5,8 +5,6 @@ import common.event.AbstractEvent;
 
 public final class Flip extends AbstractEvent {
 	
-	private static final long serialVersionUID = 2681914798988781436L;
-	
 	TileProperties tile = null;
 	
 	public boolean flipAll(){
