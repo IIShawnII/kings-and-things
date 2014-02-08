@@ -106,7 +106,7 @@ public final class Constants {
 	public static final Dimension LABEL_SIZE = new Dimension( 50,50);
 	public static final Dimension CONSOLE_SIZE = new Dimension( 300,100);
 	public static final Dimension LOADING_SIZE = new Dimension( 350,425);
-	public static final Dimension PLAYERS_STATE_SIZE = new Dimension( 350,125);
+	public static final Dimension PLAYERS_STATE_SIZE = new Dimension( 260,145);
 	public static final Dimension PROGRESS_SIZE = new Dimension( LOADING_SIZE.width,170);
 	public static final Dimension HEX_SIZE = new Dimension( (int)(HEX_HEIGHT*HEX_RATIO),HEX_HEIGHT);
 	public static final Dimension TILE_SIZE_BANK = new Dimension( (int) (TIILE_HEIGHT_BANK*TILE_RATIO),TIILE_HEIGHT_BANK);

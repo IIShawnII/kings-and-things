@@ -324,19 +324,29 @@ public class Board extends JPanel{
 	}
 	
 	private final static BufferedImage StateImage;
-	//private static final int LOCKX, LOCKY;
+	private static final int LOCKX, LOCKY;
+	private static final int PADDING = 10;
 	static{
 		StateImage = new BufferedImage( PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d = image.createGraphics();
+		Graphics2D g2d = StateImage.createGraphics();
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		g2d.setStroke( new BasicStroke( 5));
 		g2d.setColor( Color.BLACK);
 		g2d.drawRect( 0, 0, PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height);
-		int lockBorderWidth = PLAYERS_STATE_SIZE.width/MAX_RACK_SIZE-5;
+		int lockBorderWidth = (PLAYERS_STATE_SIZE.width/(MAX_RACK_SIZE/2)) - (int)(PADDING*1.2);
 		int lockBorderheight = (int) (lockBorderWidth*TILE_RATIO_REVERSE);
-		Rectangle bound = new Rectangle(0,0,lockBorderWidth,lockBorderheight);
-		bound.translate( 0, 0);
+		LOCKX = PADDING;
+		LOCKY = PLAYERS_STATE_SIZE.height-lockBorderheight-PADDING;
+		Rectangle bound = new Rectangle(LOCKX,LOCKY,lockBorderWidth,lockBorderheight);
+		for( int i=0; i<MAX_RACK_SIZE;i++){
+			g2d.draw( bound);
+			if( i==4){
+				bound.setLocation( LOCKX, LOCKY-lockBorderheight-PADDING);
+			}else{
+				bound.translate( lockBorderWidth+PADDING, 0);
+			}
+		}
 		g2d.dispose();
 	}
 	
@@ -363,9 +373,9 @@ public class Board extends JPanel{
 			super.paintComponent( g);
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.drawImage( StateImage, 0, 0, null);
-			g2d.setFont( new Font("default", Font.BOLD, 40));
-			g2d.drawString( name, 10, 40);
-			g2d.drawString( gold+"", getWidth()-140, 40);
+			g2d.setFont( new Font("default", Font.BOLD, 30));
+			g2d.drawString( name, 10, 35);
+			g2d.drawString( gold+"", getWidth()-100, 35);
 			g2d.dispose();
 		}
 	}
