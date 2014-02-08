@@ -13,6 +13,8 @@ import java.util.HashSet;
 
 import javax.imageio.ImageIO;
 
+import common.game.TileProperties;
+
 
 public final class Constants {
 
@@ -41,7 +43,8 @@ public final class Constants {
 	public static final HashMap< Integer, TileProperties> GOLD = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> SPECIAL = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> BUILDING = new HashMap<>();
-	public static final HashMap< Restriction, TileProperties> STATE = new HashMap<>();
+	public static final HashMap< Integer, TileProperties> STATE = new HashMap<>();
+	public static final HashMap< Integer, Image> IMAGES = new HashMap<>();
 	
 	//Colors
 	public static final Color RED = new Color( 255, 0, 0);
@@ -69,7 +72,7 @@ public final class Constants {
 	public static final int MAX_MOVE_SPEED = 4;
 	
 	//Minimums
-	public static final int MIN_PLAYERS = 2;
+	public static final int MIN_PLAYERS = 1;
 	public static final int MIN_HEXES_ON_BOARD = 19;
 	public static final Dimension MIN_CLIENT_SIZE = new Dimension( 1300,720);
 	

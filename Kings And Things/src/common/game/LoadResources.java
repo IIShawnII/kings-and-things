@@ -1,12 +1,17 @@
-package common;
+package common.game;
 
 import static common.Constants.RESOURCE_PATH;
 import static common.Constants.BUILDING;
-import static common.Constants.CUP;
-import static common.Constants.GOLD;
-import static common.Constants.HEX;
 import static common.Constants.SPECIAL;
+import static common.Constants.IMAGES;
 import static common.Constants.STATE;
+import static common.Constants.GOLD;
+import static common.Constants.CUP;
+import static common.Constants.HEX;
+import common.Constants;
+import common.Constants.Ability;
+import common.Constants.Building;
+import common.Constants.Restriction;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -18,11 +23,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import javax.imageio.ImageIO;
 
-import client.gui.LoadProgress;
-import common.Constants.Ability;
-import common.Constants.Building;
+import client.event.LoadProgress;
 import common.Constants.Category;
-import common.Constants.Restriction;
 
 public class LoadResources implements Runnable, FileVisitor< Path>{
 
@@ -66,9 +68,6 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	public FileVisitResult visitFile( Path file, BasicFileAttributes attrs) throws IOException {
 		if( currentCategory!=null && currentCategory!=Category.Resources  && currentCategory!=Category.Misc){
 			TileProperties tile = createTile( file.getFileName().toString());
-			if( loadImages){
-				tile.setImage( ImageIO.read( file.toFile()));
-			}
 			switch( currentCategory){
 				case Building:
 					if(tile.isBuildableBuilding())
@@ -81,22 +80,34 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 						{
 							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 							CUP.put( tileCopy.hashCode(), tileCopy);
+							if( loadImages){
+								IMAGES.put( tileCopy.hashCode(), ImageIO.read( file.toFile()));
+							}
 						}
 					}
 					tile.setSpecialFlip();
 					BUILDING.put( tile.hashCode(), tile);
+					if( loadImages){
+						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
+					}
 					break;
 				case Cup:
 					if(tile.isCreature())
 					{
-						tile.setMoveSpeed(Constants.MAX_MOVE_SPEED);
+						tile.setMoveSpeed( Constants.MAX_MOVE_SPEED);
 					}
 					if( copyTile==0){
 						CUP.put( tile.hashCode(), tile);
+						if( loadImages){
+							IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
+						}
 					}else{
 						for( int i=0; i<copyTile; i++){
 							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 							CUP.put( tileCopy.hashCode(), tileCopy);
+							if( loadImages){
+								IMAGES.put( tileCopy.hashCode(), ImageIO.read( file.toFile()));
+							}
 						}
 					}
 					break;
@@ -104,36 +115,44 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setNoFlip();
 					tile.setInfinite();
 					GOLD.put( tile.hashCode(), tile);
+					if( loadImages){
+						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
+					}
 					break;
 				case Hex:
-					switch(tile.getName())
-					{
+					switch(tile.getName()){
 						case "Swamp":
 						case "Mountain":
 						case "Forest":
 						case "Jungle":
-						{
 							tile.setMoveSpeed(2);
-						}
+							break;
 						default:
-						{
 							tile.setMoveSpeed(1);
-						}
 					}
 					for( int i=0; i<copyTile; i++){
 						TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 						HEX.put( tileCopy.hashCode(), tileCopy);
+						if( loadImages){
+							IMAGES.put( tileCopy.hashCode(), ImageIO.read( file.toFile()));
+						}
 					}
 					break;
 				case Special:
 					tile.setMoveSpeed(Constants.MAX_MOVE_SPEED);
 					tile.setSpecialFlip();
 					SPECIAL.put( tile.hashCode(), tile);
+					if( loadImages){
+						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
+					}
 					break;
 				case State:
 					tile.setNoFlip();
 					tile.setInfinite();
-					STATE.put( tile.getRestriction()[0], tile);
+					STATE.put( tile.hashCode(), tile);
+					if( loadImages){
+						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
+					}
 					break;
 					
 				case Resources:

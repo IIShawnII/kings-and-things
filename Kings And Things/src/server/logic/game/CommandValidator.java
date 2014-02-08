@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import server.logic.exceptions.NoMoreTilesException;
-
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Biome;
@@ -16,7 +15,8 @@ import common.Constants.BuildableBuilding;
 import common.Constants.Building;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
-import common.TileProperties;
+import common.game.HexState;
+import common.game.TileProperties;
 
 /**
  * This class checks requested commands against game states and throws appropriate
@@ -36,7 +36,7 @@ public abstract class CommandValidator
 	public static void validateStartNewGame(boolean demoMode, Set<Player> players)
 	{
 		validateCollection(players,"players");
-		if(players.size() < 2 || 4 < players.size())
+		if(players.size() < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < players.size())
 		{
 			throw new IllegalArgumentException("Can only start a game with 2 to 4 players");
 		}

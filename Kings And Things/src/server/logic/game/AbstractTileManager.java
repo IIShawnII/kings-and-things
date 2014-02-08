@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import server.logic.exceptions.NoMoreTilesException;
-import common.TileProperties;
+import common.game.TileProperties;
 
 
 /**

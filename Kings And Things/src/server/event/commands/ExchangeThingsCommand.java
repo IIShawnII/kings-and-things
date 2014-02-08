@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.TileProperties;
 import common.event.AbstractEvent;
+import common.game.TileProperties;
 
 public class ExchangeThingsCommand extends AbstractEvent{
 	

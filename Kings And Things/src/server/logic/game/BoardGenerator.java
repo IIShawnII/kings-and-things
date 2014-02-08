@@ -6,7 +6,7 @@ import java.util.HashSet;
 import server.logic.exceptions.NoMoreTilesException;
 import common.Constants;
 import common.Constants.Biome;
-import common.TileProperties;
+import common.game.TileProperties;
 
 /**
  * This class creates a playing board according to the rules for removing
@@ -30,7 +30,7 @@ public class BoardGenerator
 	 */
 	public BoardGenerator(int numPlayers, HexTileManager hexManager)
 	{
-		if(numPlayers < 2 || 4 < numPlayers)
+		if(numPlayers < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < numPlayers)
 		{
 			throw new IllegalArgumentException("Can not generate board with: " + numPlayers + " players");
 		}

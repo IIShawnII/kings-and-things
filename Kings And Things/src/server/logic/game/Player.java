@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.PlayerInfo;
-import common.TileProperties;
+import common.game.PlayerInfo;
+import common.game.TileProperties;
 
 /**
  * This class represents a player in the game

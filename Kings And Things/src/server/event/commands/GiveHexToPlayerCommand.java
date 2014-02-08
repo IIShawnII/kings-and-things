@@ -1,7 +1,7 @@
 package server.event.commands;
 
-import common.TileProperties;
 import common.event.AbstractEvent;
+import common.game.TileProperties;
 
 public class GiveHexToPlayerCommand extends AbstractEvent{
 	

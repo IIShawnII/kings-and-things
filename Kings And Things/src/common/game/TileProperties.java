@@ -1,16 +1,12 @@
-package common;
+package common.game;
 
 import static common.Constants.FACE_DOWN;
 import static common.Constants.FACE_UP;
 import static common.Constants.INFINITE_TILE;
 
-import java.awt.Image;
 import java.awt.Rectangle;
+import java.io.Serializable;
 import java.util.ArrayList;
-
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import common.Constants.Ability;
 import common.Constants.Biome;
@@ -18,43 +14,32 @@ import common.Constants.BuildableBuilding;
 import common.Constants.Building;
 import common.Constants.Restriction;
 
-@XmlRootElement
-public class TileProperties {
+public class TileProperties implements Serializable{
 
-	@XmlAttribute
+	private static final long serialVersionUID = 3896952672735323992L;
+	
 	private int number;
-	@XmlAttribute
 	private int value;
-	@XmlAttribute
 	private int moveSpeed;
-	@XmlElement
-	private Image image;
-	@XmlAttribute
 	private String name;
-	@XmlAttribute
 	private boolean hasFlip;
-	@XmlAttribute
 	private boolean specialFlip;
-	@XmlAttribute
 	private boolean isFaceUp;
-	@XmlElement
 	private ArrayList< Ability> abilities;
-	@XmlElement
 	private ArrayList< Restriction> restrictions;
 	
 	public TileProperties(){
-		this( 1, 0, null, "none", null, null);
+		this( 1, 0, "none", null, null);
 	}
 	
 	public TileProperties( TileProperties tile, int number){
-		this( number, tile.value, tile.image, tile.name, tile.abilities, tile.restrictions);
+		this( number, tile.value, tile.name, tile.abilities, tile.restrictions);
 		hasFlip = tile.hasFlip;
 		specialFlip = tile.specialFlip;
 	}
 	
-	private TileProperties( int number, int attack, Image image, String name, ArrayList< Ability> abilities, ArrayList< Restriction> restrictions){
+	private TileProperties( int number, int attack, String name, ArrayList< Ability> abilities, ArrayList< Restriction> restrictions){
 		this.name = name;
-		this.image = image;
 		this.hasFlip = true;
 		this.value = attack;
 		this.number = number;
@@ -116,14 +101,6 @@ public class TileProperties {
 	
 	protected void addAbilities( Ability ability) {
 		abilities.add( ability);
-	}
-	
-	public Image getImage(){
-		return image;
-	}
-	
-	protected void setImage( Image image){
-		this.image = image;
 	}
 
 	protected void setSpecialFlip() {
@@ -287,6 +264,6 @@ public class TileProperties {
 	
 	@Override
 	public String toString(){
-		return name + ", " + value;
+		return "-n " + name + " -a " + value + " -c " + number;
 	}
 }

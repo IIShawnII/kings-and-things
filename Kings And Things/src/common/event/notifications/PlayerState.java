@@ -1,7 +1,7 @@
 package common.event.notifications;
 
-import common.PlayerInfo;
 import common.event.AbstractNetwrokEvent;
+import common.game.PlayerInfo;
 
 public class PlayerState extends AbstractNetwrokEvent{
 	

@@ -2,7 +2,7 @@ package server.event.commands;
 
 import common.Constants.BuildableBuilding;
 import common.event.AbstractEvent;
-import common.TileProperties;
+import common.game.TileProperties;
 
 public class ConstructBuildingCommand extends AbstractEvent{
 	

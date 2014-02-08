@@ -10,7 +10,8 @@ import java.util.Map.Entry;
 
 import com.google.common.collect.ImmutableBiMap;
 
-import common.TileProperties;
+import common.game.HexState;
+import common.game.TileProperties;
 
 /**
  * This class provides a convenient mechanism for representing the hex board inside out code.
@@ -315,5 +316,13 @@ public class HexBoard
 	public List<HexState> getHexesAsList()
 	{
 		return boardList;
+	}
+
+	void fillArray( HexState[] array) {
+		int i=0;
+		for( HexState hex : boardList){
+			array[i] = hex;
+			i++;
+		}
 	}
 }

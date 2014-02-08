@@ -1,17 +1,20 @@
 package client.logic;
 
+import client.event.BoardUpdate;
 import client.event.EndClient;
 import client.event.ConnectionState;
 import client.event.ConnectionAction;
 import client.event.UpdatePlayerNames;
 import common.Logger;
-import common.PlayerInfo;
 import common.network.Connection;
 import common.Constants.NetwrokAction;
 import common.event.AbstractNetwrokEvent;
+import common.event.notifications.Flip;
+import common.event.notifications.HexPlacement;
 import common.event.notifications.StartGame;
 import common.event.notifications.PlayersList;
 import common.event.notifications.PlayerState;
+import common.game.PlayerInfo;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -29,7 +32,7 @@ public class ConnectionLogic implements Runnable {
 	
 	@Override
 	public void run() {
-		AbstractNetwrokEvent notification = null;
+		AbstractNetwrokEvent event = null;
 		while( !finished && !connection.isConnected()){
 			try {
 				Thread.sleep( 10);
@@ -38,14 +41,18 @@ public class ConnectionLogic implements Runnable {
 			}
 		}
 		Logger.getStandardLogger().info( "listenning");
-		while( !finished && (notification = connection.recieve())!=null){
-			Logger.getStandardLogger().info( "Received: " + notification);
-			if( notification instanceof PlayersList){
-				new UpdatePlayerNames( ((PlayersList)notification).getPlayers()).postCommand();
-			} else if( notification instanceof StartGame){
+		while( !finished && (event = connection.recieve())!=null){
+			Logger.getStandardLogger().info( "Received: " + event);
+			if( event instanceof PlayersList){
+				new UpdatePlayerNames( ((PlayersList)event).getPlayers()).postCommand();
+			} else if( event instanceof StartGame){
 				new ConnectionState( NetwrokAction.StartGame).postCommand();
-			} else if( notification instanceof PlayerState){
-				player = ((PlayerState)notification).getPlayer();
+			} else if( event instanceof PlayerState){
+				player = ((PlayerState)event).getPlayer();
+			} else if( event instanceof HexPlacement){
+				new BoardUpdate( ((HexPlacement)event).getArray()).postCommand();
+			} else if( event instanceof Flip){
+				new BoardUpdate( ((Flip)event).flipAll()).postCommand();
 			}
 		}
 		finished = true;
@@ -100,9 +107,9 @@ public class ConnectionLogic implements Runnable {
 	}
 	
 	@Subscribe
-	public void sendToServer( AbstractNetwrokEvent notification){
-		Logger.getStandardLogger().info( "Sent: " + notification);
-		connection.send( notification);
+	public void sendToServer( AbstractNetwrokEvent event){
+		Logger.getStandardLogger().info( "Sent: " + event);
+		connection.send( event);
 	}
 	
 	@Subscribe

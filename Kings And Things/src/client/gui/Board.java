@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import javax.swing.Timer;
 import javax.swing.JPanel;
 
+import com.google.common.eventbus.Subscribe;
+
+import common.game.HexState;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Component;
@@ -19,6 +23,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
+import client.event.BoardUpdate;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
 import static common.Constants.HEX_SIZE;
@@ -83,11 +88,11 @@ public class Board extends JPanel{
 		addMouseWheelListener( mouseInput);
 		lockList = new ArrayList<>();
 		hexLock = new Rectangle( (int)(8+HEX_SIZE.getWidth()/2-LOCK_SIZE/2), (int)(8+HEX_SIZE.getHeight()/2-LOCK_SIZE/2), LOCK_SIZE, LOCK_SIZE);
-		addHex( 8, 8);
+		addHex( 8, 8, null);
 	}
 	
-	public Tile addHex( int x, int y){
-		Tile hex = new Hex();
+	public Tile addHex( int x, int y, HexState state){
+		Tile hex = new Hex( state);
 		hex.addMouseListener( mouseInput);
 		hex.addMouseMotionListener( mouseInput);
 		hex.setBounds( x, y, HEX_SIZE.width, HEX_SIZE.height);
@@ -110,10 +115,15 @@ public class Board extends JPanel{
 
 		private Rectangle oldBound = null;
 		private Tile tile = null;
-		private int ring = 0, count = 0;
+		private int ring = 0, count = 0, drawIndex = 0;
 		private double slope = 0, intercept = 0;
 		private int x=0, y=0, xStart=0, yStart=0, xTemp=-1, yTemp=-1;
+		private HexState[] hexes;
 		
+		public SpiralPlacement( HexState[] hexes) {
+			this.hexes = hexes;
+		}
+
 		@Override
 		public void actionPerformed( ActionEvent e) {
 			if( xTemp>=0){
@@ -129,8 +139,8 @@ public class Board extends JPanel{
 				oldBound.add(tile.getBounds());
 				repaint( oldBound);
 			}else if( ring<BOARD_LOAD_ROW.length){
-				if( count<BOARD_LOAD_ROW[ring].length){
-					tile = addHex( 8, 8);
+				if( count<BOARD_LOAD_ROW[ring].length && drawIndex<hexes.length){
+					tile = addHex( 8, 8, hexes[drawIndex]);
 					x = (widthSegment*BOARD_LOAD_COL[ring][count]);
 					y = (heightSegment*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
 					tile.setLockArea( x-LOCK_SIZE/2, y-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
@@ -139,6 +149,7 @@ public class Board extends JPanel{
 					slope = (y-yStart)/(double)(x-xStart);
 					intercept = yStart-slope*xStart;
 					count++;
+					drawIndex++;
 				}else{
 					count = 0;
 					ring++;
@@ -231,16 +242,26 @@ public class Board extends JPanel{
 				if( ((Tile)source).isInside( xPressed, yPressed)){
 					((Tile)source).flip();
 				}
-			}else if( interactWithHexes && !(source instanceof Tile) && e.getButton()==MouseEvent.BUTTON2){
-				for( Component tile : getComponents()){
-					((Tile)tile).flip();
-				}
-			}else if( !(source instanceof Tile) && e.getButton()==MouseEvent.BUTTON1){
-				if( timer == null){
-					timer = new Timer( SPIRAL_DELAY, new SpiralPlacement());
-					timer.setInitialDelay( 0);
-					timer.start();
-				}
+			}
+		}
+	}
+	
+	@Subscribe
+	public void updateBoard( BoardUpdate update){
+		if( update.hasHexes()){
+			timer = new Timer( SPIRAL_DELAY, new SpiralPlacement( update.getHexes()));
+			timer.setInitialDelay( 0);
+			timer.start();
+		}else if( update.flipAll()){
+			while( !interactWithHexes){
+				try {
+					Thread.sleep( 50);
+				} catch ( InterruptedException e) {}
+			}
+			for( Component tile : getComponents()){
+				//TODO ignore first one
+				((Tile)tile).flip();
+				System.out.println("flip");
 			}
 		}
 	}

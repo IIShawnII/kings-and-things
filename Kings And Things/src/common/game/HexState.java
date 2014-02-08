@@ -1,19 +1,22 @@
-package server.logic.game;
+package common.game;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.TileProperties;
+import server.logic.game.Player;
 
 /**
  * This class acts as a container for
  * both a hex tile, and all the things
  * inside of that hex tile
  */
-public class HexState
-{
+public class HexState implements Serializable{
+
+	private static final long serialVersionUID = -1871329628938580400L;
+	
 	private TileProperties hex;
 	private final HashSet<TileProperties> thingsInHex;
 	
@@ -23,8 +26,7 @@ public class HexState
 	 * @throws IllegalArgumentException if hex is null or
 	 * not a hex tile
 	 */
-	public HexState(TileProperties hex)
-	{
+	public HexState(TileProperties hex){
 		this(hex, new HashSet<TileProperties>());
 	}
 	

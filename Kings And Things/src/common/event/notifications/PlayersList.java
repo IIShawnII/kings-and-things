@@ -2,8 +2,8 @@ package common.event.notifications;
 
 import java.util.ArrayList;
 
-import common.PlayerInfo;
 import common.event.AbstractNetwrokEvent;
+import common.game.PlayerInfo;
 
 public class PlayersList extends AbstractNetwrokEvent{
 	

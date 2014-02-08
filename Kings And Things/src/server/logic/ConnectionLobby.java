@@ -2,6 +2,7 @@ package server.logic;
 
 import static common.Constants.PLAYER;
 import static common.Constants.MAX_PLAYERS;
+import static common.Constants.MIN_PLAYERS;
 import static common.Constants.PLAYER_INC;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
@@ -20,12 +21,13 @@ import server.event.commands.EndServer;
 import server.event.commands.PlayerUpdated;
 import server.event.commands.StartGameCommand;
 import common.Logger;
-import common.LoadResources;
-import common.PlayerInfo;
 import common.network.Connection;
 import common.event.EventDispatch;
 import common.event.notifications.PlayerState;
 import common.event.notifications.PlayersList;
+import common.event.notifications.StartGame;
+import common.game.LoadResources;
+import common.game.PlayerInfo;
 
 public class ConnectionLobby implements Runnable {
 
@@ -80,7 +82,7 @@ public class ConnectionLobby implements Runnable {
             		info = new PlayerInfo( info, playerID);
 	            	Player player = new Player( new PlayerInfo( info, playerID));
 	            	PlayerConnection pc = new PlayerConnection( player, connection);
-	            	EventDispatch.registerForCommandEvents( pc);
+	            	EventDispatch.registerForNotificationEvents( pc);
 	            	startTask( pc, pc.getName());
 	            	pc.sendNotificationToClient( new PlayerState( info));
 	            	connectedPlayers.add( pc);
@@ -118,13 +120,14 @@ public class ConnectionLobby implements Runnable {
 			}
 		}
 		if( connections.getPlayers().size()>0){
-			connections.postCommand();
+			connections.postNotification();
 		}
-		if( !anyUnReady && connectedPlayers.size()==MAX_PLAYERS){
+		if( !anyUnReady && connectedPlayers.size()>=MIN_PLAYERS && connectedPlayers.size()<=MAX_PLAYERS){
 			HashSet< Player> set = new HashSet<>();
 			for( PlayerConnection pc : connectedPlayers){
 				set.add( pc.getPlayer());
 			}
+			new StartGame().postNotification();
 			new StartGameCommand( demoMode, set).postCommand();
 		}
 	}

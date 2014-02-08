@@ -24,12 +24,14 @@ import com.google.common.eventbus.Subscribe;
 
 import common.Logger;
 import common.Constants;
-import common.TileProperties;
 import common.Constants.SetupPhase;
 import common.Constants.RegularPhase;
 import common.Constants.BuildableBuilding;
 import common.event.EventDispatch;
-import common.event.notifications.StartGame;
+import common.event.notifications.Flip;
+import common.event.notifications.HexPlacement;
+import common.game.HexState;
+import common.game.TileProperties;
 
 /**
  * This class is used to execute commands that change the state of a game
@@ -57,13 +59,17 @@ public class GameFlowManager{
 	 * @throws IllegalArgumentException if the entered list of players is invalid
 	 */
 	public void startNewGame(boolean demoMode, Set<Player> players) throws NoMoreTilesException{
-		new StartGame().postCommand();
 		CommandValidator.validateStartNewGame(demoMode, players);
 		cup = new CupManager(demoMode);
 		bank = new HexTileManager(demoMode);
 		boardGenerator = new BoardGenerator(players.size(),bank);
+		HexBoard board = boardGenerator.createNewBoard();
+		HexPlacement placement = new HexPlacement( Constants.MAX_HEXES);
+		board.fillArray( placement.getArray());
+		placement.postNotification();
 		List<Integer> playerOrder = determinePlayerOrder(players,demoMode);
-		currentState = new GameState(boardGenerator.createNewBoard(),players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0));
+		currentState = new GameState(board,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0));
+		new Flip().postNotification();
 	}
 	
 	/**

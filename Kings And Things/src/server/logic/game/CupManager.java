@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import server.logic.exceptions.NoMoreTilesException;
 import common.Constants;
-import common.TileProperties;
+import common.game.TileProperties;
 
 /**
  * this class encapsulates the logic of drawing tiles from the cup, and placing

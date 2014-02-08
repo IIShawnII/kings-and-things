@@ -6,10 +6,10 @@ import server.logic.game.Player;
 import com.google.common.eventbus.Subscribe;
 
 import common.Logger;
-import common.PlayerInfo;
 import common.event.AbstractEvent;
 import common.event.AbstractNetwrokEvent;
 import common.event.notifications.PlayerState;
+import common.game.PlayerInfo;
 import common.network.Connection;
 
 public class PlayerConnection implements Runnable{

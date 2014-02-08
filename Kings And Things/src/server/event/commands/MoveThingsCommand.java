@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import common.TileProperties;
 import common.event.AbstractEvent;
+import common.game.TileProperties;
 
 public class MoveThingsCommand extends AbstractEvent
 {

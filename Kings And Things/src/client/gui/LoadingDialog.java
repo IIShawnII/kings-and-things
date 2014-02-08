@@ -15,6 +15,7 @@ import com.google.common.eventbus.Subscribe;
 
 import client.event.ConnectionAction;
 import client.event.ConnectionState;
+import client.event.LoadProgress;
 import client.event.UpdatePlayerNames;
 
 import java.awt.Frame;
@@ -29,7 +30,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import common.Constants.NetwrokAction;
-import common.PlayerInfo;
+import common.game.PlayerInfo;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;

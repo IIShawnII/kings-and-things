@@ -2,7 +2,7 @@ package server.logic.game;
 
 import common.Constants;
 import common.Constants.BuildableBuilding;
-import common.TileProperties;
+import common.game.TileProperties;
 
 abstract class BuildableBuildingGenerator
 {

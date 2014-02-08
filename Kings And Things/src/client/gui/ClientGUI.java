@@ -14,8 +14,8 @@ import javax.swing.JScrollPane;
 
 import client.event.EndClient;
 import common.Console;
-import common.LoadResources;
 import common.event.EventDispatch;
+import common.game.LoadResources;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.CONSOLE_SIZE;
 
@@ -47,7 +47,7 @@ public class ClientGUI extends JFrame implements Runnable{
         setVisible(true);
 		LoadingDialog dialog = new LoadingDialog( new LoadResources( true), "Lobby", true, true, getGraphicsConfiguration());
 		EventDispatch.registerForCommandEvents( dialog);
-		if( !dialog.run()){
+		if( dialog.run()){
 			EventDispatch.unregisterForCommandEvents( dialog);
         	dispose();
             setUndecorated(false);
@@ -78,8 +78,9 @@ public class ClientGUI extends JFrame implements Runnable{
 		constraints.fill = GridBagConstraints.BOTH;
 
 		Board board = new Board( null, true);
+		EventDispatch.registerForCommandEvents( board);
 		board.setPreferredSize( BOARD_SIZE);
-		//board.init();
+		board.init();
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		jpMain.add( board, constraints);

@@ -1,4 +1,4 @@
-package client.gui;
+package client.event;
 
 import common.Constants.Category;
 import common.event.AbstractEvent;
