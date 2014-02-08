@@ -28,7 +28,7 @@ public final class Constants {
 	public enum NetwrokAction { Connect, Disconnect, ReadyState, StartGame}
 	public enum Level { Error, Warning, Notice, Plain, END, LOADING_DIALOG}
 	public enum Ability { Charge, Fly, Range, Special, Magic, Armor, Neutralised}
-	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END}
+	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END, Creature, Event, Magic, Treasure, Buildable}
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea,
 			Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}

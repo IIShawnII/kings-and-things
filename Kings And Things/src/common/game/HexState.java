@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import common.Constants.Category;
+
 import server.logic.game.Player;
 
 /**
@@ -19,6 +21,15 @@ public class HexState implements Serializable{
 	
 	private TileProperties hex;
 	private final HashSet<TileProperties> thingsInHex;
+	
+	//only used by Client GUI for display purpose
+	private boolean fake = false;
+	
+	public HexState(){
+		fake = true;
+		thingsInHex = new HashSet<TileProperties>();
+		hex = new TileProperties( Category.Hex);
+	}
 	
 	/**
 	 * Create a new hex state with nothing in the hex
@@ -39,6 +50,7 @@ public class HexState implements Serializable{
 	 */
 	public HexState(TileProperties hex, Collection<TileProperties> thingsInHex)
 	{
+		fake = false;
 		validateTileNotNull(hex);
 		validateIsHexTile(hex);
 		if(thingsInHex==null)
@@ -52,6 +64,10 @@ public class HexState implements Serializable{
 		{
 			addThingToHex(tp);
 		}
+	}
+	
+	public boolean isFake(){
+		return fake;
 	}
 	
 	/**

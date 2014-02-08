@@ -11,6 +11,7 @@ import static common.Constants.HEX;
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Building;
+import common.Constants.Category;
 import common.Constants.Restriction;
 
 import java.io.IOException;
@@ -24,13 +25,13 @@ import java.nio.file.attribute.BasicFileAttributes;
 import javax.imageio.ImageIO;
 
 import client.event.LoadProgress;
-import common.Constants.Category;
 
 public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	private int copyTile = 0;
 	private boolean loadImages;
 	private Category currentCategory = null;
+	private Category currentCupCategory = null;
 	private final Path RESOURCES_DIRECTORY;
 	
 	public LoadResources( boolean loadImages){
@@ -57,6 +58,8 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		try{
 			if( !(currentCategory!=null && currentCategory==Category.Cup && dir.toString().contains( Category.Cup.name()))){
 				currentCategory = Category.valueOf( dir.getFileName().toString());
+			}else{
+				currentCupCategory = Category.valueOf( dir.getFileName().toString());
 			}
 		}catch( IllegalArgumentException e){
 			currentCategory = null;
@@ -70,32 +73,37 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			TileProperties tile = createTile( file.getFileName().toString());
 			switch( currentCategory){
 				case Building:
-					if(tile.isBuildableBuilding())
-					{
-						tile.setInfinite();
-					}
-					if(tile.getName().equals(Building.City) || tile.getName().equals(Building.Village))
-					{
-						for(int i=0; i<6; i++)
-						{
+					if( tile.getName().equals( Building.City) || tile.getName().equals( Building.Village)){
+						tile.setCategory( Category.Building);
+						for(int i=0; i<6; i++){
 							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 							CUP.put( tileCopy.hashCode(), tileCopy);
 							if( loadImages){
 								IMAGES.put( tileCopy.hashCode(), ImageIO.read( file.toFile()));
 							}
 						}
-					}
-					tile.setSpecialFlip();
-					BUILDING.put( tile.hashCode(), tile);
-					if( loadImages){
-						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
+					}else{
+						tile.setInfinite();
+						tile.setSpecialFlip();
+						tile.setCategory( Category.Buildable);
+						BUILDING.put( tile.hashCode(), tile);
+						if( loadImages){
+							IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
+						}
 					}
 					break;
 				case Cup:
-					if(tile.isCreature())
-					{
-						tile.setMoveSpeed( Constants.MAX_MOVE_SPEED);
+					switch( currentCupCategory){
+						case Event:
+						case Magic:
+						case Treasure:
+							tile.setCategory( currentCupCategory);
+							break;
+						default:
+							tile.setCategory( Category.Creature);
+							tile.setMoveSpeed( Constants.MAX_MOVE_SPEED);
 					}
+					tile.setCategory( currentCupCategory);
 					if( copyTile==0){
 						CUP.put( tile.hashCode(), tile);
 						if( loadImages){
@@ -114,6 +122,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 				case Gold:
 					tile.setNoFlip();
 					tile.setInfinite();
+					tile.setCategory( currentCategory);
 					GOLD.put( tile.hashCode(), tile);
 					if( loadImages){
 						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
@@ -130,6 +139,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 						default:
 							tile.setMoveSpeed(1);
 					}
+					tile.setCategory( currentCategory);
 					for( int i=0; i<copyTile; i++){
 						TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 						HEX.put( tileCopy.hashCode(), tileCopy);
@@ -142,6 +152,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setMoveSpeed(Constants.MAX_MOVE_SPEED);
 					tile.setSpecialFlip();
 					SPECIAL.put( tile.hashCode(), tile);
+					tile.setCategory( currentCategory);
 					if( loadImages){
 						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
 					}
@@ -149,6 +160,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 				case State:
 					tile.setNoFlip();
 					tile.setInfinite();
+					tile.setCategory( currentCategory);
 					STATE.put( tile.hashCode(), tile);
 					if( loadImages){
 						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));

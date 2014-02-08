@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import common.Constants.Biome;
 import common.Constants.Ability;
 import common.Constants.Building;
+import common.Constants.Category;
 import common.Constants.Restriction;
 import common.Constants.BuildableBuilding;
 
@@ -24,6 +25,15 @@ public class TileProperties implements Serializable{
 	private boolean isFaceUp;
 	private ArrayList< Ability> abilities;
 	private ArrayList< Restriction> restrictions;
+	private Category tileType;
+	private Biome biome;
+	
+	private boolean fake = false;
+	
+	public TileProperties( Category category){
+		fake = true;
+		tileType = category;
+	}
 	
 	public TileProperties(){
 		this( 1, 0, "none", null, null);
@@ -34,6 +44,9 @@ public class TileProperties implements Serializable{
 		hasFlip = tile.hasFlip;
 		specialFlip = tile.specialFlip;
 		moveSpeed = tile.moveSpeed;
+		tileType = tile.tileType;
+		isFaceUp = tile.isFaceUp;
+		biome = tile.biome;
 	}
 	
 	private TileProperties( int number, int attack, String name, ArrayList< Ability> abilities, ArrayList< Restriction> restrictions){
@@ -45,6 +58,15 @@ public class TileProperties implements Serializable{
 		this.abilities = abilities==null? new ArrayList<Ability>() : new ArrayList<>( abilities);
 		this.restrictions = restrictions==null? new ArrayList<Restriction>() : new ArrayList<>( restrictions);
 		isFaceUp = specialFlip;
+		biome = null;
+	}
+	
+	public boolean isFake(){
+		return fake;
+	}
+	
+	public void setCategory( Category category){
+		tileType = category;
 	}
 
 	public int getNumber() {
@@ -81,13 +103,10 @@ public class TileProperties implements Serializable{
 		this.name = name;
 	}
 	
-	public Restriction[] getRestriction() {
-		Restriction[] array = new Restriction[ restrictions.size()];
-		restrictions.toArray( array);
-		return array;
-	}
-	
 	protected void addRestriction( Restriction restriction) {
+		try{
+			biome = Biome.valueOf( restriction.name());
+		}catch( IllegalArgumentException ex){}
 		restrictions.add( restriction);
 	}
 	
@@ -132,38 +151,17 @@ public class TileProperties implements Serializable{
 	
 	public boolean isHexTile()
 	{
-		for(Biome b : Biome.values())
-		{
-			if(b.name().equals(getName()))
-			{
-				return true;
-			}
-		}
-		return false;
+		return tileType == Category.Hex;
 	}
 	
 	public boolean isBuilding()
 	{
-		for(Building b : Building.values())
-		{
-			if(b.name().equals(getName()))
-			{
-				return true;
-			}
-		}
-		return false;
+		return tileType == Category.Building || isBuildableBuilding();
 	}
 	
 	public boolean isBuildableBuilding()
 	{
-		for(BuildableBuilding b : BuildableBuilding.values())
-		{
-			if(b.name().equals(getName()))
-			{
-				return true;
-			}
-		}
-		return false;
+		return tileType == Category.Buildable;
 	}
 	
 	public boolean isRestrictedToBiome()
@@ -173,34 +171,27 @@ public class TileProperties implements Serializable{
 	
 	public boolean isEvent()
 	{
-		return restrictions.contains(Restriction.Event);
+		return tileType == Category.Event;
 	}
 	
 	public boolean isMagicItem()
 	{
-		return restrictions.contains(Restriction.Magic);
+		return tileType == Category.Magic;
 	}
 	
 	public boolean isTreasure()
 	{
-		return restrictions.contains(Restriction.Treasure) && !isRestrictedToBiome();
+		return tileType == Category.Treasure;
 	}
 	
 	public boolean isCreature()
 	{
-		return !isBuilding() && !isEvent() && !isMagicItem() && !isTreasure() && !isSpecialIncomeCounter();
+		return tileType == Category.Creature;
 	}
 	
 	public boolean hasAbility(Ability ability)
 	{
-		for(Ability a : getAbilities())
-		{
-			if(a == ability)
-			{
-				return true;
-			}
-		}
-		return false;
+		return abilities.contains( ability);
 	}
 	
 	public boolean isSpecialCreatureWithAbility(Ability ability)
@@ -210,23 +201,13 @@ public class TileProperties implements Serializable{
 	
 	public Biome getBiomeRestriction()
 	{
-		for(Restriction r : restrictions)
-		{
-			if(r == Restriction.Desert || r == Restriction.Forest || r == Restriction.Frozen_Waste ||
-				r == Restriction.Jungle || r == Restriction.Mountain || r == Restriction.Plains ||
-				r == Restriction.Sea || r == Restriction.Swamp)
-			{
-				return Biome.valueOf(r.name());
-			}
-		}
-		
-		return null;
+		return biome;
 	}
 	
 	public boolean isSpecialIncomeCounter()
 	{
 		
-		return (restrictions.contains(Restriction.Treasure) && isRestrictedToBiome()) || Building.Village.name().equals(getName()) || Building.City.name().equals(getName());
+		return (restrictions.contains(Restriction.Treasure) && isRestrictedToBiome()) || !isBuildableBuilding();
 	}
 
 	@Override
