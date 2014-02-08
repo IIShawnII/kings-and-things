@@ -6,7 +6,6 @@ import javax.swing.Timer;
 import javax.swing.JPanel;
 
 import java.awt.Color;
-import java.awt.Stroke;
 import java.awt.Graphics;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -49,7 +48,6 @@ public class Board extends JPanel{
 		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		g2d.drawImage( IMAGE_BACKGROUND, 0, 0, BOARD_SIZE.width, BOARD_SIZE.height, null);
 		int x=0, y=0;
-		Stroke old = g2d.getStroke();
 		g2d.setStroke( new BasicStroke( 5));
 		g2d.setColor( Color.BLACK);
 		HEX_OUTLINE.translate( 8-2, 8-3);
@@ -64,7 +62,6 @@ public class Board extends JPanel{
 				HEX_OUTLINE.translate( -((int) (x-HEX_SIZE.getWidth()/2)-2), -((int) (y-HEX_SIZE.getHeight()/2)-3));
 			}
 		}
-		g2d.setStroke( old);
 		g2d.dispose();
 	}
 	

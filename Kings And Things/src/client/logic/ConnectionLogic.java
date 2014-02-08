@@ -17,13 +17,13 @@ import com.google.common.eventbus.Subscribe;
 
 import static common.Constants.PLAYER_READY;
 
-public class Logic implements Runnable {
+public class ConnectionLogic implements Runnable {
 
 	private Connection connection;
 	private boolean finished = false;
 	private PlayerInfo player = null;
 	
-	public Logic( Connection connection){
+	public ConnectionLogic( Connection connection){
 		this.connection = connection;
 	}
 	
@@ -86,8 +86,8 @@ public class Logic implements Runnable {
 			case ReadyState:
 				netaction = NetwrokAction.ReadyState;
 				player.setReady( !player.isReady());
+				message = !player.isReady()? "Ready":"UnReady";
 				sendToServer( new PlayerState( player));
-				message=null;
 				break;
 			default:
 				return;

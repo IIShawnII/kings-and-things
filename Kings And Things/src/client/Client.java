@@ -5,7 +5,7 @@ import javax.swing.SwingUtilities;
 
 import org.apache.log4j.PropertyConfigurator;
 
-import client.logic.Logic;
+import client.logic.ConnectionLogic;
 import client.gui.ClientGUI;
 import common.event.EventDispatch;
 import common.network.Connection;
@@ -26,7 +26,7 @@ public class Client {
 		}
 		
 		try {
-			Logic logic = new Logic( new Connection());
+			ConnectionLogic logic = new ConnectionLogic( new Connection());
 			EventDispatch.registerForCommandEvents( logic);
 			new Thread( logic, "Client Logic").start();
 			ClientGUI clientGUI = new ClientGUI( GAME_TITLE);

@@ -1,7 +1,7 @@
 package client.gui;
 
 import java.awt.Insets;
-import java.awt.Rectangle;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.WindowEvent;
@@ -18,7 +18,6 @@ import common.LoadResources;
 import common.event.EventDispatch;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.CONSOLE_SIZE;
-import static common.Constants.MIN_CLIENT_SIZE;
 
 /**
  * client GUI to hold all and display all game related information
@@ -48,17 +47,21 @@ public class ClientGUI extends JFrame implements Runnable{
         setVisible(true);
 		LoadingDialog dialog = new LoadingDialog( new LoadResources( true), "Lobby", true, true, getGraphicsConfiguration());
 		EventDispatch.registerForCommandEvents( dialog);
-		if( dialog.run()){
+		if( !dialog.run()){
+			EventDispatch.unregisterForCommandEvents( dialog);
         	dispose();
             setUndecorated(false);
 			setContentPane( createGUI());
 			pack();
-			setMinimumSize( MIN_CLIENT_SIZE);
+			Dimension size = new Dimension( getWidth(), getHeight());
+			setMinimumSize( size);
+	        setLocationRelativeTo(null);
+			/*setMinimumSize( MIN_CLIENT_SIZE);
 			setExtendedState( MAXIMIZED_BOTH);
 			Rectangle bound = getBounds();
 			bound.width -= bound.x*2;
 			bound.height -= bound.y*2;
-			bound.x = bound.y = 0;
+			bound.x = bound.y = 0;*/
 			setVisible( true);
 		}else{
 			close();
@@ -83,7 +86,7 @@ public class ClientGUI extends JFrame implements Runnable{
 
 		JScrollPane jsp = new JScrollPane( jpMain);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		
 		return jsp;
 	}

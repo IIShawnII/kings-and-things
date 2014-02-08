@@ -1,11 +1,11 @@
 package common;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -89,7 +89,7 @@ public final class Constants {
 	public static final int BOARD_BOTTOM_PADDING = 120;
 	public static final Dimension LABEL_SIZE = new Dimension( 50,50);
 	public static final Dimension TILE_SIZE = new Dimension( 430,440);
-	public static final Dimension CONSOLE_SIZE = new Dimension( 100,80);
+	public static final Dimension CONSOLE_SIZE = new Dimension( 300,100);
 	public static final Dimension LOADING_SIZE = new Dimension( 350,425);
 	public static final Dimension PROGRESS_SIZE = new Dimension( LOADING_SIZE.width,170);
 	public static final Rectangle FACE_DOWN = new Rectangle( 0,0,TILE_SIZE.width,TILE_SIZE.height);

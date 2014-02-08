@@ -25,13 +25,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GraphicsConfiguration;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import common.Constants.NetwrokAction;
 import common.PlayerInfo;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
-import static common.Constants.LOADING_SIZE;
 import static common.Constants.PROGRESS_SIZE;
 import static common.Constants.IP_COLUMN_COUNT;
 import static common.Constants.PORT_COLUMN_COUNT;
@@ -46,10 +47,10 @@ public class LoadingDialog extends JDialog{
 	private JPanel jpProgress;
 	private DefaultListModel< PlayerInfo> listModel;
 	private JTextField jtfIP, jtfPort, jtfName;
-	private JButton jbConnect, jbDisconnect, jbReady;
+	private JButton jbConnect, jbReady;
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
 	private JProgressBar jpbGold, jpbSpecial, jpbState;
-	private boolean result = false, isConnected = false;
+	private boolean result = false, isConnected = false, doneLoading = false;
 	
 	public LoadingDialog( Runnable task, String title, boolean modal, boolean progress, GraphicsConfiguration gc) {
 		super( (Frame)null, title, modal, gc);
@@ -60,10 +61,12 @@ public class LoadingDialog extends JDialog{
 	}
 
 	public boolean run() {
-		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE);
+		addWindowListener( new InputControl());
 		setContentPane( createGUI());
 		pack();
-		setMinimumSize( LOADING_SIZE);
+		Dimension size = new Dimension( getWidth(), getHeight());
+		setMinimumSize( size);
 		setLocationRelativeTo( null);
 		Thread thread = new Thread( task, title);
 		thread.setDaemon( true);
@@ -82,31 +85,26 @@ public class LoadingDialog extends JDialog{
 		constraints.gridy = 0;
 		jpMain.add( label, constraints);
 		
-		jbReady = new JButton( "(Un)Ready");
+		jbReady = new JButton( "UnReady");
 		jbReady.setEnabled( false);
 		jbReady.addActionListener( control);
 		constraints.gridy = 1;
 		jpMain.add( jbReady, constraints);
 		
-		JButton jbCancel = new JButton( "Cancel");
+		JButton jbCancel = new JButton( "Close");
 		jbCancel.setActionCommand( "Cancel");
 		jbCancel.addActionListener( control);
+		//constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.gridy = 2;
 		jpMain.add( jbCancel, constraints);
 		
 		jbConnect = new JButton( "Connect");
 		jbConnect.addActionListener( control);
-		constraints.gridy = 3;
+		constraints.gridy = 6;
 		jpMain.add( jbConnect, constraints);
 		
-		jbDisconnect = new JButton( "Disonnect");
-		jbDisconnect.setEnabled( false);
-		jbDisconnect.addActionListener( control);
-		constraints.gridy = 4;
-		jpMain.add( jbDisconnect, constraints);
-		
 		label = new JLabel( "IP:");
-		constraints.gridy = 6;
+		constraints.fill = GridBagConstraints.BOTH;
 		constraints.gridx = 1;
 		jpMain.add( label, constraints);
 		
@@ -142,8 +140,8 @@ public class LoadingDialog extends JDialog{
 
 		listModel = new DefaultListModel<>();
 		JList<PlayerInfo> jlPlayers = new JList<>( listModel);
-		jlPlayers.setPreferredSize( CONSOLE_SIZE);
 		JScrollPane jsp = new JScrollPane( jlPlayers);
+		jsp.setPreferredSize( CONSOLE_SIZE);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		constraints.gridheight = 5;
@@ -162,19 +160,20 @@ public class LoadingDialog extends JDialog{
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.insets = new Insets( 5, 5, 5, 5);
 		
-		JLabel label = new JLabel("HEX");
+		JLabel label = new JLabel("Building");
 		constraints.gridwidth = 1;
 		constraints.weightx = 0;
 		constraints.gridy = 0;
 		constraints.gridx = 0;
 		jpMain.add( label, constraints);
+
 		
-		jpbHex = new JProgressBar( JProgressBar.HORIZONTAL, 0, 8);
-		jpbHex.setStringPainted( true);
+		jpbBuilding = new JProgressBar( JProgressBar.HORIZONTAL, 0, 6);
+		jpbBuilding.setStringPainted( true);
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		constraints.weightx = 1;
 		constraints.gridx = 1;
-		jpMain.add( jpbHex, constraints);
+		jpMain.add( jpbBuilding, constraints);
 		
 		label = new JLabel("Cup");
 		constraints.gridwidth = 1;
@@ -190,33 +189,33 @@ public class LoadingDialog extends JDialog{
 		constraints.gridx = 1;
 		jpMain.add( jpbCup, constraints);
 		
-		label = new JLabel("Building");
+		label = new JLabel("Gold");
 		constraints.gridwidth = 1;
 		constraints.weightx = 0;
 		constraints.gridy = 2;
 		constraints.gridx = 0;
 		jpMain.add( label, constraints);
-		
-		jpbBuilding = new JProgressBar( JProgressBar.HORIZONTAL, 0, 6);
-		jpbBuilding.setStringPainted( true);
-		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		constraints.weightx = 1;
-		constraints.gridx = 1;
-		jpMain.add( jpbBuilding, constraints);
-		
-		label = new JLabel("Gold");
-		constraints.gridwidth = 1;
-		constraints.weightx = 0;
-		constraints.gridy = 3;
-		constraints.gridx = 0;
-		jpMain.add( label, constraints);
-		
+
 		jpbGold = new JProgressBar( JProgressBar.HORIZONTAL, 0, 6);
 		jpbGold.setStringPainted( true);
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		constraints.weightx = 1;
 		constraints.gridx = 1;
 		jpMain.add( jpbGold, constraints);
+		
+		label = new JLabel("Hex");
+		constraints.gridwidth = 1;
+		constraints.weightx = 0;
+		constraints.gridy = 3;
+		constraints.gridx = 0;
+		jpMain.add( label, constraints);
+		
+		jpbHex = new JProgressBar( JProgressBar.HORIZONTAL, 0, 8);
+		jpbHex.setStringPainted( true);
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.weightx = 1;
+		constraints.gridx = 1;
+		jpMain.add( jpbHex, constraints);
 		
 		label = new JLabel("Special");
 		constraints.gridwidth = 1;
@@ -261,26 +260,35 @@ public class LoadingDialog extends JDialog{
 	}
 	
 	public void close(){
-		setVisible( false);
-		task = null;
-		dispose();
+		if( doneLoading){
+			setVisible( false);
+			task = null;
+			dispose();
+		}
 	}
 	
-	private class InputControl implements ActionListener {
+	private class InputControl extends WindowAdapter implements ActionListener {
 		
 		@Override
 		public void actionPerformed( ActionEvent e) {
 			Object source = e.getSource();
 			if( source==jbConnect){
-				new ConnectionAction( jtfName.getText().trim(), jtfIP.getText().trim(), Integer.parseInt( jtfPort.getText().trim())).postCommand();
-			}else if( source==jbDisconnect){
-				new ConnectionAction( NetwrokAction.Disconnect).postCommand();
+				if( !isConnected){
+					new ConnectionAction( jtfName.getText().trim(), jtfIP.getText().trim(), Integer.parseInt( jtfPort.getText().trim())).postCommand();
+				}else{
+					new ConnectionAction( NetwrokAction.Disconnect).postCommand();
+				}
 			}else if( isConnected && source==jbReady){
 				new ConnectionAction( NetwrokAction.ReadyState).postCommand();
 			}else if( e.getActionCommand().equals( "Cancel")){
 				result = false;
-				dispose();
+				close();
 			}
+		}
+		
+		@Override
+		public void windowClosing(WindowEvent e){
+			close();
 		}
 	}
 	
@@ -297,12 +305,14 @@ public class LoadingDialog extends JDialog{
 		switch( conncetion.getAction()){
 			case Connect:
 				isConnected = true;
+				jbConnect.setText( "Disconnect");
 				jtfName.setEnabled( false);
 				jtfIP.setEnabled( false);
 				jtfPort.setEnabled( false);
 				break;
 			case Disconnect:
 				isConnected = false;
+				jbConnect.setText( "Connect");
 				if( conncetion.getMessage()!=null){
 					JOptionPane.showMessageDialog( this, conncetion.getMessage(), "Connection", JOptionPane.ERROR_MESSAGE);
 				}
@@ -310,18 +320,20 @@ public class LoadingDialog extends JDialog{
 				break;
 			case StartGame:
 				result = true;
-				dispose();
+				close();
 			case ReadyState:
+				jbReady.setText( conncetion.getMessage());
 			default:
 				return;
 		}
 		jbReady.setEnabled( isConnected);
-		jbDisconnect.setEnabled( isConnected);
-		jbConnect.setEnabled( !isConnected);
 	}
 	
 	@Subscribe
 	public void loadProgress( LoadProgress load) {
+		if( !progress){
+			return;
+		}
 		switch( load.getCategory()){
 			case Building:
 				jpbBuilding.setValue( jpbBuilding.getValue()+1);
@@ -349,6 +361,7 @@ public class LoadingDialog extends JDialog{
 				setSize( size);
 				revalidate();
 				repaint();
+				doneLoading = true;
 			default:
 				break;
 		}
