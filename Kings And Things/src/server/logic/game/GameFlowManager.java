@@ -10,11 +10,11 @@ import java.util.Collection;
 import java.util.Collections;
 
 import server.event.commands.StartGameCommand;
-import server.event.commands.PaidRecruitsCommand;
 import server.event.commands.EndPlayerTurnCommand;
 import server.event.commands.ExchangeSeaHexCommand;
 import server.event.commands.ExchangeThingsCommand;
 import server.event.commands.GiveHexToPlayerCommand;
+import server.event.commands.RecruitThingsCommand;
 import server.event.commands.PlaceThingOnBoardCommand;
 import server.event.commands.ConstructBuildingCommand;
 
@@ -160,7 +160,10 @@ public class GameFlowManager{
 	public void exchangeThings(Collection<TileProperties> things, int playerNumber) throws NoMoreTilesException{
 		CommandValidator.validateCanExchangeThings(things, playerNumber, currentState);
 		makeThingsExchanged(things,playerNumber);
-		advanceActivePhasePlayer();
+		if(currentState.getCurrentSetupPhase() != SetupPhase.SETUP_FINISHED)
+		{
+			advanceActivePhasePlayer();
+		}
 	}
 	
 	/**
@@ -209,6 +212,22 @@ public class GameFlowManager{
 		for(int i = 0; i < (gold/5); i++) {
 			player.addThingToTray(cup.drawTile());
 		}
+	}
+	
+	/**
+	 * Call this to take free recruits, exchange things, and buy things all at
+	 * the same time
+	 * @param gold The gold amount the player wants to pay to purchase new recruits
+	 * @param thingsToExchange The list of things the player wants to exchange from
+	 * their tray
+	 * @param playerNumber The player who sent the command
+	 * @throws NoMoreTilesException If the cup runs out of things
+	 */
+	public void recruitThings(int gold, Collection<TileProperties> thingsToExchange, int playerNumber) throws NoMoreTilesException
+	{
+		paidRecruits(gold,playerNumber);
+		exchangeThings(thingsToExchange,playerNumber);
+		drawFreeThings(playerNumber);
 	}
 	
 	private void advanceActivePhasePlayer(){
@@ -320,6 +339,16 @@ public class GameFlowManager{
 				hs.setHex(replacement);
 				break;
 			}
+		}
+	}
+	
+	private void drawFreeThings(int playerNumber) throws NoMoreTilesException
+	{
+		Player player = currentState.getActivePhasePlayer();
+		int freeThings = (int) Math.ceil(((double)player.getOwnedHexes().size()) / (double)2);
+		for(int i=0; i<freeThings; i++)
+		{
+			player.addThingToTray(cup.drawTile());
 		}
 	}
 	
@@ -642,11 +671,11 @@ public class GameFlowManager{
 	}
 	
 	@Subscribe
-	public void receivePaidRecruitsCommand(PaidRecruitsCommand command)
+	public void receiveRecruitThingsCommand(RecruitThingsCommand command)
 	{
 		try
 		{
-			paidRecruits(command.getGold(), command.getPlayerID());
+			recruitThings(command.getGold(), command.getThingsToExchange(), command.getPlayerID());
 		}
 		catch(Throwable t)
 		{

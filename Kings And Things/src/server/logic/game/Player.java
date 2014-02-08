@@ -100,6 +100,7 @@ public class Player implements Serializable{
 	 * negative
 	 */
 	public void addGold(int amount){
+		validateEnteredGoldPositive(amount);
 		setGold( info.getGold()+amount);
 	}
 	
@@ -111,6 +112,7 @@ public class Player implements Serializable{
 	 * or if amount is negative
 	 */
 	public void removeGold(int amount){
+		validateEnteredGoldPositive(amount);
 		setGold( info.getGold()-amount);
 	}
 	
