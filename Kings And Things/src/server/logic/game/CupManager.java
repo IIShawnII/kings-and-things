@@ -147,6 +147,13 @@ class CupManager extends AbstractTileManager
 			newDeckOrder.add(tile);
 			tile = removeCreatureByNameAndAttack("Buffalo_Herd",3);
 			newDeckOrder.add(tile);
+
+			tile = removeCreatureByNameAndAttack("Cyclops",5);
+			newDeckOrder.add(tile);
+			tile = removeCreatureByNameAndAttack("Mountain_Men",1);
+			newDeckOrder.add(tile);
+			tile = removeCreatureByNameAndAttack("Goblins",1);
+			newDeckOrder.add(tile);
 			
 			for(TileProperties tp : tiles)
 			{
