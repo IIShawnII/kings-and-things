@@ -1,26 +1,33 @@
 package server.logic.game;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
+import common.game.HexState;
 
 /**
  * GameState can be described by the board and player info
  */
 public class GameState
 {
-	private final HexBoard board;
+	private HexBoard board;
 	private final HashSet<Player> players;
 	private final ArrayList<Integer> playerOrder;
-	private final SetupPhase currentSetupPhase;
-	private final RegularPhase currentRegularPhase;
-	private final int activePhasePlayerNumber;
-	private final int activeTurnPlayerNumber;
+	private SetupPhase currentSetupPhase;
+	private RegularPhase currentRegularPhase;
+	private int activePhasePlayerNumber;
+	private int activeTurnPlayerNumber;
+	private CombatPhase currentCombatPhase;
+	private int defenderPlayerNumber;
+	private Point combatLocation;
+	private final ArrayList<Roll> rolls;
 
 	/**
 	 * Creates a new GameState object
@@ -30,8 +37,12 @@ public class GameState
 	 * @param currentSetupPhase The current setup phase
 	 * @param activeTurnPlayerNumber The player id of the player who's turn it is
 	 * @param activePhasePlayerNumber The player id of the next player to act in the current phase
+	 * @param currentCombatPhase The current phase of combat
+	 * @param defenderPlayerNumber The player who is acting as the defender
+	 * @param combatLocation The (x,y) coordinates of the hex where combat is taking place
 	 */
-	public GameState(HexBoard board, Set<Player> players, List<Integer> playerOrder, SetupPhase currentSetupPhase, RegularPhase currentRegularPhase, int activeTurnPlayerNumber, int activePhasePlayerNumber)
+	public GameState(HexBoard board, Set<Player> players, List<Integer> playerOrder, SetupPhase currentSetupPhase, RegularPhase currentRegularPhase,
+			int activeTurnPlayerNumber, int activePhasePlayerNumber, CombatPhase currentCombatPhase, int defenderPlayerNumber, Point combatLocation)
 	{
 		this.board = board;
 		this.players = new HashSet<Player>(players);
@@ -40,6 +51,10 @@ public class GameState
 		this.currentRegularPhase = currentRegularPhase;
 		this.activePhasePlayerNumber = activePhasePlayerNumber;
 		this.activeTurnPlayerNumber = activeTurnPlayerNumber;
+		this.currentCombatPhase = currentCombatPhase;
+		this.defenderPlayerNumber = defenderPlayerNumber;
+		this.combatLocation = combatLocation;
+		this.rolls = new ArrayList<Roll>();
 	}
 	
 	/**
@@ -124,5 +139,225 @@ public class GameState
 		}
 		
 		throw new IllegalArgumentException("There is no player with number: " + playerNumber);
+	}
+	
+	/**
+	 * The current combat phase
+	 * @return The combat phase
+	 */
+	public CombatPhase getCurrentCombatPhase()
+	{
+		return currentCombatPhase;
+	}
+	
+	/**
+	 * The hex where combat is taking place
+	 * @return The combat hex
+	 */
+	public HexState getCombatHex()
+	{
+		return board.getHexByXY(combatLocation.x, combatLocation.y);
+	}
+
+	/**
+	 * The coordinates of the hex where combat is taking place,
+	 * or null if no combat is happening
+	 * @return The location of the combat hex, or null if
+	 * there is not combat
+	 */
+	public Point getCombatLocation()
+	{
+		return combatLocation;
+	}
+	
+	/**
+	 * The player that is acting as the defender
+	 * @return Defending player
+	 */
+	public Player getDefendingPlayer()
+	{
+		return getPlayerByPlayerNumber(defenderPlayerNumber);
+	}
+
+	
+	/**
+	 * The ID of the player that is acting as the defender
+	 * @return Defending player id
+	 */
+	public int getDefendingPlayerNumber()
+	{
+		return defenderPlayerNumber;
+	}
+	
+	/**
+	 * Find out if the game is currently waiting for a 
+	 * player to roll for something
+	 * @return True if someone needs to roll a die,
+	 * false otherwise
+	 */
+	public boolean isWaitingForRolls()
+	{
+		for(Roll r : rolls)
+		{
+			if(r.needsRoll())
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Gets a list of all rolls recently made that we might not
+	 * need to wait for
+	 * @return List of completed rolls
+	 */
+	public List<Roll> getFinishedRolls()
+	{
+		ArrayList<Roll> finishedRolls = new ArrayList<Roll>();
+		for(Roll r : rolls)
+		{
+			if(!r.needsRoll())
+			{
+				finishedRolls.add(r);
+			}
+		}
+		
+		return Collections.unmodifiableList(finishedRolls);
+	}
+	
+	/**
+	 * Get all of the rolls the game has recently recorded
+	 * @return List of recent rolls
+	 */
+	public List<Roll> getRecordedRolls()
+	{
+		return Collections.unmodifiableList(rolls);
+	}
+	
+	
+	/** setters **/
+	
+
+	/**
+	 * Keeps track of a roll that needs to be
+	 * made
+	 * @param roll The roll that must be made
+	 */
+	public void addNeededRoll(Roll roll)
+	{
+		rolls.add(roll);
+	}
+	
+	/**
+	 * Remove a roll from the list of rolls that
+	 * need to be made
+	 * @param roll The roll ro remove
+	 */
+	public void removeRoll(Roll roll)
+	{
+		rolls.remove(roll);
+	}
+	
+	/**
+	 * Clears the list of rolls that need to
+	 * be made
+	 */
+	public void removeAllRecordedRolls()
+	{
+		rolls.clear();
+	}
+	
+	/**
+	 * Sets the current board
+	 * @param board The game board
+	 */
+	public void setBoard(HexBoard board)
+	{
+		this.board = board;
+	}
+	
+	/**
+	 * Set the set of players currently playing the game
+	 * @param players The players of the game
+	 */
+	public void setPlayers(Set<Player> players)
+	{
+		players.addAll(players);
+	}
+	
+	/**
+	 * Set a list of player ids indicating the player order
+	 * @param playerOrder List indicating player order
+	 */
+	public void setPlayerOrder(List<Integer> playerOrder)
+	{
+		this.playerOrder.addAll(playerOrder);
+	}
+	
+	/**
+	 * Set the current setup phase of the game
+	 * @param phase The setup phase of the game
+	 */
+	public void setCurrentSetupPhase(SetupPhase phase)
+	{
+		currentSetupPhase = phase;
+	}
+	
+	/**
+	 * Set the current regular phase of the game
+	 * @param The regular phase of the game
+	 */
+	public void setCurrentRegularPhase(RegularPhase phase)
+	{
+		currentRegularPhase = phase;
+	}
+	
+	/**
+	 * Set the player who needs to move next for the current
+	 * phase
+	 * @param id The player who needs to move next for this phase
+	 */
+	public void setActivePhasePlayer(int id)
+	{
+		activePhasePlayerNumber = id;
+	}
+
+	/**
+	 * Set the player who's turn it is
+	 * @param id The player who's turn it is
+	 */
+	public void setActiveTurnPlayer(int id)
+	{
+		activeTurnPlayerNumber = id;
+	}
+	
+	/**
+	 * The current combat phase
+	 * @param combatPhase The combat phase
+	 */
+	public void setCurrentCombatPhase(CombatPhase combatPhase)
+	{
+		currentCombatPhase = combatPhase;
+	}
+
+	/**
+	 * The coordinates of the hex where combat is taking place,
+	 * or null if no combat is happening
+	 * @param location The location of the combat hex, or null if
+	 * there is not combat
+	 */
+	public void setCombatLocation(Point location)
+	{
+		combatLocation = location;
+	}
+	
+	/**
+	 * @param id The ID of the player that is acting as the defender
+	 */
+	public void setDefendingPlayerNumber(int id)
+	{
+		defenderPlayerNumber = id;
 	}
 }

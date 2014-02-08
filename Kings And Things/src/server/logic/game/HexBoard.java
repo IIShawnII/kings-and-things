@@ -4,9 +4,11 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableBiMap;
 
@@ -241,6 +243,19 @@ public class HexBoard
 	}
 	
 	/**
+	 * Given a hex, find the corresponding HexState on this board
+	 * @param hex The hex to find
+	 * @return The HexState for the given hex
+	 * @throws IllegalArgumentException if the entered tile is null, is
+	 * not a hex, or doesn't exist in this board
+	 */
+	public HexState getHexStateForHex(TileProperties hex)
+	{
+		Point coords = getXYCoordinatesOfHex(hex);
+		return getHexByXY(coords.x,coords.y);
+	}
+	
+	/**
 	 * Given a hex from this board, find a list of all adjacent hexes.
 	 * The list may be empty but is guaranteed not to be null. The given
 	 * hex is not returned inside the generated list.
@@ -295,8 +310,7 @@ public class HexBoard
 		for(int i=0; i<hexes.size()-1; i++)
 		{
 			List<HexState> adjacentHexes = getAdjacentHexesTo(hexes.get(i));
-			Point coords = getXYCoordinatesOfHex(hexes.get(i+1));
-			HexState hs = getHexByXY(coords.x, coords.y);
+			HexState hs = getHexStateForHex(hexes.get(i+1));
 			if(!adjacentHexes.contains(hs))
 			{
 				return false;
@@ -304,6 +318,36 @@ public class HexBoard
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * Given the list of players currently using this board,
+	 * this method will check for any hexes that are 'contested'
+	 * according to the game logic, these are hexes where combat must
+	 * take place during the combat phase
+	 * @param players The players using the board
+	 * @return Set of contested hexes
+	 */
+	public Set<HexState> getContestedHexes(Set<Player> players)
+	{
+		Set<HexState> contestedHexes = new HashSet<HexState>();
+		for(HexState hs : getHexesAsList())
+		{
+			Set<Player> playersInHex = new HashSet<Player>();
+			for(Player p : players)
+			{
+				if(p.ownsHex(hs.getHex()) || hs.getThingsInHexOwnedByPlayer(p).size() > 0)
+				{
+					playersInHex.add(p);
+				}
+			}
+			if(playersInHex.size() > 1)
+			{
+				contestedHexes.add(hs);
+			}
+		}
+		
+		return Collections.unmodifiableSet(contestedHexes);
 	}
 	
 	/**

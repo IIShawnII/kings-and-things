@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import server.event.commands.MoveThingsCommand;
+import server.event.commands.ResolveCombat;
+import server.event.commands.RollDiceCommand;
 import server.event.commands.StartGameCommand;
 import server.event.commands.EndPlayerTurnCommand;
 import server.event.commands.ExchangeSeaHexCommand;
@@ -22,6 +24,8 @@ import server.logic.exceptions.NoMoreTilesException;
 
 import com.google.common.eventbus.Subscribe;
 
+import common.Constants.CombatPhase;
+import common.Constants.RollReason;
 import common.Logger;
 import common.Constants;
 import common.Constants.SetupPhase;
@@ -42,6 +46,7 @@ public class GameFlowManager{
 	private HexTileManager bank;
 	private BoardGenerator boardGenerator;
 	private GameState currentState;
+	private boolean isDemoMode;
 	
 	/**
 	 * call this method to initialize this class before sending it commands
@@ -60,6 +65,7 @@ public class GameFlowManager{
 	 */
 	public void startNewGame(boolean demoMode, Set<Player> players) throws NoMoreTilesException{
 		CommandValidator.validateStartNewGame(demoMode, players);
+		isDemoMode = demoMode;
 		cup = new CupManager(demoMode);
 		bank = new HexTileManager(demoMode);
 		boardGenerator = new BoardGenerator(players.size(),bank);
@@ -68,7 +74,8 @@ public class GameFlowManager{
 		board.fillArray( placement.getArray());
 		placement.postNotification();
 		List<Integer> playerOrder = determinePlayerOrder(players,demoMode);
-		currentState = new GameState(board,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0));
+		//TODO handle dice rolls for player order
+		currentState = new GameState(board,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0), CombatPhase.NO_COMBAT, -1, null);
 		new Flip().postNotification();
 	}
 	
@@ -248,6 +255,35 @@ public class GameFlowManager{
 		makeThingsMoved(things, playerNumber, hexes);
 	}
 	
+	/**
+	 * Call this to roll dice for a player
+	 * @param reasonForRoll The reason for this dice roll
+	 * @param playerNumber The player who sent the command
+	 * @param tile The target of the role, (could be hex, creature, building etc)
+	 * @throws IllegalArgumentException If the game is not currently waiting for any
+	 * rolls, and the reason for rolling is not RollReason.ENTERTAINMENT
+	 */
+	public void rollDice(RollReason reasonForRoll, int playerNumber, TileProperties tile)
+	{
+		CommandValidator.validateCanRollDice(reasonForRoll, playerNumber, tile, currentState);
+		makeDiceRoll(reasonForRoll, playerNumber, tile);
+	}
+	
+	/**
+	 * Call this to resolve combat in, or explore, a particular hex
+	 * @param hex The hex to resolve
+	 * @param playerNumber The player who sent the command
+	 * @throws IllegalArgumentException If parameters are invalid, or
+	 * if combat in hex can not be resolved according to game rules
+	 * @throws IllegalStateException If it is not the combat phase,
+	 * or if another combat is already being resolved
+	 */
+	public void resolveCombat(TileProperties hex, int playerNumber)
+	{
+		CommandValidator.validateCanResolveCombat(hex,playerNumber,currentState);
+		beginCombatResolution(hex, playerNumber);
+	}
+	
 	private void advanceActivePhasePlayer(){
 		SetupPhase nextSetupPhase = currentState.getCurrentSetupPhase();
 		RegularPhase nextRegularPhase = currentState.getCurrentRegularPhase();
@@ -267,9 +303,12 @@ public class GameFlowManager{
 				regularPhaseChanged(nextRegularPhase);
 			}
 		}
-		currentState = new GameState(currentState.getBoard(), currentState.getPlayers(), currentState.getPlayerOrder(),
-										nextSetupPhase, nextRegularPhase, currentState.getActiveTurnPlayer().getID(),
-										currentState.getPlayerOrder().get(++activePhasePlayerOrderIndex % currentState.getPlayers().size()));
+		currentState.setCurrentSetupPhase(nextSetupPhase);
+		currentState.setCurrentRegularPhase(nextRegularPhase);
+		currentState.setCurrentCombatPhase(CombatPhase.NO_COMBAT);
+		currentState.setCombatLocation(null);
+		currentState.setDefendingPlayerNumber(-1);
+		currentState.setActivePhasePlayer(currentState.getPlayerOrder().get(++activePhasePlayerOrderIndex % currentState.getPlayers().size()));
 	}
 	
 	private void advanceActiveTurnPlayer(){
@@ -283,8 +322,8 @@ public class GameFlowManager{
 			nextActiveTurnPlayerNumber = currentState.getPlayerOrder().get(0);
 		}
 
-		currentState = new GameState(currentState.getBoard(), currentState.getPlayers(), currentState.getPlayerOrder(),
-									currentState.getCurrentSetupPhase(), currentState.getCurrentRegularPhase(), nextActiveTurnPlayerNumber, nextActiveTurnPlayerNumber);
+		currentState.setActivePhasePlayer(nextActiveTurnPlayerNumber);
+		currentState.setActiveTurnPlayer(nextActiveTurnPlayerNumber);
 	}
 	
 	private SetupPhase getNextSetupPhase(){
@@ -320,6 +359,10 @@ public class GameFlowManager{
 		}
 		else
 		{
+			if(currentState.getBoard().getContestedHexes(currentState.getPlayers()).size() > 0)
+			{
+				return RegularPhase.COMBAT;
+			}
 			int currentRegularPhaseIndex = nextRegularPhase.ordinal();
 			for(RegularPhase rp : RegularPhase.values())
 			{
@@ -334,8 +377,7 @@ public class GameFlowManager{
 	}
 	
 	private void makeThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex){
-		Point coords = currentState.getBoard().getXYCoordinatesOfHex(hex);
-		HexState hs = currentState.getBoard().getHexByXY(coords.x, coords.y);
+		HexState hs = currentState.getBoard().getHexStateForHex(hex);
 		if(thing.isCreature() && thing.isFaceUp())
 		{
 			//TODO check if this is a special character first
@@ -353,10 +395,8 @@ public class GameFlowManager{
 			moveCost += hexes.get(i).getMoveSpeed();
 		}
 		
-		Point coords = currentState.getBoard().getXYCoordinatesOfHex(hexes.get(0));
-		HexState firstHex = currentState.getBoard().getHexByXY(coords.x, coords.y);
-		coords = currentState.getBoard().getXYCoordinatesOfHex(hexes.get(hexes.size()-1));
-		HexState lastHex = currentState.getBoard().getHexByXY(coords.x, coords.y);
+		HexState firstHex = currentState.getBoard().getHexStateForHex(hexes.get(0));
+		HexState lastHex = currentState.getBoard().getHexStateForHex(hexes.get(hexes.size()-1));
 		
 		for(TileProperties thing : things)
 		{
@@ -365,6 +405,33 @@ public class GameFlowManager{
 			lastHex.addThingToHex(thing);
 		}
 
+	}
+	
+	private void beginCombatResolution(TileProperties hex, int playerNumber)
+	{
+		boolean isExploration = true;
+		for(Player p : currentState.getPlayers())
+		{
+			if(p.ownsHex(hex))
+			{
+				isExploration = false;
+			}
+		}
+		if(isExploration)
+		{
+			List<Integer> playerOrder = currentState.getPlayerOrder();
+			int attackerIndex = playerOrder.indexOf(playerNumber);
+			int defenderIndex = attackerIndex>0? attackerIndex-1 : playerOrder.size()-1;
+			
+			currentState.setCurrentCombatPhase(CombatPhase.DETERMINE_DEFENDERS);
+			currentState.setDefendingPlayerNumber(playerOrder.get(defenderIndex));
+			currentState.setCombatLocation(currentState.getBoard().getXYCoordinatesOfHex(hex));
+			currentState.addNeededRoll(new Roll(1,currentState.getCombatHex().getHex(),RollReason.EXPLORE_HEX,playerNumber));
+		}
+		else
+		{
+			//TODO implement regular combat
+		}
 	}
 	
 	private void makeSeaHexExchanged(TileProperties hex, int playerNumber) throws NoMoreTilesException
@@ -394,8 +461,7 @@ public class GameFlowManager{
 	
 	private void makeBuildingConstructed(BuildableBuilding building, int playerNumber, TileProperties hex)
 	{
-		Point coords = currentState.getBoard().getXYCoordinatesOfHex(hex);
-		HexState hs = currentState.getBoard().getHexByXY(coords.x, coords.y);
+		HexState hs = currentState.getBoard().getHexStateForHex(hex);
 		TileProperties buildingTile = BuildableBuildingGenerator.createBuildingTileForType(building);
 		hs.removeBuildingFromHex();
 		hs.addThingToHex(buildingTile);
@@ -614,6 +680,74 @@ public class GameFlowManager{
 		}
 	}
 	
+	private void makeDiceRoll(RollReason reasonForRoll, int playerNumber, TileProperties tile)
+	{
+		if(reasonForRoll == RollReason.ENTERTAINMENT)
+		{
+			currentState.addNeededRoll(new Roll(1, null, RollReason.ENTERTAINMENT, playerNumber));
+		}
+		
+		for(Roll r : currentState.getRecordedRolls())
+		{
+			if(Roll.rollSatisfiesParameters(r, reasonForRoll, playerNumber, tile) && r.needsRoll())
+			{
+				r.addRoll(rollDie());
+				//TODO notify players of die roll
+				break;
+			}
+		}
+		
+		//if we are no longer waiting for more rolls, then we can apply the effects now
+		if(!currentState.isWaitingForRolls())
+		{
+			applyRollEffects();
+		}
+	}
+	
+	private void applyRollEffects()
+	{
+		for(Roll r : currentState.getFinishedRolls())
+		{
+			switch(r.getRollReason())
+			{
+				case ATTACK_WITH_CREATURE:
+					//TODO handle
+					break;
+				case CALCULATE_DAMAGE_TO_TILE:
+					//TODO handle
+					break;
+				case DETERMINE_PLAYER_ORDER:
+					//TODO handle
+					break;
+				case ENTERTAINMENT:
+					//nothing to do
+					break;
+				case EXPLORE_HEX:
+					if(isDemoMode)
+					{
+						//give hex to player
+						makeHexOwnedByPlayer(r.getRollTarget(), r.getRollingPlayerID());
+						currentState.setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
+					}
+					else
+					{
+						//TODO implement regular exploration
+					}
+					break;
+				default:
+					break;
+				
+			}
+		}
+		
+		currentState.removeAllRecordedRolls();
+	}
+	
+	private static int rollDie()
+	{
+		return (int) Math.round((Math.random() * 5) + 1);
+	}
+	
 	/**
 	 * This method is useful for unit testing purposes,
 	 * which does not use our event driven architecture
@@ -744,6 +878,32 @@ public class GameFlowManager{
 		catch(Throwable t)
 		{
 			Logger.getErrorLogger().error("Unable to process MoveThingsCommand due to: ", t);
+		}
+	}
+	
+	@Subscribe
+	public void receiveResolveCombatCommand(ResolveCombat command)
+	{
+		try
+		{
+			resolveCombat(command.getCombatHex(), command.getPlayerID());
+		}
+		catch(Throwable t)
+		{
+			Logger.getErrorLogger().error("Unable to process ResolveCombatCommand due to: ", t);
+		}
+	}
+
+	@Subscribe
+	public void receiveRollDiceCommand(RollDiceCommand command)
+	{
+		try
+		{
+			rollDice(command.getReasonForRoll(), command.getPlayerID(), command.getTileToRollFor());
+		}
+		catch(Throwable t)
+		{
+			Logger.getErrorLogger().error("Unable to process RollDieCommand due to: ", t);
 		}
 	}
 }

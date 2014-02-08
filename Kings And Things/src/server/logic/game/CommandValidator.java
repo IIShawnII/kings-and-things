@@ -13,7 +13,9 @@ import common.Constants.Ability;
 import common.Constants.Biome;
 import common.Constants.BuildableBuilding;
 import common.Constants.Building;
+import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
+import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.game.HexState;
 import common.game.TileProperties;
@@ -56,6 +58,7 @@ public abstract class CommandValidator
 	public static void validateCanGiveHexToPlayer(TileProperties hex, int playerNumber, GameState currentState)
 	{
 		validateIsPlayerActive(playerNumber, currentState);
+		validateNoPendingRolls(currentState);
 		switch(currentState.getCurrentSetupPhase())
 		{
 			case PICK_FIRST_HEX:
@@ -90,6 +93,7 @@ public abstract class CommandValidator
 	public static void validateCanBuildBuilding(BuildableBuilding building, int playerNumber, TileProperties hex, GameState currentState)
 	{
 		validateIsPlayerActive(playerNumber,currentState);
+		validateNoPendingRolls(currentState);
 		if(building==null)
 		{
 			throw new IllegalArgumentException("Can not create a null building");
@@ -124,6 +128,7 @@ public abstract class CommandValidator
 	public static void validateCanExchangeThings(Collection<TileProperties> things, int playerNumber, GameState currentState)
 	{
 		validateIsPlayerActive(playerNumber,currentState);
+		validateNoPendingRolls(currentState);
 		validateCollection(things,"things");
 		
 		SetupPhase sp = currentState.getCurrentSetupPhase();
@@ -160,16 +165,25 @@ public abstract class CommandValidator
 	 */
 	public static void validateCanPlaceThingOnBoard(final TileProperties thing, int playerNumber, TileProperties hex, GameState currentState)
 	{
-		validateIsPlayerActive(playerNumber,currentState);
+		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
+		CombatPhase combatPhase = currentState.getCurrentCombatPhase();
+		if(combatPhase != CombatPhase.PLACE_THINGS)
+		{
+			validateIsPlayerActive(playerNumber,currentState);
+		}
+		else if(!currentState.getCombatHex().getHex().equals(hex))
+		{
+			throw new IllegalArgumentException("Can only place things on the newly acquired hex");
+		}
+		
+		validateNoPendingRolls(currentState);
 		SetupPhase setupPhase = currentState.getCurrentSetupPhase();
 		RegularPhase regularPhase = currentState.getCurrentRegularPhase();
-		if(setupPhase != SetupPhase.PLACE_FREE_THINGS && setupPhase != SetupPhase.PLACE_EXCHANGED_THINGS && regularPhase != RegularPhase.RECRUITING_THINGS)
+		if(setupPhase != SetupPhase.PLACE_FREE_THINGS && setupPhase != SetupPhase.PLACE_EXCHANGED_THINGS && regularPhase != RegularPhase.RECRUITING_THINGS && combatPhase != CombatPhase.PLACE_THINGS)
 		{
 			throw new IllegalStateException("Can not place things on the board during the " + (setupPhase==SetupPhase.SETUP_FINISHED? regularPhase : setupPhase) + " phase");
 		}
-		Point coords = currentState.getBoard().getXYCoordinatesOfHex(hex);
-		HexState hs = currentState.getBoard().getHexByXY(coords.x, coords.y);
-		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
+		HexState hs = currentState.getBoard().getHexStateForHex(hex);
 		if(!player.ownsHex(hex))
 		{
 			throw new IllegalArgumentException("Can not place things onto someone else's hex");
@@ -197,6 +211,7 @@ public abstract class CommandValidator
 	public static void validateCanPurchaseRecruits(int amountToSpend, int playerNumber, GameState currentState)
 	{
 		validateIsPlayerActive(playerNumber,currentState);
+		validateNoPendingRolls(currentState);
 		RegularPhase regularPhase = currentState.getCurrentRegularPhase();
 		if(regularPhase != RegularPhase.RECRUITING_THINGS)
 		{
@@ -234,6 +249,7 @@ public abstract class CommandValidator
 		
 		// checks if it's player's turn
 		validateIsPlayerActive(playerNumber, currentState);
+		validateNoPendingRolls(currentState);
 		validateCollection(Hexes,"hexes");
 		validateCollection(Creatures,"creatures");
 		
@@ -260,6 +276,7 @@ public abstract class CommandValidator
 	public static void validateCanExchangeSeaHex(TileProperties hex, int playerNumber, GameState currentState)
 	{
 		validateIsPlayerActive(playerNumber,currentState);
+		validateNoPendingRolls(currentState);
 		if(hex == null)
 		{
 			throw new IllegalArgumentException("The entered tile must not be null.");
@@ -276,8 +293,7 @@ public abstract class CommandValidator
 		TileProperties startingHex = currentState.getPlayerByPlayerNumber(playerNumber).getOwnedHexes().iterator().next();
 		List<HexState> adjacentHexes = currentState.getBoard().getAdjacentHexesTo(startingHex);
 		
-		Point hexCoords = currentState.getBoard().getXYCoordinatesOfHex(hex);
-		HexState hexState = currentState.getBoard().getHexByXY(hexCoords.x, hexCoords.y);
+		HexState hexState = currentState.getBoard().getHexStateForHex(hex);
 		
 		int numSeaHexes = 0;
 		for(HexState hs : adjacentHexes)
@@ -328,33 +344,123 @@ public abstract class CommandValidator
 	}
 	
 	/**
+	 * Call this to validate the resolve combat in hex command
+	 * @param hex The hex to resolve
+	 * @param playerNumber The player who sent the command
+	 * @param currentState The current state of the game
+	 * @throws IllegalArgumentException If parameters are invalid, or
+	 * if combat in hex can not be resolved according to game rules
+	 * @throws IllegalStateException If it is not the combat phase,
+	 * or if another combat is already being resolved
+	 */
+	public static void validateCanResolveCombat(TileProperties hex, int playerNumber, GameState currentState)
+	{
+		validateNoPendingRolls(currentState);
+		validateIsPlayerActive(playerNumber,currentState);
+		if(currentState.getCurrentCombatPhase() != CombatPhase.NO_COMBAT)
+		{
+			throw new IllegalStateException("Must resolve existing combat before starting a new one.");
+		}
+		if(currentState.getCurrentRegularPhase() != RegularPhase.COMBAT)
+		{
+			throw new IllegalStateException("Can only resolve combat during the combat phase");
+		}
+		HexState combatHex = currentState.getBoard().getHexStateForHex(hex);
+		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
+		if(!player.ownsHex(hex) && combatHex.getThingsInHexOwnedByPlayer(player).size() == 0)
+		{
+			throw new IllegalArgumentException("Can only resolve combat in a hex that involves the player");
+		}
+		boolean otherPlayersOwnThingsInHex = false;
+		
+		for(Player p : currentState.getPlayers())
+		{
+			if(!p.equals(player) && combatHex.getThingsInHexOwnedByPlayer(p).size()!=0)
+			{
+				otherPlayersOwnThingsInHex = true;
+				break;
+			}
+		}
+		
+		if(player.ownsHex(hex) && !otherPlayersOwnThingsInHex)
+		{
+			throw new IllegalArgumentException("The entered hex is not a combat hex");
+		}
+	}
+
+	/**
+	 * Call this to validate the roll dice command
+	 * @param reasonForRoll The reason this roll is being done
+	 * @param playerNumber The player who sent the command
+	 * @param tileToRollFor The tile being rolled for (might be creature, hex, tower etc)
+	 * @param currentState The current state of the game
+	 * @throws IllegalArgumentException If the game is not currently waiting for any
+	 * rolls, and the reason for rolling is not RollReason.ENTERTAINMENT
+	 */
+	public static void validateCanRollDice(RollReason reasonForRoll, int playerNumber, TileProperties tileToRollFor, GameState currentState)
+	{
+		boolean rollNeeded = false;
+		for(Roll r : currentState.getRecordedRolls())
+		{
+			if(Roll.rollSatisfiesParameters(r, reasonForRoll, playerNumber, tileToRollFor))
+			{
+				rollNeeded = true;
+			}
+		}
+		if(!rollNeeded && reasonForRoll != RollReason.ENTERTAINMENT)
+		{
+			throw new IllegalArgumentException("Not currently waiting for " + reasonForRoll + " type roll from player " + playerNumber + " targeting tile: " + tileToRollFor);
+		}
+	}
+	
+	/**
 	 * Call this to validate the end the current players turn command
 	 * @param playerNumber The player who sent the command
 	 * @param currentState The current state of the game to do the validation check on
-	 * @throws IllegalArgumentException If it is not the entered player's turn, or if
-	 * the player can not end their turn (this is only true during the setup phase)
+	 * @throws IllegalArgumentException If it is not the entered player's turn
+	 * @throws IllegalStateException If the player can not end their turn
 	 */
 	public static void validateCanEndPlayerTurn(int playerNumber, GameState currentState)
 	{
+		validateNoPendingRolls(currentState);
+		if(currentState.getCurrentCombatPhase() == CombatPhase.NO_COMBAT)
+		{
+			validateIsPlayerActive(playerNumber, currentState);
+		}
 		switch(currentState.getCurrentSetupPhase())
 		{
 			case PICK_FIRST_HEX:
 			{
-				throw new IllegalArgumentException("You must select a starting hex.");
+				throw new IllegalStateException("You must select a starting hex.");
 			}
 			case PICK_SECOND_HEX:
 			case PICK_THIRD_HEX:
 			{
-				throw new IllegalArgumentException("You must select a hex to take ownership of.");
+				throw new IllegalStateException("You must select a hex to take ownership of.");
 			}
 			case PLACE_FREE_TOWER:
 			{
-				throw new IllegalArgumentException("You must select a hex to place your tower in.");
+				throw new IllegalStateException("You must select a hex to place your tower in.");
 			}
 			default:
 				break;
 		}
-		validateIsPlayerActive(playerNumber, currentState);
+		switch(currentState.getCurrentCombatPhase())
+		{
+			case PLACE_THINGS:
+			{
+				Player player = currentState.getPlayerByPlayerNumber(playerNumber);
+				if(!player.ownsHex(currentState.getCombatHex().getHex()))
+				{
+					throw new IllegalStateException("Must wait for combat winner to place things on hex");
+				}
+			}
+			case NO_COMBAT:
+				break;
+			default:
+				throw new IllegalStateException("You must resolve the combat in the hex before ending your turn");
+			
+		}
 	}
 	
 	// private methods
@@ -414,8 +520,7 @@ public abstract class CommandValidator
 	private static void validateCreatureLimitInHexNotExceeded(int playerNumber, TileProperties hex, GameState currentState, Collection<TileProperties> toAdd)
 	{
 		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
-		Point xy = currentState.getBoard().getXYCoordinatesOfHex(hex);
-		HexState hs = currentState.getBoard().getHexByXY(xy.x, xy.y);
+		HexState hs = currentState.getBoard().getHexStateForHex(hex);
 		
 		for(TileProperties thing : toAdd)
 		{
@@ -446,11 +551,9 @@ public abstract class CommandValidator
 		
 		int moveSpeedTotal = 0;
 		HashSet<HexState> pathOfHexes = new HashSet<>();
-		Point coordinates = null;
 		HexState nextHex = null;
 
-		coordinates = currentState.getBoard().getXYCoordinatesOfHex(Hexes.get(0));
-		HexState firstHex = currentState.getBoard().getHexByXY(coordinates.x, coordinates.y);
+		HexState firstHex = currentState.getBoard().getHexStateForHex(Hexes.get(0));
 		
 		if(!currentState.getBoard().areHexesConnected(Hexes))
 		{
@@ -467,8 +570,7 @@ public abstract class CommandValidator
 			TileProperties hex = Hexes.get(i);
 			
 			if (i < Hexes.size() - 1) {
-				coordinates = currentState.getBoard().getXYCoordinatesOfHex(Hexes.get(i));
-				nextHex = currentState.getBoard().getHexByXY(coordinates.x, coordinates.y);
+				nextHex = currentState.getBoard().getHexStateForHex(Hexes.get(i));
 				pathOfHexes.add(nextHex);
 				for (Player p : currentState.getPlayers()) {
 					if (p.ownsHex(hex)) {
@@ -540,6 +642,14 @@ public abstract class CommandValidator
 		
 		if (Biome.Sea.name().equals(Hexes.get(Hexes.size() - 1).getName())) {
 			throw new IllegalArgumentException("Can't end movement on sea hex");
+		}
+	}
+	
+	private static void validateNoPendingRolls(GameState currentState)
+	{
+		if(currentState.isWaitingForRolls())
+		{
+			throw new IllegalStateException("Some players must finish rolling dice first");
 		}
 	}
 }
