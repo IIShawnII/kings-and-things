@@ -1,19 +1,24 @@
 package client.gui;
 
-import static common.Constants.HEX_SIZE;
-import static common.Constants.LOCK_SIZE;
-import static common.Constants.MAX_RACK_SIZE;
-import static common.Constants.TILE_SIZE_BANK;
-
+import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 
 import client.gui.tiles.Tile;
+import common.game.TileProperties;
+import static common.Constants.HEX_SIZE;
+import static common.Constants.LOCK_SIZE;
+import static common.Constants.BOARD_SIZE;
+import static common.Constants.MAX_RACK_SIZE;
+import static common.Constants.TILE_SIZE_BANK;
+import static common.Constants.BOARD_LOAD_COL;
+import static common.Constants.BOARD_LOAD_ROW;
+import static common.Constants.BOARD_TOP_PADDING;
+import static common.Constants.PLAYERS_STATE_SIZE;
 
 public class LockManager {
 	
 	private Rectangle[][] rackLocks;
-	private ArrayList< Rectangle> hexBoardLocks;
+	private Rectangle[][] hexBoardLocks;
 	private Rectangle hexLock, fortLock, goldLock;
 	private Rectangle markerLock, specialLock, cupLock;
 	
@@ -25,6 +30,8 @@ public class LockManager {
 		markerLock = new Rectangle( bound.x+TILE_SIZE_BANK.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE_BANK.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
 		specialLock = new Rectangle( bound.x+TILE_SIZE_BANK.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE_BANK.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
 		cupLock = new Rectangle( bound.x+TILE_SIZE_BANK.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE_BANK.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
+		rackLocks = new Rectangle[playerCount][MAX_RACK_SIZE];
+		hexBoardLocks = new Rectangle[7][13];
 		for( int j=0; j<playerCount;j++){
 			for( int i=0; i<MAX_RACK_SIZE;i++){
 				rackLocks[j][i] = new Rectangle( Board.LOCK_X,Board.LOCK_Y,Board.lockBorderWidth,Board.lockBorderheight);
@@ -35,10 +42,85 @@ public class LockManager {
 				}
 			}
 		}
+		int x=0, y=0;
+		for(int ring=0; ring<BOARD_LOAD_ROW.length; ring++){
+			for( int count=0; count<BOARD_LOAD_ROW[ring].length; count++){
+				x = (Board.widthSegment*BOARD_LOAD_COL[ring][count]);
+				y = (Board.heightSegment*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
+				hexBoardLocks[BOARD_LOAD_COL[ring][count]-1][BOARD_LOAD_ROW[ring][count]-1] = new Rectangle( x-LOCK_SIZE/2, y-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
+			}
+		}
+		System.out.println();
 	}
 
-	public Rectangle getLock( Tile tile) {
-		
+	public Rectangle getPermanentLock( Tile tile) {
+		TileProperties prop = tile.getProperties();
+		switch( prop.getCategory()){
+			case Cup:
+			case Treasure:
+			case Magic:
+			case Creature:
+			case Building:
+			case Event:
+				return new Rectangle(cupLock);
+			case Buildable:
+				return new Rectangle(fortLock);
+			case Gold:
+				return new Rectangle(goldLock);
+			case Hex:
+				return new Rectangle(hexLock);
+			case Special:
+				return new Rectangle(specialLock);
+			case State:
+				return new Rectangle(markerLock);
+			default:
+				throw new IllegalArgumentException( "ERROR - no lock for "+tile);
+		}
+	}
+	
+	public Rectangle getLock( Tile tile){
+		Rectangle rect = tile.getBounds(), lock = null;
+		if( rect.x>(BOARD_SIZE.width-PLAYERS_STATE_SIZE.width)){
+			lock = lookThroughLocks( rackLocks, rect);
+		}else{
+			lock = lookThroughLocks( hexBoardLocks, rect);
+		}
+		return lock;
+	}
+	
+	private Rectangle lookThroughLocks( Rectangle[][] locks, Rectangle bound){
+		Rectangle lock;
+		for( int i=0; i<hexBoardLocks.length;i++){
+			for( int j=0; j<hexBoardLocks[i].length;j++){
+				if( canLock( hexBoardLocks[i][j], bound)){
+					lock = new Rectangle( hexBoardLocks[i][j]);
+					hexBoardLocks[i][j] = null;
+					return lock;
+				}
+			}
+		}
 		return null;
+	}
+	
+	private boolean canLock( Rectangle lock, Rectangle bound){
+		if( lock!=null && lock.contains( bound.getX()+bound.getWidth()/2, bound.getY()+bound.getHeight()/2)){
+			bound.x = (int) ((lock.getX()+lock.getWidth()/2)-bound.getWidth()/2);
+			bound.y = (int) ((lock.getY()+lock.getHeight()/2)-bound.getHeight()/2);
+			return true;
+		}
+		return false;
+	}
+	
+	public Point convertToRowAndCol( int x, int y){
+		int row = x/Board.widthSegment;
+		int col = y/Board.heightSegment;
+		return new Point( row-1, col-1);
+	}
+	
+	public Point convertToCenterCoordinate( int row, int col){
+		Point point = hexBoardLocks[row][col].getLocation();
+		point.x += LOCK_SIZE/2;
+		point.y += LOCK_SIZE/2;
+		return point;
 	}
 }

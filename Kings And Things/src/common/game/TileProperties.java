@@ -7,10 +7,8 @@ import java.util.ArrayList;
 
 import common.Constants.Biome;
 import common.Constants.Ability;
-import common.Constants.Building;
 import common.Constants.Category;
 import common.Constants.Restriction;
-import common.Constants.BuildableBuilding;
 
 public class TileProperties implements Serializable{
 
@@ -67,6 +65,10 @@ public class TileProperties implements Serializable{
 	
 	public void setCategory( Category category){
 		tileType = category;
+	}
+	
+	public Category getCategory(){
+		return tileType;
 	}
 
 	public int getNumber() {

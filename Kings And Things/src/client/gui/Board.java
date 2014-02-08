@@ -1,13 +1,13 @@
 package client.gui;
 
-import java.util.ArrayList;
-
 import javax.swing.Timer;
 import javax.swing.JPanel;
 
 import com.google.common.eventbus.Subscribe;
 
+import common.Constants.Category;
 import common.game.HexState;
+import common.game.TileProperties;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -50,11 +50,11 @@ import static common.Constants.BOARD_HEIGHT_SEGMENT;
 public class Board extends JPanel{
 	
 	private static final BufferedImage image;
-	private static final int heightSegment = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
-	private static final int widthSegment = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
-	private static final int initialTileXShift = widthSegment/2;
+	static final int heightSegment = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
+	static final int widthSegment = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
+	static final int initialTileXShift = widthSegment/2;
 	private static final int tileXShift = (int) (widthSegment*1.2);
-	private static final int tileYShift = 13;
+	static final int tileYShift = 13;
 	private static final int hexYShift = 8-3;
 	private static final int hexeXShift = 8-2;
 	static{
@@ -87,62 +87,77 @@ public class Board extends JPanel{
 		g2d.dispose();
 	}
 	
+	private final static BufferedImage StateImage;
+	static final int LOCK_X, LOCK_Y, Y_SHIFT;
+	static final int PADDING = 2, lockBorderWidth, lockBorderheight;
+	static{
+		StateImage = new BufferedImage( PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = StateImage.createGraphics();
+		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		g2d.setStroke( new BasicStroke( 5));
+		g2d.setColor( Color.BLACK);
+		//g2d.drawRect( 0, 0, PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height);
+		lockBorderWidth = (PLAYERS_STATE_SIZE.width- PADDING)/(MAX_RACK_SIZE/2) ;
+		lockBorderheight = (int) (lockBorderWidth*TILE_RATIO_REVERSE);
+		LOCK_X = PADDING;
+		LOCK_Y = PLAYERS_STATE_SIZE.height-lockBorderheight-PADDING-1;
+		Rectangle bound = new Rectangle(LOCK_X,LOCK_Y,lockBorderWidth,lockBorderheight);
+		Y_SHIFT = LOCK_Y-lockBorderheight-PADDING;
+		for( int i=0; i<MAX_RACK_SIZE;i++){
+			g2d.draw( bound);
+			if( i==4){
+				bound.setLocation( LOCK_X,Y_SHIFT);
+			}else{
+				bound.translate( lockBorderWidth, 0);
+			}
+		}
+		g2d.dispose();
+	}
+	
 	private boolean interactWithHexes = false;
 	
 	private Timer timer;
+	private LockManager locks;
 	private MouseInput mouseInput;
-	private Rectangle[] rackLocks;
-	private ArrayList< Rectangle> hexBoardLocks;
-	private Rectangle hexLock, fortLock, goldLock;
-	private Rectangle markerLock, specialLock, cupLock;
 	private PlayerState[] states;
 	
 	public Board( LayoutManager layout, boolean isDoubleBuffered){
 		super( layout, isDoubleBuffered);
 	}
 	
-	protected void init( int playerSize){
+	protected void init( int playerCount){
 		mouseInput = new MouseInput();
 		addMouseListener( mouseInput);
 		addMouseMotionListener( mouseInput);
 		addMouseWheelListener( mouseInput);
-		states = new PlayerState[playerSize];
-		for( int i=0; i<playerSize; i++){
+		states = new PlayerState[playerCount];
+		for( int i=0; i<playerCount; i++){
 			states[i] = new PlayerState();
 			states[i].init( getWidth()-PLAYERS_STATE_SIZE.width-5, PLAYERS_STATE_SIZE.height*i+10*(i+1));
 			add( states[i]);
 		}
-		hexBoardLocks = new ArrayList<>();
-		hexLock = new Rectangle( 8+HEX_SIZE.width/2-LOCK_SIZE/2, 8+HEX_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
-		addHex( 8, 8, null);
 		Rectangle bound = new Rectangle( initialTileXShift, tileYShift, TILE_SIZE_BANK.width, TILE_SIZE_BANK.height);
+		locks = new LockManager( playerCount);
+		addTile( new Hex( new HexState()), new Rectangle( 8,8,HEX_SIZE.width, HEX_SIZE.height));
 		bound.translate( tileXShift, 0);
-		fortLock = new Rectangle( bound.x+TILE_SIZE_BANK.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE_BANK.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
-		addTile( new Tile(), bound, fortLock);
+		addTile( new Tile( new TileProperties( Category.Buildable)), bound);
 		bound.translate( tileXShift, 0);
-		goldLock = new Rectangle( bound.x+TILE_SIZE_BANK.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE_BANK.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
-		addTile( new Tile(), bound, goldLock);
+		addTile( new Tile( new TileProperties( Category.Gold)), bound);
 		bound.translate( tileXShift, 0);
-		markerLock = new Rectangle( bound.x+TILE_SIZE_BANK.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE_BANK.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
-		addTile( new Tile(), bound, markerLock);
+		addTile( new Tile( new TileProperties( Category.State)), bound);
 		bound.translate( tileXShift, 0);
-		specialLock = new Rectangle( bound.x+TILE_SIZE_BANK.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE_BANK.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
-		addTile( new Tile(), bound, specialLock);
+		addTile( new Tile( new TileProperties( Category.Special)), bound);
 		bound.translate( tileXShift, 0);
-		cupLock = new Rectangle( bound.x+TILE_SIZE_BANK.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE_BANK.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
-		addTile( new Tile(), bound, cupLock);
+		addTile( new Tile( new TileProperties( Category.Cup)), bound);
 	}
 	
-	public Tile addHex( int x, int y, HexState state){
-		return addTile( new Hex( state), new Rectangle( x,y,HEX_SIZE.width, HEX_SIZE.height), hexLock);
-	}
-	
-	public Tile addTile( Tile tile, Rectangle bound, Rectangle lock){
+	public Tile addTile( Tile tile, Rectangle bound){
+		tile.init();
+		tile.setBounds( bound);
 		tile.addMouseListener( mouseInput);
 		tile.addMouseMotionListener( mouseInput);
-		tile.setBounds( bound);
-		tile.setLockArea( lock);
-		tile.init();
+		tile.setLockArea( locks.getPermanentLock( tile));
 		add(tile,0);
 		return tile;
 	}
@@ -185,7 +200,7 @@ public class Board extends JPanel{
 				repaint( oldBound);
 			}else if( ring<BOARD_LOAD_ROW.length){
 				if( count<BOARD_LOAD_ROW[ring].length && drawIndex<hexes.length){
-					tile = addHex( 8, 8, hexes[drawIndex]);
+					tile = addTile( new Hex( new HexState()), new Rectangle( 8,8,HEX_SIZE.width, HEX_SIZE.height));
 					x = (widthSegment*BOARD_LOAD_COL[ring][count]);
 					y = (heightSegment*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
 					tile.setLockArea( x-LOCK_SIZE/2, y-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
@@ -215,7 +230,7 @@ public class Board extends JPanel{
 
 		@Override
 	    public void mouseDragged(MouseEvent e){
-			if(	!ignore && e.getSource() instanceof Tile && interactWithHexes){
+			if(	!ignore && e.getSource() instanceof Tile && interactWithHexes){/*
 				Tile tile = (Tile)e.getSource();
 				boardBound = getBounds();
 				bound = new Rectangle( tile.getBounds());
@@ -248,17 +263,8 @@ public class Board extends JPanel{
 						}
 					}
 					tile.setBounds( bound);
-				}
+				}*/
 			}
-		}
-		
-		private boolean checkLock( Rectangle lock, Rectangle bound){
-			if( lock.contains( bound.getX()+bound.getWidth()/2, bound.getY()+bound.getHeight()/2)){
-				bound.x = (int) ((lock.getX()+lock.getWidth()/2)-bound.getWidth()/2);
-				bound.y = (int) ((lock.getY()+lock.getHeight()/2)-bound.getHeight()/2);
-				return true;
-			}
-			return false;
 		}
 
 		@Override
@@ -317,39 +323,11 @@ public class Board extends JPanel{
 			}
 			for( Component tile : getComponents()){
 				if( tile instanceof Tile){
-					//TODO ignore first one
+					//TODO ignore fake one on permanent lock
 					((Tile)tile).flip();
 				}
 			}
 		}
-	}
-	
-	private final static BufferedImage StateImage;
-	private static final int LOCK_X, LOCK_Y, Y_SHIFT;
-	private static final int PADDING = 2, lockBorderWidth, lockBorderheight;
-	static{
-		StateImage = new BufferedImage( PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d = StateImage.createGraphics();
-		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		g2d.setStroke( new BasicStroke( 5));
-		g2d.setColor( Color.BLACK);
-		//g2d.drawRect( 0, 0, PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height);
-		lockBorderWidth = (PLAYERS_STATE_SIZE.width- PADDING)/(MAX_RACK_SIZE/2) ;
-		lockBorderheight = (int) (lockBorderWidth*TILE_RATIO_REVERSE);
-		LOCK_X = PADDING;
-		LOCK_Y = PLAYERS_STATE_SIZE.height-lockBorderheight-PADDING-1;
-		Rectangle bound = new Rectangle(LOCK_X,LOCK_Y,lockBorderWidth,lockBorderheight);
-		Y_SHIFT = LOCK_Y-lockBorderheight-PADDING;
-		for( int i=0; i<MAX_RACK_SIZE;i++){
-			g2d.draw( bound);
-			if( i==4){
-				bound.setLocation( LOCK_X,Y_SHIFT);
-			}else{
-				bound.translate( lockBorderWidth, 0);
-			}
-		}
-		g2d.dispose();
 	}
 	
 	public class PlayerState extends JPanel{
@@ -361,20 +339,11 @@ public class Board extends JPanel{
 			super();
 			gold = 0;
 			name = "Player";
-			rackLocks = new Rectangle[MAX_RACK_SIZE];
 		}
 		
 		public void init( int x, int y){
 			setOpaque( false);
 			setBounds( x,y,PLAYERS_STATE_SIZE.width,PLAYERS_STATE_SIZE.height);
-			for( int i=0; i<MAX_RACK_SIZE;i++){
-				rackLocks[i] = new Rectangle( LOCK_X,LOCK_Y,lockBorderWidth,lockBorderheight);
-				if( i!=4){
-					rackLocks[i].translate( lockBorderWidth, 0);
-				}else{
-					rackLocks[i].setLocation( LOCK_X, Y_SHIFT);
-				}
-			}
 		}
 		
 		@Override

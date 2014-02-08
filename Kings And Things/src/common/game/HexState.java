@@ -23,10 +23,10 @@ public class HexState implements Serializable{
 	private final HashSet<TileProperties> thingsInHex;
 	
 	//only used by Client GUI for display purpose
-	private boolean fake = false;
+	private boolean isFake;
 	
 	public HexState(){
-		fake = true;
+		isFake = true;
 		thingsInHex = new HashSet<TileProperties>();
 		hex = new TileProperties( Category.Hex);
 	}
@@ -50,7 +50,7 @@ public class HexState implements Serializable{
 	 */
 	public HexState(TileProperties hex, Collection<TileProperties> thingsInHex)
 	{
-		fake = false;
+		isFake = false;
 		validateTileNotNull(hex);
 		validateIsHexTile(hex);
 		if(thingsInHex==null)
@@ -67,7 +67,7 @@ public class HexState implements Serializable{
 	}
 	
 	public boolean isFake(){
-		return fake;
+		return isFake;
 	}
 	
 	/**

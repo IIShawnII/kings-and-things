@@ -6,9 +6,12 @@ import common.game.HexState;
 
 @SuppressWarnings("serial")
 public class Hex extends Tile{
+
+	protected HexState state = null;
 	
 	public Hex( HexState state){
-		super( state);
+		super( state.getHex());
+		this.state = state;
 	}
 	
 	@Override
