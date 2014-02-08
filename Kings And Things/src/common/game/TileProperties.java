@@ -36,6 +36,7 @@ public class TileProperties implements Serializable{
 		this( number, tile.value, tile.name, tile.abilities, tile.restrictions);
 		hasFlip = tile.hasFlip;
 		specialFlip = tile.specialFlip;
+		moveSpeed = tile.moveSpeed;
 	}
 	
 	private TileProperties( int number, int attack, String name, ArrayList< Ability> abilities, ArrayList< Restriction> restrictions){

@@ -348,9 +348,9 @@ public class GameFlowManager{
 	private void makeThingsMoved(Collection<TileProperties> things, int playerNumber, List<TileProperties> hexes)
 	{
 		int moveCost = 0;
-		for(TileProperties hex : hexes)
+		for(int i=1; i<hexes.size(); i++)
 		{
-			moveCost += hex.getMoveSpeed();
+			moveCost += hexes.get(i).getMoveSpeed();
 		}
 		
 		Point coords = currentState.getBoard().getXYCoordinatesOfHex(hexes.get(0));
