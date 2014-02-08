@@ -48,7 +48,8 @@ class CupManager extends AbstractTileManager
 				{
 					stackDeck();
 				}
-				return tiles.remove(numDraws++);
+				numDraws++;
+				return tiles.remove(0);
 			}
 		}
 	}
@@ -70,7 +71,7 @@ class CupManager extends AbstractTileManager
 			newDeckOrder.add(tile);
 			tile = removeCreatureByNameAndAttack("Giant",4);
 			newDeckOrder.add(tile);
-			tile = removeCreatureByNameAndAttack("Dwarves",4);
+			tile = removeCreatureByNameAndAttack("Dwarves",2);
 			newDeckOrder.add(tile);
 			tile = removeCreatureByNameAndAttack("Skeletons",1);
 			newDeckOrder.add(tile);
@@ -118,7 +119,7 @@ class CupManager extends AbstractTileManager
 			newDeckOrder.add(tile);
 			tile = removeCreatureByNameAndAttack("Pygmies",2);
 			newDeckOrder.add(tile);
-			tile = removeCreatureByNameAndAttack("Great_Hunter",4);
+			tile = removeCreatureByNameAndAttack("Greathunter",4);
 			newDeckOrder.add(tile);
 			tile = removeCreatureByNameAndAttack("Nomads",1);
 			newDeckOrder.add(tile);
@@ -126,7 +127,7 @@ class CupManager extends AbstractTileManager
 			newDeckOrder.add(tile);
 
 			//player 4
-			tile = removeCreatureByNameAndAttack("Tribesman",2);
+			tile = removeCreatureByNameAndAttack("Tribesmen",2);
 			newDeckOrder.add(tile);
 			tile = removeCreatureByNameAndAttack("Giant_Lizard",2);
 			newDeckOrder.add(tile);
@@ -136,7 +137,7 @@ class CupManager extends AbstractTileManager
 			newDeckOrder.add(tile);
 			tile = removeCreatureByNameAndAttack("Vampire_Bat",4);
 			newDeckOrder.add(tile);
-			tile = removeCreatureByNameAndAttack("Tribesman",2);
+			tile = removeCreatureByNameAndAttack("Tribesmen",2);
 			newDeckOrder.add(tile);
 			tile = removeCreatureByNameAndAttack("Dark_Wizard",1);
 			newDeckOrder.add(tile);

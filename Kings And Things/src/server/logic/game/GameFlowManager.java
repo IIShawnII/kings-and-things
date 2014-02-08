@@ -482,8 +482,17 @@ public class GameFlowManager{
 			}
 			case PLACE_FREE_THINGS:
 			{
-				//give all players 10 free things from cup
-				for(Player p : currentState.getPlayers())
+				//give all players 10 free things from cup, things are drawn randomly so player order
+				//doesn't matter, unless we are in demo mode, in which case we must do it in player
+				//order, so let's just do it in player order all the time
+				ArrayList<Player> players = new ArrayList<Player>();
+				ArrayList<Integer> playerOrder = new ArrayList<Integer>(currentState.getPlayerOrder());
+				for(Integer i : playerOrder)
+				{
+					players.add(currentState.getPlayerByPlayerNumber(i));
+				}
+
+				for(Player p : players)
 				{
 					for(int i=0; i<10; i++)
 					{
