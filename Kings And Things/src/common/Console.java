@@ -62,7 +62,7 @@ public class Console extends JTextPane {
 	 * @param color - color to be used for printing of the text
 	 * @param message - text to be appended
 	 */
-	private void add( Color color, String message){
+	private synchronized void add( Color color, String message){
 		styleContext = StyleContext.getDefaultStyleContext();
 		attribute = styleContext.addAttribute( SimpleAttributeSet.EMPTY, StyleConstants.Foreground, color);
 		Document doc = getDocument();

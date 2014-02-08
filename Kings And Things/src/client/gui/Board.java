@@ -91,6 +91,7 @@ public class Board extends JPanel{
 	
 	private Timer timer;
 	private MouseInput mouseInput;
+	private Rectangle[] rackLocks;
 	private ArrayList< Rectangle> hexBoardLocks;
 	private Rectangle hexLock, fortLock, goldLock;
 	private Rectangle markerLock, specialLock, cupLock;
@@ -324,8 +325,8 @@ public class Board extends JPanel{
 	}
 	
 	private final static BufferedImage StateImage;
-	private static final int LOCKX, LOCKY;
-	private static final int PADDING = 10;
+	private static final int LOCK_X, LOCK_Y, Y_SHIFT;
+	private static final int PADDING = 2, lockBorderWidth, lockBorderheight;
 	static{
 		StateImage = new BufferedImage( PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2d = StateImage.createGraphics();
@@ -333,18 +334,19 @@ public class Board extends JPanel{
 		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		g2d.setStroke( new BasicStroke( 5));
 		g2d.setColor( Color.BLACK);
-		g2d.drawRect( 0, 0, PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height);
-		int lockBorderWidth = (PLAYERS_STATE_SIZE.width/(MAX_RACK_SIZE/2)) - (int)(PADDING*1.2);
-		int lockBorderheight = (int) (lockBorderWidth*TILE_RATIO_REVERSE);
-		LOCKX = PADDING;
-		LOCKY = PLAYERS_STATE_SIZE.height-lockBorderheight-PADDING;
-		Rectangle bound = new Rectangle(LOCKX,LOCKY,lockBorderWidth,lockBorderheight);
+		//g2d.drawRect( 0, 0, PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height);
+		lockBorderWidth = (PLAYERS_STATE_SIZE.width- PADDING)/(MAX_RACK_SIZE/2) ;
+		lockBorderheight = (int) (lockBorderWidth*TILE_RATIO_REVERSE);
+		LOCK_X = PADDING;
+		LOCK_Y = PLAYERS_STATE_SIZE.height-lockBorderheight-PADDING-1;
+		Rectangle bound = new Rectangle(LOCK_X,LOCK_Y,lockBorderWidth,lockBorderheight);
+		Y_SHIFT = LOCK_Y-lockBorderheight-PADDING;
 		for( int i=0; i<MAX_RACK_SIZE;i++){
 			g2d.draw( bound);
 			if( i==4){
-				bound.setLocation( LOCKX, LOCKY-lockBorderheight-PADDING);
+				bound.setLocation( LOCK_X,Y_SHIFT);
 			}else{
-				bound.translate( lockBorderWidth+PADDING, 0);
+				bound.translate( lockBorderWidth, 0);
 			}
 		}
 		g2d.dispose();
@@ -354,18 +356,25 @@ public class Board extends JPanel{
 
 		private int gold;
 		private String name;
-		private Rectangle[] locks;
 		
 		public PlayerState(){
 			super();
 			gold = 0;
 			name = "Player";
-			locks = new Rectangle[MAX_RACK_SIZE];
+			rackLocks = new Rectangle[MAX_RACK_SIZE];
 		}
 		
 		public void init( int x, int y){
 			setOpaque( false);
 			setBounds( x,y,PLAYERS_STATE_SIZE.width,PLAYERS_STATE_SIZE.height);
+			for( int i=0; i<MAX_RACK_SIZE;i++){
+				rackLocks[i] = new Rectangle( LOCK_X,LOCK_Y,lockBorderWidth,lockBorderheight);
+				if( i!=4){
+					rackLocks[i].translate( lockBorderWidth, 0);
+				}else{
+					rackLocks[i].setLocation( LOCK_X, Y_SHIFT);
+				}
+			}
 		}
 		
 		@Override
@@ -374,8 +383,8 @@ public class Board extends JPanel{
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.drawImage( StateImage, 0, 0, null);
 			g2d.setFont( new Font("default", Font.BOLD, 30));
-			g2d.drawString( name, 10, 35);
-			g2d.drawString( gold+"", getWidth()-100, 35);
+			g2d.drawString( name, 10, 32);
+			g2d.drawString( gold+"", getWidth()-100, 32);
 			g2d.dispose();
 		}
 	}
