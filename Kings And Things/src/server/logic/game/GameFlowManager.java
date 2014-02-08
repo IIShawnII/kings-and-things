@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import server.event.commands.MoveThingsCommand;
 import server.event.commands.StartGameCommand;
 import server.event.commands.EndPlayerTurnCommand;
 import server.event.commands.ExchangeSeaHexCommand;
@@ -17,7 +18,6 @@ import server.event.commands.GiveHexToPlayerCommand;
 import server.event.commands.RecruitThingsCommand;
 import server.event.commands.PlaceThingOnBoardCommand;
 import server.event.commands.ConstructBuildingCommand;
-
 import server.logic.exceptions.NoMoreTilesException;
 
 import com.google.common.eventbus.Subscribe;
@@ -230,6 +230,18 @@ public class GameFlowManager{
 		drawFreeThings(playerNumber);
 	}
 	
+	/**
+	 * Call this to move creatures during the movement phase
+	 * @param things The list of things the player wants to move
+	 * @param playerNumber The player who sent the command
+	 * @param hexes The hexes the player wants to move through
+	 */
+	public void moveThings(Collection<TileProperties> things, int playerNumber, List<TileProperties> hexes)
+	{
+		CommandValidator.validateCanMove(playerNumber, currentState, hexes, things);
+		makeThingsMoved(things, playerNumber, hexes);
+	}
+	
 	private void advanceActivePhasePlayer(){
 		SetupPhase nextSetupPhase = currentState.getCurrentSetupPhase();
 		RegularPhase nextRegularPhase = currentState.getCurrentRegularPhase();
@@ -325,6 +337,28 @@ public class GameFlowManager{
 		}
 		hs.addThingToHex(thing);
 		currentState.getPlayerByPlayerNumber(playerNumber).placeThingFromTrayOnBoard(thing);
+	}
+
+	private void makeThingsMoved(Collection<TileProperties> things, int playerNumber, List<TileProperties> hexes)
+	{
+		int moveCost = 0;
+		for(TileProperties hex : hexes)
+		{
+			moveCost += hex.getMoveSpeed();
+		}
+		
+		Point coords = currentState.getBoard().getXYCoordinatesOfHex(hexes.get(0));
+		HexState firstHex = currentState.getBoard().getHexByXY(coords.x, coords.y);
+		coords = currentState.getBoard().getXYCoordinatesOfHex(hexes.get(hexes.size()-1));
+		HexState lastHex = currentState.getBoard().getHexByXY(coords.x, coords.y);
+		
+		for(TileProperties thing : things)
+		{
+			thing.setMoveSpeed(thing.getMoveSpeed() - moveCost);
+			firstHex.removeThingFromHex(thing);
+			lastHex.addThingToHex(thing);
+		}
+
 	}
 	
 	private void makeSeaHexExchanged(TileProperties hex, int playerNumber) throws NoMoreTilesException
@@ -558,6 +592,17 @@ public class GameFlowManager{
 				makeGoldCollected();
 				break;
 			}
+			case COMBAT:
+			{
+				//replenish move points of all creatures in preparation for next round
+				for(HexState hs : currentState.getBoard().getHexesAsList())
+				{
+					for(TileProperties tp : hs.getCreaturesInHex())
+					{
+						tp.setMoveSpeed(4);
+					}
+				}
+			}
 			default:
 				break;
 		}
@@ -679,7 +724,20 @@ public class GameFlowManager{
 		}
 		catch(Throwable t)
 		{
-			Logger.getErrorLogger().error("Unable to process PaidRecruitsCommand due to: ", t);
+			Logger.getErrorLogger().error("Unable to process RecruitThingsCommand due to: ", t);
+		}
+	}
+
+	@Subscribe
+	public void moveThingsCommand(MoveThingsCommand command)
+	{
+		try
+		{
+			moveThings(command.getThings(),command.getPlayerID(), command.getHexes());
+		}
+		catch(Throwable t)
+		{
+			Logger.getErrorLogger().error("Unable to process MoveThingsCommand due to: ", t);
 		}
 	}
 }

@@ -66,6 +66,7 @@ public final class Constants {
 	public static final int MAX_PLAYERS = 4;
 	public static final int MAX_HEXES_ON_BOARD = 37;
 	public static final int MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX = 10;
+	public static final int MAX_MOVE_SPEED = 4;
 	
 	//Minimums
 	public static final int MIN_PLAYERS = 2;

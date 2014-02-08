@@ -282,6 +282,30 @@ public class HexBoard
 	}
 	
 	/**
+	 * Given a list of hexes, this method will check to
+	 * make sure each hex in the list, is adjacent to the
+	 * hex that comes after it in the list
+	 * @param hexes The list of hexes to check
+	 * @return true if the entered list of hexes are all
+	 * connected to each other
+	 */
+	public boolean areHexesConnected(List<TileProperties> hexes)
+	{
+		for(int i=0; i<hexes.size()-1; i++)
+		{
+			List<HexState> adjacentHexes = getAdjacentHexesTo(hexes.get(i));
+			Point coords = getXYCoordinatesOfHex(hexes.get(i+1));
+			HexState hs = getHexByXY(coords.x, coords.y);
+			if(!adjacentHexes.contains(hs))
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
 	 * Use this method if you want to traverse all hexes on the board.
 	 * The returned list is non-modifiable and references the same objects
 	 * returned by the other methods in this class. The list is also in

@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 
 import client.gui.LoadProgress;
 import common.Constants.Ability;
+import common.Constants.Building;
 import common.Constants.Category;
 import common.Constants.Restriction;
 
@@ -70,15 +71,26 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			}
 			switch( currentCategory){
 				case Building:
-					//TODO need to handle special income counters + actual num of city/village counters
 					if(tile.isBuildableBuilding())
 					{
 						tile.setInfinite();
+					}
+					if(tile.getName().equals(Building.City) || tile.getName().equals(Building.Village))
+					{
+						for(int i=0; i<6; i++)
+						{
+							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
+							CUP.put( tileCopy.hashCode(), tileCopy);
+						}
 					}
 					tile.setSpecialFlip();
 					BUILDING.put( tile.hashCode(), tile);
 					break;
 				case Cup:
+					if(tile.isCreature())
+					{
+						tile.setMoveSpeed(Constants.MAX_MOVE_SPEED);
+					}
 					if( copyTile==0){
 						CUP.put( tile.hashCode(), tile);
 					}else{
@@ -94,12 +106,27 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					GOLD.put( tile.hashCode(), tile);
 					break;
 				case Hex:
+					switch(tile.getName())
+					{
+						case "Swamp":
+						case "Mountain":
+						case "Forest":
+						case "Jungle":
+						{
+							tile.setMoveSpeed(2);
+						}
+						default:
+						{
+							tile.setMoveSpeed(1);
+						}
+					}
 					for( int i=0; i<copyTile; i++){
 						TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 						HEX.put( tileCopy.hashCode(), tileCopy);
 					}
 					break;
 				case Special:
+					tile.setMoveSpeed(Constants.MAX_MOVE_SPEED);
 					tile.setSpecialFlip();
 					SPECIAL.put( tile.hashCode(), tile);
 					break;

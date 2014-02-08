@@ -221,14 +221,15 @@ public abstract class CommandValidator
 	
 	/**
 	 * Call this method to validate the move command
-	 * @param
-	 * @param
-	 * @param
-	 * @throws
-	 * @throws
-	 * @throws
+	 * @param playerNumber The player who sent the command
+	 * @param currentState The current state of the game
+	 * @param Hexes The list of hexes the player wants to move through
+	 * @param Creatures The list of creatures the player wants to move
+	 * @throws IllegalStateException If it isn't the movement phase
+	 * @throws IllegalArgumentException If the move can't be completed due
+	 * to game rules
 	 */
-	public static void validateCanMove(int playerNumber, GameState currentState, Collection<TileProperties> Hexes, Collection<TileProperties> Creatures) {
+	public static void validateCanMove(int playerNumber, GameState currentState, List<TileProperties> Hexes, Collection<TileProperties> Creatures) {
 		
 		// checks if it's player's turn
 		validateIsPlayerActive(playerNumber, currentState);
@@ -240,9 +241,9 @@ public abstract class CommandValidator
 			throw new IllegalStateException("Can't move during the setup phase");
 		} else if (currentState.getCurrentRegularPhase() != RegularPhase.MOVEMENT) {
 			throw new IllegalStateException("Can't move during the " + currentState.getCurrentRegularPhase() + " phase");
-		} else {
-			
 		}
+		
+		validateMovementConditions(playerNumber,currentState,Hexes,Creatures);
 	}
 
 	/**
@@ -437,7 +438,6 @@ public abstract class CommandValidator
 		}
 	}
 	
-	@SuppressWarnings("unused")
 	/*
 	 * Checks to see if player can move through hexes
 	 */
@@ -447,23 +447,18 @@ public abstract class CommandValidator
 		HashSet<HexState> pathOfHexes = new HashSet<>();
 		Point coordinates = null;
 		HexState nextHex = null;
+
+		coordinates = currentState.getBoard().getXYCoordinatesOfHex(Hexes.get(0));
+		HexState firstHex = currentState.getBoard().getHexByXY(coordinates.x, coordinates.y);
+		
+		if(!currentState.getBoard().areHexesConnected(Hexes))
+		{
+			throw new IllegalArgumentException("You can only move through hexes that are adjacent to each other.");
+		}
 		
 		validateCreatureLimitInHexNotExceeded(playerNumber, Hexes.get(Hexes.size() - 1), currentState, Creatures);
 		
-		boolean landCreaturesExist = false;
-		
-		for (TileProperties creature : Creatures) {
-			currentState.getPlayerByPlayerNumber(playerNumber).ownsThingOnBoard(creature);
-			if (!creature.isCreature()) {
-				throw new IllegalArgumentException("You can only move creatures");
-			}
-			if (creature.getMoveSpeed() < moveSpeedTotal) {
-				throw new IllegalArgumentException("Creature cannot move that far");
-			}
-			if (!creature.isSpecialCreatureWithAbility(Ability.Fly)) {
-				landCreaturesExist = true;
-			}
-		}
+		boolean seaHexesExist = false;
 		
 		boolean hexNotOwned = true;
 		
@@ -490,8 +485,28 @@ public abstract class CommandValidator
 				throw new IllegalArgumentException("Can't move through non hexes");
 			}
 			
-			if (Biome.Sea.name().equals(hex.getName()) && landCreaturesExist) {
+			if (Biome.Sea.name().equals(hex.getName())) {
+				seaHexesExist = true;
+			}
+		}
+
+		for (TileProperties creature : Creatures) {
+			if(!currentState.getPlayerByPlayerNumber(playerNumber).ownsThingOnBoard(creature))
+			{
+				throw new IllegalArgumentException("You can only move your own creatures");
+			}
+			if (!creature.isCreature()) {
+				throw new IllegalArgumentException("You can only move creatures");
+			}
+			if (creature.getMoveSpeed() < moveSpeedTotal) {
+				throw new IllegalArgumentException("Creature cannot move that far");
+			}
+			if (!creature.isSpecialCreatureWithAbility(Ability.Fly) && seaHexesExist) {
 				throw new IllegalArgumentException("Can't move through sea hexes");
+			}
+			if(!firstHex.getThingsInHex().contains(creature))
+			{
+				throw new IllegalArgumentException("Can only move creatures contained in the first hex of the movement");
 			}
 		}
 		
@@ -503,8 +518,6 @@ public abstract class CommandValidator
 			}
 		}
 		
-		coordinates = currentState.getBoard().getXYCoordinatesOfHex(Hexes.get(0));
-		HexState firstHex = currentState.getBoard().getHexByXY(coordinates.x, coordinates.y);
 		pathOfHexes.add(firstHex);
 		Player playerMoving = currentState.getPlayerByPlayerNumber(playerNumber);
 		
