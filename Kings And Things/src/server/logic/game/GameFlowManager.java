@@ -291,7 +291,8 @@ public class GameFlowManager{
 		int activePhasePlayerNumber = currentState.getActivePhasePlayer().getID();
 		int activePhasePlayerOrderIndex = currentState.getPlayerOrder().indexOf(activePhasePlayerNumber);
 		
-		if(currentState.getPlayerOrder().size()-1 == activePhasePlayerOrderIndex)
+		int indexOfActiveTurnPlayer = currentState.getPlayerOrder().indexOf(currentState.getActiveTurnPlayer().getID());
+		if(indexOfActiveTurnPlayer == ((activePhasePlayerOrderIndex + 1) % currentState.getPlayers().size()))
 		{
 			if(nextSetupPhase != SetupPhase.SETUP_FINISHED)
 			{
@@ -303,12 +304,15 @@ public class GameFlowManager{
 				regularPhaseChanged(nextRegularPhase);
 			}
 		}
+		else
+		{
+			currentState.setActivePhasePlayer(currentState.getPlayerOrder().get(++activePhasePlayerOrderIndex % currentState.getPlayers().size()));
+		}
 		currentState.setCurrentSetupPhase(nextSetupPhase);
 		currentState.setCurrentRegularPhase(nextRegularPhase);
 		currentState.setCurrentCombatPhase(CombatPhase.NO_COMBAT);
 		currentState.setCombatLocation(null);
 		currentState.setDefendingPlayerNumber(-1);
-		currentState.setActivePhasePlayer(currentState.getPlayerOrder().get(++activePhasePlayerOrderIndex % currentState.getPlayers().size()));
 	}
 	
 	private void advanceActiveTurnPlayer(){
@@ -335,6 +339,10 @@ public class GameFlowManager{
 		}
 		else
 		{
+			int activePhasePlayerNumber = currentState.getActivePhasePlayer().getID();
+			int activePhasePlayerOrderIndex = currentState.getPlayerOrder().indexOf(activePhasePlayerNumber);
+			currentState.setActivePhasePlayer(currentState.getPlayerOrder().get(++activePhasePlayerOrderIndex % currentState.getPlayers().size()));
+			
 			int currentSetupPhaseIndex = nextSetupPhase.ordinal();
 			for(SetupPhase sp : SetupPhase.values())
 			{
@@ -359,6 +367,10 @@ public class GameFlowManager{
 		}
 		else
 		{
+			int activePhasePlayerNumber = currentState.getActivePhasePlayer().getID();
+			int activePhasePlayerOrderIndex = currentState.getPlayerOrder().indexOf(activePhasePlayerNumber);
+			currentState.setActivePhasePlayer(currentState.getPlayerOrder().get(++activePhasePlayerOrderIndex % currentState.getPlayers().size()));
+			
 			if(currentState.getBoard().getContestedHexes(currentState.getPlayers()).size() > 0)
 			{
 				return RegularPhase.COMBAT;
