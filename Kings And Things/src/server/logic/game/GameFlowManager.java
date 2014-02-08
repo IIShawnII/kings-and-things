@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,7 @@ import server.logic.exceptions.NoMoreTilesException;
 
 import com.google.common.eventbus.Subscribe;
 
+import common.Constants;
 import common.Constants.BuildableBuilding;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
@@ -79,6 +81,34 @@ public class GameFlowManager{
 		if(currentState.getCurrentSetupPhase() == SetupPhase.PICK_FIRST_HEX && currentState.getPlayers().size() == 2)
 		{
 			pickSecondPlayersHex();
+		}
+		else if(currentState.getCurrentSetupPhase() == SetupPhase.PICK_FIRST_HEX && currentState.getPlayers().size() == 4 && currentState.getActivePhasePlayer().getID() == currentState.getPlayerOrder().get(2))
+		{
+			//pick the last hex for player 4 automatically
+			HashSet<TileProperties> startingHexes = new HashSet<TileProperties>();
+			for(Point p : Constants.getValidStartingHexes(4))
+			{
+				startingHexes.add(currentState.getBoard().getHexByXY(p.x, p.y).getHex());
+			}
+			
+			for(TileProperties tp : startingHexes)
+			{
+				boolean isOwned = false;
+				for(Player p : currentState.getPlayers())
+				{
+					if(p.ownsHex(tp))
+					{
+						isOwned = true;
+						break;
+					}
+				}
+				if(!isOwned)
+				{
+					makeHexOwnedByPlayer(tp,currentState.getPlayerOrder().get(3));
+					advanceActivePhasePlayer();
+					break;
+				}
+			}
 		}
 		advanceActivePhasePlayer();
 	}
@@ -373,7 +403,7 @@ public class GameFlowManager{
 				}
 			}
 		}
-		
+		playerOrder.add(players.get(0).getID());
 		return Collections.unmodifiableList(playerOrder);
 	}
 	

@@ -34,7 +34,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		this( RESOURCE_PATH, loadImages);
 	}
 	
-	private LoadResources(String directory, boolean loadImages){
+	public LoadResources(String directory, boolean loadImages){
 		RESOURCES_DIRECTORY = Paths.get(directory);
 		this.loadImages = loadImages;
 	}

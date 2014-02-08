@@ -22,12 +22,15 @@ public class Player implements Serializable{
 	private final HashSet<TileProperties> ownedThingsOnBoard;
 	
 	/**
-	 * Create a new player with the given name and id number
-	 * @param name The player's name
-	 * @param playerNumber The player's id
-	 * @throws IllegalArgumentException if name is null
+	 * Create a new player with the given info
+	 * @param player The player's info
+	 * @throws IllegalArgumentException if player is null
 	 */
 	public Player( PlayerInfo player){
+		if(player == null)
+		{
+			throw new IllegalArgumentException("The entered player info must not be null");
+		}
 		this.info = player;
 		ownedHexes = new HashSet<TileProperties>();
 		ownedThingsOnBoard = new HashSet<TileProperties>();

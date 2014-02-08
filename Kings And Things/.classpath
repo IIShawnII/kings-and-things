@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="Lib/log4j-1.2.17.jar"/>
-	<classpathentry kind="lib" path="Lib/guava-16.0.jar" sourcepath="Lib/guava-16.0.1-sources.jar">
+	<classpathentry kind="lib" path="Lib/guava-16.0.1.jar" sourcepath="Lib/guava-16.0.1-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/Kings%20And%20Things/Lib/guava-16.0.1-javadoc.jar!/"/>
 		</attributes>

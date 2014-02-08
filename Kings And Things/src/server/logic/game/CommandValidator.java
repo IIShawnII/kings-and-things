@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import server.logic.exceptions.NoMoreTilesException;
+
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Biome;
@@ -24,7 +25,6 @@ import common.TileProperties;
  */
 public abstract class CommandValidator
 {
-
 	/**
 	 * Use this method to validate the start new game commands
 	 * @param demoMode Set to true to stack the deck to match with the demo script
@@ -311,23 +311,7 @@ public abstract class CommandValidator
 	public static void validateIsHexStartingPosition(TileProperties hex, GameState currentState)
 	{
 		Point desiredHex = currentState.getBoard().getXYCoordinatesOfHex(hex);
-		ArrayList<Point> validChoices = new ArrayList<Point>();
-		if(currentState.getPlayers().size() == 4)
-		{
-			validChoices.add(new Point(1,2));
-			validChoices.add(new Point(1,2));
-			validChoices.add(new Point(5,10));
-			validChoices.add(new Point(5,10));
-		}
-		else
-		{
-			validChoices.add(new Point(0,2));
-			validChoices.add(new Point(0,6));
-			validChoices.add(new Point(2,0));
-			validChoices.add(new Point(2,8));
-			validChoices.add(new Point(4,2));
-			validChoices.add(new Point(4,6));
-		}
+		HashSet<Point> validChoices = Constants.getValidStartingHexes(currentState.getPlayers().size());
 		if(!validChoices.contains(desiredHex))
 		{
 			throw new IllegalArgumentException("The chosen hex was not a starting hex.");

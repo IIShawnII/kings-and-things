@@ -69,9 +69,9 @@ public class HexBoard
 			}
 			//start by placing one piece above the last placed piece of the last ring
 			nextHex = new HexState(tiles.remove(0));
-			tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-1), nextHex);
+			tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-2), nextHex);
 			tempBoardList.add(nextHex);
-			lastRingPiece.y--;
+			lastRingPiece.y-=2;
 			
 			//place hexes until you are at the top of the ring
 			int numAwayFromTop = nextRingNumber - 2;
@@ -101,9 +101,9 @@ public class HexBoard
 			for(int j=0; j<rowLength; j++)
 			{
 				nextHex = new HexState(tiles.remove(0));
-				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y+1), nextHex);
+				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y+2), nextHex);
 				tempBoardList.add(nextHex);
-				lastRingPiece.y++;
+				lastRingPiece.y+=2;
 			}
 
 			//bot right row
@@ -130,10 +130,12 @@ public class HexBoard
 			for(int j=0; j<rowLength; j++)
 			{
 				nextHex = new HexState(tiles.remove(0));
-				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-1), nextHex);
+				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-2), nextHex);
 				tempBoardList.add(nextHex);
-				lastRingPiece.y--;
+				lastRingPiece.y-=2;
 			}
+			
+			nextRingNumber++;
 		}
 		
 		board = new ImmutableBiMap.Builder<Point, HexState>().putAll(tempBoard).build();
@@ -253,8 +255,8 @@ public class HexBoard
 		int y = coords.y;
 		
 		ArrayList<Point> coordsToTest = new ArrayList<Point>();
-		coordsToTest.add(new Point(x,y-1));
-		coordsToTest.add(new Point(x,y+1));
+		coordsToTest.add(new Point(x,y-2));
+		coordsToTest.add(new Point(x,y+2));
 		coordsToTest.add(new Point(x-1,y-1));
 		coordsToTest.add(new Point(x-1,y+1));
 		coordsToTest.add(new Point(x+1,y-1));

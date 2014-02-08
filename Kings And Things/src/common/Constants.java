@@ -1,16 +1,17 @@
 package common;
 
-import java.util.HashMap;
-
-import javax.imageio.ImageIO;
-
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
-import java.awt.Color;
-import java.awt.Image;
-import java.awt.Polygon;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.util.HashMap;
+import java.util.HashSet;
+
+import javax.imageio.ImageIO;
 
 
 public final class Constants {
@@ -133,4 +134,27 @@ public final class Constants {
 	
 	//to prevent instances
 	private Constants(){}
+	
+	public static HashSet<Point> getValidStartingHexes(int playerCount)
+	{
+		HashSet<Point> startingHexes = new HashSet<Point>();
+		if(playerCount==4)
+		{
+			startingHexes.add(new Point(1,2));
+			startingHexes.add(new Point(1,10));
+			startingHexes.add(new Point(5,10));
+			startingHexes.add(new Point(5,2));
+		}
+		else
+		{
+			startingHexes.add(new Point(0,2));
+			startingHexes.add(new Point(0,6));
+			startingHexes.add(new Point(2,0));
+			startingHexes.add(new Point(2,8));
+			startingHexes.add(new Point(4,2));
+			startingHexes.add(new Point(4,6));
+		}
+		
+		return startingHexes;
+	}
 }
