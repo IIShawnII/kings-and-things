@@ -33,10 +33,11 @@ public abstract class CommandValidator
 	 * to set up another board
 	 * @throws IllegalArgumentException if the entered list of players is invalid
 	 */
+	@SuppressWarnings("unused")
 	public static void validateStartNewGame(boolean demoMode, Set<Player> players)
 	{
 		validateCollection(players,"players");
-		if(players.size() < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < players.size())
+		if( !Constants.BYPASS_MIN_PLAYER && (players.size() < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < players.size()))
 		{
 			throw new IllegalArgumentException("Can only start a game with 2 to 4 players");
 		}

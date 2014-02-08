@@ -18,6 +18,10 @@ import common.event.EventDispatch;
 import common.game.LoadResources;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.CONSOLE_SIZE;
+import static common.Constants.MAX_PLAYERS;
+import static common.Constants.BYPASS_LOBBY;
+import static common.Constants.BYPASS_MIN_PLAYER;
+import static common.Constants.BYPASS_LOAD_IMAGES;
 
 /**
  * client GUI to hold all and display all game related information
@@ -38,6 +42,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	/**
 	 * start GUI
 	 */
+	@SuppressWarnings("unused")
 	@Override
 	public void run() {
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
@@ -45,13 +50,14 @@ public class ClientGUI extends JFrame implements Runnable{
         setLocationRelativeTo(null);
         setUndecorated(true);
         setVisible(true);
-		LoadingDialog dialog = new LoadingDialog( new LoadResources( true), "Lobby", true, true, getGraphicsConfiguration());
+		LoadingDialog dialog = new LoadingDialog( new LoadResources( !BYPASS_LOAD_IMAGES), "Lobby", true, true, getGraphicsConfiguration());
 		EventDispatch.registerForCommandEvents( dialog);
-		if( dialog.run()){
+		int playerCount=BYPASS_MIN_PLAYER?MAX_PLAYERS:0;
+		if( BYPASS_LOBBY || (playerCount=dialog.run())>0){
 			EventDispatch.unregisterForCommandEvents( dialog);
         	dispose();
             setUndecorated(false);
-			setContentPane( createGUI());
+			setContentPane( createGUI( playerCount));
 			pack();
 			Dimension size = new Dimension( getWidth(), getHeight());
 			setMinimumSize( size);
@@ -72,7 +78,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	 * create all component of server GUI
 	 * @return collection of created components in a JPanel
 	 */
-	private JComponent createGUI() {
+	private JComponent createGUI( int playerCount) {
 		JPanel jpMain = new JPanel( new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
@@ -80,7 +86,8 @@ public class ClientGUI extends JFrame implements Runnable{
 		Board board = new Board( null, true);
 		EventDispatch.registerForCommandEvents( board);
 		board.setPreferredSize( BOARD_SIZE);
-		board.init();
+		board.setSize( BOARD_SIZE);
+		board.init(playerCount);
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		jpMain.add( board, constraints);

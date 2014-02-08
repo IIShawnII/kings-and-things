@@ -7,9 +7,7 @@ import java.awt.Graphics2D;
 
 import javax.swing.JComponent;
 
-import common.Constants;
 import common.game.HexState;
-import common.game.TileProperties;
 import static common.Constants.IMAGES;
 import static common.Constants.IMAGE_TILE_REVERSE;
 
@@ -20,6 +18,10 @@ public class Tile extends JComponent{
 	private boolean hasLock = false;
 	protected Image drawTile = null;
 	protected HexState state = null;
+	
+	public Tile(){
+		this(null);
+	}
 	
 	public Tile( HexState state){
 		super();
@@ -50,11 +52,6 @@ public class Tile extends JComponent{
 	public void flip() {
 		if( state!=null){
 			drawTile = IMAGES.get( state.getHex().hashCode());
-			TileProperties tile = Constants.HEX.get( state.getHex().hashCode());
-			System.out.println( tile);
-			System.out.println( state.getHex());
-			System.out.println( tile.hashCode());
-			System.out.println( state.getHex().hashCode());
 		}
 		repaint();
 	}

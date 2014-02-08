@@ -41,17 +41,17 @@ import static common.Constants.PORT_COLUMN_COUNT;
 @SuppressWarnings("serial")
 public class LoadingDialog extends JDialog{
 
-	private boolean progress;
+	private int players = 0;
 	private InputControl control;
 	private String title;
 	private Runnable task;
 	private JPanel jpProgress;
 	private DefaultListModel< PlayerInfo> listModel;
 	private JTextField jtfIP, jtfPort, jtfName;
-	private JButton jbConnect, jbReady;
+	private JButton jbConnect, jbReady, jbClose;
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
 	private JProgressBar jpbGold, jpbSpecial, jpbState;
-	private boolean result = false, isConnected = false, doneLoading = false;
+	private boolean isConnected = false, doneLoading = false, progress;
 	
 	public LoadingDialog( Runnable task, String title, boolean modal, boolean progress, GraphicsConfiguration gc) {
 		super( (Frame)null, title, modal, gc);
@@ -61,7 +61,7 @@ public class LoadingDialog extends JDialog{
 		control = new InputControl();
 	}
 
-	public boolean run() {
+	public int run() {
 		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE);
 		addWindowListener( new InputControl());
 		setContentPane( createGUI());
@@ -73,7 +73,7 @@ public class LoadingDialog extends JDialog{
 		thread.setDaemon( true);
 		thread.start();
 		setVisible( true);
-		return result;
+		return players;
 	}
 	
 	private JPanel createGUI(){
@@ -92,14 +92,15 @@ public class LoadingDialog extends JDialog{
 		constraints.gridy = 1;
 		jpMain.add( jbReady, constraints);
 		
-		JButton jbCancel = new JButton( "Close");
-		jbCancel.setActionCommand( "Cancel");
-		jbCancel.addActionListener( control);
-		//constraints.fill = GridBagConstraints.HORIZONTAL;
+		jbClose = new JButton( "Close");
+		jbClose.setEnabled( false);
+		jbClose.setActionCommand( "Cancel");
+		jbClose.addActionListener( control);
 		constraints.gridy = 2;
-		jpMain.add( jbCancel, constraints);
+		jpMain.add( jbClose, constraints);
 		
 		jbConnect = new JButton( "Connect");
+		jbConnect.setEnabled( false);
 		jbConnect.addActionListener( control);
 		constraints.gridy = 6;
 		jpMain.add( jbConnect, constraints);
@@ -282,7 +283,7 @@ public class LoadingDialog extends JDialog{
 			}else if( isConnected && source==jbReady){
 				new ConnectionAction( NetwrokAction.ReadyState).postCommand();
 			}else if( e.getActionCommand().equals( "Cancel")){
-				result = false;
+				players = 0;
 				close();
 			}
 		}
@@ -320,7 +321,7 @@ public class LoadingDialog extends JDialog{
 				listModel.removeAllElements();
 				break;
 			case StartGame:
-				result = true;
+				players = conncetion.getPlayerCount();
 				close();
 			case ReadyState:
 				jbReady.setText( conncetion.getMessage());
@@ -362,6 +363,8 @@ public class LoadingDialog extends JDialog{
 				setSize( size);
 				revalidate();
 				repaint();
+				jbConnect.setEnabled( true);
+				jbClose.setEnabled( true);
 				doneLoading = true;
 			default:
 				break;

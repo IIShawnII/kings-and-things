@@ -1,18 +1,15 @@
 package common.game;
 
-import static common.Constants.FACE_DOWN;
-import static common.Constants.FACE_UP;
 import static common.Constants.INFINITE_TILE;
 
-import java.awt.Rectangle;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import common.Constants.Ability;
 import common.Constants.Biome;
-import common.Constants.BuildableBuilding;
+import common.Constants.Ability;
 import common.Constants.Building;
 import common.Constants.Restriction;
+import common.Constants.BuildableBuilding;
 
 public class TileProperties implements Serializable{
 
@@ -106,10 +103,6 @@ public class TileProperties implements Serializable{
 
 	protected void setSpecialFlip() {
 		specialFlip = true;
-	}
-	
-	public Rectangle getFlip(){
-		return isFaceUp? FACE_UP: FACE_DOWN;
 	}
 	
 	public void flip(){

@@ -1,12 +1,12 @@
 package server.logic.game;
 
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.ArrayList;
 
-import server.logic.exceptions.NoMoreTilesException;
 import common.Constants;
 import common.Constants.Biome;
 import common.game.TileProperties;
+import server.logic.exceptions.NoMoreTilesException;
 
 /**
  * This class creates a playing board according to the rules for removing
@@ -28,9 +28,10 @@ public class BoardGenerator
 	 * @throws IllegalArgumentException if the entered number of players is not between 2
 	 * and 4 or if hexManager is null
 	 */
+	@SuppressWarnings("unused")
 	public BoardGenerator(int numPlayers, HexTileManager hexManager)
 	{
-		if(numPlayers < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < numPlayers)
+		if(!Constants.BYPASS_MIN_PLAYER && (numPlayers < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < numPlayers))
 		{
 			throw new IllegalArgumentException("Can not generate board with: " + numPlayers + " players");
 		}
@@ -52,9 +53,10 @@ public class BoardGenerator
 	 * due to insufficient hex tiles, remember to put hexes back when
 	 * finished with a board.
 	 */
+	@SuppressWarnings("unused")
 	public HexBoard createNewBoard() throws NoMoreTilesException
 	{
-		if(numPlayers == 4)
+		if(numPlayers == Constants.MAX_PLAYERS || Constants.BYPASS_MIN_PLAYER)
 		{
 			tempRemoveHexesOfType(Biome.Sea, 4);
 		}
@@ -69,7 +71,7 @@ public class BoardGenerator
 		
 		ArrayList<TileProperties> hexes = new ArrayList<TileProperties>();
 		
-		int boardSize = (numPlayers==4)? Constants.MAX_HEXES_ON_BOARD : Constants.MIN_HEXES_ON_BOARD;
+		int boardSize = (numPlayers==Constants.MAX_PLAYERS||Constants.BYPASS_MIN_PLAYER)? Constants.MAX_HEXES_ON_BOARD : Constants.MIN_HEXES_ON_BOARD;
 		for(int i=0; i<boardSize; i++)
 		{
 			TileProperties hex = hexManager.drawTile();

@@ -8,14 +8,20 @@ public class ConnectionState extends AbstractEvent {
 	private NetwrokAction action;
 	
 	private String message;
+	private int playerCount = 0;
 	
-	public ConnectionState( String message, NetwrokAction action){
+	public ConnectionState( int playerCount, String message, NetwrokAction action){
 		this.message = message;
 		this.action = action;
+		this.playerCount = playerCount;
 	}
 	
 	public ConnectionState( NetwrokAction action){
-		this( null, action);
+		this( 0, null, action);
+	}
+	
+	public ConnectionState( int playerCount){
+		this( playerCount, null, NetwrokAction.StartGame);
 	}
 	
 	public String getMessage() {
@@ -24,5 +30,9 @@ public class ConnectionState extends AbstractEvent {
 	
 	public NetwrokAction getAction(){
 		return action;
+	}
+
+	public int getPlayerCount() {
+		return playerCount;
 	}
 }

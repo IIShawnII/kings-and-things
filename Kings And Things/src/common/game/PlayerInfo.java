@@ -1,5 +1,6 @@
 package common.game;
 
+import java.awt.Point;
 import java.io.Serializable;
 
 public class PlayerInfo implements Serializable {
@@ -11,6 +12,7 @@ public class PlayerInfo implements Serializable {
 	private String name;
 	private boolean isReady;
 	private boolean isConnected;
+	private Point start;
 	
 	public PlayerInfo( String name, final int ID, boolean ready){
 		if( name==null || name.length()==0){
@@ -20,6 +22,15 @@ public class PlayerInfo implements Serializable {
 		this.ID = ID;
 		this.gold = 0;
 		this.isReady = ready;
+		this.start = null;
+	}
+	
+	public boolean hasStartPoint(){
+		return start!=null;
+	}
+	
+	public Point getStart(){
+		return new Point( start);
 	}
 	
 	public PlayerInfo( PlayerInfo player, final int ID){

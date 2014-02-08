@@ -20,6 +20,7 @@ import server.logic.game.Player;
 import server.event.commands.EndServer;
 import server.event.commands.PlayerUpdated;
 import server.event.commands.StartGameCommand;
+import common.Constants;
 import common.Logger;
 import common.network.Connection;
 import common.event.EventDispatch;
@@ -122,12 +123,12 @@ public class ConnectionLobby implements Runnable {
 		if( connections.getPlayers().size()>0){
 			connections.postNotification();
 		}
-		if( !anyUnReady && connectedPlayers.size()>=MIN_PLAYERS && connectedPlayers.size()<=MAX_PLAYERS){
+		if( !anyUnReady && ((connectedPlayers.size()>=MIN_PLAYERS && connectedPlayers.size()<=MAX_PLAYERS)||Constants.BYPASS_MIN_PLAYER)){
 			HashSet< Player> set = new HashSet<>();
 			for( PlayerConnection pc : connectedPlayers){
 				set.add( pc.getPlayer());
 			}
-			new StartGame().postNotification();
+			new StartGame( Constants.BYPASS_MIN_PLAYER? MAX_PLAYERS:set.size()).postNotification();
 			new StartGameCommand( demoMode, set).postCommand();
 		}
 	}

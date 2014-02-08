@@ -17,16 +17,21 @@ import common.game.TileProperties;
 
 
 public final class Constants {
+	
+	//Primary for bypassing rules for 4 player, so it can be tested for one players
+	public static final boolean BYPASS_MIN_PLAYER = true;
+	public static final boolean BYPASS_LOAD_IMAGES = true;
+	public static final boolean BYPASS_LOBBY = true;
 
+	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
+	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
 	public enum NetwrokAction { Connect, Disconnect, ReadyState, StartGame}
 	public enum Level { Error, Warning, Notice, Plain, END, LOADING_DIALOG}
-	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END}
 	public enum Ability { Charge, Fly, Range, Special, Magic, Armor, Neutralised}
+	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END}
+	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea,
 			Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
-	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
-	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
-	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
 	
 	//Note, phase progression is dependent on the order of the declarations in the following enum type
 	public enum SetupPhase {PICK_FIRST_HEX, EXCHANGE_SEA_HEXES, PICK_SECOND_HEX, PICK_THIRD_HEX, PLACE_FREE_TOWER, PLACE_FREE_THINGS, EXCHANGE_THINGS, PLACE_EXCHANGED_THINGS, SETUP_FINISHED}
@@ -38,13 +43,13 @@ public final class Constants {
 	public static final Image IMAGE_BACKGROUND;
 	public static final Image IMAGE_HEX_REVERSE; 
 	public static final Image IMAGE_TILE_REVERSE;
+	public static final HashMap< Integer, Image> IMAGES = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> HEX = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> CUP = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> GOLD = new HashMap<>();
+	public static final HashMap< Integer, TileProperties> STATE = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> SPECIAL = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> BUILDING = new HashMap<>();
-	public static final HashMap< Integer, TileProperties> STATE = new HashMap<>();
-	public static final HashMap< Integer, Image> IMAGES = new HashMap<>();
 	
 	//Colors
 	public static final Color RED = new Color( 255, 0, 0);
@@ -67,12 +72,13 @@ public final class Constants {
 	//Maximums
 	public static final int MAX_HEXES = 48;
 	public static final int MAX_PLAYERS = 4;
+	public static final int MAX_RACK_SIZE = 10;
+	public static final int MAX_MOVE_SPEED = 4;
 	public static final int MAX_HEXES_ON_BOARD = 37;
 	public static final int MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX = 10;
-	public static final int MAX_MOVE_SPEED = 4;
 	
 	//Minimums
-	public static final int MIN_PLAYERS = 1;
+	public static final int MIN_PLAYERS = 2;
 	public static final int MIN_HEXES_ON_BOARD = 19;
 	public static final Dimension MIN_CLIENT_SIZE = new Dimension( 1300,720);
 	
@@ -81,26 +87,33 @@ public final class Constants {
 	public static final int HEX_HEIGHT = 70;
 	public static final Polygon HEX_OUTLINE;
 	public static final int HEX_SPACING = 16;
+	public static final Rectangle TILE_OUTLINE;
 	public static final int LABEL_FONT_SIZE = 25;
 	public static final int IP_COLUMN_COUNT = 12;
 	public static final int PLAYER_FONT_SIZE = 12;
 	public static final int PORT_COLUMN_COUNT = 7;
+	public static final int TIILE_HEIGHT_BANK = 60;
+	public static final int TIILE_HEIGHT_RACK = 50;
+	public static final int TIILE_HEIGHT_BOARD = 40;
 	public static final int BOARD_TOP_PADDING = 100;
 	public static final int BOARD_WIDTH_SEGMENT = 8;
-	public static final int BOARD_PLAYERS_STATE = 450;
+	public static final int BOARD_RIGHT_PADDING = 100;
 	public static final int BOARD_HEIGHT_SEGMENT = 14;
-	public static final double HEX_RATIO = 752.0/658.0;
 	public static final int BOARD_BOTTOM_PADDING = 120;
+	public static final double HEX_RATIO = 752.0/658.0;
+	public static final double TILE_RATIO = 430.0/440.0;
+	public static final double TILE_RATIO_REVERSE = 430.0/440.0;
 	public static final Dimension LABEL_SIZE = new Dimension( 50,50);
-	public static final Dimension TILE_SIZE = new Dimension( 430,440);
 	public static final Dimension CONSOLE_SIZE = new Dimension( 300,100);
 	public static final Dimension LOADING_SIZE = new Dimension( 350,425);
+	public static final Dimension PLAYERS_STATE_SIZE = new Dimension( 350,125);
 	public static final Dimension PROGRESS_SIZE = new Dimension( LOADING_SIZE.width,170);
-	public static final Rectangle FACE_DOWN = new Rectangle( 0,0,TILE_SIZE.width,TILE_SIZE.height);
 	public static final Dimension HEX_SIZE = new Dimension( (int)(HEX_HEIGHT*HEX_RATIO),HEX_HEIGHT);
-	public static final Rectangle FACE_UP = new Rectangle( TILE_SIZE.width/2,0,TILE_SIZE.width,TILE_SIZE.height);
+	public static final Dimension TILE_SIZE_BANK = new Dimension( (int) (TIILE_HEIGHT_BANK*TILE_RATIO),TIILE_HEIGHT_BANK);
+	public static final Dimension TILE_SIZE_RACK = new Dimension( (int) (TIILE_HEIGHT_RACK*TILE_RATIO),TIILE_HEIGHT_RACK);
+	public static final Dimension TILE_SIZE_BOARD = new Dimension( (int) (TIILE_HEIGHT_BOARD*TILE_RATIO),TIILE_HEIGHT_BOARD);
 	public static final Dimension HEX_BOARD_SIZE = new Dimension( HEX_SIZE.height*BOARD_HEIGHT_SEGMENT/2 + HEX_SPACING, HEX_SIZE.height*BOARD_HEIGHT_SEGMENT/2 + HEX_SPACING);
-	public static final Dimension BOARD_SIZE = new Dimension( HEX_BOARD_SIZE.width + BOARD_PLAYERS_STATE, HEX_BOARD_SIZE.height + BOARD_BOTTOM_PADDING);
+	public static final Dimension BOARD_SIZE = new Dimension( HEX_BOARD_SIZE.width + BOARD_RIGHT_PADDING + PLAYERS_STATE_SIZE.width, HEX_BOARD_SIZE.height + BOARD_BOTTOM_PADDING);
 	
 	//Defaults
 	public static final int SPIRAL_DELAY = 5;
@@ -123,6 +136,7 @@ public final class Constants {
 		int w = (int) (HEX_SIZE.getWidth()/4)+1;
 		int h = (int) (HEX_SIZE.getHeight()/2)+2;
 		HEX_OUTLINE = new Polygon( new int[]{w,0,w,w*3,w*4,w*3}, new int[]{h*2,h,0,0,h,h*2}, 6);
+		TILE_OUTLINE = new Rectangle( 0, 0, TILE_SIZE_BANK.width, TILE_SIZE_BANK.height);
 		IMAGE_BACKGROUND = loadImage( "Resources\\Misc\\-n Woodboard.jpg");
 		IMAGE_HEX_REVERSE = loadImage( "Resources\\Misc\\-n Hex_Reverse.png");
 		IMAGE_TILE_REVERSE = loadImage( "Resources\\Misc\\-n Tile_Reverse.png");

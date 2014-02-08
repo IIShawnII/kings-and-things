@@ -22,7 +22,8 @@ public class Server {
 			//failed to change look and feel
 		}
 		
-		boolean isDemoMode = false;
+		//TODO change true to false
+		boolean isDemoMode = true;
 		String serverGUITitle = "Kings And Things Server";
 		
 		ServerGUI serverGUI;

@@ -46,7 +46,7 @@ public class ConnectionLogic implements Runnable {
 			if( event instanceof PlayersList){
 				new UpdatePlayerNames( ((PlayersList)event).getPlayers()).postCommand();
 			} else if( event instanceof StartGame){
-				new ConnectionState( NetwrokAction.StartGame).postCommand();
+				new ConnectionState(((StartGame)event).getPlayerCount()).postCommand();
 			} else if( event instanceof PlayerState){
 				player = ((PlayerState)event).getPlayer();
 			} else if( event instanceof HexPlacement){
@@ -99,7 +99,7 @@ public class ConnectionLogic implements Runnable {
 			default:
 				return;
 		}
-		new ConnectionState( message, netaction).postCommand();
+		new ConnectionState( 0, message, netaction).postCommand();
 	}
 	
 	private void startTask( Runnable task){
