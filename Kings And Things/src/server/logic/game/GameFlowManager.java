@@ -24,6 +24,7 @@ import server.logic.exceptions.NoMoreTilesException;
 
 import com.google.common.eventbus.Subscribe;
 
+import common.Constants.Ability;
 import common.Constants.CombatPhase;
 import common.Constants.RollReason;
 import common.Logger;
@@ -422,13 +423,16 @@ public class GameFlowManager{
 	private void beginCombatResolution(TileProperties hex, int playerNumber)
 	{
 		boolean isExploration = true;
+		Player defender = null;
 		for(Player p : currentState.getPlayers())
 		{
 			if(p.ownsHex(hex))
 			{
 				isExploration = false;
+				defender = p;
 			}
 		}
+		currentState.setCombatLocation(currentState.getBoard().getXYCoordinatesOfHex(hex));
 		if(isExploration)
 		{
 			List<Integer> playerOrder = currentState.getPlayerOrder();
@@ -437,12 +441,27 @@ public class GameFlowManager{
 			
 			currentState.setCurrentCombatPhase(CombatPhase.DETERMINE_DEFENDERS);
 			currentState.setDefendingPlayerNumber(playerOrder.get(defenderIndex));
-			currentState.setCombatLocation(currentState.getBoard().getXYCoordinatesOfHex(hex));
 			currentState.addNeededRoll(new Roll(1,currentState.getCombatHex().getHex(),RollReason.EXPLORE_HEX,playerNumber));
 		}
 		else
 		{
-			//TODO implement regular combat
+			HexState combatHex = currentState.getBoard().getHexStateForHex(hex);
+			currentState.setCurrentCombatPhase(CombatPhase.MAGIC_ATTACK);
+			currentState.setDefendingPlayerNumber(defender.getID());
+			for(TileProperties creature : combatHex.getCreaturesInHex())
+			{
+				if(creature.isSpecialCreatureWithAbility(Ability.Magic))
+				{
+					for(Player p : currentState.getPlayers())
+					{
+						if(p.ownsThingOnBoard(creature))
+						{
+							int diceCount = creature.isSpecialCreatureWithAbility(Ability.Charge)? 2 : 1;
+							currentState.addNeededRoll(new Roll(diceCount,creature,RollReason.ATTACK_WITH_CREATURE,p.getID()));
+						}
+					}
+				}
+			}
 		}
 	}
 	
