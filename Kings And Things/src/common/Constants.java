@@ -20,8 +20,8 @@ public final class Constants {
 	
 	//Primary for bypassing rules for 4 player, so it can be tested for one players
 	public static final boolean BYPASS_MIN_PLAYER = true;
-	public static final boolean BYPASS_LOAD_IMAGES = true;
-	public static final boolean BYPASS_LOBBY = true;
+	public static final boolean BYPASS_LOAD_IMAGES = false;
+	public static final boolean BYPASS_LOBBY = false;
 
 	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
 	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
@@ -42,7 +42,7 @@ public final class Constants {
 	//Combat phases
 	public enum CombatPhase {DETERMINE_DEFENDERS, SELECT_TARGET_PLAYER, MAGIC_ATTACK, APPLY_MAGIC_HITS, RANGED_ATTACK, APPLY_RANGED_HITS, MELEE_ATTACK, APPLY_MELEE_HITS, RETREAT, DETERMINE_DAMAGE, PLACE_THINGS, NO_COMBAT}
 	
-	//Resons for dice rolls
+	//Reasons for dice rolls
 	public enum RollReason {DETERMINE_PLAYER_ORDER, EXPLORE_HEX, ATTACK_WITH_CREATURE, CALCULATE_DAMAGE_TO_TILE, ENTERTAINMENT}
 	
 	//Resources

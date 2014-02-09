@@ -9,6 +9,7 @@ import static common.Constants.GOLD;
 import static common.Constants.CUP;
 import static common.Constants.HEX;
 import common.Constants;
+import common.Constants.Biome;
 import common.Constants.Ability;
 import common.Constants.Building;
 import common.Constants.Category;
@@ -55,15 +56,20 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	@Override
 	public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs) throws IOException {
-		try{
 			if( !(currentCategory!=null && currentCategory==Category.Cup && dir.toString().contains( Category.Cup.name()))){
-				currentCategory = Category.valueOf( dir.getFileName().toString());
+				try{	
+					currentCategory = Category.valueOf( dir.getFileName().toString());
+				}catch( IllegalArgumentException e){
+					currentCategory = null;
+				}
 			}else{
-				currentCupCategory = Category.valueOf( dir.getFileName().toString());
+				try{
+					Biome.valueOf( dir.getFileName().toString());
+					currentCupCategory = Category.Creature;
+				}catch( IllegalArgumentException e){
+					currentCupCategory = Category.valueOf( dir.getFileName().toString());
+				}
 			}
-		}catch( IllegalArgumentException e){
-			currentCategory = null;
-		}
 		return FileVisitResult.CONTINUE;
 	}
 
