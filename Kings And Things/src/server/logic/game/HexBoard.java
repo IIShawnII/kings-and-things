@@ -362,7 +362,7 @@ public class HexBoard
 		return boardList;
 	}
 
-	void fillArray( HexState[] array) {
+	public void fillArray( HexState[] array) {
 		int i=0;
 		for( HexState hex : boardList){
 			array[i] = hex;

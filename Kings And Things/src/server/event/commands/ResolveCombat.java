@@ -1,9 +1,8 @@
 package server.event.commands;
 
-import common.event.AbstractEvent;
 import common.game.TileProperties;
 
-public class ResolveCombat extends AbstractEvent
+public class ResolveCombat extends AbstractCommand
 {
 	private final TileProperties hex;
 

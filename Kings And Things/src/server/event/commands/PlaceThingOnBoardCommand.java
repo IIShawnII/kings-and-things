@@ -1,9 +1,8 @@
 package server.event.commands;
 
-import common.event.AbstractEvent;
 import common.game.TileProperties;
 
-public class PlaceThingOnBoardCommand extends AbstractEvent{
+public class PlaceThingOnBoardCommand extends AbstractCommand{
 	
 	private final TileProperties hex;
 	private final TileProperties thing;

@@ -5,11 +5,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.event.AbstractEvent;
 import common.game.TileProperties;
 
 
-public class RecruitThingsCommand extends AbstractEvent {
+public class RecruitThingsCommand extends AbstractCommand {
 	
 	private final int gold;
 	private final HashSet<TileProperties> things;

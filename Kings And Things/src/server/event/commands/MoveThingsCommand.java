@@ -6,10 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import common.event.AbstractEvent;
 import common.game.TileProperties;
 
-public class MoveThingsCommand extends AbstractEvent
+public class MoveThingsCommand extends AbstractCommand
 {
 	private final Set<TileProperties> things;
 	private final List<TileProperties> hexes;

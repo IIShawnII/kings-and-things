@@ -15,7 +15,7 @@ import java.net.SocketTimeoutException;
 
 import com.google.common.eventbus.Subscribe;
 
-import server.logic.game.GameFlowManager;
+import server.logic.game.CommandHandlerManager;
 import server.logic.game.Player;
 import server.event.commands.EndServer;
 import server.event.commands.PlayerUpdated;
@@ -34,7 +34,7 @@ public class ConnectionLobby implements Runnable {
 
 	private boolean close = false;
 	private ServerSocket serverSocket;
-	private final GameFlowManager game;
+	private final CommandHandlerManager game;
 	private final ArrayList< PlayerConnection> connectedPlayers;
 	private final boolean demoMode;
 	
@@ -47,7 +47,7 @@ public class ConnectionLobby implements Runnable {
 		
 		demoMode = isDemoMode;
 		connectedPlayers = new ArrayList<>();
-		game = new GameFlowManager();
+		game = new CommandHandlerManager();
 		
 		try {
 			serverSocket = new ServerSocket( SERVER_PORT);

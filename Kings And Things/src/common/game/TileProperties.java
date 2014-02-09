@@ -16,6 +16,7 @@ public class TileProperties implements Serializable{
 	
 	private int number;
 	private int value;
+	private final int baseValue;
 	private int moveSpeed;
 	private String name;
 	private boolean hasFlip;
@@ -31,6 +32,7 @@ public class TileProperties implements Serializable{
 	public TileProperties( Category category){
 		fake = true;
 		tileType = category;
+		baseValue = 0;
 	}
 	
 	public TileProperties(){
@@ -51,6 +53,7 @@ public class TileProperties implements Serializable{
 		this.name = name;
 		this.hasFlip = true;
 		this.value = attack;
+		baseValue = value;
 		this.number = number;
 		this.specialFlip = false;
 		this.abilities = abilities==null? new ArrayList<Ability>() : new ArrayList<>( abilities);
@@ -83,8 +86,13 @@ public class TileProperties implements Serializable{
 		return value;
 	}
 	
-	protected void setValue( int value) {
+	public void setValue( int value) {
 		this.value = value;
+	}
+
+	public void resetValue()
+	{
+		value = baseValue;
 	}
 	
 	// retrieves moveSpeed

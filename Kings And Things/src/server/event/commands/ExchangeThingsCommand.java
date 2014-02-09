@@ -5,10 +5,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.event.AbstractEvent;
 import common.game.TileProperties;
 
-public class ExchangeThingsCommand extends AbstractEvent{
+public class ExchangeThingsCommand extends AbstractCommand{
 	
 	private final HashSet<TileProperties> things;
 	

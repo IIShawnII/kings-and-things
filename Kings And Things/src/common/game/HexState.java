@@ -6,9 +6,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.Constants.Category;
-
 import server.logic.game.Player;
+
+import common.Constants.Category;
 
 /**
  * This class acts as a container for
@@ -183,6 +183,25 @@ public class HexState implements Serializable{
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Gets the set of all things added to this hex that are
+	 * capable of participating in combat
+	 * @return Set of things that can fight
+	 */
+	public Set<TileProperties> getFightingThingsInHex()
+	{
+		HashSet<TileProperties> fightingThings = new HashSet<TileProperties>();
+		for(TileProperties thing : getThingsInHex())
+		{
+			if((thing.isCreature() || thing.isBuilding()) && thing.getValue()>0)
+			{
+				fightingThings.add(thing);
+			}
+		}
+		
+		return Collections.unmodifiableSet(fightingThings);
 	}
 	
 	/**

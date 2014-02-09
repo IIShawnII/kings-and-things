@@ -1,9 +1,8 @@
 package server.event.commands;
 
-import common.event.AbstractEvent;
 import common.game.TileProperties;
 
-public class ExchangeSeaHexCommand extends AbstractEvent{
+public class ExchangeSeaHexCommand extends AbstractCommand{
 	
 	private final TileProperties hex;
 	

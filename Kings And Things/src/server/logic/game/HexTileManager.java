@@ -11,7 +11,7 @@ import common.game.TileProperties;
  * this class encapsulates the logic of drawing hex tiles from the bank, and placing
  * previously drawn ones back into the bank.
  */
-class HexTileManager extends AbstractTileManager
+public class HexTileManager extends AbstractTileManager
 {
 	private final boolean isDemoMode;
 	private int numDraws;

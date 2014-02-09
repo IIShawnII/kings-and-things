@@ -1,10 +1,9 @@
 package server.event.commands;
 
 import common.Constants.RollReason;
-import common.event.AbstractEvent;
 import common.game.TileProperties;
 
-public class RollDiceCommand extends AbstractEvent
+public class RollDiceCommand extends AbstractCommand
 {
 	private final RollReason reason;
 	private final TileProperties tile;

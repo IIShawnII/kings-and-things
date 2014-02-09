@@ -4,7 +4,7 @@ import common.Constants;
 import common.Constants.BuildableBuilding;
 import common.game.TileProperties;
 
-abstract class BuildableBuildingGenerator
+public abstract class BuildableBuildingGenerator
 {
 	private static int id = 2;
 	

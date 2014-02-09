@@ -11,7 +11,7 @@ import common.game.TileProperties;
  * this class encapsulates the logic of drawing tiles from somewhere, and placing
  * previously drawn ones back.
  */
-abstract class AbstractTileManager
+public abstract class AbstractTileManager
 {
 	protected final ArrayList<TileProperties> tiles;
 	private final String tileType;

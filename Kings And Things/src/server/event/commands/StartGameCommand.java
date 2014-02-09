@@ -5,9 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import server.logic.game.Player;
-import common.event.AbstractEvent;
 
-public class StartGameCommand extends AbstractEvent{
+public class StartGameCommand extends AbstractCommand{
 
 	private final boolean demoMode;
 	

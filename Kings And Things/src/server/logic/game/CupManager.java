@@ -11,7 +11,7 @@ import common.game.TileProperties;
  * this class encapsulates the logic of drawing tiles from the cup, and placing
  * previously drawn ones back.
  */
-class CupManager extends AbstractTileManager
+public class CupManager extends AbstractTileManager
 {
 	private final boolean isDemoMode;
 	private int numDraws;

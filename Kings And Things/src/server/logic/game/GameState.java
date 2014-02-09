@@ -3,6 +3,7 @@ package server.logic.game;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,7 @@ public class GameState
 	private int defenderPlayerNumber;
 	private Point combatLocation;
 	private final ArrayList<Roll> rolls;
+	private final HashMap<Integer,Integer> hitsToApply;
 
 	/**
 	 * Creates a new GameState object
@@ -55,6 +57,11 @@ public class GameState
 		this.defenderPlayerNumber = defenderPlayerNumber;
 		this.combatLocation = combatLocation;
 		this.rolls = new ArrayList<Roll>();
+		hitsToApply = new HashMap<>();
+		for(Player p : players)
+		{
+			hitsToApply.put(p.getID(), 0);
+		}
 	}
 	
 	/**
@@ -209,6 +216,36 @@ public class GameState
 	}
 	
 	/**
+	 * Checks if there are any players who still have to apply
+	 * hits to their creatures
+	 * @return True if some players still need to apply hits,
+	 * false otherwise
+	 */
+	public boolean hitsToApply()
+	{
+		for (int hitNumber : hitsToApply.values())
+		{
+			if(hitNumber > 0)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Retrieves the current number of hits that need to be
+	 * applied to a particular player
+	 * @param id The player id of the player
+	 * @return The number of hits they have taken
+	 */
+	public int getHitsOnPlayer(int id)
+	{
+		return hitsToApply.get(id);
+	}
+	
+	/**
 	 * Gets a list of all rolls recently made that we might not
 	 * need to wait for
 	 * @return List of completed rolls
@@ -253,11 +290,35 @@ public class GameState
 	/**
 	 * Remove a roll from the list of rolls that
 	 * need to be made
-	 * @param roll The roll ro remove
+	 * @param roll The roll to remove
 	 */
 	public void removeRoll(Roll roll)
 	{
 		rolls.remove(roll);
+	}
+	
+	/**
+	 * Add a number to the amount of hits that a player
+	 * has currently taken
+	 * @param playerNumber The player that has been hit
+	 * @param hitCount The number of hits to add
+	 */
+	public void addHitsToPlayer(int playerNumber, int hitCount)
+	{
+		int totalHits = hitsToApply.get(playerNumber) + hitCount;
+		hitsToApply.put(playerNumber, totalHits);
+	}
+	
+	/**
+	 * Remove a number of hits from the amount of hits that a
+	 * player has currently taken
+	 * @param playerNumber The player that is applying hits
+	 * @param hitCount The number to remove
+	 */
+	public void removeHitsFromPlayer(int playerNumber, int hitCount)
+	{
+		int totalHits = hitsToApply.get(playerNumber) - hitCount;
+		hitsToApply.put(playerNumber, totalHits);
 	}
 	
 	/**
