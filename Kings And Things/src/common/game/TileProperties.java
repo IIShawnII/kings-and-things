@@ -209,7 +209,7 @@ public class TileProperties implements Serializable{
 	public boolean isSpecialIncomeCounter()
 	{
 		
-		return (restrictions.contains(Restriction.Treasure) && isRestrictedToBiome()) || !isBuildableBuilding();
+		return (restrictions.contains(Restriction.Treasure) && isRestrictedToBiome()) || (isBuilding() && !isBuildableBuilding());
 	}
 
 	@Override
