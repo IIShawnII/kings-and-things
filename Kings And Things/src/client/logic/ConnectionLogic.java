@@ -44,15 +44,15 @@ public class ConnectionLogic implements Runnable {
 		while( !finished && (event = connection.recieve())!=null){
 			Logger.getStandardLogger().info( "Received: " + event);
 			if( event instanceof PlayersList){
-				new UpdatePlayerNames( ((PlayersList)event).getPlayers()).postCommand();
+				new UpdatePlayerNames(((PlayersList)event).getPlayers()).postCommand();
 			} else if( event instanceof StartGame){
 				new ConnectionState(((StartGame)event).getPlayerCount()).postCommand();
 			} else if( event instanceof PlayerState){
 				player = ((PlayerState)event).getPlayer();
 			} else if( event instanceof HexPlacement){
-				new BoardUpdate( ((HexPlacement)event).getArray()).postCommand();
+				new BoardUpdate(((HexPlacement)event).getArray()).postCommand();
 			} else if( event instanceof Flip){
-				new BoardUpdate( ((Flip)event).flipAll()).postCommand();
+				new BoardUpdate(((Flip)event).flipAll()).postCommand();
 			}
 		}
 		finished = true;

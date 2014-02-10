@@ -42,7 +42,6 @@ public class ClientGUI extends JFrame implements Runnable{
 	/**
 	 * start GUI
 	 */
-	@SuppressWarnings("unused")
 	@Override
 	public void run() {
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
