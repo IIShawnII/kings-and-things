@@ -69,7 +69,7 @@ public class CombatCommandHandler extends CommandHandler
 		else
 		{
 			getCurrentState().setDefendingPlayerNumber(defender.getID());
-			getCurrentState().setCurrentCombatPhase(CombatPhase.values()[CombatPhase.values().length-1]);
+			getCurrentState().setCurrentCombatPhase(CombatPhase.SELECT_TARGET_PLAYER);
 			advanceToNextCombatPhase();
 		}
 	}
