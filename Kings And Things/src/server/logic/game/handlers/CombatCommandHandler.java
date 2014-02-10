@@ -68,60 +68,9 @@ public class CombatCommandHandler extends CommandHandler
 		}
 		else
 		{
-			HexState combatHex = getCurrentState().getBoard().getHexStateForHex(hex);
-			getCurrentState().setCurrentCombatPhase(CombatPhase.MAGIC_ATTACK);
 			getCurrentState().setDefendingPlayerNumber(defender.getID());
-			Set<TileProperties> things = combatHex.getFightingThingsInHex();
-			for(TileProperties thing : things)
-			{
-				if(thing.hasAbility(Ability.Magic))
-				{
-					for(Player p : getCurrentState().getPlayers())
-					{
-						if(p.ownsThingOnBoard(thing))
-						{
-							int diceCount = thing.isSpecialCreatureWithAbility(Ability.Charge)? 2 : 1;
-							getCurrentState().addNeededRoll(new Roll(diceCount,thing,RollReason.ATTACK_WITH_CREATURE,p.getID()));
-						}
-					}
-				}
-			}
-			if(!getCurrentState().isWaitingForRolls())
-			{
-				getCurrentState().setCurrentCombatPhase(CombatPhase.RANGED_ATTACK);
-				for(TileProperties thing : things)
-				{
-					if(thing.hasAbility(Ability.Range))
-					{
-						for(Player p : getCurrentState().getPlayers())
-						{
-							if(p.ownsThingOnBoard(thing))
-							{
-								int diceCount = thing.isSpecialCreatureWithAbility(Ability.Charge)? 2 : 1;
-								getCurrentState().addNeededRoll(new Roll(diceCount,thing,RollReason.ATTACK_WITH_CREATURE,p.getID()));
-							}
-						}
-					}
-				}
-			}
-			if(!getCurrentState().isWaitingForRolls())
-			{
-				getCurrentState().setCurrentCombatPhase(CombatPhase.MELEE_ATTACK);
-				for(TileProperties thing : things)
-				{
-					if(!thing.hasAbility(Ability.Range) && !thing.hasAbility(Ability.Magic))
-					{
-						for(Player p : getCurrentState().getPlayers())
-						{
-							if(p.ownsThingOnBoard(thing))
-							{
-								int diceCount = thing.isSpecialCreatureWithAbility(Ability.Charge)? 2 : 1;
-								getCurrentState().addNeededRoll(new Roll(diceCount,thing,RollReason.ATTACK_WITH_CREATURE,p.getID()));
-							}
-						}
-					}
-				}
-			}
+			getCurrentState().setCurrentCombatPhase(CombatPhase.values()[CombatPhase.values().length-1]);
+			advanceToNextCombatPhase();
 		}
 	}
 
@@ -155,8 +104,55 @@ public class CombatCommandHandler extends CommandHandler
 		
 		if(!getCurrentState().hitsToApply())
 		{
-			
+			advanceToNextCombatPhase();
 		}
+	}
+	
+	private void advanceToNextCombatPhase()
+	{
+		int currentPhaseOrdinal = getCurrentState().getCurrentCombatPhase().ordinal();
+		CombatPhase nextPhase = getCombatPhaseByOrdinal((currentPhaseOrdinal + 1) % CombatPhase.values().length);
+		
+		HexState combatHex = getCurrentState().getCombatHex();
+		getCurrentState().setCurrentCombatPhase(nextPhase);
+		Set<TileProperties> things = combatHex.getFightingThingsInHex();
+		if(nextPhase == CombatPhase.MAGIC_ATTACK || nextPhase == CombatPhase.RANGED_ATTACK || nextPhase == CombatPhase.MELEE_ATTACK)
+		{
+			for(TileProperties thing : things)
+			{
+				if((nextPhase == CombatPhase.MAGIC_ATTACK && thing.hasAbility(Ability.Magic)) ||
+					(nextPhase == CombatPhase.RANGED_ATTACK && thing.hasAbility(Ability.Range)) ||
+					(nextPhase == CombatPhase.MELEE_ATTACK && (!thing.hasAbility(Ability.Range) && !thing.hasAbility(Ability.Magic))))
+				{
+					for(Player p : getCurrentState().getPlayers())
+					{
+						if(p.ownsThingOnBoard(thing))
+						{
+							int diceCount = thing.isSpecialCreatureWithAbility(Ability.Charge)? 2 : 1;
+							getCurrentState().addNeededRoll(new Roll(diceCount,thing,RollReason.ATTACK_WITH_CREATURE,p.getID()));
+						}
+					}
+				}
+			}
+			if(!getCurrentState().isWaitingForRolls())
+			{
+				getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(nextPhase.ordinal() + 1));
+				advanceToNextCombatPhase();
+			}
+		}
+	}
+	
+	private CombatPhase getCombatPhaseByOrdinal(int ordinal)
+	{
+		for(CombatPhase phase : CombatPhase.values())
+		{
+			if(phase.ordinal() == ordinal)
+			{
+				return phase;
+			}
+		}
+		
+		throw new IllegalArgumentException("Recieved invalid combat phase ordinal: " + ordinal);
 	}
 
 	private void applyRollEffects()
