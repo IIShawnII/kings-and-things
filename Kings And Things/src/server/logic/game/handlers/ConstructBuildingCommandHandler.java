@@ -39,6 +39,10 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 		hs.removeBuildingFromHex();
 		hs.addThingToHex(buildingTile);
 		getCurrentState().getPlayerByPlayerNumber(playerNumber).addOwnedThingOnBoard(buildingTile);
+		if (getCurrentState().getCurrentSetupPhase() == SetupPhase.SETUP_FINISHED) {
+			getCurrentState().getPlayerByPlayerNumber(playerNumber).removeGold(5);
+		}
+		getCurrentState().addHexToListOfConstructedHexes(hs);
 	}
 	
 	@Subscribe

@@ -143,6 +143,7 @@ public abstract class CommandHandler
 		currentState.setCurrentCombatPhase(CombatPhase.NO_COMBAT);
 		currentState.setCombatLocation(null);
 		currentState.setDefendingPlayerNumber(-1);
+		currentState.removeAllHexesWithBuiltInObjects();
 	}
 	
 	protected void advanceActiveTurnPlayer(){

@@ -30,6 +30,7 @@ public class GameState
 	private Point combatLocation;
 	private final ArrayList<Roll> rolls;
 	private final HashMap<Integer,Integer> hitsToApply;
+	private final HashSet<HexState> hexesContainingBuiltObjects;
 
 	/**
 	 * Creates a new GameState object
@@ -58,6 +59,7 @@ public class GameState
 		this.combatLocation = combatLocation;
 		this.rolls = new ArrayList<Roll>();
 		hitsToApply = new HashMap<>();
+		this.hexesContainingBuiltObjects = new HashSet<HexState>();
 		for(Player p : players)
 		{
 			hitsToApply.put(p.getID(), 0);
@@ -273,6 +275,14 @@ public class GameState
 		return Collections.unmodifiableList(rolls);
 	}
 	
+	/*
+	 * Retrieves the set of hexes that have been built during the construction phase
+	 */
+	public Set<HexState> getHexesContainingBuiltObjects() 
+	{
+		return Collections.unmodifiableSet(hexesContainingBuiltObjects);
+	}
+	
 	
 	/** setters **/
 	
@@ -420,5 +430,21 @@ public class GameState
 	public void setDefendingPlayerNumber(int id)
 	{
 		defenderPlayerNumber = id;
+	}
+	
+	/**
+	 * Adds a hex with a built-in object to hexes with built-in objects
+	 */
+	public void addHexToListOfConstructedHexes(HexState newHex) 
+	{
+		hexesContainingBuiltObjects.add(newHex);
+	}
+	
+	/**
+	 * Removes all the hexes with built in objects
+	 */
+	public void removeAllHexesWithBuiltInObjects() 
+	{
+		hexesContainingBuiltObjects.clear();
 	}
 }
