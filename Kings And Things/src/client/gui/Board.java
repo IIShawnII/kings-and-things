@@ -157,7 +157,7 @@ public class Board extends JPanel{
 		tile.setBounds( bound);
 		tile.addMouseListener( mouseInput);
 		tile.addMouseMotionListener( mouseInput);
-		tile.setLockArea( locks.getPermanentLock( tile));
+		tile.setLockArea( locks.getLock( tile));
 		add(tile,0);
 		return tile;
 	}
@@ -181,7 +181,7 @@ public class Board extends JPanel{
 		private HexState[] hexes;
 		
 		public SpiralPlacement( HexState[] hexes) {
-			this.hexes = hexes==null?new HexState[37]:hexes;
+			this.hexes = hexes;
 		}
 
 		@Override
@@ -199,8 +199,8 @@ public class Board extends JPanel{
 				oldBound.add(tile.getBounds());
 				repaint( oldBound);
 			}else if( ring<BOARD_LOAD_ROW.length){
-				if( count<BOARD_LOAD_ROW[ring].length && drawIndex<hexes.length){
-					tile = addTile( new Hex( new HexState()), new Rectangle( 8,8,HEX_SIZE.width, HEX_SIZE.height));
+				if( count<BOARD_LOAD_ROW[ring].length && (hexes==null?true:drawIndex<hexes.length)){
+					tile = addTile( new Hex( hexes==null?new HexState():hexes[drawIndex]), new Rectangle( 8,8,HEX_SIZE.width, HEX_SIZE.height));
 					x = (widthSegment*BOARD_LOAD_COL[ring][count]);
 					y = (heightSegment*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
 					tile.setLockArea( x-LOCK_SIZE/2, y-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
@@ -223,20 +223,20 @@ public class Board extends JPanel{
 	
 	private class MouseInput extends MouseAdapter{
 
-		private Rectangle bound, boardBound;
+		private Rectangle bound, boardBound, newLock;
 		private int xDiff, yDiff;
 		private int xPressed, yPressed;
 		private boolean ignore = false;
 
 		@Override
 	    public void mouseDragged(MouseEvent e){
-			if(	!ignore && e.getSource() instanceof Tile && interactWithHexes){/*
+			if(	!ignore && e.getSource() instanceof Tile && interactWithHexes){
 				Tile tile = (Tile)e.getSource();
 				boardBound = getBounds();
-				bound = new Rectangle( tile.getBounds());
+				bound = tile.getBounds();
 				xDiff = e.getX() - xPressed;
 				yDiff = e.getY() - yPressed;
-				if( !tile.canLock( xDiff, yDiff)){
+				if( !locks.canLeaveLock( tile, xDiff, yDiff)){
 					bound.translate( xDiff, 0);
 					if( !boardBound.contains( bound)){
 						bound.translate( -xDiff, 0);
@@ -245,9 +245,12 @@ public class Board extends JPanel{
 					if( !boardBound.contains( bound)){
 						bound.translate( 0, -yDiff);
 					}
-					if( checkLock( hexLock, bound)){
-						tile.setLockArea( hexLock);
+					newLock = locks.canLockToAny( tile);
+					if( newLock!=null){
+						tile.setLockArea( newLock);
 					}else{
+						tile.removeLock();
+					}/*else{
 						Rectangle lock = null;
 						for( int i=0; i<hexBoardLocks.size(); i++){
 							lock = hexBoardLocks.get( i);
@@ -261,9 +264,9 @@ public class Board extends JPanel{
 						if( !temp.equals( hexLock)){
 							hexBoardLocks.add( temp);
 						}
-					}
+					}*/
 					tile.setBounds( bound);
-				}*/
+				}
 			}
 		}
 
@@ -322,7 +325,7 @@ public class Board extends JPanel{
 				} catch ( InterruptedException e) {}
 			}
 			for( Component tile : getComponents()){
-				if( tile instanceof Tile){
+				if( tile instanceof Hex){
 					//TODO ignore fake one on permanent lock
 					((Tile)tile).flip();
 				}

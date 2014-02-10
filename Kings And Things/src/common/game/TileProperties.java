@@ -226,9 +226,9 @@ public class TileProperties implements Serializable{
 		int result = 1;
 		result = prime * result + number;
 		result = prime * result + value;
-		result = prime * result + name.hashCode();
-		result = prime * result + abilities.hashCode();
-		result = prime * result + restrictions.hashCode();
+		result = prime * result + (name==null?0:name.hashCode());
+		result = prime * result + (abilities==null?0:abilities.hashCode());
+		result = prime * result + (restrictions==null?0:restrictions.hashCode());
 		return result;
 	}
 

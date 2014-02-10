@@ -53,7 +53,7 @@ public class LockManager {
 		System.out.println();
 	}
 
-	public Rectangle getPermanentLock( Tile tile) {
+	private Rectangle getPermanentLock( Tile tile) {
 		TileProperties prop = tile.getProperties();
 		switch( prop.getCategory()){
 			case Cup:
@@ -82,8 +82,10 @@ public class LockManager {
 		Rectangle rect = tile.getBounds(), lock = null;
 		if( rect.x>(BOARD_SIZE.width-PLAYERS_STATE_SIZE.width)){
 			lock = lookThroughLocks( rackLocks, rect);
-		}else{
+		}else if( rect.y>(BOARD_TOP_PADDING/2)){
 			lock = lookThroughLocks( hexBoardLocks, rect);
+		}else{
+			lock = getPermanentLock( tile);
 		}
 		return lock;
 	}
@@ -92,23 +94,26 @@ public class LockManager {
 		Rectangle lock;
 		for( int i=0; i<hexBoardLocks.length;i++){
 			for( int j=0; j<hexBoardLocks[i].length;j++){
-				if( canLock( hexBoardLocks[i][j], bound)){
+				/*if( canLock( hexBoardLocks[i][j], bound)){
 					lock = new Rectangle( hexBoardLocks[i][j]);
 					hexBoardLocks[i][j] = null;
 					return lock;
-				}
+				}*/
 			}
 		}
 		return null;
 	}
 	
-	private boolean canLock( Rectangle lock, Rectangle bound){
-		if( lock!=null && lock.contains( bound.getX()+bound.getWidth()/2, bound.getY()+bound.getHeight()/2)){
-			bound.x = (int) ((lock.getX()+lock.getWidth()/2)-bound.getWidth()/2);
-			bound.y = (int) ((lock.getY()+lock.getHeight()/2)-bound.getHeight()/2);
-			return true;
-		}
-		return false;
+	public boolean canLeaveLock( Tile tile, int x, int y){
+		return tile.hasLock() && tile.getLock().contains( tile.getCeneter( x, y));
+	}
+	
+	public boolean canLockToPermanent( Tile tile){
+		return canLock( getPermanentLock( tile), tile.getCeneter(0,0));
+	}
+	
+	private boolean canLock( Rectangle lock, Point point){
+		return lock!=null&&point!=null&&lock.contains( point);
 	}
 	
 	public Point convertToRowAndCol( int x, int y){
@@ -122,5 +127,9 @@ public class LockManager {
 		point.x += LOCK_SIZE/2;
 		point.y += LOCK_SIZE/2;
 		return point;
+	}
+
+	public Rectangle canLockToAny( Tile tile) {
+		return getLock( tile);
 	}
 }

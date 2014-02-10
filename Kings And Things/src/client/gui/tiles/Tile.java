@@ -2,6 +2,7 @@ package client.gui.tiles;
 
 import java.awt.Image;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Graphics2D;
 
@@ -50,7 +51,7 @@ public class Tile extends JComponent{
 	}
 
 	public void flip() {
-		if( prop!=null){
+		if( prop!=null && !prop.isFake()){
 			drawTile = IMAGES.get( prop.hashCode());
 		}
 		repaint();
@@ -60,8 +61,12 @@ public class Tile extends JComponent{
 		return true;
 	}
 	
-	public boolean canLock( int x, int y){
-		return hasLock && lockArea.contains( getCenterX()+x, getCenterY()+y);
+	public Rectangle getLock(){
+		return new Rectangle( lockArea);
+	}
+	
+	public Point getCeneter( int xOffset, int yOffset){
+		return new Point( getCenterX()+xOffset, getCenterY()+yOffset);
 	}
 	
 	public int getCenterX(){
