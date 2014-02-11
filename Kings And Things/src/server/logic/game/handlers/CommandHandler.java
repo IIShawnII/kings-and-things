@@ -276,6 +276,7 @@ public abstract class CommandHandler
 					}
 					
 					tray.postNotification();
+					new PlayerState(p.getPlayerInfo()).postNotification();
 				}
 				break;
 			}

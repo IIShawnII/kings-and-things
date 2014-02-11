@@ -35,6 +35,7 @@ public class Player implements Serializable{
 		ownedHexes = new HashSet<TileProperties>();
 		ownedThingsOnBoard = new HashSet<TileProperties>();
 		tray = new HashSet<TileProperties>();
+		info.setCardonRack(0);
 	}
 
 	public void setIsPlaying( boolean ready) {
@@ -214,7 +215,10 @@ public class Player implements Serializable{
 			throw new IllegalArgumentException("You cannot have more than 10 things in your tray!");
 		}
 		validateNotNull(tile);
-		return tray.add(tile);
+
+		boolean success = tray.add(tile);
+		info.setCardonRack(tray.size());
+		return success;
 	}
 	
 	/**
@@ -227,7 +231,10 @@ public class Player implements Serializable{
 	public boolean removeThingFromTray(TileProperties tile)
 	{
 		validateNotNull(tile);
-		return tray.remove(tile);
+		
+		boolean success = tray.remove(tile);
+		info.setCardonRack(tray.size());
+		return success;
 	}
 	
 	/**
