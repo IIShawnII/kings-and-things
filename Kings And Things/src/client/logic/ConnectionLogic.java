@@ -10,7 +10,9 @@ import common.network.Connection;
 import common.Constants.NetwrokAction;
 import common.event.AbstractNetwrokEvent;
 import common.event.notifications.Flip;
+import common.event.notifications.HexOwnershipChanged;
 import common.event.notifications.HexPlacement;
+import common.event.notifications.HexStatesChanged;
 import common.event.notifications.PlayerOrderList;
 import common.event.notifications.RackPlacement;
 import common.event.notifications.StartGame;
@@ -62,6 +64,14 @@ public class ConnectionLogic implements Runnable {
 				new BoardUpdate(((PlayerOrderList)event).getList()).postCommand();
 			} else if( event instanceof RackPlacement){
 				new BoardUpdate(((RackPlacement)event).getArray()).postCommand();
+			}
+			else if(event instanceof HexOwnershipChanged)
+			{
+				//TODO handle
+			}
+			else if(event instanceof HexStatesChanged)
+			{
+				//TODO handle
 			}
 		}
 		finished = true;

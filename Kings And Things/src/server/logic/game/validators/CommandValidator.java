@@ -5,12 +5,12 @@ import java.util.Set;
 
 import server.logic.game.GameState;
 import server.logic.game.Player;
-import server.logic.game.Roll;
 import common.Constants;
 import common.Constants.Building;
 import common.Constants.CombatPhase;
 import common.Constants.RollReason;
 import common.game.HexState;
+import common.game.Roll;
 import common.game.TileProperties;
 
 /**

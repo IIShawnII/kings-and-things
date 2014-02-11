@@ -8,7 +8,6 @@ import server.event.DiceRolled;
 import server.event.commands.ApplyHitsCommand;
 import server.event.commands.ResolveCombat;
 import server.logic.game.Player;
-import server.logic.game.Roll;
 import server.logic.game.validators.CombatPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
@@ -18,6 +17,7 @@ import common.Constants.CombatPhase;
 import common.Constants.RollReason;
 import common.Logger;
 import common.game.HexState;
+import common.game.Roll;
 import common.game.TileProperties;
 
 public class CombatCommandHandler extends CommandHandler

@@ -1,11 +1,10 @@
-package server.logic.game;
+package common.game;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import common.Constants.RollReason;
-import common.game.TileProperties;
 
 public class Roll
 {

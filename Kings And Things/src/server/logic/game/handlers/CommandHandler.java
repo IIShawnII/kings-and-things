@@ -12,7 +12,6 @@ import server.logic.game.CupManager;
 import server.logic.game.GameState;
 import server.logic.game.HexTileManager;
 import server.logic.game.Player;
-import server.logic.game.Roll;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
@@ -23,9 +22,11 @@ import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.event.EventDispatch;
+import common.event.notifications.HexOwnershipChanged;
 import common.event.notifications.PlayerState;
 import common.event.notifications.RackPlacement;
 import common.game.HexState;
+import common.game.Roll;
 import common.game.TileProperties;
 
 public abstract class CommandHandler
@@ -114,6 +115,9 @@ public abstract class CommandHandler
 			}
 		}
 		currentState.getPlayerByPlayerNumber(playerNumber).addOwnedHex(hex);
+
+		HexState hs = getCurrentState().getBoard().getHexStateForHex(hex);
+		new HexOwnershipChanged(hs,playerNumber).postNotification();
 	}
 
 	protected void advanceActivePhasePlayer(){

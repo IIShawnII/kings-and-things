@@ -12,6 +12,7 @@ import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.game.HexState;
+import common.game.Roll;
 
 /**
  * GameState can be described by the board and player info

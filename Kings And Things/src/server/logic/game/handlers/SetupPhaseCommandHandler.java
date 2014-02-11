@@ -20,7 +20,6 @@ import server.logic.game.GameState;
 import server.logic.game.HexBoard;
 import server.logic.game.HexTileManager;
 import server.logic.game.Player;
-import server.logic.game.Roll;
 import server.logic.game.validators.SetupPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
@@ -31,9 +30,11 @@ import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
 import common.event.notifications.Flip;
+import common.event.notifications.HexOwnershipChanged;
 import common.event.notifications.HexPlacement;
 import common.event.notifications.PlayerOrderList;
 import common.game.HexState;
+import common.game.Roll;
 import common.game.TileProperties;
 
 public class SetupPhaseCommandHandler extends CommandHandler
