@@ -24,6 +24,7 @@ import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.event.EventDispatch;
 import common.event.notifications.PlayerState;
+import common.event.notifications.RackPlacement;
 import common.game.HexState;
 import common.game.TileProperties;
 
@@ -258,11 +259,14 @@ public abstract class CommandHandler
 
 				for(Player p : players)
 				{
+					RackPlacement tray = new RackPlacement(10);
 					for(int i=0; i<10; i++)
 					{
 						try
 						{
-							p.addThingToTray(cup.drawTile());
+							TileProperties thing = cup.drawTile();
+							p.addThingToTray(thing);
+							tray.getArray()[i] = thing;
 						}
 						catch (NoMoreTilesException e)
 						{
@@ -270,6 +274,8 @@ public abstract class CommandHandler
 							Logger.getErrorLogger().error("Unable to draw 10 free things for: " + currentState.getActivePhasePlayer() + ", due to: ", e);
 						}
 					}
+					
+					tray.postNotification();
 				}
 				break;
 			}
