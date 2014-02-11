@@ -11,9 +11,11 @@ import server.logic.game.Player;
 import server.logic.game.validators.RecruitingThingsPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
+import common.event.notifications.RackPlacement;
 import common.game.HexState;
 import common.game.TileProperties;
 
@@ -140,6 +142,17 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		hs.addThingToHex(thing);
 		getCurrentState().getPlayerByPlayerNumber(playerNumber).placeThingFromTrayOnBoard(thing);
 	}
+	
+	private void notifyClientsOfPlayerTray(int playerNumber)
+	{
+		RackPlacement toClient = new RackPlacement(getCurrentState().getPlayerByPlayerNumber(playerNumber).getTrayThings().size());
+		int i=0;
+		for(TileProperties tp : getCurrentState().getPlayerByPlayerNumber(playerNumber).getTrayThings())
+		{
+			toClient.getArray()[i++] = tp;
+		}
+		toClient.postNotification();
+	}
 
 	@Subscribe
 	public void recieveExchangeThingsCommand(ExchangeThingsCommand command)
@@ -149,6 +162,8 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			try
 			{
 				exchangeThings(command.getThings(), command.getPlayerID());
+				//notify client
+				notifyClientsOfPlayerTray(command.getPlayerID());
 			}
 			catch(Throwable t)
 			{
@@ -165,6 +180,8 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			try
 			{
 				placeThingOnBoard(command.getThing(), command.getPlayerID(), command.getHex());
+				//notify client
+				notifyClientsOfPlayerTray(command.getPlayerID());
 			}
 			catch(Throwable t)
 			{
@@ -181,6 +198,8 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			try
 			{
 				recruitThings(command.getGold(), command.getThingsToExchange(), command.getPlayerID());
+				//notify client
+				notifyClientsOfPlayerTray(command.getPlayerID());
 			}
 			catch(Throwable t)
 			{
