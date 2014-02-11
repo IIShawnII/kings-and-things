@@ -9,6 +9,7 @@ import server.logic.game.validators.MovementValidator;
 import com.google.common.eventbus.Subscribe;
 
 import common.Logger;
+import common.event.notifications.HexStatesChanged;
 import common.game.HexState;
 import common.game.TileProperties;
 
@@ -53,6 +54,11 @@ public class MovementCommandHandler extends CommandHandler
 			try
 			{
 				moveThings(command.getThings(),command.getPlayerID(), command.getHexes());
+
+				HexStatesChanged changedHex = new HexStatesChanged(2);
+				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHexes().get(0));
+				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHexes().get(1));
+				changedHex.postNotification();
 			}
 			catch(Throwable t)
 			{

@@ -15,6 +15,7 @@ import com.google.common.eventbus.Subscribe;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
+import common.event.notifications.HexStatesChanged;
 import common.event.notifications.RackPlacement;
 import common.game.HexState;
 import common.game.TileProperties;
@@ -180,6 +181,10 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			try
 			{
 				placeThingOnBoard(command.getThing(), command.getPlayerID(), command.getHex());
+				
+				HexStatesChanged changedHex = new HexStatesChanged(1);
+				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHex());
+				changedHex.postNotification();
 				//notify client
 				notifyClientsOfPlayerTray(command.getPlayerID());
 			}

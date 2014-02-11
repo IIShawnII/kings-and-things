@@ -9,6 +9,7 @@ import com.google.common.eventbus.Subscribe;
 import common.Logger;
 import common.Constants.BuildableBuilding;
 import common.Constants.SetupPhase;
+import common.event.notifications.HexStatesChanged;
 import common.game.HexState;
 import common.game.TileProperties;
 
@@ -53,6 +54,10 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 			try
 			{
 				constructBuilding(command.getBuilding(), command.getPlayerID(), command.getHex());
+
+				HexStatesChanged changedHex = new HexStatesChanged(1);
+				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHex());
+				changedHex.postNotification();
 			}
 			catch(Throwable t)
 			{
