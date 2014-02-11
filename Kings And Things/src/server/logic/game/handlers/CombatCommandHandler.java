@@ -16,6 +16,7 @@ import common.Constants.Ability;
 import common.Constants.CombatPhase;
 import common.Constants.RollReason;
 import common.Logger;
+import common.event.notifications.CombatHits;
 import common.game.HexState;
 import common.game.Roll;
 import common.game.TileProperties;
@@ -168,6 +169,8 @@ public class CombatCommandHandler extends CommandHandler
 					//TODO handle 3 and 4 way combat by adding targetting mechanism
 					Player rollingPlayer = getCurrentState().getPlayerByPlayerNumber(r.getRollingPlayerID());
 					int hitCount = 0;
+					final int rollingPlayerID = rollingPlayer.getID();
+					
 					for(int roll : r.getRolls())
 					{
 						if(roll <= r.getRollTarget().getValue())
@@ -184,11 +187,12 @@ public class CombatCommandHandler extends CommandHandler
 								if(p.ownsThingOnBoard(tp) && !p.equals(rollingPlayer))
 								{
 									getCurrentState().addHitsToPlayer(p.getID(), hitCount);
+									//notifies players of hits
+									new CombatHits(rollingPlayerID,p.getID(),hitCount).postNotification();
 									break;
 								}
 							}
 						}
-						//TODO notify players of hits
 					}
 					int nextOrdinal = getCurrentState().getCurrentCombatPhase().ordinal() + 1;
 					if(!getCurrentState().hitsToApply())
