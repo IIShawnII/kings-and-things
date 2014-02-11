@@ -29,10 +29,16 @@ public class TileProperties implements Serializable{
 	
 	private boolean fake = false;
 	
+	/**
+	 * fake constructor will be removed in complete game
+	 * @param category - tile category to fake
+	 */
 	public TileProperties( Category category){
 		fake = true;
 		tileType = category;
 		baseValue = 0;
+		this.abilities = new ArrayList<>();
+		this.restrictions = new ArrayList<>();
 	}
 	
 	TileProperties(){

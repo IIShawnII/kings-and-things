@@ -3,6 +3,8 @@ package client.gui;
 import javax.swing.Timer;
 import javax.swing.JPanel;
 
+import sun.rmi.runtime.NewThreadAction;
+
 import com.google.common.eventbus.Subscribe;
 
 import java.awt.Dimension;
@@ -246,6 +248,7 @@ public class Board extends JPanel{
 		Point center = lock.getCenter();
 		//create bound for starting position of tile
 		Rectangle start = new Rectangle( center.x-TILE_SIZE.width/2, center.y-TILE_SIZE.height/2, TILE_SIZE.width, TILE_SIZE.height);
+		addTile( new Tile( new TileProperties( Category.Cup)), start, true);
 		//create bound for destination location, this bound starts from outside of board
 		Rectangle bound = new Rectangle( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-TILE_SIZE.height-PADDING, TILE_SIZE.width, TILE_SIZE.height);
 		for( int count=0; count<MAX_RACK_SIZE; count++){
@@ -274,6 +277,62 @@ public class Board extends JPanel{
 	}
 	
 	/**
+	 * animate placement of hex tiles
+	 * @param hexes - list of HexState to populate the hexes on board
+	 */
+	private void animateHexPlacement( HexState[] hexes){
+		addTile( new Hex( new HexState()), new Rectangle(8,8,HEX_SIZE.width,HEX_SIZE.height), true);
+		MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( hexes));
+        animation.start();
+	}
+	
+	/**
+	 * animate placement of rack tiles
+	 */
+	private void animateRackPlacement(){
+		MoveAnimation animation = new MoveAnimation( setupTilesForRack( null));
+        animation.start();
+	}
+	
+	/**
+	 * Flip all hexes
+	 */
+	private void FlipAllHexes(){
+		FlipAll flip = new FlipAll( getComponents());
+		flip.start();
+	}
+	
+	/**
+	 * place markers on the board, if no order is provided a demo setup will be placed
+	 * @param order - list of players id in order 
+	 */
+	private void placeMarkers(int[] order){
+		if( order!=null){
+			for( int i=0; i<order.length; i++){
+				if( currentPlayer.getID()==order[i]){
+					playerMarker = getPlayerMarker( i);
+					break;
+				}
+			}
+		}else{
+			playerMarker = getPlayerMarker( -1);
+			order = new int[4];
+		}
+		Point point = locks.getPermanentLock( Category.State).getCenter();
+		Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
+		Tile tile = addTile( new Tile( playerMarker), bound, true);
+		tile.flip();
+		Tile[] tiles = new Tile[order.length];
+		for( int i=0; i<BOARD_POSITIONS.length && i<tiles.length; i++){
+			tiles[i] = addTile( new Tile( getPlayerMarker( i)), bound, false);
+			tiles[i].flip();
+			tiles[i].setDestination( locks.convertToCenterCoordinate( BOARD_POSITIONS[i][0], BOARD_POSITIONS[i][1]));
+		}
+		MoveAnimation animation = new MoveAnimation( tiles);
+		animation.start();
+	}
+	
+	/**
 	 * update the board with new information, such as hex placement, flip all, player order and rack info
 	 * this method handles all events in client.event
 	 * @param update - event wrapper containing update information
@@ -281,35 +340,13 @@ public class Board extends JPanel{
 	@Subscribe
 	public void updateBoard( BoardUpdate update){
 		if( update.hasHexes()){
-			addTile( new Hex( new HexState()), new Rectangle(8,8,HEX_SIZE.width,HEX_SIZE.height), true);
-			MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( update.getHexes()));
-            animation.start();
+			animateHexPlacement( update.getHexes());
 		}else if( update.flipAll()){
-			FlipAll flip = new FlipAll( getComponents());
-			flip.start();
+			FlipAllHexes();
 		}else if( update.isPlayerOder()){
-			int[] order = update.getPlayerOrder();
-			for( int i=0; i<order.length; i++){
-				if( currentPlayer.getID()==order[i]){
-					playerMarker = getPlayerMarker( i);
-					break;
-				}
-			}
-			Point point = locks.getPermanentLock( Category.State).getCenter();
-			Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
-			Tile tile = addTile( new Tile( playerMarker), bound, true);
-			tile.flip();
-			Tile[] tiles = new Tile[order.length];
-			for( int i=0; i<BOARD_POSITIONS.length && i<tiles.length; i++){
-				tiles[i] = addTile( new Tile( getPlayerMarker( i)), bound, false);
-				tiles[i].flip();
-				tiles[i].setDestination( locks.convertToCenterCoordinate( BOARD_POSITIONS[i][0], BOARD_POSITIONS[i][1]));
-			}
-			MoveAnimation animation = new MoveAnimation( tiles);
-			animation.start();
+			placeMarkers( update.getPlayerOrder());
 		}else if( update.isRack()){
-			MoveAnimation animation = new MoveAnimation( setupTilesForRack( null));
-            animation.start();
+			animateRackPlacement();
 		}
 		while( !boradComplete){
 			try {
@@ -337,12 +374,21 @@ public class Board extends JPanel{
 		}
 	}
 
+	/**
+	 * place any tile on hex, however only battle and markers will be drawn
+	 * current Tile will be removed and added as TileProperties to the Hex
+	 * @param tile - thing to be placed
+	 */
 	private void placeTileOnHex( Tile tile) {
 		if( !(tile instanceof Hex) && tile.hasLock() &&tile.getLock().isForHex()){
-			tile.getLock().getHex().placeTile( tile.getProperties());
+			tile.getLock().getHex().getState().addThingToHex(tile.getProperties());
 			remove(tile);
 			revalidate();
 		}
+	}
+	
+	private void moveStack( Hex hex){
+		
 	}
 	
 	/**
@@ -356,6 +402,9 @@ public class Board extends JPanel{
 		private int xPressed, yPressed;
 		private boolean ignore = false;
 		private int clickCount = 0;
+		private Hex currentHex;
+		private Tile currentTile;
+		private boolean moveStack = false;
 		
 		/**
 		 * display mouse position in console
@@ -372,8 +421,8 @@ public class Board extends JPanel{
 		 */
 		@Override
 	    public void mouseDragged(MouseEvent e){
-			if(	!ignore && e.getSource() instanceof Tile && boradComplete){
-				Tile tile = (Tile)e.getSource();
+			if( moveStack || !ignore && e.getSource() instanceof Tile && boradComplete){
+				Tile tile = currentTile!=null? currentTile:(Tile)e.getSource();
 				boardBound = getBounds();
 				bound = tile.getBounds();
 				xDiff = e.getX() - xPressed;
@@ -400,12 +449,22 @@ public class Board extends JPanel{
 						bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
 					}
 					tile.setBounds( bound);
+					if( newLock!=null && newLock.canHold( !tile.isTile())){
+						placeTileOnHex( tile);
+					}
 				}
 			}
 		}
+		
+		@Override
+		public void mouseReleased( MouseEvent e){
+			moveStack = false;
+			currentHex = null;
+			currentTile = null;
+		}
 
 		/**
-		 * record initial mouse press for later drag and lock assignment
+		 * record initial mouse press for later drag, locking and move assignment
 		 */
 		@Override
 		public void mousePressed( MouseEvent e){
@@ -420,6 +479,20 @@ public class Board extends JPanel{
 					revalidate();
 					repaint( tile.getBounds());
 					ignore = false;
+					if( tile instanceof Hex){
+						currentHex = (Hex)tile;
+						if( currentHex.getState().hasThings()){
+							Point point = currentHex.getLock().getCenter();
+							Rectangle bound = new Rectangle( TILE_SIZE);
+							bound.setLocation( point.x-(TILE_SIZE.width/2), point.y-(TILE_SIZE.height/2));
+							tile = addTile( new Tile( playerMarker), bound, false);
+							tile.setLockArea( newLock);
+							tile.flip();
+							revalidate();
+							currentTile = tile;
+							moveStack = true;
+						}
+					}
 				}else{
 					ignore = true;
 				}
@@ -445,30 +518,15 @@ public class Board extends JPanel{
             }else if( !(source instanceof Tile) && e.getButton()==MouseEvent.BUTTON1){
             	switch( clickCount){
             		case 0: 
-            			addTile( new Hex( new HexState()), new Rectangle(8,8,HEX_SIZE.width,HEX_SIZE.height), true);
-        				MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( null));
-        	            animation.start();
+            			animateHexPlacement( null);
         	            clickCount++;
         	            break;
             		case 1:
-            			animation = new MoveAnimation( setupTilesForRack( null));
-        	            animation.start();
+            			animateRackPlacement();
         	            clickCount++;
         	            break;
             		case 2:
-            			playerMarker = getPlayerMarker( -1);
-        				Point point = locks.getPermanentLock( Category.State).getCenter();
-        				Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
-        				Tile tile = addTile( new Tile( playerMarker), bound, true);
-        				tile.flip();
-        				Tile[] tiles = new Tile[4];
-        				for( int i=0; i<BOARD_POSITIONS.length && i<tiles.length; i++){
-        					tiles[i] = addTile( new Tile( getPlayerMarker( i)), bound, false);
-        					tiles[i].flip();
-        					tiles[i].setDestination( locks.convertToCenterCoordinate( BOARD_POSITIONS[i][0], BOARD_POSITIONS[i][1]));
-        				}
-        				animation = new MoveAnimation( tiles);
-        				animation.start();
+            			placeMarkers( null);
         	            clickCount++;
         				break;
             	}

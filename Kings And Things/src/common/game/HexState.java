@@ -1,5 +1,8 @@
 package common.game;
 
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Point;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -7,8 +10,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import server.logic.game.Player;
-
+import common.Constants;
 import common.Constants.Category;
+import common.Constants.Restriction;
 
 /**
  * This class acts as a container for
@@ -16,11 +20,16 @@ import common.Constants.Category;
  * inside of that hex tile
  */
 public class HexState implements Serializable{
-
-	private static final long serialVersionUID = -1871329628938580400L;
 	
+	private static final Image BATLLE_IMAGE = Constants.IMAGES.get( Constants.STATE.get( Restriction.Battle).hashCode());
+	
+	private static final long serialVersionUID = -1871329628938580400L;
+
+	private Image markerImage;
+	private TileProperties marker;
 	private TileProperties hex;
 	private final HashSet<TileProperties> thingsInHex;
+	private boolean isInBattle = false;
 	
 	//only used by Client GUI for display purpose
 	private boolean isFake;
@@ -65,6 +74,44 @@ public class HexState implements Serializable{
 			addThingToHex(tp);
 		}
 	}
+	
+	public boolean hasThings(){
+		return thingsInHex.size()>=1;
+	}
+	
+	public boolean isInBattle(){
+		return isInBattle;
+	}
+	
+	public void setInBattle( boolean battle){
+		isInBattle = battle;
+	}
+	
+	public boolean hasMarker(){
+		return marker!=null;
+	}
+	
+	public void setMarker( TileProperties marker){
+		this.marker = marker;
+		markerImage = Constants.IMAGES.get( marker.hashCode());
+	}
+	
+	public void removeMarker(){
+		this.marker = null;
+		markerImage = null;
+	}
+	
+	public void paint( Graphics g, Point point){
+		if( hasMarker() && isInBattle()){
+			g.drawImage( markerImage, point.x+5, point.y+5, null);
+			g.drawImage( BATLLE_IMAGE, point.x-5, point.y-5, null);
+		}else if( hasMarker()){
+			g.drawImage( markerImage, point.x, point.y, Constants.TILE_SIZE_BOARD.width, Constants.TILE_SIZE_BOARD.height, null);
+		}else if( isInBattle()){
+			g.drawImage( BATLLE_IMAGE, point.x, point.y, null);
+		}
+	}
+	
 	
 	public boolean isFake(){
 		return isFake;
@@ -128,11 +175,24 @@ public class HexState implements Serializable{
 	 * @throws IllegalArgumentException if tile is null,
 	 * or can not be added due to game rules
 	 */
-	public boolean addThingToHex(TileProperties tile)
-	{
-		validateCanAddThingToHex(tile);
-		
-		return thingsInHex.add(tile);
+	public boolean addThingToHex(TileProperties tile){
+		//Restriction.Special is just a place holder to force default in switch
+		Restriction res = tile.hasRestriction()? tile.getRestriction( 0):Restriction.Special; 
+		switch( res){
+			case Battle:
+				setInBattle( true);
+				return true;
+			case Yellow:
+			case Gray:
+			case Green:
+			case Red:
+				setMarker( tile);
+				return true;
+			default:
+				//TODO comment out for testing
+				//validateCanAddThingToHex(tile);
+				return thingsInHex.add(tile);
+		}
 	}
 	
 	/**
@@ -146,7 +206,7 @@ public class HexState implements Serializable{
 		validateTileNotNull(tile);
 		if(!tile.isCreature() && !tile.isSpecialIncomeCounter() && !tile.isBuilding())
 		{
-			throw new IllegalArgumentException("Can not place " + tile.getName() + "onto the board");
+			throw new IllegalArgumentException("Can not place " + tile.getName() + " onto the board");
 		}
 		if(tile.isBuilding() && hasBuilding())
 		{

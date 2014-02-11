@@ -10,7 +10,6 @@ import javax.swing.JComponent;
 import client.gui.LockManager.Lock;
 import common.game.TileProperties;
 import static common.Constants.IMAGES;
-import static common.Constants.BYPASS_LOAD_IMAGES;
 import static common.Constants.IMAGE_TILE_REVERSE;
 
 @SuppressWarnings("serial")
@@ -76,7 +75,7 @@ public class Tile extends JComponent{
 	}
 
 	public void flip() {
-		if( !BYPASS_LOAD_IMAGES && prop!=null && !prop.isFake()){
+		if( prop!=null && !prop.isFake()){
 			drawTile = IMAGES.get( prop.hashCode());
 		}
 	}
@@ -117,5 +116,9 @@ public class Tile extends JComponent{
 	
 	protected Point getCenter( Dimension offset) {
 		return new Point( (getWidth()/2) - (offset.width/2), (getHeight()/2) - (offset.height/2));
+	}
+
+	public boolean isTile() {
+		return true;
 	}
 }
