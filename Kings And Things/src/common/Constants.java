@@ -145,7 +145,7 @@ public final class Constants {
 													{3, 4, 5, 6, 6, 6, 5, 4, 3, 2, 2, 2},
 													{2, 3, 4, 5, 6, 7, 7, 7, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1}};
 	//starting from top right and going clockwise for 4 player game
-	public static final int BOARD_POSITIONS[][] = {{6,3}, {6,9}, {0,9}, {0,3}} ;
+	public static final int BOARD_POSITIONS[][] = {{5,2}, {5,10}, {1,10}, {1,2}} ;
 			
 	static{
 		int w = (int) (HEX_SIZE.getWidth()/4)+1;

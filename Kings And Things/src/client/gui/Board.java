@@ -3,8 +3,6 @@ package client.gui;
 import javax.swing.Timer;
 import javax.swing.JPanel;
 
-import sun.rmi.runtime.NewThreadAction;
-
 import com.google.common.eventbus.Subscribe;
 
 import java.awt.Dimension;
