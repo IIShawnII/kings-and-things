@@ -22,6 +22,7 @@ import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.event.EventDispatch;
+import common.event.notifications.DieRoll;
 import common.event.notifications.HexOwnershipChanged;
 import common.event.notifications.PlayerState;
 import common.event.notifications.RackPlacement;
@@ -340,7 +341,8 @@ public abstract class CommandHandler
 			if(Roll.rollSatisfiesParameters(r, reasonForRoll, playerNumber, tile) && r.needsRoll())
 			{
 				r.addRoll(rollDie());
-				//TODO notify players of die roll
+				//notifies players of die roll
+				new DieRoll(r).postNotification();;
 				break;
 			}
 		}
