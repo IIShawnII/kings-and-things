@@ -23,6 +23,7 @@ import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.event.EventDispatch;
+import common.event.notifications.PlayerState;
 import common.game.HexState;
 import common.game.TileProperties;
 
@@ -144,6 +145,8 @@ public abstract class CommandHandler
 		currentState.setCombatLocation(null);
 		currentState.setDefendingPlayerNumber(-1);
 		currentState.removeAllHexesWithBuiltInObjects();
+		
+		new PlayerState(currentState.getActivePhasePlayer().getPlayerInfo()).postNotification();
 	}
 	
 	protected void advanceActiveTurnPlayer(){

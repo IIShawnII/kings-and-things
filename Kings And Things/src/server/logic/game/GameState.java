@@ -23,7 +23,6 @@ public class GameState
 	private final ArrayList<Integer> playerOrder;
 	private SetupPhase currentSetupPhase;
 	private RegularPhase currentRegularPhase;
-	private int activePhasePlayerNumber;
 	private int activeTurnPlayerNumber;
 	private CombatPhase currentCombatPhase;
 	private int defenderPlayerNumber;
@@ -52,7 +51,6 @@ public class GameState
 		this.playerOrder = new ArrayList<Integer>(playerOrder);
 		this.currentSetupPhase = currentSetupPhase;
 		this.currentRegularPhase = currentRegularPhase;
-		this.activePhasePlayerNumber = activePhasePlayerNumber;
 		this.activeTurnPlayerNumber = activeTurnPlayerNumber;
 		this.currentCombatPhase = currentCombatPhase;
 		this.defenderPlayerNumber = defenderPlayerNumber;
@@ -64,6 +62,7 @@ public class GameState
 		{
 			hitsToApply.put(p.getID(), 0);
 		}
+		this.setActivePhasePlayer(activePhasePlayerNumber);
 	}
 	
 	/**
@@ -118,7 +117,14 @@ public class GameState
 	 */
 	public Player getActivePhasePlayer()
 	{
-		return getPlayerByPlayerNumber(activePhasePlayerNumber);
+		for(Player p : getPlayers())
+		{
+			if(p.getPlayerInfo().isActive())
+			{
+				return p;
+			}
+		}
+		throw new IllegalStateException("No active player found");
 	}
 
 	/**
@@ -392,7 +398,10 @@ public class GameState
 	 */
 	public void setActivePhasePlayer(int id)
 	{
-		activePhasePlayerNumber = id;
+		for(Player p : getPlayers())
+		{
+			p.getPlayerInfo().setIsActive(p.getID() == id);
+		}
 	}
 
 	/**

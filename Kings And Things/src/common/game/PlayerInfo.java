@@ -13,6 +13,7 @@ public class PlayerInfo implements Serializable {
 	private int cardsOnRack;
 	private boolean isReady;
 	private boolean isConnected;
+	private boolean isActive;
 	private Point start;
 	
 	public PlayerInfo( String name, final int ID, boolean ready){
@@ -24,6 +25,7 @@ public class PlayerInfo implements Serializable {
 		this.gold = 0;
 		this.isReady = ready;
 		this.start = null;
+		isActive = false;
 	}
 	
 	public void setCardonRack( int count){
@@ -53,6 +55,16 @@ public class PlayerInfo implements Serializable {
 	
 	public boolean isConnected() {
 		return isConnected;
+	}
+	
+	public boolean isActive()
+	{
+		return isActive;
+	}
+	
+	public void setIsActive(boolean newVal)
+	{
+		isActive = newVal;
 	}
 	
 	public void setConnected( boolean connected) {
