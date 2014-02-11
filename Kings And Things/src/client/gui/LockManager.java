@@ -118,8 +118,8 @@ public class LockManager {
 		return null;
 	}
 	
-	public boolean canLeaveLock( Tile tile, int x, int y){
-		return tile.hasLock() && !tile.getLock().contains( tile.getCeneter( x, y));
+	public boolean canLeaveLock( Tile tile, int xOffset, int yOffset){
+		return tile.hasLock() && !tile.getLock().contains( tile.getCeneter( xOffset, yOffset));
 	}
 	
 	public boolean canLockToPermanent( Tile tile){
@@ -242,6 +242,11 @@ public class LockManager {
 		
 		public int getCenterY(){
 			return center.y;
+		}
+		
+		@Override
+		public String toString(){
+			return "Center: " + center + ", InUse: " + inUse + ", Hex: " + isHex;
 		}
 	}
 }

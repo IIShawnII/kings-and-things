@@ -47,6 +47,10 @@ public class Hex extends Tile{
 		return state;
 	}
 	
+	public void setState( HexState state){
+		this.state = state;
+	}
+	
 	@Override
 	public boolean isTile(){
 		return false;

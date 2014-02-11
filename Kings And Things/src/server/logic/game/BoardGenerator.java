@@ -28,7 +28,6 @@ public class BoardGenerator
 	 * @throws IllegalArgumentException if the entered number of players is not between 2
 	 * and 4 or if hexManager is null
 	 */
-	@SuppressWarnings("unused")
 	public BoardGenerator(int numPlayers, HexTileManager hexManager)
 	{
 		if(!Constants.BYPASS_MIN_PLAYER && (numPlayers < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < numPlayers))
@@ -53,7 +52,6 @@ public class BoardGenerator
 	 * due to insufficient hex tiles, remember to put hexes back when
 	 * finished with a board.
 	 */
-	@SuppressWarnings("unused")
 	public HexBoard createNewBoard() throws NoMoreTilesException
 	{
 		if(numPlayers == Constants.MAX_PLAYERS || Constants.BYPASS_MIN_PLAYER)

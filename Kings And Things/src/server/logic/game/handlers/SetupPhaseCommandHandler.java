@@ -30,7 +30,6 @@ import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
 import common.event.notifications.Flip;
-import common.event.notifications.HexOwnershipChanged;
 import common.event.notifications.HexPlacement;
 import common.event.notifications.PlayerOrderList;
 import common.game.HexState;

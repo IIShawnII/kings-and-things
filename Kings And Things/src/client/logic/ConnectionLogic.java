@@ -51,26 +51,30 @@ public class ConnectionLogic implements Runnable {
 			if( event instanceof PlayersList){
 				players = ((PlayersList)event).getPlayers();
 				new UpdatePlayer(players).postCommand();
-			} else if( event instanceof StartGame){
+			} 
+			else if( event instanceof StartGame){
 				new ConnectionState(((StartGame)event).getPlayerCount()).postCommand();
 				new UpdatePlayer(players, player).postCommand();
-			} else if( event instanceof PlayerState){
+			} 
+			else if( event instanceof PlayerState){
 				player = ((PlayerState)event).getPlayer();
-			} else if( event instanceof HexPlacement){
+			} 
+			else if( event instanceof HexPlacement){
 				new BoardUpdate(((HexPlacement)event).getArray()).postCommand();
-			} else if( event instanceof Flip){
+			} 
+			else if( event instanceof Flip){
 				new BoardUpdate(((Flip)event).flipAll()).postCommand();
-			} else if( event instanceof PlayerOrderList){
+			} 
+			else if( event instanceof PlayerOrderList){
 				new BoardUpdate(((PlayerOrderList)event).getList()).postCommand();
-			} else if( event instanceof RackPlacement){
+			} 
+			else if( event instanceof RackPlacement){
 				new BoardUpdate(((RackPlacement)event).getArray()).postCommand();
 			}
-			else if(event instanceof HexOwnershipChanged)
-			{
+			else if(event instanceof HexOwnershipChanged){
 				//TODO handle
 			}
-			else if(event instanceof HexStatesChanged)
-			{
+			else if(event instanceof HexStatesChanged){
 				//TODO handle
 			}
 		}

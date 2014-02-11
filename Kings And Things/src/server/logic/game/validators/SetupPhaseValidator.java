@@ -24,7 +24,6 @@ public abstract class SetupPhaseValidator
 	 * to set up another board
 	 * @throws IllegalArgumentException if the entered list of players is invalid
 	 */
-	@SuppressWarnings("unused")
 	public static void validateStartNewGame(boolean demoMode, Set<Player> players)
 	{
 		CommandValidator.validateCollection(players,"players");
