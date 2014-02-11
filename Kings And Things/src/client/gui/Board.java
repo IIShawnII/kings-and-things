@@ -58,12 +58,17 @@ public class Board extends JPanel{
 	private static final BufferedImage IMAGE;
 	static final int HEIGHT_SEGMENT = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
 	static final int WIDTH_SEGMENT = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
+	//used for placing bank outlines
 	static final int INITIAL_TILE_X_SHIFT = WIDTH_SEGMENT/2;
 	static final int TILE_X_SHIFT = (int) (WIDTH_SEGMENT*1.2);
 	static final int TILE_Y_SHIFT = 13;
 	private static final int HEX_Y_SHIFT = 8-3;
 	private static final int HEX_X_SHIFT = 8-2;
 	static final int PADDING = 10;
+	
+	/**
+	 * create a static image with background and all outlines for faster drawing in Game 
+	 */
 	static{
 		//create image for outlines on board
 		IMAGE = new BufferedImage( BOARD_SIZE.width, BOARD_SIZE.height, BufferedImage.TYPE_INT_ARGB);
@@ -117,10 +122,19 @@ public class Board extends JPanel{
 	private PlayerInfo players[], currentPlayer;
 	private Font font = new Font("default", Font.BOLD, 30);
 	
+	/**
+	 * basic super constructor warper for JPanel
+	 * @param layout
+	 * @param isDoubleBuffered
+	 */
 	public Board( LayoutManager layout, boolean isDoubleBuffered){
 		super( layout, isDoubleBuffered);
 	}
 	
+	/**
+	 * create LockManager and mouse listeners with specific player count
+	 * @param playerCount - number of players to be playing on this board
+	 */
 	protected void init( int playerCount){
 		players = new PlayerInfo[]{ new PlayerInfo( "Player1", 1, true), new PlayerInfo( "Player2", 2, true), new PlayerInfo( "Player3", 3, true), new PlayerInfo( "Player4", 4, true)};
 		currentPlayer = players[0];
@@ -142,6 +156,13 @@ public class Board extends JPanel{
 		addTile( new Tile( new TileProperties( Category.Cup)), bound, true);*/
 	}
 	
+	/**
+	 * add a tile to the board
+	 * @param tile - tile to be added, must not be null
+	 * @param bound - bounds to be used in placing the tile, must nut be null
+	 * @param lock - if true this tile is fake and cannot be animated, and uses a Permanent Lock
+	 * @return fully created tile that was added to board
+	 */
 	public Tile addTile( Tile tile, Rectangle bound, boolean lock){
 		tile.init();
 		tile.setBounds( bound);
@@ -157,6 +178,11 @@ public class Board extends JPanel{
 		return tile;
 	}
 	
+	/**
+	 * paint the background with already drawn outlines.
+	 * paint players information
+	 * paint locks if Constants.DRAW_LOCKS is true
+	 */
 	@Override
 	public void paintComponent( Graphics g){
 		super.paintComponent( g);
@@ -183,6 +209,14 @@ public class Board extends JPanel{
 		}
 	}
 
+
+	/**
+	 * add new hexes to bank lock to be send to board, max of 37
+	 * this placement uses the predetermined order stored in 
+	 * arrays Constants.BOARD_LOAD_ROW and Constants.BOARD_LOAD_COL
+	 * @param hexes - list of hexStates to be used in placing Hexes, if null fakes will be created
+	 * @return array of tiles in order they were created
+	 */
 	private Tile[] setupHexesForPlacement( HexState[] hexes) {
 		Tile tile = null;
 		int x, y, hexCount = hexes==null?MAX_HEXES_ON_BOARD:hexes.length;
@@ -199,25 +233,38 @@ public class Board extends JPanel{
 		return list;
 	}
 
+	/**
+	 * add new tiles to cup lock to be send to player rack, max of 10
+	 * @param prop - list of tiles to be placed, if null fakes will be created
+	 * @return array of tiles in order they were created
+	 */
 	private Tile[] setupTilesForRack( TileProperties[] prop) {
 		Tile tile = null;
 		Tile[] list = new Tile[MAX_RACK_SIZE];
 		Lock lock = locks.getPermanentLock( Category.Cup);
 		Point center = lock.getCenter();
-		Rectangle bound = new Rectangle( BOARD_SIZE.width+2, BOARD_SIZE.height-TILE_SIZE.height-PADDING/2, TILE_SIZE.width, TILE_SIZE.height);
+		//create bound for starting position of tile
 		Rectangle start = new Rectangle( center.x-TILE_SIZE.width/2, center.y-TILE_SIZE.height/2, TILE_SIZE.width, TILE_SIZE.height);
+		//create bound for destination location, this bound starts from outside of board
+		Rectangle bound = new Rectangle( BOARD_SIZE.width+2, BOARD_SIZE.height-TILE_SIZE.height-PADDING/2, TILE_SIZE.width, TILE_SIZE.height);
 		for( int count=0; count<MAX_RACK_SIZE; count++){
 			tile = addTile( new Tile( prop==null?new TileProperties(Category.Cup):prop[count]), start, false);
 			if( count==5){
+				// since rack is two rows of five, at half all bounds must be shifted up, this bound starts from outside of board
 				bound.setLocation( BOARD_SIZE.width+2, (int) (BOARD_SIZE.height-(2*TILE_OUTLINE.height)-(PADDING*1.5)));
 			}
 			bound.translate( -TILE_X_SHIFT, 0);
+			//set final destination for tile to be animated later
 			tile.setDestination( bound.x+TILE_SIZE.width/2, bound.y+TILE_SIZE.height/2);
 			list[count] = tile;
 		}
 		return list;
 	}
 	
+	/**
+	 * update player information, such as gold, name, and rack count 
+	 * @param update - event wrapper holding players information
+	 */
 	@Subscribe
 	public void updatePlayers( UpdatePlayer update){
 		currentPlayer = update.getCurrent();
@@ -225,6 +272,11 @@ public class Board extends JPanel{
 		repaint();
 	}
 	
+	/**
+	 * update the board with new information, such as hex placement, flip all, player order and rack info
+	 * this method handles all events in client.event
+	 * @param update - event wrapper containing update information
+	 */
 	@Subscribe
 	public void updateBoard( BoardUpdate update){
 		if( update.hasHexes()){
@@ -256,6 +308,13 @@ public class Board extends JPanel{
 		}
 	}
 	
+	/**
+	 * get a specific marker according to the player order,
+	 * currently in order 1 to 4, colors go as Yellow, Gray, Green and Red
+	 * order -1 is special for getting the battle tile.
+	 * @param order - player order number
+	 * @return TileProperties corresponding to the order
+	 */
 	private TileProperties getPlayerMarker( int order){
 		switch( order){
 			case -1: return STATE.get( Restriction.Battle);
@@ -268,6 +327,9 @@ public class Board extends JPanel{
 		}
 	}
 	
+	/**
+	 * input class for mouse, used for like assignment and current testing phases suck as placement
+	 */
 	private class MouseInput extends MouseAdapter{
 
 		private Rectangle bound, boardBound;
@@ -276,6 +338,11 @@ public class Board extends JPanel{
 		private int xPressed, yPressed;
 		private boolean ignore = false;
 		
+		/**
+		 * checks to see if movement is still inside the board,
+		 * check to see if a new lock can be placed,
+		 * check to see if old lock can be released/
+		 */
 		@Override
 	    public void mouseDragged(MouseEvent e){
 			if(	!ignore && e.getSource() instanceof Tile && interactWithHexes){
@@ -309,6 +376,9 @@ public class Board extends JPanel{
 			}
 		}
 
+		/**
+		 * record initial mouse press for later drag and lock assignment
+		 */
 		@Override
 		public void mousePressed( MouseEvent e){
 			Object source = e.getSource();
@@ -328,6 +398,9 @@ public class Board extends JPanel{
 			}
 		}
 
+		/**
+		 * for testing purposes
+		 */
 		@Override
 		public void mouseClicked( MouseEvent e){
 			Object source = e.getSource();
@@ -349,6 +422,10 @@ public class Board extends JPanel{
 		}
 	}
 	
+	/**
+	 * animation task to work with timer, used for animating 
+	 * tile movement from starting position to its destination
+	 */
 	private class MoveAnimation implements ActionListener{
 		
 		private Tile tile;
@@ -386,12 +463,15 @@ public class Board extends JPanel{
 
 		@Override
 		public void actionPerformed( ActionEvent e) {
+			//animation is done
 			if( xTemp==-1){
-				if( index>=list.length){
+				//lise is done
+				if( index==-1 || index>=list.length){
 					timer.stop();
 					hexBoradComplete = true;
 					return;
 				}
+				//get next index in list
 				if( list[index]!=null && list[index].canAnimate()){
 					setTile((tile = list[index]));
 					index++;
@@ -409,15 +489,15 @@ public class Board extends JPanel{
 				xTemp=-1;
 				tile.setLocation( end.x-HEX_SIZE.width/2, end.y-HEX_SIZE.height/2);
 				tile.setLockArea( locks.getLock( tile));
-				if( index==-1 || index>=list.length){
-					timer.stop();
-				}
 			}
 			start.add( tile.getBounds());
 			repaint( start);
 		}
 	}
 	
+	/**
+	 * Task for Timer to flip all hex tiles
+	 */
 	private class FlipAll implements ActionListener{
 
 		private Timer timer;

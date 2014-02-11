@@ -2,7 +2,6 @@ package server.logic;
 
 import static common.Constants.PLAYER;
 import static common.Constants.MAX_PLAYERS;
-import static common.Constants.MIN_PLAYERS;
 import static common.Constants.PLAYER_INC;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
