@@ -26,7 +26,7 @@ public class LockManager {
 	private Lock markerLock, specialLock, cupLock;
 	
 	public LockManager( int playerCount){
-		hexLock = new Lock( 8+(HEX_SIZE.width/2)-LOCK_SIZE/2, 8+(HEX_SIZE.height/2)-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE, true);
+		hexLock = new Lock( 8+(HEX_SIZE.width/2)-LOCK_SIZE/2, 8+(HEX_SIZE.height/2)-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE, true, true);
 		Rectangle bound = new Rectangle( Board.INITIAL_TILE_X_SHIFT, Board.TILE_Y_SHIFT, TILE_SIZE.width, TILE_SIZE.height);
 		bound.translate( Board.TILE_X_SHIFT, 0);
 		fortLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
@@ -53,7 +53,7 @@ public class LockManager {
 			for( int count=0; count<BOARD_LOAD_ROW[ring].length; count++){
 				x = (Board.WIDTH_SEGMENT*BOARD_LOAD_COL[ring][count]);
 				y = (Board.HEIGHT_SEGMENT*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
-				hexBoardLocks[BOARD_LOAD_COL[ring][count]-1][BOARD_LOAD_ROW[ring][count]-1] = new Lock( x-LOCK_SIZE/2, y-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE, true);
+				hexBoardLocks[BOARD_LOAD_COL[ring][count]-1][BOARD_LOAD_ROW[ring][count]-1] = new Lock( x-LOCK_SIZE/2, y-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE, false, true);
 			}
 		}
 	}
@@ -96,17 +96,20 @@ public class LockManager {
 			lock.setInUse( true);
 			return lock;
 		}
+		lock = null;
 		if( !isHex){
-			return lookThroughLocks( rackLocks, point);
-		}else{
-			return lookThroughLocks( hexBoardLocks, point);
+			lock = lookThroughLocks( rackLocks, point, isHex);
 		}
+		if( lock==null){
+			lock = lookThroughLocks( hexBoardLocks, point, isHex);
+		}
+		return lock;
 	}
 	
-	private Lock lookThroughLocks( Lock[][] locks, Point point){
+	private Lock lookThroughLocks( Lock[][] locks, Point point, boolean isHex){
 		for( int i=0; i<locks.length;i++){
 			for( int j=0; j<locks[i].length;j++){
-				if( locks[i][j]!=null&&!locks[i][j].isInUse() && canLock( locks[i][j], point)){
+				if( locks[i][j]!=null&&locks[i][j].canHold( isHex) && canLock( locks[i][j], point)){
 					locks[i][j].setInUse( true);
 					return locks[i][j];
 				}
@@ -129,7 +132,7 @@ public class LockManager {
 	
 	public Point convertToRowAndCol( int x, int y){
 		int row = x/Board.WIDTH_SEGMENT;
-		int col = y/Board.HEIGHT_SEGMENT;
+		int col = (y-BOARD_TOP_PADDING)/Board.HEIGHT_SEGMENT;
 		return new Point( row-1, col-1);
 	}
 	
@@ -174,17 +177,31 @@ public class LockManager {
 		
 		private final Rectangle lock;
 		private final Point center;
-		private boolean inUse;
+		private boolean inUse, permanent;
+		private Hex hex;
 		
-		private Lock( int x, int y, int width, int height, final boolean isHex){
+		private Lock( int x, int y, int width, int height, boolean permanent, final boolean isHex){
 			this.isHex= isHex;
 			inUse = false;
 			this.lock = new Rectangle( x, y, width, height);
 			center = new Point( x+width/2, y+height/2);
+			this.permanent = permanent;
+		}
+		
+		public void setHex( Hex hex){
+			this.hex = hex;
+		}
+		
+		public Hex getHex(){
+			return hex;
+		}
+		
+		private Lock( int x, int y, int width, int height, boolean permanent) {
+			this( x, y, width, height, permanent, false);
 		}
 		
 		private Lock( int x, int y, int width, int height) {
-			this( x, y, width, height, false);
+			this( x, y, width, height, false, false);
 		}
 
 		public boolean isForHex(){
@@ -193,6 +210,14 @@ public class LockManager {
 		
 		public boolean isInUse(){
 			return inUse;
+		}
+		
+		public boolean canHold( boolean isHex){
+			if( this.isHex && !permanent && !isHex){
+				return true;
+			}else{
+				return !inUse;
+			}
 		}
 		
 		public void setInUse( boolean use){
@@ -209,6 +234,14 @@ public class LockManager {
 		
 		public Point getCenter(){
 			return center;
+		}
+		
+		public int getCenterX(){
+			return center.x;
+		}
+		
+		public int getCenterY(){
+			return center.y;
 		}
 	}
 }

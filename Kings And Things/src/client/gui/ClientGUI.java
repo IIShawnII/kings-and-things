@@ -51,12 +51,12 @@ public class ClientGUI extends JFrame implements Runnable{
         setVisible(true);
 		LoadingDialog dialog = new LoadingDialog( new LoadResources( !BYPASS_LOAD_IMAGES), "Lobby", true, true, getGraphicsConfiguration());
 		EventDispatch.registerForCommandEvents( dialog);
-		int playerCount=BYPASS_MIN_PLAYER?MAX_PLAYERS:0;
+		int playerCount=0;
 		if( BYPASS_LOBBY || (playerCount=dialog.run())>0){
 			EventDispatch.unregisterForCommandEvents( dialog);
         	dispose();
             setUndecorated(false);
-			setContentPane( createGUI( playerCount));
+			setContentPane( createGUI( BYPASS_MIN_PLAYER?MAX_PLAYERS:playerCount));
 			pack();
 			Dimension size = new Dimension( getWidth(), getHeight());
 			setMinimumSize( size);

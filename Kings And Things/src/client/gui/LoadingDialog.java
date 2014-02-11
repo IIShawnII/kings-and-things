@@ -32,6 +32,7 @@ import java.awt.event.WindowEvent;
 import common.Constants.NetwrokAction;
 import common.game.PlayerInfo;
 import static common.Constants.SERVER_IP;
+import static common.Constants.MAX_PLAYERS;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.PROGRESS_SIZE;
@@ -48,7 +49,7 @@ public class LoadingDialog extends JDialog{
 	private JPanel jpProgress;
 	private DefaultListModel< PlayerInfo> listModel;
 	private JTextField jtfIP, jtfPort, jtfName;
-	private JButton jbConnect, jbReady, jbClose;
+	private JButton jbConnect, jbReady, jbClose, jbSkip;
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
 	private JProgressBar jpbGold, jpbSpecial, jpbState;
 	private boolean isConnected = false, doneLoading = false, progress;
@@ -98,6 +99,13 @@ public class LoadingDialog extends JDialog{
 		jbClose.addActionListener( control);
 		constraints.gridy = 2;
 		jpMain.add( jbClose, constraints);
+		
+		jbSkip = new JButton( "Skip");
+		jbSkip.setEnabled( false);
+		jbSkip.setActionCommand( "Skip");
+		jbSkip.addActionListener( control);
+		constraints.gridy = 3;
+		jpMain.add( jbSkip, constraints);
 		
 		jbConnect = new JButton( "Connect");
 		jbConnect.setEnabled( false);
@@ -282,8 +290,11 @@ public class LoadingDialog extends JDialog{
 				}
 			}else if( isConnected && source==jbReady){
 				new ConnectionAction( NetwrokAction.ReadyState).postCommand();
-			}else if( e.getActionCommand().equals( "Cancel")){
+			}else if( source==jbClose){
 				players = 0;
+				close();
+			}else if( source==jbSkip){
+				players = MAX_PLAYERS;
 				close();
 			}
 		}
@@ -364,6 +375,7 @@ public class LoadingDialog extends JDialog{
 				revalidate();
 				jbConnect.setEnabled( true);
 				jbClose.setEnabled( true);
+				jbSkip.setEnabled( true);
 				doneLoading = true;
 			default:
 				break;

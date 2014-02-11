@@ -19,10 +19,17 @@ import common.game.TileProperties;
 public final class Constants {
 	
 	//Primary for bypassing rules for 4 player, so it can be tested for one players
-	public static final boolean BYPASS_MIN_PLAYER = true;
+	public static final boolean BYPASS_MIN_PLAYER = false;
+	public static final boolean BYPASS_MOUSE_CLICK = true;
 	public static final boolean BYPASS_LOAD_IMAGES = false;
 	public static final boolean BYPASS_LOBBY = false;
 	public static final boolean DRAW_LOCKS = false;
+	public static final boolean LOAD_BUILDING = false;
+	public static final boolean LOAD_SPECIAL = false;
+	public static final boolean LOAD_GOLD = false;
+	public static final boolean LOAD_STATE = true;
+	public static final boolean LOAD_CUP = false;
+	public static final boolean LOAD_HEX = true;
 
 	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
 	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
@@ -100,7 +107,7 @@ public final class Constants {
 	public static final int IP_COLUMN_COUNT = 12;
 	public static final int PLAYER_FONT_SIZE = 12;
 	public static final int PORT_COLUMN_COUNT = 7;
-	public static final int TIILE_HEIGHT_BOARD = 40;
+	public static final int TIILE_HEIGHT_BOARD = 35;
 	public static final int BOARD_TOP_PADDING = 125;
 	public static final int BOARD_WIDTH_SEGMENT = 8;
 	public static final int PLAYERS_STATE_SIZE = 500;
@@ -130,14 +137,16 @@ public final class Constants {
 	public static final String SERVER_IP = "127.0.0.1";
 	public static final String RESOURCE_PATH = "Resources/";
 	public static final String GAME_TITLE = "Kings & Things";
-	public static final int HEX_MOVE_DISTANCE = (int) (HEX_HEIGHT*0.5);
+	public static final int MOVE_DISTANCE = (int) (HEX_HEIGHT*0.5);
 	public static final int BOARD_LOAD_ROW[][] = { { 7, 5, 6, 8, 9, 8, 6},
 													{4, 3, 4, 5, 7, 9, 10, 11, 10, 9, 7, 5},
 													{3, 2, 1, 2, 3, 4, 6, 8, 10, 11, 12, 13, 12, 11, 10, 8, 6, 4}};
 	public static final int BOARD_LOAD_COL[][] = { { 4, 4, 5, 5, 4, 3, 3},
 													{3, 4, 5, 6, 6, 6, 5, 4, 3, 2, 2, 2},
 													{2, 3, 4, 5, 6, 7, 7, 7, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1}};
-	
+	//starting from top right and going clockwise for 4 player game
+	public static final int BOARD_POSITIONS[][] = {{6,3}, {6,9}, {0,9}, {0,3}} ;
+			
 	static{
 		int w = (int) (HEX_SIZE.getWidth()/4)+1;
 		int h = (int) (HEX_SIZE.getHeight()/2)+2;

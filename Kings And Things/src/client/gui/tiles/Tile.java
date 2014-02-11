@@ -1,5 +1,6 @@
 package client.gui.tiles;
 
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Graphics;
@@ -9,6 +10,7 @@ import javax.swing.JComponent;
 import client.gui.LockManager.Lock;
 import common.game.TileProperties;
 import static common.Constants.IMAGES;
+import static common.Constants.BYPASS_LOAD_IMAGES;
 import static common.Constants.IMAGE_TILE_REVERSE;
 
 @SuppressWarnings("serial")
@@ -16,7 +18,7 @@ public class Tile extends JComponent{
 	
 	private boolean hasLock = false;
 	protected Image drawTile = null;
-	private Lock lockArea = null;
+	protected Lock lockArea = null;
 	private TileProperties prop = null;
 	private Point destination;
 	private boolean canAnimate = true;
@@ -71,11 +73,10 @@ public class Tile extends JComponent{
 	public void paintComponent( Graphics g){
 		super.paintComponent( g);
 		g.drawImage( drawTile, 0, 0, getWidth(), getHeight(), null);
-		g.dispose();
 	}
 
 	public void flip() {
-		if( prop!=null && !prop.isFake()){
+		if( !BYPASS_LOAD_IMAGES && prop!=null && !prop.isFake()){
 			drawTile = IMAGES.get( prop.hashCode());
 		}
 	}
@@ -108,5 +109,13 @@ public class Tile extends JComponent{
 		hasLock = false;
 		lockArea.setInUse( false);
 		lockArea = null;
+	}
+	
+	protected Point getCenter() {
+		return new Point( getWidth()/2, getHeight()/2);
+	}
+	
+	protected Point getCenter( Dimension offset) {
+		return new Point( (getWidth()/2) - (offset.width/2), (getHeight()/2) - (offset.height/2));
 	}
 }

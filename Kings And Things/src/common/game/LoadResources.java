@@ -1,6 +1,12 @@
 package common.game;
 
 import static common.Constants.RESOURCE_PATH;
+import static common.Constants.LOAD_BUILDING;
+import static common.Constants.LOAD_SPECIAL;
+import static common.Constants.LOAD_STATE;
+import static common.Constants.LOAD_GOLD;
+import static common.Constants.LOAD_CUP;
+import static common.Constants.LOAD_HEX;
 import static common.Constants.BUILDING;
 import static common.Constants.SPECIAL;
 import static common.Constants.IMAGES;
@@ -84,7 +90,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 						for(int i=0; i<6; i++){
 							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 							CUP.put( tileCopy.hashCode(), tileCopy);
-							if( loadImages){
+							if( loadImages || LOAD_BUILDING){
 								IMAGES.put( tileCopy.hashCode(), ImageIO.read( file.toFile()));
 							}
 						}
@@ -93,7 +99,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 						tile.setSpecialFlip();
 						tile.setCategory( Category.Buildable);
 						BUILDING.put( tile.hashCode(), tile);
-						if( loadImages){
+						if( loadImages || LOAD_BUILDING){
 							IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
 						}
 					}
@@ -112,14 +118,14 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setCategory( currentCupCategory);
 					if( copyTile==0){
 						CUP.put( tile.hashCode(), tile);
-						if( loadImages){
+						if( loadImages || LOAD_CUP){
 							IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
 						}
 					}else{
 						for( int i=0; i<copyTile; i++){
 							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 							CUP.put( tileCopy.hashCode(), tileCopy);
-							if( loadImages){
+							if( loadImages || LOAD_CUP){
 								IMAGES.put( tileCopy.hashCode(), ImageIO.read( file.toFile()));
 							}
 						}
@@ -130,7 +136,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setInfinite();
 					tile.setCategory( currentCategory);
 					GOLD.put( tile.hashCode(), tile);
-					if( loadImages){
+					if( loadImages || LOAD_GOLD){
 						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
 					}
 					break;
@@ -149,7 +155,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					for( int i=0; i<copyTile; i++){
 						TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 						HEX.put( tileCopy.hashCode(), tileCopy);
-						if( loadImages){
+						if( loadImages || LOAD_HEX){
 							IMAGES.put( tileCopy.hashCode(), ImageIO.read( file.toFile()));
 						}
 					}
@@ -159,7 +165,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setSpecialFlip();
 					SPECIAL.put( tile.hashCode(), tile);
 					tile.setCategory( currentCategory);
-					if( loadImages){
+					if( loadImages || LOAD_SPECIAL){
 						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
 					}
 					break;
@@ -168,7 +174,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setInfinite();
 					tile.setCategory( currentCategory);
 					STATE.put( tile.getRestriction( 0), tile);
-					if( loadImages){
+					if( loadImages || LOAD_STATE){
 						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
 					}
 					break;

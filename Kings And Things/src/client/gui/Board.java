@@ -5,6 +5,7 @@ import javax.swing.JPanel;
 
 import com.google.common.eventbus.Subscribe;
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.Point;
@@ -38,14 +39,16 @@ import static common.Constants.DRAW_LOCKS;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.HEX_OUTLINE;
 import static common.Constants.TILE_OUTLINE;
+import static common.Constants.MOVE_DISTANCE;
 import static common.Constants.MAX_RACK_SIZE;
 import static common.Constants.HEX_BOARD_SIZE;
 import static common.Constants.BOARD_LOAD_ROW;
 import static common.Constants.BOARD_LOAD_COL;
 import static common.Constants.ANIMATION_DELAY;
+import static common.Constants.BOARD_POSITIONS;
 import static common.Constants.IMAGE_BACKGROUND;
 import static common.Constants.BOARD_TOP_PADDING;
-import static common.Constants.HEX_MOVE_DISTANCE;
+import static common.Constants.BYPASS_MOUSE_CLICK;
 import static common.Constants.MAX_HEXES_ON_BOARD;
 import static common.Constants.BOARD_WIDTH_SEGMENT;
 import static common.Constants.BOARD_RIGHT_PADDING;
@@ -114,7 +117,7 @@ public class Board extends JPanel{
 		g2d.dispose();
 	}
 	
-	private boolean interactWithHexes = false, hexBoradComplete = false;
+	private boolean boradComplete = false;
 
 	private LockManager locks;
 	private MouseInput mouseInput;
@@ -136,8 +139,6 @@ public class Board extends JPanel{
 	 * @param playerCount - number of players to be playing on this board
 	 */
 	protected void init( int playerCount){
-		players = new PlayerInfo[]{ new PlayerInfo( "Player1", 1, true), new PlayerInfo( "Player2", 2, true), new PlayerInfo( "Player3", 3, true), new PlayerInfo( "Player4", 4, true)};
-		currentPlayer = players[0];
 		mouseInput = new MouseInput();
 		addMouseListener( mouseInput);
 		addMouseMotionListener( mouseInput);
@@ -191,9 +192,9 @@ public class Board extends JPanel{
 		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		g2d.drawImage( IMAGE, 0, 0, getWidth(), getHeight(), null);
 		g2d.setFont( font);
-		if( players!=null){
+		if( players!=null && currentPlayer!=null){
 			for( int i=0, y=PLAYERS_STATE_PADDING; i<players.length; i++, y+=PLAYERS_STATE_PADDING){
-				if( players[i]!=currentPlayer){
+				if( players[i].getID()!=currentPlayer.getID()){
 					g2d.drawString( players[i].getName(), HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING, y);
 					g2d.drawString( "Gold: " + players[i].getGold(), HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING+165, y);
 					g2d.drawString( "Rack: " + players[i].getCradsOnRack(), HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING+355, y);
@@ -246,12 +247,12 @@ public class Board extends JPanel{
 		//create bound for starting position of tile
 		Rectangle start = new Rectangle( center.x-TILE_SIZE.width/2, center.y-TILE_SIZE.height/2, TILE_SIZE.width, TILE_SIZE.height);
 		//create bound for destination location, this bound starts from outside of board
-		Rectangle bound = new Rectangle( BOARD_SIZE.width+2, BOARD_SIZE.height-TILE_SIZE.height-PADDING/2, TILE_SIZE.width, TILE_SIZE.height);
+		Rectangle bound = new Rectangle( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-TILE_SIZE.height-PADDING, TILE_SIZE.width, TILE_SIZE.height);
 		for( int count=0; count<MAX_RACK_SIZE; count++){
 			tile = addTile( new Tile( prop==null?new TileProperties(Category.Cup):prop[count]), start, false);
 			if( count==5){
 				// since rack is two rows of five, at half all bounds must be shifted up, this bound starts from outside of board
-				bound.setLocation( BOARD_SIZE.width+2, (int) (BOARD_SIZE.height-(2*TILE_OUTLINE.height)-(PADDING*1.5)));
+				bound.setLocation( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-(2*TILE_OUTLINE.height)-(PADDING*2));
 			}
 			bound.translate( -TILE_X_SHIFT, 0);
 			//set final destination for tile to be animated later
@@ -283,13 +284,7 @@ public class Board extends JPanel{
 			addTile( new Hex( new HexState()), new Rectangle(8,8,HEX_SIZE.width,HEX_SIZE.height), true);
 			MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( update.getHexes()));
             animation.start();
-            interactWithHexes = true;
 		}else if( update.flipAll()){
-			while( !hexBoradComplete){
-				try {
-					Thread.sleep( 50);
-				} catch ( InterruptedException e) {}
-			}
 			FlipAll flip = new FlipAll( getComponents());
 			flip.start();
 		}else if( update.isPlayerOder()){
@@ -297,14 +292,29 @@ public class Board extends JPanel{
 			for( int i=0; i<order.length; i++){
 				if( currentPlayer.getID()==order[i]){
 					playerMarker = getPlayerMarker( i);
+					break;
 				}
 			}
 			Point point = locks.getPermanentLock( Category.State).getCenter();
-			Tile tile = addTile( new Tile( playerMarker), new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height), true);
+			Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
+			Tile tile = addTile( new Tile( playerMarker), bound, true);
 			tile.flip();
+			Tile[] tiles = new Tile[order.length];
+			for( int i=0; i<BOARD_POSITIONS.length && i<tiles.length; i++){
+				tiles[i] = addTile( new Tile( getPlayerMarker( i)), bound, false);
+				tiles[i].flip();
+				tiles[i].setDestination( locks.convertToCenterCoordinate( BOARD_POSITIONS[i][0], BOARD_POSITIONS[i][1]));
+			}
+			MoveAnimation animation = new MoveAnimation( tiles);
+			animation.start();
 		}else if( update.isRack()){
 			MoveAnimation animation = new MoveAnimation( setupTilesForRack( null));
             animation.start();
+		}
+		while( !boradComplete){
+			try {
+				Thread.sleep( 50);
+			} catch ( InterruptedException e) {}
 		}
 	}
 	
@@ -326,6 +336,14 @@ public class Board extends JPanel{
 				throw new IllegalArgumentException("ERROR - invalid player name for marker");
 		}
 	}
+
+	private void placeTileOnHex( Tile tile) {
+		if( !(tile instanceof Hex) && tile.hasLock() &&tile.getLock().isForHex()){
+			tile.getLock().getHex().placeTile( tile.getProperties());
+			remove(tile);
+			revalidate();
+		}
+	}
 	
 	/**
 	 * input class for mouse, used for like assignment and current testing phases suck as placement
@@ -337,6 +355,15 @@ public class Board extends JPanel{
 		private int xDiff, yDiff;
 		private int xPressed, yPressed;
 		private boolean ignore = false;
+		private int clickCount = 0;
+		
+		/**
+		 * display mouse position in console
+		 */
+		@Override
+		public void mouseMoved(MouseEvent e){
+			//System.out.println( e.getPoint());
+		}
 		
 		/**
 		 * checks to see if movement is still inside the board,
@@ -345,7 +372,7 @@ public class Board extends JPanel{
 		 */
 		@Override
 	    public void mouseDragged(MouseEvent e){
-			if(	!ignore && e.getSource() instanceof Tile && interactWithHexes){
+			if(	!ignore && e.getSource() instanceof Tile && boradComplete){
 				Tile tile = (Tile)e.getSource();
 				boardBound = getBounds();
 				bound = tile.getBounds();
@@ -369,6 +396,7 @@ public class Board extends JPanel{
 					if( newLock!=null){
 						tile.setLockArea( newLock);
 						Point center = newLock.getCenter();
+						System.out.println( center);
 						bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
 					}
 					tile.setBounds( bound);
@@ -382,7 +410,7 @@ public class Board extends JPanel{
 		@Override
 		public void mousePressed( MouseEvent e){
 			Object source = e.getSource();
-			if( interactWithHexes && source instanceof Tile){
+			if( boradComplete && source instanceof Tile){
 				xPressed = e.getX();
 				yPressed = e.getY();
 				Tile tile = (Tile)source;
@@ -403,21 +431,47 @@ public class Board extends JPanel{
 		 */
 		@Override
 		public void mouseClicked( MouseEvent e){
+			if( BYPASS_MOUSE_CLICK){
+				return;
+			}
 			Object source = e.getSource();
-			if( interactWithHexes && source instanceof Tile && e.getButton()==MouseEvent.BUTTON3){
+			if( boradComplete && source instanceof Tile && e.getButton()==MouseEvent.BUTTON3){
 				if( ((Tile)source).isInside( xPressed, yPressed)){
 					((Tile)source).flip();
 				}
-			}else if( interactWithHexes && !(source instanceof Tile) && e.getButton()==MouseEvent.BUTTON2){
+			}else if( boradComplete && !(source instanceof Tile) && e.getButton()==MouseEvent.BUTTON2){
 				FlipAll flip = new FlipAll( getComponents());
 				flip.start();
             }else if( !(source instanceof Tile) && e.getButton()==MouseEvent.BUTTON1){
-				MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( null));
-	            animation.start();
-	            
-	            animation = new MoveAnimation( setupTilesForRack( null));
-	            animation.start();
-	            interactWithHexes = true;
+            	switch( clickCount){
+            		case 0: 
+            			addTile( new Hex( new HexState()), new Rectangle(8,8,HEX_SIZE.width,HEX_SIZE.height), true);
+        				MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( null));
+        	            animation.start();
+        	            clickCount++;
+        	            break;
+            		case 1:
+            			animation = new MoveAnimation( setupTilesForRack( null));
+        	            animation.start();
+        	            clickCount++;
+        	            break;
+            		case 2:
+            			playerMarker = getPlayerMarker( -1);
+        				Point point = locks.getPermanentLock( Category.State).getCenter();
+        				Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
+        				Tile tile = addTile( new Tile( playerMarker), bound, true);
+        				tile.flip();
+        				Tile[] tiles = new Tile[4];
+        				for( int i=0; i<BOARD_POSITIONS.length && i<tiles.length; i++){
+        					tiles[i] = addTile( new Tile( getPlayerMarker( i)), bound, false);
+        					tiles[i].flip();
+        					tiles[i].setDestination( locks.convertToCenterCoordinate( BOARD_POSITIONS[i][0], BOARD_POSITIONS[i][1]));
+        				}
+        				animation = new MoveAnimation( tiles);
+        				animation.start();
+        	            clickCount++;
+        				break;
+            	}
 		    }
 		}
 	}
@@ -435,6 +489,7 @@ public class Board extends JPanel{
 		private int slope, intercept, xTemp=-1, yTemp;
 		private Tile[] list;
 		private int index = -1;
+		private Dimension size;
 		
 		public MoveAnimation( Tile tile ){
 			setTile( tile);
@@ -447,6 +502,7 @@ public class Board extends JPanel{
 			yTemp = tile.getY();
 			slope = (end.y-yTemp)/(end.x-xTemp);
 			intercept = yTemp-slope*xTemp;
+			size = tile.getSize();
 		}
 		
 		public MoveAnimation( Tile[] tiles ){
@@ -456,6 +512,7 @@ public class Board extends JPanel{
 		}
 		
 		public void start(){
+			boradComplete = false;
 			timer = new Timer( ANIMATION_DELAY, this);
             timer.setInitialDelay( 0);
             timer.start();
@@ -465,10 +522,10 @@ public class Board extends JPanel{
 		public void actionPerformed( ActionEvent e) {
 			//animation is done
 			if( xTemp==-1){
-				//lise is done
+				//list is done
 				if( index==-1 || index>=list.length){
 					timer.stop();
-					hexBoradComplete = true;
+					boradComplete = true;
 					return;
 				}
 				//get next index in list
@@ -483,12 +540,13 @@ public class Board extends JPanel{
 			start = tile.getBounds();
 			yTemp = (int)(slope*xTemp+intercept);
 			tile.setLocation( xTemp, yTemp);
-			xTemp+=HEX_MOVE_DISTANCE;
+			xTemp+=MOVE_DISTANCE;
 			//hex has passed its final location
-			if( xTemp>=end.x-HEX_SIZE.width/2){
+			if( xTemp>=end.x-size.width/2){
 				xTemp=-1;
-				tile.setLocation( end.x-HEX_SIZE.width/2, end.y-HEX_SIZE.height/2);
+				tile.setLocation( end.x-size.width/2, end.y-size.height/2);
 				tile.setLockArea( locks.getLock( tile));
+				placeTileOnHex( tile);
 			}
 			start.add( tile.getBounds());
 			repaint( start);
@@ -522,7 +580,7 @@ public class Board extends JPanel{
 			}else{
 				if( list[index] instanceof Hex){
 					((Tile) list[index]).flip();
-					repaint();
+					repaint( list[index].getBounds());
 				}
 				index++;
 			}

@@ -255,4 +255,8 @@ public class TileProperties implements Serializable{
 	public String toString(){
 		return "-n " + name + " -a " + value + " -c " + number;
 	}
+
+	public boolean hasRestriction() {
+		return restrictions.size()>=1;
+	}
 }
