@@ -19,8 +19,12 @@ public class PlayersList extends AbstractNetwrokEvent{
 		players.add( player);
 	}
 	
-	public ArrayList<PlayerInfo> getPlayers(){
-		return players;
+	public PlayerInfo[] getPlayers(){
+		PlayerInfo[] array = new PlayerInfo[players.size()];
+		for( int i=0; i<array.length;i++){
+			array[i] = players.get( i);
+		}
+		return array;
 	}
 	
 	@Override

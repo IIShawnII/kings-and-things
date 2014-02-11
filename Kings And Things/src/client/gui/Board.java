@@ -5,12 +5,9 @@ import javax.swing.JPanel;
 
 import com.google.common.eventbus.Subscribe;
 
-import common.Constants.Category;
-import common.game.HexState;
-import common.game.TileProperties;
-
-import java.awt.Color;
 import java.awt.Font;
+import java.awt.Color;
+import java.awt.Point;
 import java.awt.Graphics;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -24,140 +21,138 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
-import client.event.BoardUpdate;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
+import client.gui.LockManager.Lock;
+import client.event.BoardUpdate;
+import client.event.UpdatePlayer;
+import common.Constants.Category;
+import common.Constants.Restriction;
+import common.game.HexState;
+import common.game.PlayerInfo;
+import common.game.TileProperties;
+import static common.Constants.STATE;
 import static common.Constants.HEX_SIZE;
-import static common.Constants.LOCK_SIZE;
+import static common.Constants.TILE_SIZE;
+import static common.Constants.DRAW_LOCKS;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.HEX_OUTLINE;
 import static common.Constants.TILE_OUTLINE;
-import static common.Constants.SPIRAL_DELAY;
 import static common.Constants.MAX_RACK_SIZE;
-import static common.Constants.TILE_SIZE_BANK;
 import static common.Constants.HEX_BOARD_SIZE;
 import static common.Constants.BOARD_LOAD_ROW;
 import static common.Constants.BOARD_LOAD_COL;
+import static common.Constants.ANIMATION_DELAY;
 import static common.Constants.IMAGE_BACKGROUND;
 import static common.Constants.BOARD_TOP_PADDING;
 import static common.Constants.HEX_MOVE_DISTANCE;
-import static common.Constants.PLAYERS_STATE_SIZE;
-import static common.Constants.TILE_RATIO_REVERSE;
+import static common.Constants.MAX_HEXES_ON_BOARD;
 import static common.Constants.BOARD_WIDTH_SEGMENT;
+import static common.Constants.BOARD_RIGHT_PADDING;
 import static common.Constants.BOARD_HEIGHT_SEGMENT;
+import static common.Constants.PLAYERS_STATE_PADDING;
 
 @SuppressWarnings("serial")
 public class Board extends JPanel{
 	
-	private static final BufferedImage image;
-	static final int heightSegment = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
-	static final int widthSegment = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
-	static final int initialTileXShift = widthSegment/2;
-	private static final int tileXShift = (int) (widthSegment*1.2);
-	static final int tileYShift = 13;
-	private static final int hexYShift = 8-3;
-	private static final int hexeXShift = 8-2;
+	private static final BufferedImage IMAGE;
+	static final int HEIGHT_SEGMENT = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
+	static final int WIDTH_SEGMENT = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
+	static final int INITIAL_TILE_X_SHIFT = WIDTH_SEGMENT/2;
+	static final int TILE_X_SHIFT = (int) (WIDTH_SEGMENT*1.2);
+	static final int TILE_Y_SHIFT = 13;
+	private static final int HEX_Y_SHIFT = 8-3;
+	private static final int HEX_X_SHIFT = 8-2;
+	static final int PADDING = 10;
 	static{
-		image = new BufferedImage( BOARD_SIZE.width, BOARD_SIZE.height, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d = image.createGraphics();
+		//create image for outlines on board
+		IMAGE = new BufferedImage( BOARD_SIZE.width, BOARD_SIZE.height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = IMAGE.createGraphics();
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		//draw background on the new image
 		g2d.drawImage( IMAGE_BACKGROUND, 0, 0, BOARD_SIZE.width, BOARD_SIZE.height, null);
 		int x=0, y=0;
+		//create a thicker stroke
 		g2d.setStroke( new BasicStroke( 5));
 		g2d.setColor( Color.BLACK);
-		HEX_OUTLINE.translate( hexeXShift, hexYShift);
+		//position the outline for hex
+		HEX_OUTLINE.translate( HEX_X_SHIFT, HEX_Y_SHIFT);
 		g2d.drawPolygon( HEX_OUTLINE);
-		HEX_OUTLINE.translate( -hexeXShift, -hexYShift);
+		HEX_OUTLINE.translate( -HEX_X_SHIFT, -HEX_Y_SHIFT);
+		//draw hex board
 		for( int ring=0; ring<BOARD_LOAD_ROW.length; ring++){
 			for( int count=0; count<BOARD_LOAD_ROW[ring].length; count++){
-				x = (widthSegment*BOARD_LOAD_COL[ring][count]);
-				y = (heightSegment*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
+				x = (WIDTH_SEGMENT*BOARD_LOAD_COL[ring][count]);
+				y = (HEIGHT_SEGMENT*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
 				HEX_OUTLINE.translate( ((int) (x-HEX_SIZE.getWidth()/2))-2, ((int) (y-HEX_SIZE.getHeight()/2)-3));
 				g2d.drawPolygon( HEX_OUTLINE);
 				HEX_OUTLINE.translate( -((int) (x-HEX_SIZE.getWidth()/2)-2), -((int) (y-HEX_SIZE.getHeight()/2)-3));
 			}
 		}
-		TILE_OUTLINE.translate( initialTileXShift, tileYShift);
+		//draw bank tiles
+		TILE_OUTLINE.translate( INITIAL_TILE_X_SHIFT, TILE_Y_SHIFT);
 		for( int i=0; i<5; i++){
-			TILE_OUTLINE.translate( tileXShift, 0);
+			TILE_OUTLINE.translate( TILE_X_SHIFT, 0);
 			g2d.draw( TILE_OUTLINE);
 		}
-		TILE_OUTLINE.setLocation( initialTileXShift, tileYShift);
-		g2d.dispose();
-	}
-	
-	private final static BufferedImage StateImage;
-	static final int LOCK_X, LOCK_Y, Y_SHIFT;
-	static final int PADDING = 2, lockBorderWidth, lockBorderheight;
-	static{
-		StateImage = new BufferedImage( PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d = StateImage.createGraphics();
-		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		g2d.setStroke( new BasicStroke( 5));
-		g2d.setColor( Color.BLACK);
-		//g2d.drawRect( 0, 0, PLAYERS_STATE_SIZE.width, PLAYERS_STATE_SIZE.height);
-		lockBorderWidth = (PLAYERS_STATE_SIZE.width- PADDING)/(MAX_RACK_SIZE/2) ;
-		lockBorderheight = (int) (lockBorderWidth*TILE_RATIO_REVERSE);
-		LOCK_X = PADDING;
-		LOCK_Y = PLAYERS_STATE_SIZE.height-lockBorderheight-PADDING-1;
-		Rectangle bound = new Rectangle(LOCK_X,LOCK_Y,lockBorderWidth,lockBorderheight);
-		Y_SHIFT = LOCK_Y-lockBorderheight-PADDING;
-		for( int i=0; i<MAX_RACK_SIZE;i++){
-			g2d.draw( bound);
-			if( i==4){
-				bound.setLocation( LOCK_X,Y_SHIFT);
-			}else{
-				bound.translate( lockBorderWidth, 0);
+		//draw rack tiles
+		TILE_OUTLINE.setLocation( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-TILE_OUTLINE.height-PADDING);
+		for( int i=0; i<MAX_RACK_SIZE; i++){
+			if(i==5){
+				TILE_OUTLINE.setLocation( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-(2*TILE_OUTLINE.height)-(2*PADDING));
 			}
+			TILE_OUTLINE.translate( -TILE_X_SHIFT, 0);
+			g2d.draw( TILE_OUTLINE);
 		}
+		TILE_OUTLINE.setLocation( 0, 0);
 		g2d.dispose();
 	}
 	
-	private boolean interactWithHexes = false;
-	
-	private Timer timer;
+	private boolean interactWithHexes = false, hexBoradComplete = false;
+
 	private LockManager locks;
 	private MouseInput mouseInput;
-	private PlayerState[] states;
+	private TileProperties playerMarker;
+	private PlayerInfo players[], currentPlayer;
+	private Font font = new Font("default", Font.BOLD, 30);
 	
 	public Board( LayoutManager layout, boolean isDoubleBuffered){
 		super( layout, isDoubleBuffered);
 	}
 	
 	protected void init( int playerCount){
+		players = new PlayerInfo[]{ new PlayerInfo( "Player1", 1, true), new PlayerInfo( "Player2", 2, true), new PlayerInfo( "Player3", 3, true), new PlayerInfo( "Player4", 4, true)};
+		currentPlayer = players[0];
 		mouseInput = new MouseInput();
 		addMouseListener( mouseInput);
 		addMouseMotionListener( mouseInput);
 		addMouseWheelListener( mouseInput);
-		states = new PlayerState[playerCount];
-		for( int i=0; i<playerCount; i++){
-			states[i] = new PlayerState();
-			states[i].init( getWidth()-PLAYERS_STATE_SIZE.width-5, PLAYERS_STATE_SIZE.height*i+10*(i+1));
-			add( states[i]);
-		}
-		Rectangle bound = new Rectangle( initialTileXShift, tileYShift, TILE_SIZE_BANK.width, TILE_SIZE_BANK.height);
 		locks = new LockManager( playerCount);
-		addTile( new Hex( new HexState()), new Rectangle( 8,8,HEX_SIZE.width, HEX_SIZE.height));
-		bound.translate( tileXShift, 0);
-		addTile( new Tile( new TileProperties( Category.Buildable)), bound);
-		bound.translate( tileXShift, 0);
-		addTile( new Tile( new TileProperties( Category.Gold)), bound);
-		bound.translate( tileXShift, 0);
-		addTile( new Tile( new TileProperties( Category.State)), bound);
-		bound.translate( tileXShift, 0);
-		addTile( new Tile( new TileProperties( Category.Special)), bound);
-		bound.translate( tileXShift, 0);
-		addTile( new Tile( new TileProperties( Category.Cup)), bound);
+		/*Rectangle bound = new Rectangle( INITIAL_TILE_X_SHIFT, TILE_Y_SHIFT, TILE_SIZE.width, TILE_SIZE.height);
+		bound.translate( TILE_X_SHIFT, 0);
+		addTile( new Tile( new TileProperties( Category.Buildable)), bound, true);
+		bound.translate( TILE_X_SHIFT, 0);
+		addTile( new Tile( new TileProperties( Category.Gold)), bound, true);
+		bound.translate( TILE_X_SHIFT, 0);
+		
+		bound.translate( TILE_X_SHIFT, 0);
+		addTile( new Tile( new TileProperties( Category.Special)), bound, true);
+		bound.translate( TILE_X_SHIFT, 0);
+		addTile( new Tile( new TileProperties( Category.Cup)), bound, true);*/
 	}
 	
-	public Tile addTile( Tile tile, Rectangle bound){
+	public Tile addTile( Tile tile, Rectangle bound, boolean lock){
 		tile.init();
 		tile.setBounds( bound);
 		tile.addMouseListener( mouseInput);
 		tile.addMouseMotionListener( mouseInput);
-		tile.setLockArea( locks.getLock( tile));
+		if( lock){
+			tile.setLockArea( locks.getPermanentLock( tile));
+			tile.setCanAnimate( false);
+		}else{
+			tile.setCanAnimate( true);
+		}
 		add(tile,0);
 		return tile;
 	}
@@ -168,66 +163,119 @@ public class Board extends JPanel{
 		Graphics2D g2d = (Graphics2D)g;
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		g2d.drawImage( image, 0, 0, getWidth(), getHeight(), null);
+		g2d.drawImage( IMAGE, 0, 0, getWidth(), getHeight(), null);
+		g2d.setFont( font);
+		if( players!=null){
+			for( int i=0, y=PLAYERS_STATE_PADDING; i<players.length; i++, y+=PLAYERS_STATE_PADDING){
+				if( players[i]!=currentPlayer){
+					g2d.drawString( players[i].getName(), HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING, y);
+					g2d.drawString( "Gold: " + players[i].getGold(), HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING+165, y);
+					g2d.drawString( "Rack: " + players[i].getCradsOnRack(), HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING+355, y);
+				}else{
+					y-=PLAYERS_STATE_PADDING;
+				}
+			}
+			g2d.drawString( currentPlayer.getName(), HEX_BOARD_SIZE.width+160, BOARD_SIZE.height-TILE_OUTLINE.height*2-PADDING*4);
+			g2d.drawString( "Gold: " + currentPlayer.getGold(), HEX_BOARD_SIZE.width+360, BOARD_SIZE.height-TILE_OUTLINE.height*2-PADDING*4);
+		}
+		if( DRAW_LOCKS){
+			locks.draw( g2d);
+		}
+	}
+
+	private Tile[] setupHexesForPlacement( HexState[] hexes) {
+		Tile tile = null;
+		int x, y, hexCount = hexes==null?MAX_HEXES_ON_BOARD:hexes.length;
+		Tile[] list = new Tile[hexCount];
+		for(int ring=0, drawIndex=0; ring<BOARD_LOAD_ROW.length&&drawIndex<hexCount; ring++){
+			for( int count=0; count<BOARD_LOAD_ROW[ring].length&&drawIndex<hexCount; count++, drawIndex++){
+				tile = addTile( new Hex( hexes==null?new HexState():hexes[drawIndex]), new Rectangle( 8,8,HEX_SIZE.width, HEX_SIZE.height), false);
+				x = (WIDTH_SEGMENT*BOARD_LOAD_COL[ring][count]);
+				y = (HEIGHT_SEGMENT*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
+				tile.setDestination( x, y);
+				list[drawIndex] = tile;
+			}
+		}
+		return list;
+	}
+
+	private Tile[] setupTilesForRack( TileProperties[] prop) {
+		Tile tile = null;
+		Tile[] list = new Tile[MAX_RACK_SIZE];
+		Lock lock = locks.getPermanentLock( Category.Cup);
+		Point center = lock.getCenter();
+		Rectangle bound = new Rectangle( BOARD_SIZE.width+2, BOARD_SIZE.height-TILE_SIZE.height-PADDING/2, TILE_SIZE.width, TILE_SIZE.height);
+		Rectangle start = new Rectangle( center.x-TILE_SIZE.width/2, center.y-TILE_SIZE.height/2, TILE_SIZE.width, TILE_SIZE.height);
+		for( int count=0; count<MAX_RACK_SIZE; count++){
+			tile = addTile( new Tile( prop==null?new TileProperties(Category.Cup):prop[count]), start, false);
+			if( count==5){
+				bound.setLocation( BOARD_SIZE.width+2, (int) (BOARD_SIZE.height-(2*TILE_OUTLINE.height)-(PADDING*1.5)));
+			}
+			bound.translate( -TILE_X_SHIFT, 0);
+			tile.setDestination( bound.x+TILE_SIZE.width/2, bound.y+TILE_SIZE.height/2);
+			list[count] = tile;
+		}
+		return list;
 	}
 	
-	private class SpiralPlacement implements ActionListener{
-
-		private Rectangle oldBound = null;
-		private Tile tile = null;
-		private int ring = 0, count = 0, drawIndex = 0;
-		private double slope = 0, intercept = 0;
-		private int x=0, y=0, xStart=0, yStart=0, xTemp=-1, yTemp=-1;
-		private HexState[] hexes;
-		
-		public SpiralPlacement( HexState[] hexes) {
-			this.hexes = hexes;
-		}
-
-		@Override
-		public void actionPerformed( ActionEvent e) {
-			if( xTemp>=0){
-				oldBound = tile.getBounds();
-				yTemp = (int)(slope*xTemp+intercept);
-				tile.setLocation( xTemp, yTemp);
-				xTemp+=HEX_MOVE_DISTANCE;
-				//hex has passed its final location
-				if( xTemp>=x-HEX_SIZE.width/2){
-					xTemp=-1;
-					tile.setLocation( x-HEX_SIZE.width/2, y-HEX_SIZE.height/2);
-				}
-				oldBound.add(tile.getBounds());
-				repaint( oldBound);
-			}else if( ring<BOARD_LOAD_ROW.length){
-				if( count<BOARD_LOAD_ROW[ring].length && (hexes==null?true:drawIndex<hexes.length)){
-					tile = addTile( new Hex( hexes==null?new HexState():hexes[drawIndex]), new Rectangle( 8,8,HEX_SIZE.width, HEX_SIZE.height));
-					x = (widthSegment*BOARD_LOAD_COL[ring][count]);
-					y = (heightSegment*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
-					tile.setLockArea( x-LOCK_SIZE/2, y-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
-					xTemp = xStart = tile.getX();
-					yStart = tile.getY();
-					slope = (y-yStart)/(double)(x-xStart);
-					intercept = yStart-slope*xStart;
-					count++;
-					drawIndex++;
-				}else{
-					count = 0;
-					ring++;
-				}
-			}else{
-				timer.stop();
-				interactWithHexes = true;
+	@Subscribe
+	public void updatePlayers( UpdatePlayer update){
+		currentPlayer = update.getCurrent();
+		players = update.getPlayers();
+		repaint();
+	}
+	
+	@Subscribe
+	public void updateBoard( BoardUpdate update){
+		if( update.hasHexes()){
+			addTile( new Hex( new HexState()), new Rectangle(8,8,HEX_SIZE.width,HEX_SIZE.height), true);
+			MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( update.getHexes()));
+            animation.start();
+            interactWithHexes = true;
+		}else if( update.flipAll()){
+			while( !hexBoradComplete){
+				try {
+					Thread.sleep( 50);
+				} catch ( InterruptedException e) {}
 			}
+			FlipAll flip = new FlipAll( getComponents());
+			flip.start();
+		}else if( update.isPlayerOder()){
+			int[] order = update.getPlayerOrder();
+			for( int i=0; i<order.length; i++){
+				if( currentPlayer.getID()==order[i]){
+					playerMarker = getPlayerMarker( i);
+				}
+			}
+			Point point = locks.getPermanentLock( Category.State).getCenter();
+			Tile tile = addTile( new Tile( playerMarker), new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height), true);
+			tile.flip();
+		}else if( update.isRack()){
+			MoveAnimation animation = new MoveAnimation( setupTilesForRack( null));
+            animation.start();
+		}
+	}
+	
+	private TileProperties getPlayerMarker( int order){
+		switch( order){
+			case -1: return STATE.get( Restriction.Battle);
+			case 0: return STATE.get( Restriction.Yellow);
+			case 1: return STATE.get( Restriction.Gray);
+			case 2: return STATE.get( Restriction.Green);
+			case 3: return STATE.get( Restriction.Red);
+			default:
+				throw new IllegalArgumentException("ERROR - invalid player name for marker");
 		}
 	}
 	
 	private class MouseInput extends MouseAdapter{
 
-		private Rectangle bound, boardBound, newLock;
+		private Rectangle bound, boardBound;
+		private Lock newLock;
 		private int xDiff, yDiff;
 		private int xPressed, yPressed;
 		private boolean ignore = false;
-
+		
 		@Override
 	    public void mouseDragged(MouseEvent e){
 			if(	!ignore && e.getSource() instanceof Tile && interactWithHexes){
@@ -236,35 +284,26 @@ public class Board extends JPanel{
 				bound = tile.getBounds();
 				xDiff = e.getX() - xPressed;
 				yDiff = e.getY() - yPressed;
-				if( !locks.canLeaveLock( tile, xDiff, yDiff)){
-					bound.translate( xDiff, 0);
-					if( !boardBound.contains( bound)){
-						bound.translate( -xDiff, 0);
+				bound.translate( xDiff, 0);
+				if( !boardBound.contains( bound)){
+					bound.translate( -xDiff, 0);
+				}
+				bound.translate( 0, yDiff);
+				if( !boardBound.contains( bound)){
+					bound.translate( 0, -yDiff);
+				}
+				if(tile.hasLock()){
+					if( locks.canLeaveLock( tile, xDiff, yDiff)){
+						tile.removeLock();
+						tile.setBounds( bound);
 					}
-					bound.translate( 0, yDiff);
-					if( !boardBound.contains( bound)){
-						bound.translate( 0, -yDiff);
-					}
+				}else{
 					newLock = locks.canLockToAny( tile);
 					if( newLock!=null){
 						tile.setLockArea( newLock);
-					}else{
-						tile.removeLock();
-					}/*else{
-						Rectangle lock = null;
-						for( int i=0; i<hexBoardLocks.size(); i++){
-							lock = hexBoardLocks.get( i);
-							if( checkLock( lock, bound)){
-								tile.setLockArea( hexBoardLocks.remove( i));
-							}
-						}
+						Point center = newLock.getCenter();
+						bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
 					}
-					if( tile.hasLock() && !tile.canLock( xDiff, yDiff)){
-						Rectangle temp = tile.removeLock();
-						if( !temp.equals( hexLock)){
-							hexBoardLocks.add( temp);
-						}
-					}*/
 					tile.setBounds( bound);
 				}
 			}
@@ -297,67 +336,116 @@ public class Board extends JPanel{
 					((Tile)source).flip();
 				}
 			}else if( interactWithHexes && !(source instanceof Tile) && e.getButton()==MouseEvent.BUTTON2){
-                for( Component tile : getComponents()){
-    				if( tile instanceof Tile){
-    					((Tile)tile).flip();
-    				}
-                }
+				FlipAll flip = new FlipAll( getComponents());
+				flip.start();
             }else if( !(source instanceof Tile) && e.getButton()==MouseEvent.BUTTON1){
-	            if( timer == null){
-                    timer = new Timer( SPIRAL_DELAY, new SpiralPlacement( null));
-                    timer.setInitialDelay( 0);
-                    timer.start();
-	            }
+				MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( null));
+	            animation.start();
+	            
+	            animation = new MoveAnimation( setupTilesForRack( null));
+	            animation.start();
+	            interactWithHexes = true;
 		    }
 		}
 	}
 	
-	@Subscribe
-	public void updateBoard( BoardUpdate update){
-		if( update.hasHexes()){
-			timer = new Timer( SPIRAL_DELAY, new SpiralPlacement( update.getHexes()));
-			timer.setInitialDelay( 0);
-			timer.start();
-		}else if( update.flipAll()){
-			while( !interactWithHexes){
-				try {
-					Thread.sleep( 50);
-				} catch ( InterruptedException e) {}
-			}
-			for( Component tile : getComponents()){
-				if( tile instanceof Hex){
-					//TODO ignore fake one on permanent lock
-					((Tile)tile).flip();
+	private class MoveAnimation implements ActionListener{
+		
+		private Tile tile;
+		private Point end;
+		private Timer timer;
+		private Rectangle start;
+		private int slope, intercept, xTemp=-1, yTemp;
+		private Tile[] list;
+		private int index = -1;
+		
+		public MoveAnimation( Tile tile ){
+			setTile( tile);
+		}
+		
+		private void setTile( Tile tile){
+			this.tile = tile;
+			this.end = tile.getDestination();
+			xTemp = tile.getX();
+			yTemp = tile.getY();
+			slope = (end.y-yTemp)/(end.x-xTemp);
+			intercept = yTemp-slope*xTemp;
+		}
+		
+		public MoveAnimation( Tile[] tiles ){
+			list = tiles;
+			tile = null;
+			index = 0;
+		}
+		
+		public void start(){
+			timer = new Timer( ANIMATION_DELAY, this);
+            timer.setInitialDelay( 0);
+            timer.start();
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent e) {
+			if( xTemp==-1){
+				if( index>=list.length){
+					timer.stop();
+					hexBoradComplete = true;
+					return;
+				}
+				if( list[index]!=null && list[index].canAnimate()){
+					setTile((tile = list[index]));
+					index++;
+				}else{
+					index++;
+					return;
 				}
 			}
+			start = tile.getBounds();
+			yTemp = (int)(slope*xTemp+intercept);
+			tile.setLocation( xTemp, yTemp);
+			xTemp+=HEX_MOVE_DISTANCE;
+			//hex has passed its final location
+			if( xTemp>=end.x-HEX_SIZE.width/2){
+				xTemp=-1;
+				tile.setLocation( end.x-HEX_SIZE.width/2, end.y-HEX_SIZE.height/2);
+				tile.setLockArea( locks.getLock( tile));
+				if( index==-1 || index>=list.length){
+					timer.stop();
+				}
+			}
+			start.add( tile.getBounds());
+			repaint( start);
 		}
 	}
 	
-	public class PlayerState extends JPanel{
+	private class FlipAll implements ActionListener{
 
-		private int gold;
-		private String name;
+		private Timer timer;
+		private Component[] list;
+		private int index = 0;
 		
-		public PlayerState(){
-			super();
-			gold = 0;
-			name = "Player";
+		public FlipAll( Component[] components ){
+			list = components;
+			index = 0;
 		}
 		
-		public void init( int x, int y){
-			setOpaque( false);
-			setBounds( x,y,PLAYERS_STATE_SIZE.width,PLAYERS_STATE_SIZE.height);
+		public void start(){
+			timer = new Timer( ANIMATION_DELAY, this);
+            timer.setInitialDelay( 0);
+            timer.start();
 		}
-		
+
 		@Override
-		public void paintComponent( Graphics g){
-			super.paintComponent( g);
-			Graphics2D g2d = (Graphics2D)g;
-			g2d.drawImage( StateImage, 0, 0, null);
-			g2d.setFont( new Font("default", Font.BOLD, 30));
-			g2d.drawString( name, 10, 32);
-			g2d.drawString( gold+"", getWidth()-100, 32);
-			g2d.dispose();
+		public void actionPerformed( ActionEvent e) {
+			if( index>=list.length){
+				timer.stop();
+			}else{
+				if( list[index] instanceof Hex){
+					((Tile) list[index]).flip();
+					repaint();
+				}
+				index++;
+			}
 		}
 	}
 }

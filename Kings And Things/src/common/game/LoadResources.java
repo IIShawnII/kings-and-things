@@ -167,7 +167,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setNoFlip();
 					tile.setInfinite();
 					tile.setCategory( currentCategory);
-					STATE.put( tile.hashCode(), tile);
+					STATE.put( tile.getRestriction( 0), tile);
 					if( loadImages){
 						IMAGES.put( tile.hashCode(), ImageIO.read( file.toFile()));
 					}

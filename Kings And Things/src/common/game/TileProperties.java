@@ -35,7 +35,7 @@ public class TileProperties implements Serializable{
 		baseValue = 0;
 	}
 	
-	public TileProperties(){
+	TileProperties(){
 		this( 1, 0, "none", null, null);
 	}
 	
@@ -219,7 +219,11 @@ public class TileProperties implements Serializable{
 		
 		return (restrictions.contains(Restriction.Treasure) && isRestrictedToBiome()) || (isBuilding() && !isBuildableBuilding());
 	}
-
+	
+	public Restriction getRestriction( int index){
+		return restrictions.get( index);
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

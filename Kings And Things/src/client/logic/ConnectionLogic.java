@@ -4,13 +4,15 @@ import client.event.BoardUpdate;
 import client.event.EndClient;
 import client.event.ConnectionState;
 import client.event.ConnectionAction;
-import client.event.UpdatePlayerNames;
+import client.event.UpdatePlayer;
 import common.Logger;
 import common.network.Connection;
 import common.Constants.NetwrokAction;
 import common.event.AbstractNetwrokEvent;
 import common.event.notifications.Flip;
 import common.event.notifications.HexPlacement;
+import common.event.notifications.PlayerOrderList;
+import common.event.notifications.RackPlacement;
 import common.event.notifications.StartGame;
 import common.event.notifications.PlayersList;
 import common.event.notifications.PlayerState;
@@ -25,6 +27,7 @@ public class ConnectionLogic implements Runnable {
 	private Connection connection;
 	private boolean finished = false;
 	private PlayerInfo player = null;
+	private PlayerInfo[] players;
 	
 	public ConnectionLogic( Connection connection){
 		this.connection = connection;
@@ -44,15 +47,21 @@ public class ConnectionLogic implements Runnable {
 		while( !finished && (event = connection.recieve())!=null){
 			Logger.getStandardLogger().info( "Received: " + event);
 			if( event instanceof PlayersList){
-				new UpdatePlayerNames(((PlayersList)event).getPlayers()).postCommand();
+				players = ((PlayersList)event).getPlayers();
+				new UpdatePlayer(players).postCommand();
 			} else if( event instanceof StartGame){
 				new ConnectionState(((StartGame)event).getPlayerCount()).postCommand();
+				new UpdatePlayer(players, player).postCommand();
 			} else if( event instanceof PlayerState){
 				player = ((PlayerState)event).getPlayer();
 			} else if( event instanceof HexPlacement){
 				new BoardUpdate(((HexPlacement)event).getArray()).postCommand();
 			} else if( event instanceof Flip){
 				new BoardUpdate(((Flip)event).flipAll()).postCommand();
+			} else if( event instanceof PlayerOrderList){
+				new BoardUpdate(((PlayerOrderList)event).getList()).postCommand();
+			} else if( event instanceof RackPlacement){
+				new BoardUpdate(((RackPlacement)event).getArray()).postCommand();
 			}
 		}
 		finished = true;

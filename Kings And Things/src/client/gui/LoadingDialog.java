@@ -16,7 +16,7 @@ import com.google.common.eventbus.Subscribe;
 import client.event.ConnectionAction;
 import client.event.ConnectionState;
 import client.event.LoadProgress;
-import client.event.UpdatePlayerNames;
+import client.event.UpdatePlayer;
 
 import java.awt.Frame;
 import java.awt.Insets;
@@ -295,7 +295,7 @@ public class LoadingDialog extends JDialog{
 	}
 	
 	@Subscribe
-	public void updateJList( UpdatePlayerNames names){
+	public void updateJList( UpdatePlayer names){
 		listModel.removeAllElements();
 		for( PlayerInfo player: names.getPlayers()){
 			listModel.addElement( player);
@@ -362,7 +362,6 @@ public class LoadingDialog extends JDialog{
 				setMinimumSize( size);
 				setSize( size);
 				revalidate();
-				repaint();
 				jbConnect.setEnabled( true);
 				jbClose.setEnabled( true);
 				doneLoading = true;

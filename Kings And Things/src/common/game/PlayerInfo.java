@@ -10,6 +10,7 @@ public class PlayerInfo implements Serializable {
 	private final int ID;
 	private int gold;
 	private String name;
+	private int cardsOnRack;
 	private boolean isReady;
 	private boolean isConnected;
 	private Point start;
@@ -23,6 +24,10 @@ public class PlayerInfo implements Serializable {
 		this.gold = 0;
 		this.isReady = ready;
 		this.start = null;
+	}
+	
+	public void setCardonRack( int count){
+		cardsOnRack = count;
 	}
 	
 	public boolean hasStartPoint(){
@@ -107,5 +112,9 @@ public class PlayerInfo implements Serializable {
 			return false;
 		}
 		return true;
+	}
+
+	public int getCradsOnRack() {
+		return cardsOnRack;
 	}
 }

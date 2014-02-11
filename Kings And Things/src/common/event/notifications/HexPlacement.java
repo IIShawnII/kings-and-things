@@ -19,6 +19,6 @@ public class HexPlacement extends AbstractNetwrokEvent {
 	
 	@Override
 	public String toString(){
-		return "Network/StartGame: HexPlacement";
+		return "Network/HexPlacement: Board";
 	}
 }

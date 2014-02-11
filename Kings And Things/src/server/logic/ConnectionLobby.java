@@ -120,10 +120,10 @@ public class ConnectionLobby implements Runnable {
 				connections.addPlayer( pc.getPlayerInfo());
 			}
 		}
-		if( connections.getPlayers().size()>0){
+		if( connections.getPlayers().length>0){
 			connections.postNotification();
 		}
-		if( !anyUnReady && ((connectedPlayers.size()>=MIN_PLAYERS && connectedPlayers.size()<=MAX_PLAYERS)||Constants.BYPASS_MIN_PLAYER)){
+		if( !anyUnReady && ((connectedPlayers.size()==MAX_PLAYERS)||Constants.BYPASS_MIN_PLAYER)){
 			HashSet< Player> set = new HashSet<>();
 			for( PlayerConnection pc : connectedPlayers){
 				set.add( pc.getPlayer());

@@ -1,13 +1,12 @@
 package client.gui.tiles;
 
 import java.awt.Image;
-import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 
 import javax.swing.JComponent;
 
+import client.gui.LockManager.Lock;
 import common.game.TileProperties;
 import static common.Constants.IMAGES;
 import static common.Constants.IMAGE_TILE_REVERSE;
@@ -17,12 +16,26 @@ public class Tile extends JComponent{
 	
 	private boolean hasLock = false;
 	protected Image drawTile = null;
-	private Rectangle lockArea = null;
+	private Lock lockArea = null;
 	private TileProperties prop = null;
+	private Point destination;
+	private boolean canAnimate = true;
 	
 	public Tile( TileProperties prop){
 		super();
 		this.prop = prop;
+	}
+	
+	public boolean canAnimate(){
+		return canAnimate;
+	}
+	
+	public void setCanAnimate( boolean canAnimate){
+		this.canAnimate = canAnimate;
+	}
+	
+	public boolean isFake(){
+		return prop.isFake();
 	}
 	
 	public TileProperties getProperties(){
@@ -33,36 +46,46 @@ public class Tile extends JComponent{
 		drawTile = IMAGE_TILE_REVERSE;
 	}
 	
-	public void setLockArea( Rectangle lock){
-		lockArea = lock;
-		hasLock = true;
+	public void setDestination( int x, int y){
+		destination = new Point( x,y);
 	}
 	
-	public void setLockArea( int x, int y, int width, int height){
-		setLockArea( new Rectangle( x, y, width, height));
+	public void setDestination( Point point){
+		destination = point;
+	}
+	
+	public Point getDestination(){
+		return destination;
+	}
+	
+	public void setLockArea( Lock lock){
+		if( lock!=null){
+			lockArea = lock;
+			hasLock = true;
+		}else{
+			hasLock = false;
+		}
 	}
 	
 	@Override
 	public void paintComponent( Graphics g){
 		super.paintComponent( g);
-		Graphics2D g2d = (Graphics2D)g;
-		g2d.drawImage( drawTile, 0, 0, getWidth(), getHeight(), null);
-		g2d.dispose();
+		g.drawImage( drawTile, 0, 0, getWidth(), getHeight(), null);
+		g.dispose();
 	}
 
 	public void flip() {
 		if( prop!=null && !prop.isFake()){
 			drawTile = IMAGES.get( prop.hashCode());
 		}
-		repaint();
 	}
 	
 	public boolean isInside( int x, int y){
 		return true;
 	}
 	
-	public Rectangle getLock(){
-		return new Rectangle( lockArea);
+	public Lock getLock(){
+		return lockArea;
 	}
 	
 	public Point getCeneter( int xOffset, int yOffset){
@@ -81,8 +104,9 @@ public class Tile extends JComponent{
 		return hasLock;
 	}
 	
-	public Rectangle removeLock(){
+	public void removeLock(){
 		hasLock = false;
-		return new Rectangle( lockArea);
+		lockArea.setInUse( false);
+		lockArea = null;
 	}
 }
