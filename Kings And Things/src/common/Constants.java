@@ -24,11 +24,11 @@ public final class Constants {
 	public static final boolean BYPASS_LOAD_IMAGES = false;
 	public static final boolean BYPASS_LOBBY = false;
 	public static final boolean DRAW_LOCKS = false;
-	public static final boolean LOAD_BUILDING = true;
+	public static final boolean LOAD_BUILDING = false;
 	public static final boolean LOAD_SPECIAL = false;
 	public static final boolean LOAD_GOLD = false;
 	public static final boolean LOAD_STATE = true;
-	public static final boolean LOAD_CUP = true;
+	public static final boolean LOAD_CUP = false;
 	public static final boolean LOAD_HEX = true;
 
 	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
@@ -108,7 +108,7 @@ public final class Constants {
 	public static final int PLAYER_FONT_SIZE = 12;
 	public static final int PORT_COLUMN_COUNT = 7;
 	public static final int TIILE_HEIGHT_BOARD = 35;
-	public static final int BOARD_TOP_PADDING = 125;
+	public static final int BOARD_TOP_PADDING = 100;
 	public static final int BOARD_WIDTH_SEGMENT = 8;
 	public static final int PLAYERS_STATE_SIZE = 500;
 	public static final int BOARD_RIGHT_PADDING = 40;

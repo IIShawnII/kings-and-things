@@ -4,11 +4,11 @@ import client.event.BoardUpdate;
 import client.event.EndClient;
 import client.event.ConnectionState;
 import client.event.ConnectionAction;
-import client.event.UpdatePlayer;
 import common.Logger;
 import common.network.Connection;
 import common.Constants.NetwrokAction;
 import common.event.AbstractNetwrokEvent;
+import common.event.notifications.CurrentPhase;
 import common.event.notifications.Flip;
 import common.event.notifications.HexOwnershipChanged;
 import common.event.notifications.HexPlacement;
@@ -37,6 +37,7 @@ public class ConnectionLogic implements Runnable {
 	
 	@Override
 	public void run() {
+		CurrentPhase phase = null;
 		AbstractNetwrokEvent event = null;
 		while( !finished && !connection.isConnected()){
 			try {
@@ -50,11 +51,11 @@ public class ConnectionLogic implements Runnable {
 			Logger.getStandardLogger().info( "Received: " + event);
 			if( event instanceof PlayersList){
 				players = ((PlayersList)event).getPlayers();
-				new UpdatePlayer(players).postCommand();
+				new BoardUpdate(players).postCommand();
 			} 
 			else if( event instanceof StartGame){
 				new ConnectionState(((StartGame)event).getPlayerCount()).postCommand();
-				new UpdatePlayer(players, player).postCommand();
+				new BoardUpdate(players, player).postCommand();
 			} 
 			else if( event instanceof PlayerState){
 				player = ((PlayerState)event).getPlayer();
@@ -70,6 +71,16 @@ public class ConnectionLogic implements Runnable {
 			} 
 			else if( event instanceof RackPlacement){
 				new BoardUpdate(((RackPlacement)event).getArray()).postCommand();
+			}
+			else if( event instanceof CurrentPhase){
+				phase = (CurrentPhase) event;
+				if( phase.isSetupPhase()){
+					new BoardUpdate(phase.getPlayers(),phase.getSetup()).postCommand();
+				}else if( phase.isRegularPhase()){
+					
+				}else if( phase.isCombatPhase()){
+					
+				}
 			}
 			else if(event instanceof HexOwnershipChanged){
 				//TODO handle

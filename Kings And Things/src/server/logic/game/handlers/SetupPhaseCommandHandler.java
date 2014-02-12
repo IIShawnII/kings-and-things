@@ -29,6 +29,7 @@ import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
+import common.event.notifications.CurrentPhase;
 import common.event.notifications.Flip;
 import common.event.notifications.HexPlacement;
 import common.event.notifications.PlayerOrderList;
@@ -59,10 +60,11 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		List<Integer> playerOrder = determinePlayerOrder(players,demoMode);
 		//TODO handle dice rolls for player order
 		new PlayerOrderList( playerOrder).postNotification();
-		GameState currentState = new GameState(board,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0), CombatPhase.NO_COMBAT, -1, null);
+		//TODO since player order is predetermined start from SetupPhase.PICK_SECOND_HEX
+		GameState currentState = new GameState(board,players,playerOrder,SetupPhase.PICK_SECOND_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0), CombatPhase.NO_COMBAT, -1, null);
 		new Flip().postNotification();
-		
 		new GameStarted(isDemoMode, cup, bank, boardGenerator, currentState).postCommand();
+		new CurrentPhase( currentState.getPlayerInfoArray(), SetupPhase.PICK_SECOND_HEX).postNotification();
 	}
 
 	/**

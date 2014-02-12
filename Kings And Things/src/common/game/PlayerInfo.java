@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 public class PlayerInfo implements Serializable {
 	
-	private static final long serialVersionUID = 3451331442207885108L;
+	private static final long serialVersionUID = 4318444709892949244L;
 	
 	private final int ID;
 	private int gold;

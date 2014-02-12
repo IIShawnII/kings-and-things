@@ -1,5 +1,6 @@
 package client.gui;
 
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.JPanel;
@@ -27,9 +28,10 @@ import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
 import client.gui.LockManager.Lock;
 import client.event.BoardUpdate;
-import client.event.UpdatePlayer;
 import common.Constants.Category;
+import common.Constants.RegularPhase;
 import common.Constants.Restriction;
+import common.Constants.SetupPhase;
 import common.game.HexState;
 import common.game.PlayerInfo;
 import common.game.TileProperties;
@@ -118,9 +120,10 @@ public class Board extends JPanel{
 		g2d.dispose();
 	}
 	
-	private boolean boradComplete = false;
+	private boolean phaseDone = false;
 
 	private LockManager locks;
+	private JTextField jtfStatus;
 	private MouseInput mouseInput;
 	private TileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
@@ -142,9 +145,16 @@ public class Board extends JPanel{
 	protected void init( int playerCount){
 		mouseInput = new MouseInput();
 		addMouseListener( mouseInput);
-		addMouseMotionListener( mouseInput);
 		addMouseWheelListener( mouseInput);
+		addMouseMotionListener( mouseInput);
 		locks = new LockManager( playerCount);
+		jtfStatus = new JTextField("Welcome to Kings & Things");
+		jtfStatus.setBounds( 10, getHeight()-40, HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING, 35);
+		jtfStatus.setEditable( false);
+		jtfStatus.setOpaque( false);
+		jtfStatus.setBorder( null);
+		jtfStatus.setFont( font);
+		add(jtfStatus);
 		/*Rectangle bound = new Rectangle( INITIAL_TILE_X_SHIFT, TILE_Y_SHIFT, TILE_SIZE.width, TILE_SIZE.height);
 		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Buildable)), bound, true);
@@ -263,17 +273,6 @@ public class Board extends JPanel{
 	}
 	
 	/**
-	 * update player information, such as gold, name, and rack count 
-	 * @param update - event wrapper holding players information
-	 */
-	@Subscribe
-	public void updatePlayers( UpdatePlayer update){
-		currentPlayer = update.getCurrent();
-		players = update.getPlayers();
-		repaint();
-	}
-	
-	/**
 	 * animate placement of hex tiles
 	 * @param hexes - list of HexState to populate the hexes on board
 	 */
@@ -336,6 +335,14 @@ public class Board extends JPanel{
 	 */
 	@Subscribe
 	public void updateBoard( BoardUpdate update){
+		try{
+		//TODO complete Board update
+		if( update.hasPlayerInfo()){
+			currentPlayer = update.getCurrent();
+			players = update.getPlayers();
+			repaint();
+			phaseDone = true;
+		}
 		if( update.hasHexes()){
 			animateHexPlacement( update.getHexes());
 		}else if( update.flipAll()){
@@ -344,12 +351,72 @@ public class Board extends JPanel{
 			placeMarkers( update.getPlayerOrder());
 		}else if( update.isRack()){
 			animateRackPlacement();
+		}else if( update.isSetupPhase()){
+			manageSetupPhase( update.getSetup());
+		}else if( update.isRegularPhase()){
+			manageRegularPhase( update.getRegular());
 		}
-		while( !boradComplete){
+		while( !phaseDone){
 			try {
-				Thread.sleep( 50);
+				Thread.sleep( 100);
 			} catch ( InterruptedException e) {}
 		}
+		}catch( Exception ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	private void manageRegularPhase( RegularPhase phase) {
+		switch( phase){
+			case COMBAT:
+				break;
+			case CONSTRUCTION:
+				break;
+			case MOVEMENT:
+				break;
+			case RANDOM_EVENTS:
+				break;
+			case RECRUITING_CHARACTERS:
+				break;
+			case RECRUITING_THINGS:
+				break;
+			case SPECIAL_POWERS:
+				break;
+			default:
+				break;
+		}
+	}
+
+	private void manageSetupPhase( SetupPhase phase){
+		switch( phase){
+			case DETERMINE_PLAYER_ORDER:
+				break;
+			case EXCHANGE_SEA_HEXES:
+				break;
+			case EXCHANGE_THINGS:
+				break;
+			case PICK_FIRST_HEX:
+				jtfStatus.setText( "Pick your first Hex"); mouseInput.ignore = false;
+				//TODO must be implemented when dice roll is implemented
+				break;
+			case PICK_SECOND_HEX:
+				jtfStatus.setText( "Pick your second Hex"); mouseInput.ignore = false;
+				break;
+			case PICK_THIRD_HEX:
+				jtfStatus.setText( "Pick your third Hex"); mouseInput.ignore = false;
+				break;
+			case PLACE_EXCHANGED_THINGS:
+				break;
+			case PLACE_FREE_THINGS:
+				break;
+			case PLACE_FREE_TOWER:
+				break;
+			case SETUP_FINISHED:
+				break;
+			default:
+				break;
+		}
+		
 	}
 	
 	/**
@@ -397,14 +464,7 @@ public class Board extends JPanel{
 		private boolean moveStack = false;
 		private Point lastPoint;
 		private HexState movingState;
-		
-		/**
-		 * display mouse position in console
-		 */
-		@Override
-		public void mouseMoved(MouseEvent e){
-			//System.out.println( e.getPoint());
-		}
+		private boolean ignore = true;
 		
 		/**
 		 * checks to see if movement is still inside the board,
@@ -413,7 +473,10 @@ public class Board extends JPanel{
 		 */
 		@Override
 	    public void mouseDragged(MouseEvent e){
-			if( (moveStack || boradComplete) && currentTile!=null){
+			if( BYPASS_MOUSE_CLICK || ignore){
+				return;
+			}
+			if( (moveStack || phaseDone) && currentTile!=null){
 				boardBound = getBounds();
 				bound = currentTile.getBounds();
 				lastPoint = bound.getLocation();
@@ -445,6 +508,9 @@ public class Board extends JPanel{
 		
 		@Override
 		public void mouseReleased( MouseEvent e){
+			if( BYPASS_MOUSE_CLICK || ignore){
+				return;
+			}
 			if( newLock!=null&&currentTile!=null&& newLock.canHold( currentTile)){
 				if( placeTileOnHex( currentTile, movingState, true)){
 					System.out.println("tile added");
@@ -463,8 +529,11 @@ public class Board extends JPanel{
 		 */
 		@Override
 		public void mousePressed( MouseEvent e){
+			if( BYPASS_MOUSE_CLICK || ignore){
+				return;
+			}
 			Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
-			if( boradComplete && deepestComponent!=null){
+			if( phaseDone && deepestComponent!=null){
 				if( deepestComponent instanceof Tile){
 					currentTile = (Tile) deepestComponent;
 					remove( currentTile);
@@ -497,17 +566,16 @@ public class Board extends JPanel{
 		 */
 		@Override
 		public void mouseClicked( MouseEvent e){
-			if( BYPASS_MOUSE_CLICK){
+			if( BYPASS_MOUSE_CLICK || ignore){
 				return;
 			}
-			if( boradComplete && SwingUtilities.isRightMouseButton( e)){
+			if( phaseDone && SwingUtilities.isRightMouseButton( e)){
 				Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
 				if( deepestComponent!=null){
 					((Tile)deepestComponent).flip();
 				}
-			}else if( boradComplete && SwingUtilities.isMiddleMouseButton( e)){
-				FlipAll flip = new FlipAll( getComponents());
-				flip.start();
+			}else if( phaseDone && SwingUtilities.isMiddleMouseButton( e)){
+				FlipAllHexes();
             }else if( SwingUtilities.isLeftMouseButton( e)){
             	switch( clickCount){
             		case 0: 
@@ -562,7 +630,7 @@ public class Board extends JPanel{
 		}
 		
 		public void start(){
-			boradComplete = false;
+			phaseDone = false;
 			timer = new Timer( ANIMATION_DELAY, this);
             timer.setInitialDelay( 0);
             timer.start();
@@ -575,7 +643,7 @@ public class Board extends JPanel{
 				//list is done
 				if( index==-1 || index>=list.length){
 					timer.stop();
-					boradComplete = true;
+					phaseDone = true;
 					return;
 				}
 				//get next index in list
@@ -616,6 +684,7 @@ public class Board extends JPanel{
 		}
 		
 		public void start(){
+			phaseDone = false;
 			timer = new Timer( ANIMATION_DELAY, this);
             timer.setInitialDelay( 0);
             timer.start();
@@ -625,6 +694,7 @@ public class Board extends JPanel{
 		public void actionPerformed( ActionEvent e) {
 			if( index>=list.length){
 				timer.stop();
+				phaseDone = true;
 			}else{
 				if( list[index] instanceof Hex){
 					((Tile) list[index]).flip();

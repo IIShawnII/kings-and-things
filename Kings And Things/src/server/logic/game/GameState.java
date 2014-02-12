@@ -12,6 +12,7 @@ import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.game.HexState;
+import common.game.PlayerInfo;
 import common.game.Roll;
 
 /**
@@ -64,6 +65,19 @@ public class GameState
 			hitsToApply.put(p.getID(), 0);
 		}
 		this.setActivePhasePlayer(activePhasePlayerNumber);
+	}
+	
+	/**
+	 * convert Players set to PlayerInfo array
+	 */
+	public PlayerInfo[] getPlayerInfoArray(){
+		PlayerInfo[] infos = new PlayerInfo[ players.size()];
+		int index=0;
+		for( Player player:players){
+			infos[index] = player.getPlayerInfo();
+			index++;
+		}
+		return infos;
 	}
 	
 	/**
