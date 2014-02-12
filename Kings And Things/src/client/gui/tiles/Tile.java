@@ -80,8 +80,9 @@ public class Tile extends JComponent{
 		}
 	}
 	
-	public boolean isInside( int x, int y){
-		return true;
+	@Override
+	public boolean contains( Point p){
+		return super.contains( p);
 	}
 	
 	public Lock getLock(){

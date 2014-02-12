@@ -118,8 +118,8 @@ public class LockManager {
 		return null;
 	}
 	
-	public boolean canLeaveLock( Tile tile, int xOffset, int yOffset){
-		return tile.hasLock() && !tile.getLock().contains( tile.getCeneter( xOffset, yOffset));
+	public boolean canLeaveLock( Tile tile, Point point){
+		return tile.hasLock() && !tile.getLock().contains( point);
 	}
 	
 	public boolean canLockToPermanent( Tile tile){

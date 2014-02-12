@@ -1,5 +1,6 @@
 package client.gui;
 
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.JPanel;
 
@@ -167,8 +168,6 @@ public class Board extends JPanel{
 	public Tile addTile( Tile tile, Rectangle bound, boolean lock){
 		tile.init();
 		tile.setBounds( bound);
-		tile.addMouseListener( mouseInput);
-		tile.addMouseMotionListener( mouseInput);
 		if( lock){
 			tile.setLockArea( locks.getPermanentLock( tile));
 			tile.setCanAnimate( false);
@@ -394,11 +393,7 @@ public class Board extends JPanel{
 
 		private Rectangle bound, boardBound;
 		private Lock newLock;
-		private int xDiff, yDiff;
-		private int xPressed, yPressed;
-		private boolean ignore = false;
 		private int clickCount = 0;
-		private Hex currentHex;
 		private Tile currentTile;
 		private boolean moveStack = false;
 		private Point lastPoint;
@@ -418,68 +413,50 @@ public class Board extends JPanel{
 		 */
 		@Override
 	    public void mouseDragged(MouseEvent e){
-			if( moveStack || !ignore && e.getSource() instanceof Tile && boradComplete){
-				Tile tile = currentTile!=null? currentTile:(Tile)e.getSource();
+			if( (moveStack || boradComplete) && currentTile!=null){
 				boardBound = getBounds();
-				bound = tile.getBounds();
-				if( moveStack){
-					xDiff = e.getX() - lastPoint.x;
-					yDiff = e.getY() - lastPoint.y;
-				}else{
-					xDiff = e.getX() - xPressed;
-					yDiff = e.getY() - yPressed;
-				}
-				System.out.println( "Diff:    " + new Point( xDiff, yDiff));
-				/*System.out.println( "Press:   " + lastPoint);
-				System.out.println( "Current: " + e.getPoint());
-				System.out.println( "Bound:   " + bound.getLocation());
-				System.out.println();*/
-				bound.translate( xDiff, 0);
+				bound = currentTile.getBounds();
+				lastPoint = bound.getLocation();
+				bound.x = e.getX()-(bound.width/2);
 				if( !boardBound.contains( bound)){
-					bound.translate( -xDiff, 0);
+					bound.x = lastPoint.x;
 				}
-				bound.translate( 0, yDiff);
+				bound.y = e.getY()-(bound.height/2);
 				if( !boardBound.contains( bound)){
-					bound.translate( 0, -yDiff);
+					bound.y= lastPoint.y;
 				}
 				//tile.setBounds( bound);
-				if(tile.hasLock()){
-					System.out.println( "Has Lock: " + tile.getLock());
-					if( moveStack || locks.canLeaveLock( tile, xDiff, yDiff)){
-						System.out.println( "Remove Lock: " + tile.getLock());
-						tile.removeLock();
-						tile.setBounds( bound);
+				if( currentTile.hasLock()){
+					if( moveStack || locks.canLeaveLock( currentTile, e.getPoint())){
+						currentTile.removeLock();
+						currentTile.setBounds( bound);
 					}
 				}else{
-					newLock = locks.canLockToAny( tile);
-					System.out.println( "New Lock: " + newLock);
+					newLock = locks.canLockToAny( currentTile);
 					if( newLock!=null){
-						System.out.println( "Assign Lock: " + newLock);
-						tile.setLockArea( newLock);
+						currentTile.setLockArea( newLock);
 						Point center = newLock.getCenter();
 						bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
 					}
-					tile.setBounds( bound);
-					if( newLock!=null && newLock.canHold( !tile.isTile())){
-						System.out.println( "CanHold: " + newLock);
-						if(placeTileOnHex( tile, false) && moveStack){
-							System.out.println( "Placed: " + newLock);
-							if( newLock.getHex().getState()!=currentHex.getState()){
-								System.out.println( "Exchnage Sate: " + newLock);
+					currentTile.setBounds( bound);
+					if( newLock!=null && newLock.canHold( !currentTile.isTile())){
+						if(placeTileOnHex( currentTile, false) && moveStack){
+							/*if( newLock.getHex().getState()!=currentHex.getState()){
 								newLock.getHex().setState( currentHex.getState());
-							}
+							}*/
 						}
 					}
 				}
-				lastPoint = e.getPoint();
 			}
 		}
 		
 		@Override
 		public void mouseReleased( MouseEvent e){
 			moveStack = false;
-			currentHex = null;
-			currentTile = null;
+			currentTile = null; 
+			lastPoint = null;
+			newLock = null;
+			bound = null;
 		}
 
 		/**
@@ -487,34 +464,25 @@ public class Board extends JPanel{
 		 */
 		@Override
 		public void mousePressed( MouseEvent e){
-			Object source = e.getSource();
-			if( boradComplete && source instanceof Tile){
-				xPressed = e.getX();
-				yPressed = e.getY();
-				Tile tile = (Tile)source;
-				if( tile.isInside( xPressed, yPressed)){
-					remove( tile);
-					add( tile, 0);
+			Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
+			if( boradComplete && deepestComponent!=null){
+				if( deepestComponent instanceof Tile){
+					currentTile = (Tile) deepestComponent;
+					remove( currentTile);
+					add( currentTile, 0);
 					revalidate();
-					repaint( tile.getBounds());
-					ignore = false;
-					if( !tile.isTile()){
-						currentHex = (Hex)tile;
-						if( currentHex.getState().hasMarker() && currentHex.getState().hasThings()){
-							Point point = currentHex.getLock().getCenter();
+					if( !currentTile.isTile()){
+						if( currentTile.getLock().getHex().getState().hasMarker() && currentTile.getLock().getHex().getState().hasThings()){
+							Point point = currentTile.getLock().getCenter();
 							Rectangle bound = new Rectangle( TILE_SIZE);
 							bound.setLocation( point.x-(TILE_SIZE.width/2), point.y-(TILE_SIZE.height/2));
-							tile = addTile( new Tile( playerMarker), bound, false);
-							tile.setLockArea( newLock);
-							tile.flip();
+							currentTile = addTile( new Tile( playerMarker), bound, false);
+							currentTile.setLockArea( newLock);
+							currentTile.flip();
 							revalidate();
-							currentTile = tile;
 							moveStack = true;
-							lastPoint = e.getPoint();
 						}
 					}
-				}else{
-					ignore = true;
 				}
 			}
 		}
@@ -527,15 +495,15 @@ public class Board extends JPanel{
 			if( BYPASS_MOUSE_CLICK){
 				return;
 			}
-			Object source = e.getSource();
-			if( boradComplete && source instanceof Tile && e.getButton()==MouseEvent.BUTTON3){
-				if( ((Tile)source).isInside( xPressed, yPressed)){
-					((Tile)source).flip();
+			if( boradComplete && SwingUtilities.isRightMouseButton( e)){
+				Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
+				if( deepestComponent!=null){
+					((Tile)deepestComponent).flip();
 				}
-			}else if( boradComplete && !(source instanceof Tile) && e.getButton()==MouseEvent.BUTTON2){
+			}else if( boradComplete && SwingUtilities.isMiddleMouseButton( e)){
 				FlipAll flip = new FlipAll( getComponents());
 				flip.start();
-            }else if( !(source instanceof Tile) && e.getButton()==MouseEvent.BUTTON1){
+            }else if( SwingUtilities.isLeftMouseButton( e)){
             	switch( clickCount){
             		case 0: 
             			animateHexPlacement( null);

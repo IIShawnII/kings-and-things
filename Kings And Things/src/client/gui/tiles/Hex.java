@@ -4,6 +4,7 @@ import static common.Constants.HEX_OUTLINE;
 import static common.Constants.IMAGE_HEX_REVERSE;
 
 import java.awt.Graphics;
+import java.awt.Point;
 
 import client.gui.LockManager.Lock;
 import common.game.HexState;
@@ -33,8 +34,8 @@ public class Hex extends Tile{
 	}
 	
 	@Override
-	public boolean isInside( int x, int y){
-		return HEX_OUTLINE.contains( x, y);
+	public boolean contains( Point point){
+		return HEX_OUTLINE.contains( point);
 	}
 	
 	@Override
