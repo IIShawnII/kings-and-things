@@ -342,7 +342,7 @@ public abstract class CommandHandler
 			{
 				r.addRoll(rollDie());
 				//notifies players of die roll
-				new DieRoll(r).postNotification();;
+				new DieRoll(r).postNotification(playerNumber);
 				break;
 			}
 		}

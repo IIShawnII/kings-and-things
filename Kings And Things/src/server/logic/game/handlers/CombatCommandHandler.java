@@ -17,6 +17,7 @@ import common.Constants.CombatPhase;
 import common.Constants.RollReason;
 import common.Logger;
 import common.event.notifications.CombatHits;
+import common.event.notifications.HexStatesChanged;
 import common.game.HexState;
 import common.game.Roll;
 import common.game.TileProperties;
@@ -99,6 +100,9 @@ public class CombatCommandHandler extends CommandHandler
 				player.removeOwnedThingOnBoard(thing);
 				getCurrentState().getCombatHex().removeThingFromHex(thing);
 			}
+			HexStatesChanged notification = new HexStatesChanged(1);
+			notification.getArray()[0] = getCurrentState().getCombatHex();
+			notification.postNotification();
 		}
 		
 		getCurrentState().removeHitsFromPlayer(playerNumber, hitCount);
@@ -117,6 +121,10 @@ public class CombatCommandHandler extends CommandHandler
 		HexState combatHex = getCurrentState().getCombatHex();
 		getCurrentState().setCurrentCombatPhase(nextPhase);
 		Set<TileProperties> things = combatHex.getFightingThingsInHex();
+		if(nextPhase == CombatPhase.RETREAT)
+		{
+			nextPhase = CombatPhase.MAGIC_ATTACK;
+		}
 		if(nextPhase == CombatPhase.MAGIC_ATTACK || nextPhase == CombatPhase.RANGED_ATTACK || nextPhase == CombatPhase.MELEE_ATTACK)
 		{
 			for(TileProperties thing : things)
@@ -159,6 +167,7 @@ public class CombatCommandHandler extends CommandHandler
 	private void applyRollEffects()
 	{
 		ArrayList<Roll> handledRolls = new ArrayList<Roll>();
+		boolean attackedWithCreature = false;
 		for(Roll r : getCurrentState().getFinishedRolls())
 		{
 			switch(r.getRollReason())
@@ -166,6 +175,7 @@ public class CombatCommandHandler extends CommandHandler
 				case ATTACK_WITH_CREATURE:
 				{
 					handledRolls.add(r);
+					attackedWithCreature = true;
 					//TODO handle 3 and 4 way combat by adding targetting mechanism
 					Player rollingPlayer = getCurrentState().getPlayerByPlayerNumber(r.getRollingPlayerID());
 					int hitCount = 0;
@@ -194,18 +204,6 @@ public class CombatCommandHandler extends CommandHandler
 							}
 						}
 					}
-					int nextOrdinal = getCurrentState().getCurrentCombatPhase().ordinal() + 1;
-					if(!getCurrentState().hitsToApply())
-					{
-						nextOrdinal++;
-					}
-					for(CombatPhase phase : CombatPhase.values())
-					{
-						if(phase.ordinal() == nextOrdinal)
-						{
-							getCurrentState().setCurrentCombatPhase(phase);
-						}
-					}
 					break;
 				}
 				case CALCULATE_DAMAGE_TO_TILE:
@@ -231,7 +229,21 @@ public class CombatCommandHandler extends CommandHandler
 					break;
 			}
 		}
-		
+		if(attackedWithCreature)
+		{
+			int nextOrdinal = getCurrentState().getCurrentCombatPhase().ordinal() + 1;
+			for(CombatPhase phase : CombatPhase.values())
+			{
+				if(phase.ordinal() == nextOrdinal)
+				{
+					getCurrentState().setCurrentCombatPhase(phase);
+				}
+			}
+			if(!getCurrentState().hitsToApply())
+			{
+				advanceToNextCombatPhase();
+			}
+		}
 		for(Roll r : handledRolls)
 		{
 			getCurrentState().removeRoll(r);

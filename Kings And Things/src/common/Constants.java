@@ -21,14 +21,14 @@ public final class Constants {
 	//Primary for bypassing rules for 4 player, so it can be tested for one players
 	public static final boolean BYPASS_MIN_PLAYER = true;
 	public static final boolean BYPASS_MOUSE_CLICK = false;
-	public static final boolean BYPASS_LOAD_IMAGES = true;
+	public static final boolean BYPASS_LOAD_IMAGES = false;
 	public static final boolean BYPASS_LOBBY = false;
 	public static final boolean DRAW_LOCKS = false;
-	public static final boolean LOAD_BUILDING = false;
+	public static final boolean LOAD_BUILDING = true;
 	public static final boolean LOAD_SPECIAL = false;
 	public static final boolean LOAD_GOLD = false;
 	public static final boolean LOAD_STATE = true;
-	public static final boolean LOAD_CUP = false;
+	public static final boolean LOAD_CUP = true;
 	public static final boolean LOAD_HEX = true;
 
 	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
