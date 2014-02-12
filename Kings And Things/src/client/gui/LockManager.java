@@ -87,29 +87,35 @@ public class LockManager {
 		lock.setInUse( true);
 		return lock;
 	}
-	
-	public Lock getLock( Tile tile){
-		Point point = tile.getCeneter( 0, 0);
-		boolean isHex = tile instanceof Hex;
-		Lock lock = getPermanentLock( tile.getProperties().getCategory());
-		if( !lock.inUse && lock.contains( tile.getCeneter( 0, 0))){
+
+	private Lock getLock( Point point, boolean isTile, Category category) {
+		Lock lock = getPermanentLock( category);
+		if( !lock.inUse && lock.contains( point)){
 			lock.setInUse( true);
 			return lock;
 		}
 		lock = null;
-		if( !isHex){
-			lock = lookThroughLocks( rackLocks, point, isHex);
+		if( isTile){
+			lock = lookThroughLocks( rackLocks, point, isTile);
 		}
 		if( lock==null){
-			lock = lookThroughLocks( hexBoardLocks, point, isHex);
+			lock = lookThroughLocks( hexBoardLocks, point, isTile);
 		}
 		return lock;
 	}
 	
-	private Lock lookThroughLocks( Lock[][] locks, Point point, boolean isHex){
+	public Lock getLock( Tile tile){
+		return getLock( tile.getCenter(), tile.isTile(), tile.getProperties().getCategory());
+	}
+	
+	public Lock getLock( Tile tile, int x, int y){
+		return getLock( new Point(x,y), tile.isTile(), tile.getProperties().getCategory());
+	}
+	
+	private Lock lookThroughLocks( Lock[][] locks, Point point, boolean isTile){
 		for( int i=0; i<locks.length;i++){
 			for( int j=0; j<locks[i].length;j++){
-				if( locks[i][j]!=null&&locks[i][j].canHold( isHex) && canLock( locks[i][j], point)){
+				if( locks[i][j]!=null&&locks[i][j].canHold( isTile) && canLock( locks[i][j], point)){
 					locks[i][j].setInUse( true);
 					return locks[i][j];
 				}
@@ -123,7 +129,7 @@ public class LockManager {
 	}
 	
 	public boolean canLockToPermanent( Tile tile){
-		return canLock( getPermanentLock( tile), tile.getCeneter(0,0));
+		return canLock( getPermanentLock( tile), tile.getCenter());
 	}
 	
 	private boolean canLock( Lock lock, Point point){
@@ -141,10 +147,6 @@ public class LockManager {
 		point.x += LOCK_SIZE/2;
 		point.y += LOCK_SIZE/2;
 		return point;
-	}
-
-	public Lock canLockToAny( Tile tile) {
-		return getLock( tile);
 	}
 
 	public void draw( Graphics2D g2d) {
@@ -212,12 +214,16 @@ public class LockManager {
 			return inUse;
 		}
 		
-		public boolean canHold( boolean isHex){
-			if( this.isHex && !permanent && !isHex){
+		private boolean canHold( boolean isTile){
+			if( this.isHex && !permanent && isTile){
 				return true;
 			}else{
 				return !inUse;
 			}
+		}
+		
+		public boolean canHold( Tile tile){
+			return canHold( tile.isTile());
 		}
 		
 		public void setInUse( boolean use){

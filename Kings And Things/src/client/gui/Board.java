@@ -376,12 +376,11 @@ public class Board extends JPanel{
 	 * current Tile will be removed and added as TileProperties to the Hex
 	 * @param tile - thing to be placed
 	 */
-	private boolean placeTileOnHex( Tile tile, boolean ignoreMarker) {
-		if( !(tile instanceof Hex) && tile.hasLock() &&tile.getLock().isForHex() && (ignoreMarker || tile.getLock().getHex().getState().hasMarker())){
-			tile.getLock().getHex().getState().addThingToHex(tile.getProperties());
+	private boolean placeTileOnHex( Tile tile, HexState state, boolean ignoreMarker) {
+		if( tile.isTile() && tile.hasLock() && tile.getLock().canHold( tile) && (ignoreMarker || (tile.getLock().getHex().getState().hasMarker()))){
 			remove(tile);
 			revalidate();
-			return true;
+			return tile.getLock().getHex().getState().addThingToHex( tile.getProperties());
 		}
 		return false;
 	}
@@ -397,6 +396,7 @@ public class Board extends JPanel{
 		private Tile currentTile;
 		private boolean moveStack = false;
 		private Point lastPoint;
+		private HexState movingState;
 		
 		/**
 		 * display mouse position in console
@@ -408,7 +408,7 @@ public class Board extends JPanel{
 		
 		/**
 		 * checks to see if movement is still inside the board,
-		 * check to see if a new lock can be placed,
+		 * check to see if a new lock can be placed,	`
 		 * check to see if old lock can be released/
 		 */
 		@Override
@@ -417,6 +417,7 @@ public class Board extends JPanel{
 				boardBound = getBounds();
 				bound = currentTile.getBounds();
 				lastPoint = bound.getLocation();
+				//TODO adjust click to prevent centering all the time
 				bound.x = e.getX()-(bound.width/2);
 				if( !boardBound.contains( bound)){
 					bound.x = lastPoint.x;
@@ -425,38 +426,36 @@ public class Board extends JPanel{
 				if( !boardBound.contains( bound)){
 					bound.y= lastPoint.y;
 				}
-				//tile.setBounds( bound);
 				if( currentTile.hasLock()){
-					if( moveStack || locks.canLeaveLock( currentTile, e.getPoint())){
+					if( locks.canLeaveLock( currentTile, e.getPoint())){
 						currentTile.removeLock();
 						currentTile.setBounds( bound);
 					}
 				}else{
-					newLock = locks.canLockToAny( currentTile);
+					newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
 					if( newLock!=null){
 						currentTile.setLockArea( newLock);
 						Point center = newLock.getCenter();
 						bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
 					}
 					currentTile.setBounds( bound);
-					if( newLock!=null && newLock.canHold( !currentTile.isTile())){
-						if(placeTileOnHex( currentTile, false) && moveStack){
-							/*if( newLock.getHex().getState()!=currentHex.getState()){
-								newLock.getHex().setState( currentHex.getState());
-							}*/
-						}
-					}
 				}
 			}
 		}
 		
 		@Override
 		public void mouseReleased( MouseEvent e){
+			if( newLock!=null&&currentTile!=null&& newLock.canHold( currentTile)){
+				if( placeTileOnHex( currentTile, movingState, true)){
+					System.out.println("tile added");
+				}
+			}
 			moveStack = false;
 			currentTile = null; 
 			lastPoint = null;
 			newLock = null;
 			bound = null;
+			repaint();
 		}
 
 		/**
@@ -471,16 +470,22 @@ public class Board extends JPanel{
 					remove( currentTile);
 					add( currentTile, 0);
 					revalidate();
-					if( !currentTile.isTile()){
-						if( currentTile.getLock().getHex().getState().hasMarker() && currentTile.getLock().getHex().getState().hasThings()){
-							Point point = currentTile.getLock().getCenter();
-							Rectangle bound = new Rectangle( TILE_SIZE);
-							bound.setLocation( point.x-(TILE_SIZE.width/2), point.y-(TILE_SIZE.height/2));
-							currentTile = addTile( new Tile( playerMarker), bound, false);
-							currentTile.setLockArea( newLock);
-							currentTile.flip();
-							revalidate();
-							moveStack = true;
+					if( !currentTile.isTile() && currentTile.hasLock()){
+						newLock = currentTile.getLock();
+						movingState = newLock.getHex().getState();
+						if( movingState.hasMarker()){
+							if( movingState.hasThings()){
+								lastPoint = newLock.getCenter();
+								Rectangle bound = new Rectangle( TILE_SIZE);
+								bound.setLocation( lastPoint.x-(TILE_SIZE.width/2), lastPoint.y-(TILE_SIZE.height/2));
+								currentTile = addTile( new Tile( playerMarker), bound, false);
+								currentTile.setLockArea( newLock);
+								currentTile.flip();
+								revalidate();
+								moveStack = true;
+							} else {
+								currentTile = null;
+							}
 						}
 					}
 				}
@@ -531,7 +536,6 @@ public class Board extends JPanel{
 		private Tile tile;
 		private Point end;
 		private Timer timer;
-		private Rectangle start;
 		private int slope, intercept, xTemp=-1, yTemp;
 		private Tile[] list;
 		private int index = -1;
@@ -583,7 +587,6 @@ public class Board extends JPanel{
 					return;
 				}
 			}
-			start = tile.getBounds();
 			yTemp = (int)(slope*xTemp+intercept);
 			tile.setLocation( xTemp, yTemp);
 			xTemp+=MOVE_DISTANCE;
@@ -592,10 +595,9 @@ public class Board extends JPanel{
 				xTemp=-1;
 				tile.setLocation( end.x-size.width/2, end.y-size.height/2);
 				tile.setLockArea( locks.getLock( tile));
-				placeTileOnHex( tile, true);
+				placeTileOnHex( tile, null, true);
 			}
-			start.add( tile.getBounds());
-			repaint( start);
+			repaint();
 		}
 	}
 	
@@ -626,7 +628,7 @@ public class Board extends JPanel{
 			}else{
 				if( list[index] instanceof Hex){
 					((Tile) list[index]).flip();
-					repaint( list[index].getBounds());
+					repaint();
 				}
 				index++;
 			}

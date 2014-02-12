@@ -80,17 +80,12 @@ public class Tile extends JComponent{
 		}
 	}
 	
-	@Override
-	public boolean contains( Point p){
-		return super.contains( p);
-	}
-	
 	public Lock getLock(){
 		return lockArea;
 	}
 	
-	public Point getCeneter( int xOffset, int yOffset){
-		return new Point( getCenterX()+xOffset, getCenterY()+yOffset);
+	public Point getCenter(){
+		return new Point( getCenterX(), getCenterY());
 	}
 	
 	public int getCenterX(){
@@ -111,11 +106,7 @@ public class Tile extends JComponent{
 		lockArea = null;
 	}
 	
-	protected Point getCenter() {
-		return new Point( getWidth()/2, getHeight()/2);
-	}
-	
-	protected Point getCenter( Dimension offset) {
+	protected Point getTileCenter( Dimension offset) {
 		return new Point( (getWidth()/2) - (offset.width/2), (getHeight()/2) - (offset.height/2));
 	}
 

@@ -41,6 +41,14 @@ public class HexState implements Serializable{
 	}
 	
 	/**
+	 * used in moving stacks, to copy all info into new hex
+	 */
+	public HexState( HexState state){
+		this( state.hex, state.thingsInHex);
+		setMarker( state.marker);
+	}
+	
+	/**
 	 * Create a new hex state with nothing in the hex
 	 * @param hex The hex of this hexState
 	 * @throws IllegalArgumentException if hex is null or
@@ -75,6 +83,15 @@ public class HexState implements Serializable{
 		}
 	}
 	
+	public void addHex( HexState state){
+		for(TileProperties tp : state.thingsInHex){
+			addThingToHex(tp);
+		}
+		if( !marker.equals( state.marker)){
+			isInBattle = true;
+		}
+	}
+	
 	public boolean hasThings(){
 		return thingsInHex.size()>=1;
 	}
@@ -103,15 +120,14 @@ public class HexState implements Serializable{
 	
 	public void paint( Graphics g, Point point){
 		if( hasMarker() && isInBattle()){
-			g.drawImage( markerImage, point.x+5, point.y+5, null);
-			g.drawImage( BATLLE_IMAGE, point.x-5, point.y-5, null);
+			g.drawImage( markerImage, point.x+5, point.y+5, Constants.TILE_SIZE_BOARD.width, Constants.TILE_SIZE_BOARD.height, null);
+			g.drawImage( BATLLE_IMAGE, point.x-5, point.y-5, Constants.TILE_SIZE_BOARD.width, Constants.TILE_SIZE_BOARD.height, null);
 		}else if( hasMarker()){
 			g.drawImage( markerImage, point.x, point.y, Constants.TILE_SIZE_BOARD.width, Constants.TILE_SIZE_BOARD.height, null);
 		}else if( isInBattle()){
-			g.drawImage( BATLLE_IMAGE, point.x, point.y, null);
+			g.drawImage( BATLLE_IMAGE, point.x, point.y, Constants.TILE_SIZE_BOARD.width, Constants.TILE_SIZE_BOARD.height, null);
 		}
 	}
-	
 	
 	public boolean isFake(){
 		return isFake;

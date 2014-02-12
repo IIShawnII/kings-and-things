@@ -251,7 +251,7 @@ public class TileProperties implements Serializable{
 			return false;
 		}
 		TileProperties other = (TileProperties) obj;
-		if ( number != other.number || value != other.value || !name.equals( other.name)  || !(restrictions.equals( other.restrictions)) || !(abilities.equals( other.abilities))) {
+		if ( number != other.number || value != other.value || (name!=null&&!name.equals( other.name))  || !(restrictions.equals( other.restrictions)) || !(abilities.equals( other.abilities))) {
 			return false;
 		}
 		return true;

@@ -29,13 +29,18 @@ public class Hex extends Tile{
 	public void paintComponent( Graphics g){
 		super.paintComponent( g);
 		if(state!=null){
-			state.paint( g, getCenter( TILE_SIZE_BOARD));
+			state.paint( g, getTileCenter( TILE_SIZE_BOARD));
 		}
 	}
 	
 	@Override
 	public boolean contains( Point point){
-		return HEX_OUTLINE.contains( point);
+		return contains( point.x, point.y);
+	}
+	
+	@Override
+	public boolean contains( int x, int y){
+		return super.contains( x, y)&&HEX_OUTLINE.contains( x, y);
 	}
 	
 	@Override
