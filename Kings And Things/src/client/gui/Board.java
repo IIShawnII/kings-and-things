@@ -32,6 +32,7 @@ import common.Constants.Category;
 import common.Constants.RegularPhase;
 import common.Constants.Restriction;
 import common.Constants.SetupPhase;
+import common.event.notifications.HexOwnershipChanged;
 import common.game.HexState;
 import common.game.PlayerInfo;
 import common.game.TileProperties;
@@ -323,6 +324,7 @@ public class Board extends JPanel{
 			tiles[i] = addTile( new Tile( getPlayerMarker( i)), bound, false);
 			tiles[i].flip();
 			tiles[i].setDestination( locks.convertToCenterCoordinate( BOARD_POSITIONS[i][0], BOARD_POSITIONS[i][1]));
+			new HexOwnershipChanged( tiles[i].getLock().getHex().getState());
 		}
 		MoveAnimation animation = new MoveAnimation( tiles);
 		animation.start();
@@ -335,11 +337,14 @@ public class Board extends JPanel{
 	 */
 	@Subscribe
 	public void updateBoard( BoardUpdate update){
-		try{
 		//TODO complete Board update
 		if( update.hasPlayerInfo()){
+			if(update.getCurrent()!=null){
 			currentPlayer = update.getCurrent();
+			}
+			if(update.getPlayers()!=null){
 			players = update.getPlayers();
+			}
 			repaint();
 			phaseDone = true;
 		}
@@ -360,9 +365,6 @@ public class Board extends JPanel{
 			try {
 				Thread.sleep( 100);
 			} catch ( InterruptedException e) {}
-		}
-		}catch( Exception ex){
-			ex.printStackTrace();
 		}
 	}
 	
@@ -464,7 +466,7 @@ public class Board extends JPanel{
 		private boolean moveStack = false;
 		private Point lastPoint;
 		private HexState movingState;
-		private boolean ignore = true;
+		private boolean ignore = false;
 		
 		/**
 		 * checks to see if movement is still inside the board,
@@ -513,7 +515,7 @@ public class Board extends JPanel{
 			}
 			if( newLock!=null&&currentTile!=null&& newLock.canHold( currentTile)){
 				if( placeTileOnHex( currentTile, movingState, true)){
-					System.out.println("tile added");
+					
 				}
 			}
 			moveStack = false;

@@ -118,7 +118,7 @@ public abstract class CommandHandler
 		currentState.getPlayerByPlayerNumber(playerNumber).addOwnedHex(hex);
 
 		HexState hs = getCurrentState().getBoard().getHexStateForHex(hex);
-		new HexOwnershipChanged(hs,playerNumber).postNotification();
+		new HexOwnershipChanged(hs).postNotification( playerNumber);
 	}
 
 	protected void advanceActivePhasePlayer(){

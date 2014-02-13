@@ -1,5 +1,6 @@
 package server.logic;
 
+import server.event.commands.GiveHexToPlayerCommand;
 import server.event.commands.PlayerUpdated;
 import server.logic.game.Player;
 
@@ -8,6 +9,7 @@ import com.google.common.eventbus.Subscribe;
 import common.Logger;
 import common.event.AbstractEvent;
 import common.event.AbstractNetwrokEvent;
+import common.event.notifications.HexOwnershipChanged;
 import common.event.notifications.PlayerState;
 import common.game.PlayerInfo;
 import common.network.Connection;
@@ -82,6 +84,9 @@ public class PlayerConnection implements Runnable{
 			Logger.getStandardLogger().info( "(" + player + ")Received: " +notification);
 			if( notification instanceof PlayerState){
 				player.setIsPlaying( ((PlayerState)notification).getPlayer().isReady());
+			}else if ( notification instanceof HexOwnershipChanged){
+				HexOwnershipChanged event = (HexOwnershipChanged)notification;
+				new GiveHexToPlayerCommand( event.getChangedHex().getHex()).postCommand( player.getID());
 			}
 			new PlayerUpdated( player).postCommand();
 		}

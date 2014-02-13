@@ -31,7 +31,7 @@ public abstract class AbstractEvent{
 		postCommand();
 	}
 	
-	private void setPlayerID( int playerID){
+	protected void setPlayerID( int playerID){
 		this.playerID = playerID;
 	}
 	
