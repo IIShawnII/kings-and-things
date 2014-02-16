@@ -3,6 +3,9 @@
 	<tstamp>
 		<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
 	</tstamp>
+	<path id="classpath">
+            <fileset dir="lib" includes="*.jar"/>
+    </path>
 	<!-- removing old build files -->
 	<target name="initCleanUp">
 		<delete dir="${build}" />
@@ -16,7 +19,7 @@
 	</target>
 	<!-- compile code -->
 	<target name="compile" depends="buildFolder">
-		<javac srcdir="src" destdir="${build}/bin" />
+		<javac srcdir="src" destdir="${build}/bin" classpathref="classpath"/>
 	</target>
 	<!-- create server manifest and build a jar file for server -->
 	<target name="server">
@@ -30,7 +33,8 @@
 			 basedir="${build}/bin" 
 			 includes="**" 
 			 excludes="client/" 
-			 manifest="${build}/MANIFEST.MF" />
+			 manifest="${build}/MANIFEST.MF" >
+			 <zipgroupfileset dir="lib" includes="*.jar" /></jar>
 	</target>
 	<!-- create server manifest and build a jar file for client -->
 	<target name="client">
@@ -44,7 +48,8 @@
 			 basedir="${build}/bin"
 		     includes="**"
 			 excludes="server/"
-			 manifest="${build}/MANIFEST.MF" />
+			 manifest="${build}/MANIFEST.MF" >
+			 <zipgroupfileset dir="lib" includes="*.jar" /></jar>
 	</target>
 	<!-- remove new build folder -->
 	<target name="finalCleanUp">

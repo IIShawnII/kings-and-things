@@ -19,9 +19,9 @@ import common.game.TileProperties;
 public final class Constants {
 	
 	//Primary for bypassing rules for 4 player, so it can be tested for one players
-	public static final boolean BYPASS_MIN_PLAYER = true;
+	public static final boolean BYPASS_MIN_PLAYER = false;
 	public static final boolean BYPASS_MOUSE_CLICK = false;
-	public static final boolean BYPASS_LOAD_IMAGES = true;
+	public static final boolean BYPASS_LOAD_IMAGES = false;
 	public static final boolean BYPASS_LOBBY = false;
 	public static final boolean DRAW_LOCKS = false;
 	public static final boolean LOAD_BUILDING = false;
@@ -31,9 +31,11 @@ public final class Constants {
 	public static final boolean LOAD_CUP = false;
 	public static final boolean LOAD_HEX = true;
 
+	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP}
+	public enum UpdateInstruction {Connect, Disconnect, ReadyState, Start, UpdatePlayers, Category, End, Send}
+	public enum UpdateContent {Setup, Regular, Combat, PlayerInfo, PlayerOrder}
 	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
 	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
-	public enum NetwrokAction { Connect, Disconnect, ReadyState, StartGame}
 	public enum Level { Error, Warning, Notice, Plain, END, LOADING_DIALOG}
 	public enum Ability { Charge, Fly, Range, Special, Magic, Armor, Neutralised}
 	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END, Creature, Event, Magic, Treasure, Buildable}
@@ -82,6 +84,9 @@ public final class Constants {
 	//keys for events
 	public static final int PLAYER = 128;     //10000000
 	public static final int PLAYER_INC = 16;  //00010000
+	public static final int LOBBY = 0;  	  //00000000
+	public static final int LOGIC = 1;  	  //00000001
+	public static final int PROGRESS = 2;  	  //00000010
 	
 	//Maximums
 	public static final int MAX_HEXES = 48;

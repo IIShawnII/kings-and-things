@@ -281,7 +281,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		{
 			try
 			{
-				exchangeSeaHex(command.getHex(), command.getPlayerID());
+				exchangeSeaHex(command.getHex(), command.getID());
 			}
 			catch(Throwable t)
 			{
@@ -297,7 +297,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		{
 			try
 			{
-				giveHexToPlayer(command.getHex(), command.getPlayerID());
+				giveHexToPlayer(command.getHex(), command.getID());
 			}
 			catch(Throwable t)
 			{

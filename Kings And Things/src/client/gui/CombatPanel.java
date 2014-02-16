@@ -180,7 +180,7 @@ public class CombatPanel extends JPanel
 	public void recieveRollNotification(DieRoll roll)
 	{
 		final DieRoll r = roll;
-		if(roll.getPlayerID() == p.getID())
+		if(roll.getID() == p.getID())
 		{
 			final JLabel valueLabel = rolls.get(roll.getDieRoll().getRollTarget());
 			SwingUtilities.invokeLater(new Runnable(){

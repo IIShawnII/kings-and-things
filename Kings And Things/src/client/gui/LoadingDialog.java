@@ -1,8 +1,7 @@
 package client.gui;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -10,13 +9,9 @@ import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.DefaultListModel;
 
 import com.google.common.eventbus.Subscribe;
-
-import client.event.BoardUpdate;
-import client.event.ConnectionAction;
-import client.event.ConnectionState;
-import client.event.LoadProgress;
 
 import java.awt.Frame;
 import java.awt.Insets;
@@ -25,12 +20,18 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GraphicsConfiguration;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.ActionListener;
 
-import common.Constants.NetwrokAction;
+import client.event.UpdatePackage;
 import common.game.PlayerInfo;
+import common.Constants.Category;
+import common.Constants.UpdateKey;
+import common.Constants.UpdateInstruction;
+import static common.Constants.LOBBY;
+import static common.Constants.LOGIC;
+import static common.Constants.PROGRESS;
 import static common.Constants.SERVER_IP;
 import static common.Constants.MAX_PLAYERS;
 import static common.Constants.SERVER_PORT;
@@ -279,17 +280,23 @@ public class LoadingDialog extends JDialog{
 	
 	private class InputControl extends WindowAdapter implements ActionListener {
 		
+		private UpdatePackage update = new UpdatePackage();
+		
 		@Override
 		public void actionPerformed( ActionEvent e) {
 			Object source = e.getSource();
+			update.clear();
 			if( source==jbConnect){
 				if( !isConnected){
-					new ConnectionAction( jtfName.getText().trim(), jtfIP.getText().trim(), Integer.parseInt( jtfPort.getText().trim())).postCommand();
+					update.addInstruction( UpdateInstruction.Connect);
+					update.putData( UpdateKey.Name, jtfName.getText().trim());
+					update.putData( UpdateKey.IP, jtfIP.getText().trim());
+					update.putData( UpdateKey.Port, Integer.parseInt( jtfPort.getText().trim()));
 				}else{
-					new ConnectionAction( NetwrokAction.Disconnect).postCommand();
+					update.addInstruction( UpdateInstruction.Disconnect);
 				}
 			}else if( isConnected && source==jbReady){
-				new ConnectionAction( NetwrokAction.ReadyState).postCommand();
+				update.addInstruction( UpdateInstruction.ReadyState);
 			}else if( source==jbClose){
 				players = 0;
 				close();
@@ -297,6 +304,7 @@ public class LoadingDialog extends JDialog{
 				players = MAX_PLAYERS;
 				close();
 			}
+			update.postCommand(LOGIC);
 		}
 		
 		@Override
@@ -304,18 +312,21 @@ public class LoadingDialog extends JDialog{
 			close();
 		}
 	}
-	
+
 	@Subscribe
-	public void updateJList( BoardUpdate names){
-		listModel.removeAllElements();
-		for( PlayerInfo player: names.getPlayers()){
-			listModel.addElement( player);
+	public void receiveUpdatePackage( UpdatePackage update){
+		if( update.isPublic()){
+			return;
+		}
+		if( update.getID()==LOBBY){
+			updateDialog( update);
+		}else if( update.getID()==PROGRESS){
+			updateProgress( update);
 		}
 	}
 
-	@Subscribe
-	public void ConnectionState( ConnectionState conncetion){
-		switch( conncetion.getAction()){
+	private void updateDialog( UpdatePackage update){
+		switch( (UpdateInstruction)update.getFirstInstruction()){
 			case Connect:
 				isConnected = true;
 				jbConnect.setText( "Disconnect");
@@ -326,59 +337,70 @@ public class LoadingDialog extends JDialog{
 			case Disconnect:
 				isConnected = false;
 				jbConnect.setText( "Connect");
-				if( conncetion.getMessage()!=null){
-					JOptionPane.showMessageDialog( this, conncetion.getMessage(), "Connection", JOptionPane.ERROR_MESSAGE);
+				if( update.getData( UpdateKey.Message)!=null){
+					JOptionPane.showMessageDialog( this, update.getData( UpdateKey.Message), "Connection", JOptionPane.ERROR_MESSAGE);
 				}
 				listModel.removeAllElements();
 				break;
-			case StartGame:
-				players = conncetion.getPlayerCount();
+			case Start:
+				players = (Integer)update.getData( UpdateKey.PlayerCount);
 				close();
+				break;
 			case ReadyState:
-				jbReady.setText( conncetion.getMessage());
+				jbReady.setText( (String)update.getData( UpdateKey.Message));
+				break;
+			case UpdatePlayers:
+				listModel.removeAllElements();
+				for( PlayerInfo player: (PlayerInfo[])update.getData( UpdateKey.Players)){
+					listModel.addElement( player);
+				}
+				break;
 			default:
 				return;
 		}
 		jbReady.setEnabled( isConnected);
 	}
 	
-	@Subscribe
-	public void loadProgress( LoadProgress load) {
+	private void updateProgress( UpdatePackage load) {
 		if( !progress){
 			return;
 		}
-		switch( load.getCategory()){
-			case Building:
-				jpbBuilding.setValue( jpbBuilding.getValue()+1);
-				break;
-			case Cup:
-				jpbCup.setValue( jpbCup.getValue()+1);
-				break;
-			case Gold:
-				jpbGold.setValue( jpbGold.getValue()+1);
-				break;
-			case Hex:
-				jpbHex.setValue( jpbHex.getValue()+1);
-				break;
-			case Special:
-				jpbSpecial.setValue( jpbSpecial.getValue()+1);
-				break;
-			case State:
-				jpbState.setValue( jpbState.getValue()+1);
-				break;
-			case END:
-				remove( jpProgress);
-				Dimension size = getSize();
-				size.height -= PROGRESS_SIZE.height+10;
-				setMinimumSize( size);
-				setSize( size);
-				revalidate();
-				jbConnect.setEnabled( true);
-				jbClose.setEnabled( true);
-				jbSkip.setEnabled( true);
-				doneLoading = true;
-			default:
-				break;
+		UpdateInstruction instruction = (UpdateInstruction)load.getFirstInstruction(); 
+		if( instruction==UpdateInstruction.Category){
+			Category category = (Category)load.getData( UpdateKey.Command);
+			switch( category){
+				case Building:
+					jpbBuilding.setValue( jpbBuilding.getValue()+1);
+					break;
+				case Cup:
+					jpbCup.setValue( jpbCup.getValue()+1);
+					break;
+				case Gold:
+					jpbGold.setValue( jpbGold.getValue()+1);
+					break;
+				case Hex:
+					jpbHex.setValue( jpbHex.getValue()+1);
+					break;
+				case Special:
+					jpbSpecial.setValue( jpbSpecial.getValue()+1);
+					break;
+				case State:
+					jpbState.setValue( jpbState.getValue()+1);
+					break;
+				case END:
+					remove( jpProgress);
+					Dimension size = getSize();
+					size.height -= PROGRESS_SIZE.height+10;
+					setMinimumSize( size);
+					setSize( size);
+					revalidate();
+					jbConnect.setEnabled( true);
+					jbClose.setEnabled( true);
+					jbSkip.setEnabled( true);
+					doneLoading = true;
+				default:
+					break;
+			}
 		}
 	}
 }

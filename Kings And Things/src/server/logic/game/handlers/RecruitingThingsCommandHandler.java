@@ -162,9 +162,9 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		{
 			try
 			{
-				exchangeThings(command.getThings(), command.getPlayerID());
+				exchangeThings(command.getThings(), command.getID());
 				//notify client
-				notifyClientsOfPlayerTray(command.getPlayerID());
+				notifyClientsOfPlayerTray(command.getID());
 			}
 			catch(Throwable t)
 			{
@@ -180,13 +180,13 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		{
 			try
 			{
-				placeThingOnBoard(command.getThing(), command.getPlayerID(), command.getHex());
+				placeThingOnBoard(command.getThing(), command.getID(), command.getHex());
 				
 				HexStatesChanged changedHex = new HexStatesChanged(1);
 				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHex());
 				changedHex.postNotification();
 				//notify client
-				notifyClientsOfPlayerTray(command.getPlayerID());
+				notifyClientsOfPlayerTray(command.getID());
 			}
 			catch(Throwable t)
 			{
@@ -202,9 +202,9 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		{
 			try
 			{
-				recruitThings(command.getGold(), command.getThingsToExchange(), command.getPlayerID());
+				recruitThings(command.getGold(), command.getThingsToExchange(), command.getID());
 				//notify client
-				notifyClientsOfPlayerTray(command.getPlayerID());
+				notifyClientsOfPlayerTray(command.getID());
 			}
 			catch(Throwable t)
 			{

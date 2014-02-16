@@ -19,9 +19,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import server.event.commands.EndServer;
+import com.google.common.eventbus.Subscribe;
 
+import server.event.commands.EndServer;
 import common.Console;
+import common.event.ConsoleMessage;
 
 /**
  * server GUI to hold all and display all server related information
@@ -99,5 +101,10 @@ public class ServerGUI extends JFrame implements Runnable{
 		public void windowClosed(WindowEvent e){
 			new EndServer().postCommand();
 		}
+	}
+	
+	@Subscribe
+	public void setConsoleMessage( ConsoleMessage message){
+		console.add( message.getMessage(), message.getLevel());
 	}
 }

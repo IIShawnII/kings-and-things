@@ -1,8 +1,8 @@
 package server.logic;
 
 import static common.Constants.PLAYER;
-import static common.Constants.MAX_PLAYERS;
 import static common.Constants.PLAYER_INC;
+import static common.Constants.MAX_PLAYERS;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
 
@@ -14,20 +14,22 @@ import java.net.SocketTimeoutException;
 
 import com.google.common.eventbus.Subscribe;
 
-import server.logic.game.CommandHandlerManager;
 import server.logic.game.Player;
+import server.logic.game.CommandHandlerManager;
 import server.event.commands.EndServer;
 import server.event.commands.PlayerUpdated;
 import server.event.commands.StartGameCommand;
-import common.Constants;
 import common.Logger;
+import common.Constants;
+import common.Constants.Level;
+import common.game.PlayerInfo;
+import common.game.LoadResources;
 import common.network.Connection;
 import common.event.EventDispatch;
+import common.event.ConsoleMessage;
+import common.event.notifications.StartGame;
 import common.event.notifications.PlayerState;
 import common.event.notifications.PlayersList;
-import common.event.notifications.StartGame;
-import common.game.LoadResources;
-import common.game.PlayerInfo;
 
 public class ConnectionLobby implements Runnable {
 
@@ -40,27 +42,29 @@ public class ConnectionLobby implements Runnable {
 	public ConnectionLobby(boolean isDemoMode) throws IOException{
 		if(isDemoMode){
 			Logger.getStandardLogger().info("Server started in demo mode.");
+			new ConsoleMessage( "Starting in demo mode.", Level.Notice).postCommand();
 		}
-		LoadResources lr = new LoadResources( false);
-		lr.run();
 		
 		demoMode = isDemoMode;
 		connectedPlayers = new ArrayList<>();
 		game = new CommandHandlerManager();
-		
-		try {
-			serverSocket = new ServerSocket( SERVER_PORT);
-            serverSocket.setSoTimeout( SERVER_TIMEOUT*1000);
-			Logger.getStandardLogger().info("Listening on port " + SERVER_PORT);
-		} catch ( IOException e) {
-			Logger.getErrorLogger().error("Failed to open port " + SERVER_PORT, e);
-			throw e;
-		}
 	}
 
 	@Override
 	public void run() {
-		EventDispatch.registerForCommandEvents(this);
+		new ConsoleMessage( "Loading Resources", Level.Plain).postCommand();
+		new LoadResources( false).run();
+		new ConsoleMessage( "Loaded Resources", Level.Plain).postCommand();
+		try {
+			serverSocket = new ServerSocket( SERVER_PORT);
+            serverSocket.setSoTimeout( SERVER_TIMEOUT*1000);
+			Logger.getStandardLogger().info("Listening on port " + SERVER_PORT);
+			new ConsoleMessage( "Listening on port " + SERVER_PORT, Level.Notice).postCommand();
+		} catch ( IOException e) {
+			Logger.getErrorLogger().error("Failed to open port " + SERVER_PORT, e);
+			new ConsoleMessage( "Failed to open port " + SERVER_PORT + ", Restart Server", Level.Error).postCommand();
+			return;
+		}
 		game.initialize();
 		int count=0, playerID = PLAYER;
 		boolean oldClient = false;
@@ -74,6 +78,7 @@ public class ConnectionLobby implements Runnable {
             			oldClient = true;
             			pc.setConnection( connection);
             			startTask( pc, pc.getName());
+            			new ConsoleMessage( "Restablished connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice).postCommand();
             			Logger.getStandardLogger().info("Restablished connection from " + connection + ", assigned to " + pc.getPlayer());
             			break;
             		}
@@ -88,19 +93,23 @@ public class ConnectionLobby implements Runnable {
 	            	connectedPlayers.add( pc);
 	            	count++;
 	            	playerID+=PLAYER_INC;
+        			new ConsoleMessage( "Recieved connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice).postCommand();
 	            	Logger.getStandardLogger().info("Recieved connection from " + connection + ", assigned to " + pc.getPlayer());
             	}
+    			new ConsoleMessage( "Player count is " + count + " out of " + MAX_PLAYERS + " players, need players: " + (MAX_PLAYERS-count), Level.Notice).postCommand();
             	Logger.getStandardLogger().info("Player count is " + count + " out of " + MAX_PLAYERS + " players, need players: " + (MAX_PLAYERS-count));
             	playerUpdated( null);
             } catch( SocketTimeoutException ex){
                 //try again for incoming connections
             } catch ( IOException e) {
+    			new ConsoleMessage( "Problem closing player connections", Level.Error).postCommand();
             	Logger.getErrorLogger().error("Problem with player connections: ", e);
 			}
         }
 		try {
 			serverSocket.close();
 		} catch ( IOException e) {
+			new ConsoleMessage( "Problem closing player connections", Level.Error).postCommand();
 			Logger.getErrorLogger().error("Problem closing player connections: ", e);
 		}
 	}

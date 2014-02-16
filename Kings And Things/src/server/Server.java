@@ -5,6 +5,7 @@ import javax.swing.UIManager;
 
 import org.apache.log4j.PropertyConfigurator;
 
+import common.event.EventDispatch;
 import server.gui.ServerGUI;
 import server.logic.ConnectionLobby;
 
@@ -47,6 +48,7 @@ public class Server {
 		}
 
 		serverGUI = new ServerGUI( serverGUITitle);
+		EventDispatch.registerForCommandEvents( serverGUI);
 		//start GUI on AWT Thread
 		SwingUtilities.invokeLater( serverGUI);
 		while( !serverGUI.isVisible()){
@@ -58,6 +60,7 @@ public class Server {
 
 		try {
 			ConnectionLobby lobby = new ConnectionLobby(isDemoMode);
+			EventDispatch.registerForCommandEvents(lobby);
 			new Thread( lobby, "GAME LOGIC").start();
 		} catch ( Exception e) {
 			e.printStackTrace();

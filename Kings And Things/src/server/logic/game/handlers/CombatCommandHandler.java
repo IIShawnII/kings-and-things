@@ -270,7 +270,7 @@ public class CombatCommandHandler extends CommandHandler
 		{
 			try
 			{
-				applyHits(command.getTarget(), command.getPlayerID(), command.getNumHits());
+				applyHits(command.getTarget(), command.getID(), command.getNumHits());
 			}
 			catch(Throwable t)
 			{
@@ -286,7 +286,7 @@ public class CombatCommandHandler extends CommandHandler
 		{
 			try
 			{
-				resolveCombat(command.getCombatHex(), command.getPlayerID());
+				resolveCombat(command.getCombatHex(), command.getID());
 			}
 			catch(Throwable t)
 			{

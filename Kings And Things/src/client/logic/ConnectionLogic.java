@@ -1,27 +1,27 @@
 package client.logic;
 
+import com.google.common.eventbus.Subscribe;
+
 import client.event.BoardUpdate;
-import client.event.EndClient;
-import client.event.ConnectionState;
-import client.event.ConnectionAction;
+import client.event.UpdatePackage;
 import common.Logger;
+import common.game.PlayerInfo;
 import common.network.Connection;
-import common.Constants.NetwrokAction;
+import common.Constants.UpdateInstruction;
+import common.Constants.UpdateKey;
 import common.event.AbstractNetwrokEvent;
-import common.event.notifications.CurrentPhase;
 import common.event.notifications.Flip;
-import common.event.notifications.HexOwnershipChanged;
-import common.event.notifications.HexPlacement;
-import common.event.notifications.HexStatesChanged;
-import common.event.notifications.PlayerOrderList;
-import common.event.notifications.RackPlacement;
 import common.event.notifications.StartGame;
 import common.event.notifications.PlayersList;
 import common.event.notifications.PlayerState;
-import common.game.PlayerInfo;
-
-import com.google.common.eventbus.Subscribe;
-
+import common.event.notifications.CurrentPhase;
+import common.event.notifications.HexPlacement;
+import common.event.notifications.RackPlacement;
+import common.event.notifications.PlayerOrderList;
+import common.event.notifications.HexStatesChanged;
+import common.event.notifications.HexOwnershipChanged;
+import static common.Constants.LOGIC;
+import static common.Constants.LOBBY;
 import static common.Constants.PLAYER_READY;
 
 public class ConnectionLogic implements Runnable {
@@ -47,14 +47,17 @@ public class ConnectionLogic implements Runnable {
 			}
 		}
 		Logger.getStandardLogger().info( "listenning");
+		UpdatePackage update = new UpdatePackage();
 		while( !finished && (event = connection.recieve())!=null){
+			update.clear();
 			Logger.getStandardLogger().info( "Received: " + event);
 			if( event instanceof PlayersList){
-				players = ((PlayersList)event).getPlayers();
-				new BoardUpdate(players).postCommand();
+				update.addInstruction( UpdateInstruction.UpdatePlayers);
+				update.putData( UpdateKey.Players, ((PlayersList)event).getPlayers());
 			} 
 			else if( event instanceof StartGame){
-				new ConnectionState(((StartGame)event).getPlayerCount()).postCommand();
+				update.addInstruction( UpdateInstruction.Start);
+				update.putData( UpdateKey.PlayerCount, ((StartGame)event).getPlayerCount());
 				new BoardUpdate(players, player).postCommand();
 			} 
 			else if( event instanceof PlayerState){
@@ -88,23 +91,32 @@ public class ConnectionLogic implements Runnable {
 			else if(event instanceof HexStatesChanged){
 				//TODO handle
 			}
+			if( update.isModified()){
+				update.postCommand( LOBBY);
+			}
 		}
 		finished = true;
 		Logger.getStandardLogger().warn( "logic disconnected");
 	}
 	
 	@Subscribe
-	public void connectionAction( ConnectionAction action){
-		NetwrokAction netaction = NetwrokAction.Disconnect;
+	public void receiveUpdate( UpdatePackage action){
+		if( action.isPublic() || action.getID()!=LOGIC){
+			return;
+		}
+		UpdateInstruction netaction = UpdateInstruction.Disconnect;
 		String message = "Unable To Connect, Try Again";
-		switch( action.getAction()){
+		switch( action.getFirstInstruction()){
 			case Connect:
-				if( action.getName()==null || action.getName().length()<=0){
+				String name = (String)action.getData( UpdateKey.Name);
+				String ip = (String)action.getData( UpdateKey.IP);
+				int port = (Integer)action.getData( UpdateKey.Port);
+				if( name==null || name.length()<=0){
 					message += "\nThere Must Be a Name";
 				}else{ 
 					try{
-						if( connection.connectTo( action.getAddress(), action.getPort())){
-							netaction = NetwrokAction.Connect;
+						if( connection.connectTo( ip, port)){
+							netaction = UpdateInstruction.Connect;
 							if( finished){
 								finished = false;
 								startTask( this);
@@ -112,7 +124,7 @@ public class ConnectionLogic implements Runnable {
 							if( player!=null){
 								sendToServer( new PlayerState( player));
 							}else{
-								sendToServer( new PlayerState( action.getName(), PLAYER_READY));
+								sendToServer( new PlayerState( name, PLAYER_READY));
 							}
 						}
 					}catch(IllegalArgumentException ex){
@@ -122,18 +134,30 @@ public class ConnectionLogic implements Runnable {
 				break;
 			case Disconnect:
 				connection.disconnect();
-				message = null;
+				message = "Disconnect";
 				break;
 			case ReadyState:
-				netaction = NetwrokAction.ReadyState;
+				netaction = UpdateInstruction.ReadyState;
 				player.setReady( !player.isReady());
 				message = !player.isReady()? "Ready":"UnReady";
 				sendToServer( new PlayerState( player));
 				break;
+			case End:
+				connection.disconnect();
+				finished = true;
+				return;
+			case Send:
+				//TODO add supprot for sending UpdatePackage
+				//sendToServer( action);
+				return;
 			default:
 				return;
 		}
-		new ConnectionState( 0, message, netaction).postCommand();
+		UpdatePackage update = new UpdatePackage();
+		update.addInstruction( netaction);
+		update.putData( UpdateKey.Message, message);
+		update.putData( UpdateKey.PlayerCount, 0);
+		update.postCommand( LOBBY);
 	}
 	
 	private void startTask( Runnable task){
@@ -144,11 +168,5 @@ public class ConnectionLogic implements Runnable {
 	public void sendToServer( AbstractNetwrokEvent event){
 		Logger.getStandardLogger().info( "Sent: " + event);
 		connection.send( event);
-	}
-	
-	@Subscribe
-	public void endClient( EndClient end){
-		connection.disconnect();
-		finished = true;
 	}
 }

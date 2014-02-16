@@ -53,7 +53,7 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 		{
 			try
 			{
-				constructBuilding(command.getBuilding(), command.getPlayerID(), command.getHex());
+				constructBuilding(command.getBuilding(), command.getID(), command.getHex());
 
 				HexStatesChanged changedHex = new HexStatesChanged(1);
 				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHex());

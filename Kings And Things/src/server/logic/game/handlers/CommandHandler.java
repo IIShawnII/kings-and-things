@@ -376,7 +376,7 @@ public abstract class CommandHandler
 		{
 			try
 			{
-				endPlayerTurn(command.getPlayerID());
+				endPlayerTurn(command.getID());
 			}
 			catch(Throwable t)
 			{
@@ -392,7 +392,7 @@ public abstract class CommandHandler
 		{
 			try
 			{
-				rollDice(command.getReasonForRoll(), command.getPlayerID(), command.getTileToRollFor());
+				rollDice(command.getReasonForRoll(), command.getID(), command.getTileToRollFor());
 			}
 			catch(Throwable t)
 			{

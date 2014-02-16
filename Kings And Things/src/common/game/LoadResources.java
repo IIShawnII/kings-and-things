@@ -1,10 +1,21 @@
 package common.game;
 
+import javax.imageio.ImageIO;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.FileVisitor;
+import java.nio.file.FileVisitResult;
+import java.nio.file.attribute.BasicFileAttributes;
+
 import static common.Constants.RESOURCE_PATH;
 import static common.Constants.LOAD_BUILDING;
 import static common.Constants.LOAD_SPECIAL;
 import static common.Constants.LOAD_STATE;
 import static common.Constants.LOAD_GOLD;
+import static common.Constants.PROGRESS;
 import static common.Constants.LOAD_CUP;
 import static common.Constants.LOAD_HEX;
 import static common.Constants.BUILDING;
@@ -14,24 +25,18 @@ import static common.Constants.STATE;
 import static common.Constants.GOLD;
 import static common.Constants.CUP;
 import static common.Constants.HEX;
+
+import client.event.UpdatePackage;
+
 import common.Constants;
 import common.Constants.Biome;
 import common.Constants.Ability;
 import common.Constants.Building;
 import common.Constants.Category;
+import common.Constants.UpdateKey;
 import common.Constants.Restriction;
+import common.Constants.UpdateInstruction;
 
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-
-import javax.imageio.ImageIO;
-
-import client.event.LoadProgress;
 
 public class LoadResources implements Runnable, FileVisitor< Path>{
 
@@ -40,6 +45,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	private Category currentCategory = null;
 	private Category currentCupCategory = null;
 	private final Path RESOURCES_DIRECTORY;
+	private UpdatePackage update = null;
 	
 	public LoadResources( boolean loadImages){
 		this( RESOURCE_PATH, loadImages);
@@ -48,13 +54,17 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	public LoadResources(String directory, boolean loadImages){
 		RESOURCES_DIRECTORY = Paths.get(directory);
 		this.loadImages = loadImages;
+		update = new UpdatePackage();
 	}
 	
 	@Override
 	public void run() {
 		try {
+			update.addInstruction( UpdateInstruction.Category);
 			Files.walkFileTree( RESOURCES_DIRECTORY, this);
-			new LoadProgress( Category.END).postCommand();
+			update.clearDate();
+			update.putData( UpdateKey.Command, Category.END);
+			update.postCommand( PROGRESS);
 		} catch ( IOException e) {
 			e.printStackTrace();
 		}
@@ -81,6 +91,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	@Override
 	public FileVisitResult visitFile( Path file, BasicFileAttributes attrs) throws IOException {
+		update.clearDate();
 		if( currentCategory!=null && currentCategory!=Category.Resources  && currentCategory!=Category.Misc){
 			TileProperties tile = createTile( file.getFileName().toString());
 			switch( currentCategory){
@@ -185,7 +196,9 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			}
 			copyTile = 0;
 		}
-		new LoadProgress( currentCategory).postCommand();
+		update.addInstruction( UpdateInstruction.Category);
+		update.putData( UpdateKey.Command, currentCategory);
+		update.postCommand( PROGRESS);
 		return FileVisitResult.CONTINUE;
 	}
 	

@@ -5,7 +5,7 @@ package common.event;
  */
 public abstract class AbstractEvent{
 	
-	int playerID;
+	private int ID = -1;
 
 	/**
 	 * post this notification on command BusEvent
@@ -21,21 +21,25 @@ public abstract class AbstractEvent{
 		EventDispatch.NOTIFICATION.post( this);
 	}
 	
-	public void postNotification( int playerID){
-		setPlayerID( playerID);
+	public void postNotification( int ID){
+		setID( ID);
 		postNotification();
 	}
 	
-	public void postCommand( int playerID){
-		setPlayerID( playerID);
+	public void postCommand( int ID){
+		setID( ID);
 		postCommand();
 	}
 	
-	protected void setPlayerID( int playerID){
-		this.playerID = playerID;
+	protected void setID( int ID){
+		this.ID = ID;
 	}
 	
-	public int getPlayerID(){
-		return playerID;
+	public int getID(){
+		return ID;
+	}
+	
+	public boolean isPublic(){
+		return ID==-1;
 	}
 }

@@ -53,7 +53,7 @@ public class MovementCommandHandler extends CommandHandler
 		{
 			try
 			{
-				moveThings(command.getThings(),command.getPlayerID(), command.getHexes());
+				moveThings(command.getThings(),command.getID(), command.getHexes());
 
 				HexStatesChanged changedHex = new HexStatesChanged(2);
 				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHexes().get(0));
