@@ -42,6 +42,8 @@ public final class Constants {
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea,
 			Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
+	public enum RandomEvents {}
+	
 	
 	//Note, phase progression is dependent on the order of the declarations in the following enum type
 	public enum SetupPhase {DETERMINE_PLAYER_ORDER, PICK_FIRST_HEX, EXCHANGE_SEA_HEXES, PICK_SECOND_HEX, PICK_THIRD_HEX, PLACE_FREE_TOWER, PLACE_FREE_THINGS, EXCHANGE_THINGS, PLACE_EXCHANGED_THINGS, SETUP_FINISHED}
