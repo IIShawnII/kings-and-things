@@ -12,16 +12,17 @@ import javax.swing.JPanel;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 
-import client.event.UpdatePackage;
 import common.Console;
 import common.Constants.UpdateInstruction;
 import common.event.EventDispatch;
+import common.event.UpdatePackage;
 import common.game.LoadResources;
 import static common.Constants.LOGIC;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.MAX_PLAYERS;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.BYPASS_LOBBY;
+import static common.Constants.LOAD_RESOURCE;
 import static common.Constants.BYPASS_MIN_PLAYER;
 import static common.Constants.BYPASS_LOAD_IMAGES;
 
@@ -132,7 +133,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	}
 	
 	private void close(){
-		new UpdatePackage( UpdateInstruction.End, "GUI.Close").postCommand( LOGIC);
+		new UpdatePackage( UpdateInstruction.End, "GUI.Close").postCommand( LOGIC|LOAD_RESOURCE);
 		dispose();
 	}
 }

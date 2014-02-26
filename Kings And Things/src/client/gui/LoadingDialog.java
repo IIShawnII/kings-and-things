@@ -24,7 +24,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.ActionListener;
 
-import client.event.UpdatePackage;
+import common.event.UpdatePackage;
 import common.game.PlayerInfo;
 import common.Constants.Category;
 import common.Constants.UpdateKey;
@@ -33,7 +33,6 @@ import static common.Constants.LOBBY;
 import static common.Constants.LOGIC;
 import static common.Constants.PROGRESS;
 import static common.Constants.SERVER_IP;
-import static common.Constants.MAX_PLAYERS;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.PROGRESS_SIZE;
@@ -50,10 +49,10 @@ public class LoadingDialog extends JDialog{
 	private JPanel jpProgress;
 	private DefaultListModel< PlayerInfo> listModel;
 	private JTextField jtfIP, jtfPort, jtfName;
-	private JButton jbConnect, jbReady, jbClose, jbSkip;
+	private JButton jbConnect, jbReady, jbClose;
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
 	private JProgressBar jpbGold, jpbSpecial, jpbState;
-	private boolean isConnected = false, doneLoading = false, progress;
+	private boolean isConnected = false, progress;
 	
 	public LoadingDialog( Runnable task, String title, boolean modal, boolean progress, GraphicsConfiguration gc) {
 		super( (Frame)null, title, modal, gc);
@@ -95,18 +94,10 @@ public class LoadingDialog extends JDialog{
 		jpMain.add( jbReady, constraints);
 		
 		jbClose = new JButton( "Close");
-		jbClose.setEnabled( false);
 		jbClose.setActionCommand( "Cancel");
 		jbClose.addActionListener( control);
 		constraints.gridy = 2;
 		jpMain.add( jbClose, constraints);
-		
-		jbSkip = new JButton( "Skip");
-		jbSkip.setEnabled( false);
-		jbSkip.setActionCommand( "Skip");
-		jbSkip.addActionListener( control);
-		constraints.gridy = 3;
-		jpMain.add( jbSkip, constraints);
 		
 		jbConnect = new JButton( "Connect");
 		jbConnect.setEnabled( false);
@@ -271,11 +262,9 @@ public class LoadingDialog extends JDialog{
 	}
 	
 	public void close(){
-		if( doneLoading){
-			setVisible( false);
-			task = null;
-			dispose();
-		}
+		setVisible( false);
+		task = null;
+		dispose();
 	}
 	
 	private class InputControl extends WindowAdapter implements ActionListener {
@@ -302,14 +291,12 @@ public class LoadingDialog extends JDialog{
 			}else if( source==jbClose){
 				players = 0;
 				close();
-			}else if( source==jbSkip){
-				players = MAX_PLAYERS;
-				close();
 			}
 		}
 		
 		@Override
 		public void windowClosing(WindowEvent e){
+			players = 0;
 			close();
 		}
 	}
@@ -396,9 +383,6 @@ public class LoadingDialog extends JDialog{
 					setSize( size);
 					revalidate();
 					jbConnect.setEnabled( true);
-					jbClose.setEnabled( true);
-					jbSkip.setEnabled( true);
-					doneLoading = true;
 				default:
 					break;
 			}

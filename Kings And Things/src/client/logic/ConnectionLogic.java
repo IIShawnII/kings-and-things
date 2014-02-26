@@ -3,13 +3,13 @@ package client.logic;
 import com.google.common.eventbus.Subscribe;
 
 import client.event.BoardUpdate;
-import client.event.UpdatePackage;
 import common.Logger;
 import common.game.PlayerInfo;
 import common.network.Connection;
 import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
 import common.event.AbstractNetwrokEvent;
+import common.event.UpdatePackage;
 import common.event.notifications.Flip;
 import common.event.notifications.StartGame;
 import common.event.notifications.PlayersList;
@@ -101,7 +101,7 @@ public class ConnectionLogic implements Runnable {
 	
 	@Subscribe
 	public void receiveUpdate( UpdatePackage action){
-		if( action.isPublic() || action.getID()!=LOGIC){
+		if( action.isPublic() || (action.getID()&LOGIC)!=LOGIC){
 			return;
 		}
 		UpdateInstruction netaction = UpdateInstruction.Disconnect;
@@ -147,7 +147,7 @@ public class ConnectionLogic implements Runnable {
 				finished = true;
 				return;
 			case Send:
-				//TODO add supprot for sending UpdatePackage
+				//TODO add support for sending UpdatePackage
 				//sendToServer( action);
 				return;
 			default:

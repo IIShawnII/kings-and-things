@@ -2,6 +2,8 @@ package common.game;
 
 import javax.imageio.ImageIO;
 
+import com.google.common.eventbus.Subscribe;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -12,6 +14,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import static common.Constants.RESOURCE_PATH;
 import static common.Constants.LOAD_BUILDING;
+import static common.Constants.LOAD_RESOURCE;
 import static common.Constants.LOAD_SPECIAL;
 import static common.Constants.LOAD_STATE;
 import static common.Constants.LOAD_GOLD;
@@ -25,9 +28,6 @@ import static common.Constants.STATE;
 import static common.Constants.GOLD;
 import static common.Constants.CUP;
 import static common.Constants.HEX;
-
-import client.event.UpdatePackage;
-
 import common.Constants;
 import common.Constants.Biome;
 import common.Constants.Ability;
@@ -36,7 +36,7 @@ import common.Constants.Category;
 import common.Constants.UpdateKey;
 import common.Constants.Restriction;
 import common.Constants.UpdateInstruction;
-
+import common.event.UpdatePackage;
 
 public class LoadResources implements Runnable, FileVisitor< Path>{
 
@@ -46,6 +46,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	private Category currentCupCategory = null;
 	private final Path RESOURCES_DIRECTORY;
 	private UpdatePackage update = null;
+	private FileVisitResult result = FileVisitResult.CONTINUE;
 	
 	public LoadResources( boolean loadImages){
 		this( RESOURCE_PATH, loadImages);
@@ -72,21 +73,21 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	@Override
 	public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs) throws IOException {
-			if( !(currentCategory!=null && currentCategory==Category.Cup && dir.toString().contains( Category.Cup.name()))){
-				try{	
-					currentCategory = Category.valueOf( dir.getFileName().toString());
-				}catch( IllegalArgumentException e){
-					currentCategory = null;
-				}
-			}else{
-				try{
-					Biome.valueOf( dir.getFileName().toString());
-					currentCupCategory = Category.Creature;
-				}catch( IllegalArgumentException e){
-					currentCupCategory = Category.valueOf( dir.getFileName().toString());
-				}
+		if( !(currentCategory!=null && currentCategory==Category.Cup && dir.toString().contains( Category.Cup.name()))){
+			try{	
+				currentCategory = Category.valueOf( dir.getFileName().toString());
+			}catch( IllegalArgumentException e){
+				currentCategory = null;
 			}
-		return FileVisitResult.CONTINUE;
+		}else{
+			try{
+				Biome.valueOf( dir.getFileName().toString());
+				currentCupCategory = Category.Creature;
+			}catch( IllegalArgumentException e){
+				currentCupCategory = Category.valueOf( dir.getFileName().toString());
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -199,7 +200,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		update.addInstruction( UpdateInstruction.Category);
 		update.putData( UpdateKey.Command, currentCategory);
 		update.postCommand( PROGRESS);
-		return FileVisitResult.CONTINUE;
+		return result;
 	}
 	
 	private TileProperties createTile( String name){
@@ -221,11 +222,21 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	@Override
 	public FileVisitResult visitFileFailed( Path file, IOException exc) throws IOException {
-		return FileVisitResult.CONTINUE;
+		return result;
 	}
 
 	@Override
 	public FileVisitResult postVisitDirectory( Path dir, IOException exc) throws IOException {
-		return FileVisitResult.CONTINUE;
+		return result;
+	}
+	
+	@Subscribe
+	public void receiveUpdate( UpdatePackage update){
+		if( update.isPublic() || (update.getID()&LOAD_RESOURCE)!=LOAD_RESOURCE){
+			return;
+		}
+		if( update.hasInstructions() && update.getFirstInstruction()==UpdateInstruction.End){
+			result = FileVisitResult.TERMINATE;
+		}
 	}
 }

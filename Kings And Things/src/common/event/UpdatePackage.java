@@ -1,9 +1,8 @@
-package client.event;
+package common.event;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import common.event.AbstractEvent;
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
 

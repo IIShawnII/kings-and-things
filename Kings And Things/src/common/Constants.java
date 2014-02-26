@@ -89,6 +89,7 @@ public final class Constants {
 	public static final int LOBBY = 0;  	  //00000000
 	public static final int LOGIC = 1;  	  //00000001
 	public static final int PROGRESS = 2;  	  //00000010
+	public static final int LOAD_RESOURCE = 4;//00000100
 	
 	//Maximums
 	public static final int MAX_HEXES = 48;
