@@ -280,7 +280,7 @@ public class LoadingDialog extends JDialog{
 	
 	private class InputControl extends WindowAdapter implements ActionListener {
 		
-		private UpdatePackage update = new UpdatePackage();
+		private UpdatePackage update = new UpdatePackage("Dialog.Control");
 		
 		@Override
 		public void actionPerformed( ActionEvent e) {
@@ -295,8 +295,10 @@ public class LoadingDialog extends JDialog{
 				}else{
 					update.addInstruction( UpdateInstruction.Disconnect);
 				}
+				update.postCommand(LOGIC);
 			}else if( isConnected && source==jbReady){
 				update.addInstruction( UpdateInstruction.ReadyState);
+				update.postCommand(LOGIC);
 			}else if( source==jbClose){
 				players = 0;
 				close();
@@ -304,7 +306,6 @@ public class LoadingDialog extends JDialog{
 				players = MAX_PLAYERS;
 				close();
 			}
-			update.postCommand(LOGIC);
 		}
 		
 		@Override

@@ -54,7 +54,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	public LoadResources(String directory, boolean loadImages){
 		RESOURCES_DIRECTORY = Paths.get(directory);
 		this.loadImages = loadImages;
-		update = new UpdatePackage();
+		update = new UpdatePackage("LoadResources");
 	}
 	
 	@Override

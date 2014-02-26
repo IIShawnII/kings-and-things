@@ -16,14 +16,16 @@ public class UpdatePackage extends AbstractEvent {
 
 	private LinkedList< UpdateInstruction> instructions;
 	private HashMap< UpdateKey, Object> data;
+	private String source;
 	
-	public UpdatePackage(){
+	public UpdatePackage( String source){
+		this.source = source;
 		data = new HashMap<>();
 		instructions = new LinkedList<>();
 	}
 	
-	public UpdatePackage( UpdateInstruction instruction){
-		this();
+	public UpdatePackage( UpdateInstruction instruction, String source){
+		this( source);
 		addInstruction( instruction);
 	}
 	
@@ -70,6 +72,6 @@ public class UpdatePackage extends AbstractEvent {
 	
 	@Override
 	public String toString(){
-		return "Network/UpdatePackage: Date: " + data.keySet() + ",\t\t\r\nInstructions count: " + instructions;
+		return "Network/UpdatePackage:\t\nSource: " + source + ",\n\tDate: " + data.keySet() + ",\n\tInstructions count: " + instructions;
 	}
 }

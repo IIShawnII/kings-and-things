@@ -47,7 +47,7 @@ public class ConnectionLogic implements Runnable {
 			}
 		}
 		Logger.getStandardLogger().info( "listenning");
-		UpdatePackage update = new UpdatePackage();
+		UpdatePackage update = new UpdatePackage("Logic.Run");
 		while( !finished && (event = connection.recieve())!=null){
 			update.clear();
 			Logger.getStandardLogger().info( "Received: " + event);
@@ -153,7 +153,7 @@ public class ConnectionLogic implements Runnable {
 			default:
 				return;
 		}
-		UpdatePackage update = new UpdatePackage();
+		UpdatePackage update = new UpdatePackage("Logic.Receive");
 		update.addInstruction( netaction);
 		update.putData( UpdateKey.Message, message);
 		update.putData( UpdateKey.PlayerCount, 0);

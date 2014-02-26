@@ -132,7 +132,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	}
 	
 	private void close(){
-		new UpdatePackage( UpdateInstruction.End).postCommand( LOGIC);
+		new UpdatePackage( UpdateInstruction.End, "GUI.Close").postCommand( LOGIC);
 		dispose();
 	}
 }
