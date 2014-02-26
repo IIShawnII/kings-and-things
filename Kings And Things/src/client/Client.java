@@ -8,7 +8,6 @@ import org.apache.log4j.PropertyConfigurator;
 import client.logic.ConnectionLogic;
 import client.gui.ClientGUI;
 import common.event.EventDispatch;
-import common.network.Connection;
 import static common.Constants.GAME_TITLE;
 
 /**
@@ -25,14 +24,10 @@ public class Client {
 			//failed to change look and feel
 		}
 		
-		try {
-			ConnectionLogic logic = new ConnectionLogic( new Connection());
-			EventDispatch.registerForCommandEvents( logic);
-			new Thread( logic, "Client Logic").start();
-			ClientGUI clientGUI = new ClientGUI( GAME_TITLE);
-			SwingUtilities.invokeLater( clientGUI);
-		} catch ( Exception e) {
-			e.printStackTrace();
-		}
+		ConnectionLogic logic = new ConnectionLogic();
+		EventDispatch.registerForCommandEvents( logic);
+		new Thread( logic, "Client Logic").start();
+		ClientGUI clientGUI = new ClientGUI( GAME_TITLE);
+		SwingUtilities.invokeLater( clientGUI);
 	}
 }

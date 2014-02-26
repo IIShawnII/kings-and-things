@@ -31,14 +31,11 @@ public class ConnectionLogic implements Runnable {
 	private PlayerInfo player = null;
 	private PlayerInfo[] players;
 	
-	public ConnectionLogic( Connection connection){
-		this.connection = connection;
-	}
-	
 	@Override
 	public void run() {
 		CurrentPhase phase = null;
 		AbstractNetwrokEvent event = null;
+		connection = new Connection();
 		while( !finished && !connection.isConnected()){
 			try {
 				Thread.sleep( 10);
@@ -46,7 +43,7 @@ public class ConnectionLogic implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		Logger.getStandardLogger().info( "listenning");
+		Logger.getStandardLogger().info( "listening");
 		UpdatePackage update = new UpdatePackage("Logic.Run");
 		while( !finished && (event = connection.recieve())!=null){
 			update.clear();
@@ -113,7 +110,8 @@ public class ConnectionLogic implements Runnable {
 				int port = (Integer)action.getData( UpdateKey.Port);
 				if( name==null || name.length()<=0){
 					message += "\nThere Must Be a Name";
-				}else{ 
+				}else{
+					
 					try{
 						if( connection.connectTo( ip, port)){
 							netaction = UpdateInstruction.Connect;
@@ -133,7 +131,9 @@ public class ConnectionLogic implements Runnable {
 				}
 				break;
 			case Disconnect:
-				connection.disconnect();
+				if( connection!=null){
+					connection.disconnect();
+				}
 				message = "Disconnect";
 				break;
 			case ReadyState:
@@ -143,7 +143,9 @@ public class ConnectionLogic implements Runnable {
 				sendToServer( new PlayerState( player));
 				break;
 			case End:
-				connection.disconnect();
+				if( connection!=null){
+					connection.disconnect();
+				}
 				finished = true;
 				return;
 			case Send:

@@ -8,7 +8,11 @@ import common.Constants.Restriction;
 //TODO Needs to be optimized
 public class TwoSidedTileProperties extends TileProperties {
 	
+	private static final long serialVersionUID = -6715600368392464765L;
+	
+	@SuppressWarnings("unused")
 	private final TileProperties faceUp;	// keeps track of the face up property of tile
+	@SuppressWarnings("unused")
 	private final TileProperties faceDown;  // keeps track of the face up property of tile
 	
 	public TwoSidedTileProperties (TileProperties faceUp, TileProperties faceDown) {

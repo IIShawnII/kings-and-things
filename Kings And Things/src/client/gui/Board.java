@@ -611,10 +611,6 @@ public class Board extends JPanel{
 		private int index = -1;
 		private Dimension size;
 		
-		public MoveAnimation( Tile tile ){
-			setTile( tile);
-		}
-		
 		private void setTile( Tile tile){
 			this.tile = tile;
 			this.end = tile.getDestination();
