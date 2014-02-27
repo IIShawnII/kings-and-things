@@ -111,7 +111,13 @@ public class ConnectionLogic implements Runnable {
 				if( name==null || name.length()<=0){
 					message += "\nThere Must Be a Name";
 				}else{
-					
+					if( name.startsWith("-demo")){
+						if( name.matches(".*?([\\s+](\\w+)){2,4}")){
+							String[] names = name.split( " ");
+						}else{
+							message += "\n\"-demo\" must follow with 2-4 unique names";
+						}
+					}
 					try{
 						if( connection.connectTo( ip, port)){
 							netaction = UpdateInstruction.Connect;
