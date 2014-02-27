@@ -72,7 +72,7 @@ public class TileProperties implements Serializable{
 		return fake;
 	}
 	
-	public void setCategory( Category category){
+	protected void setCategory( Category category){
 		tileType = category;
 	}
 	

@@ -13,6 +13,8 @@ import java.util.HashSet;
 
 import javax.imageio.ImageIO;
 
+import com.google.common.collect.ImmutableBiMap;
+
 import common.game.TileProperties;
 
 
@@ -154,6 +156,18 @@ public final class Constants {
 													{2, 3, 4, 5, 6, 7, 7, 7, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1}};
 	//starting from top right and going clockwise for 4 player game
 	public static final int BOARD_POSITIONS[][] = {{5,2}, {5,10}, {1,10}, {1,2}} ;
+	
+	public static final ImmutableBiMap<String,String> HERO_PAIRINGS = new ImmutableBiMap.Builder<String,String>().put("Assassin_Primus", "Plains_Lord")
+																												.put("Swordmaster","Mountain_King")
+																												.put("Lord_Of_Eagles","Master_Theif")
+																												.put("Jungle_Lord","Arch_Cleric")
+																												.put("Baron_Munchausen","Desert_Master")
+																												.put("Elf_Lord","Ice_Lord")
+																												.put("Arch_Mage","Ghaog_ll")
+																												.put("Dwarf_King","Warlord")
+																												.put("Deerhunter","Grand_Duke")
+																												.put("Marksman","Forest_King")
+																												.put("Swamp_King","Sir_Lancealot").build();
 			
 	static{
 		int w = (int) (HEX_SIZE.getWidth()/4)+1;
