@@ -21,6 +21,7 @@ public class TwoSidedTileProperties extends TileProperties {
 	}
 
 	@Override
+	// Ask Shahriar about this
 	public boolean isFake() {
 		// TODO Auto-generated method stub
 		return super.isFake();
@@ -29,55 +30,91 @@ public class TwoSidedTileProperties extends TileProperties {
 	@Override
 	public Category getCategory() {
 		// TODO Auto-generated method stub
-		return super.getCategory();
+		if (isFaceUp()) {
+			return faceUp.getCategory();
+		} else {
+			return faceDown.getCategory();
+		}
 	}
 
 	@Override
 	public int getNumber() {
 		// TODO Auto-generated method stub
-		return super.getNumber();
+		if (isFaceUp()) {
+			return faceUp.getNumber();
+		} else {
+			return faceDown.getNumber();
+		}
 	}
 
 	@Override
 	public int getValue() {
 		// TODO Auto-generated method stub
-		return super.getValue();
+		if (isFaceUp()) {
+			return faceUp.getValue();
+		} else {
+			return faceDown.getValue();
+		}
 	}
 
 	@Override
 	public void setValue(int value) {
 		// TODO Auto-generated method stub
-		super.setValue(value);
+		if (isFaceUp()) {
+			faceUp.setValue(value);
+		} else {
+			faceDown.setValue(value);
+		}
 	}
 
 	@Override
 	public void resetValue() {
 		// TODO Auto-generated method stub
-		super.resetValue();
+		if (isFaceUp()) {
+			faceUp.resetValue();
+		} else {
+			faceDown.resetValue();
+		}
 	}
 
 	@Override
 	public int getMoveSpeed() {
 		// TODO Auto-generated method stub
-		return super.getMoveSpeed();
+		if (isFaceUp()) {
+			return faceUp.getMoveSpeed();
+		} else {
+			return faceDown.getMoveSpeed();
+		}
 	}
 
 	@Override
 	public void setMoveSpeed(int moveSpeed) {
 		// TODO Auto-generated method stub
-		super.setMoveSpeed(moveSpeed);
+		if (isFaceUp()) {
+			faceUp.setMoveSpeed(moveSpeed);
+		} else {
+			faceDown.setMoveSpeed(moveSpeed);
+		}
 	}
 
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return super.getName();
+		if (isFaceUp()) {
+			return faceUp.getName();
+		} else {
+			return faceDown.getName();
+		}
 	}
 
 	@Override
 	public Ability[] getAbilities() {
 		// TODO Auto-generated method stub
-		return super.getAbilities();
+		if (isFaceUp()) {
+			return faceUp.getAbilities();
+		} else {
+			return faceDown.getAbilities();
+		}
 	}
 
 	@Override
@@ -89,55 +126,67 @@ public class TwoSidedTileProperties extends TileProperties {
 	@Override
 	public boolean isInfinit() {
 		// TODO Auto-generated method stub
-		return super.isInfinit();
+		return faceUp.isInfinit();
 	}
 
 	@Override
 	public boolean isBuilding() {
 		// TODO Auto-generated method stub
-		return super.isBuilding();
+		return faceUp.isBuilding();
 	}
 
 	@Override
 	public boolean isBuildableBuilding() {
 		// TODO Auto-generated method stub
-		return super.isBuildableBuilding();
+		return faceUp.isBuildableBuilding();
 	}
 
 	@Override
 	public boolean isRestrictedToBiome() {
 		// TODO Auto-generated method stub
-		return super.isRestrictedToBiome();
+		return false;
 	}
 
 	@Override
 	public boolean isCreature() {
 		// TODO Auto-generated method stub
-		return super.isCreature();
+		if (isFaceUp()) {
+			return faceUp.isCreature();
+		} else {
+			return faceDown.isCreature();
+		}
 	}
 
 	@Override
 	public boolean hasAbility(Ability ability) {
 		// TODO Auto-generated method stub
-		return super.hasAbility(ability);
+		if (isFaceUp()) {
+			return faceUp.hasAbility(ability);
+		} else {
+			return faceDown.hasAbility(ability);
+		}
 	}
 
 	@Override
 	public boolean isSpecialCreatureWithAbility(Ability ability) {
 		// TODO Auto-generated method stub
-		return super.isSpecialCreatureWithAbility(ability);
+		if (isFaceUp()) {
+			return faceUp.isSpecialCreatureWithAbility(ability);
+		} else {
+			return faceDown.isSpecialCreatureWithAbility(ability);
+		}
 	}
 
 	@Override
 	public Biome getBiomeRestriction() {
 		// TODO Auto-generated method stub
-		return super.getBiomeRestriction();
+		return faceUp.getBiomeRestriction();
 	}
 
 	@Override
 	public Restriction getRestriction(int index) {
 		// TODO Auto-generated method stub
-		return super.getRestriction(index);
+		return faceUp.getRestriction(index);
 	}
 
 	@Override
@@ -161,7 +210,11 @@ public class TwoSidedTileProperties extends TileProperties {
 	@Override
 	public boolean hasRestriction() {
 		// TODO Auto-generated method stub
-		return super.hasRestriction();
+		if (isFaceUp()) {
+			return faceUp.hasRestriction();
+		} else {
+			return faceDown.hasRestriction();
+		}
 	}
 	
 }
