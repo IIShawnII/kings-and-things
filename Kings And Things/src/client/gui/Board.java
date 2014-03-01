@@ -373,34 +373,38 @@ public class Board extends JPanel{
 	 */
 	@Subscribe
 	public void updateBoard( BoardUpdate update){
-		//TODO complete Board update
-		if( update.hasPlayerInfo()){
-			if(update.getCurrent()!=null){
-			currentPlayer = update.getCurrent();
+		try{
+			//TODO complete Board update
+			if( update.hasPlayerInfo()){
+				if(update.getCurrent()!=null){
+				currentPlayer = update.getCurrent();
+				}
+				if(update.getPlayers()!=null){
+				players = update.getPlayers();
+				}
+				repaint();
+				phaseDone = true;
 			}
-			if(update.getPlayers()!=null){
-			players = update.getPlayers();
+			if( update.hasHexes()){
+				animateHexPlacement( update.getHexes());
+			}else if( update.flipAll()){
+				FlipAllHexes();
+			}else if( update.isPlayerOder()){
+				placeMarkers( update.getPlayerOrder());
+			}else if( update.isRack()){
+				animateRackPlacement();
+			}else if( update.isSetupPhase()){
+				manageSetupPhase( update.getSetup());
+			}else if( update.isRegularPhase()){
+				manageRegularPhase( update.getRegular());
 			}
-			repaint();
-			phaseDone = true;
-		}
-		if( update.hasHexes()){
-			animateHexPlacement( update.getHexes());
-		}else if( update.flipAll()){
-			FlipAllHexes();
-		}else if( update.isPlayerOder()){
-			placeMarkers( update.getPlayerOrder());
-		}else if( update.isRack()){
-			animateRackPlacement();
-		}else if( update.isSetupPhase()){
-			manageSetupPhase( update.getSetup());
-		}else if( update.isRegularPhase()){
-			manageRegularPhase( update.getRegular());
-		}
-		while( !phaseDone){
-			try {
-				Thread.sleep( 100);
-			} catch ( InterruptedException e) {}
+			while( !phaseDone){
+				try {
+					Thread.sleep( 100);
+				} catch ( InterruptedException e) {}
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
 		}
 	}
 	

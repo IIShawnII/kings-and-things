@@ -49,7 +49,6 @@ public class SetupPhaseCommandHandler extends CommandHandler
 	 */
 	public void startNewGame(boolean demoMode, Set<Player> players) throws NoMoreTilesException{
 		SetupPhaseValidator.validateStartNewGame(demoMode, players);
-		boolean isDemoMode = demoMode;
 		CupManager cup = new CupManager(demoMode);
 		HexTileManager bank = new HexTileManager(demoMode);
 		BoardGenerator boardGenerator = new BoardGenerator(players.size(),bank);
@@ -63,7 +62,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		//TODO since player order is predetermined start from SetupPhase.PICK_SECOND_HEX
 		GameState currentState = new GameState(board,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0), CombatPhase.NO_COMBAT, -1, null);
 		new Flip().postNotification();
-		new GameStarted(isDemoMode, cup, bank, boardGenerator, currentState).postCommand();
+		new GameStarted(demoMode, cup, bank, boardGenerator, currentState).postCommand();
 		new CurrentPhase( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNotification();
 	}
 

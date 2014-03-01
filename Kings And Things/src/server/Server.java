@@ -24,18 +24,13 @@ public class Server {
 		}
 		
 		//TODO change true to false
-		boolean isDemoMode = true;
+		boolean isDemoMode = false;
 		String serverGUITitle = "Kings And Things Server";
-		
-		ServerGUI serverGUI;
-		if( args!=null && args.length>=1)
-		{
-			for(int i=0; i<args.length; i++)
-			{
-				switch(args[i])
-				{
-					case "-title":
-						serverGUITitle = args[i+1];
+		if( args!=null){
+			for(int i=0; i<args.length; i++){
+				switch(args[i]){
+					case "-t":
+						serverGUITitle = args[++i];
 						break;
 					case "-demo":
 						isDemoMode = true;
@@ -44,10 +39,8 @@ public class Server {
 						break;
 				}
 			}
-			serverGUI = new ServerGUI( args[0]);
 		}
-
-		serverGUI = new ServerGUI( serverGUITitle);
+		ServerGUI serverGUI = new ServerGUI( serverGUITitle);
 		EventDispatch.registerForCommandEvents( serverGUI);
 		//start GUI on AWT Thread
 		SwingUtilities.invokeLater( serverGUI);

@@ -235,7 +235,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		if( update.isPublic() || (update.getID()&LOAD_RESOURCE)!=LOAD_RESOURCE){
 			return;
 		}
-		if( update.hasInstructions() && update.getFirstInstruction()==UpdateInstruction.End){
+		if( update.hasInstructions() && update.getInstructions()[0]==UpdateInstruction.End){
 			result = FileVisitResult.TERMINATE;
 		}
 	}

@@ -29,7 +29,6 @@ public class ConnectionLogic implements Runnable {
 	private Connection connection;
 	private boolean finished = false;
 	private PlayerInfo player = null;
-	private PlayerInfo[] players;
 	
 	public ConnectionLogic( ) {
 		this.connection = new Connection();
@@ -58,10 +57,11 @@ public class ConnectionLogic implements Runnable {
 			else if( event instanceof StartGame){
 				update.addInstruction( UpdateInstruction.Start);
 				update.putData( UpdateKey.PlayerCount, ((StartGame)event).getPlayerCount());
-				new BoardUpdate(players, player).postCommand();
 			} 
 			else if( event instanceof PlayerState){
+				//first data from server, with PlayerInfo object
 				player = ((PlayerState)event).getPlayer();
+				update.setSource( "Logic.Run "+player.getID());
 			} 
 			else if( event instanceof HexPlacement){
 				new BoardUpdate(((HexPlacement)event).getArray()).postCommand();
@@ -92,7 +92,7 @@ public class ConnectionLogic implements Runnable {
 				//TODO handle
 			}
 			if( update.isModified()){
-				update.postCommand( LOBBY);
+				update.postCommand();
 			}
 		}
 		finished = true;
@@ -100,17 +100,28 @@ public class ConnectionLogic implements Runnable {
 	}
 	
 	@Subscribe
-	public void receiveUpdate( UpdatePackage action){
-		if( action.isPublic() || (action.getID()&LOGIC)!=LOGIC){
+	public void receiveUpdate( UpdatePackage update){
+		if( update.isPublic() || (update.getID()&LOGIC)!=LOGIC){
 			return;
 		}
+		try{
+			UpdateInstruction[] instructions = update.getInstructions();
+			for( UpdateInstruction instruction : instructions){
+				handle( instruction, update);
+			}
+		}catch( Exception ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	private void handle( UpdateInstruction instruction, UpdatePackage data) {
 		UpdateInstruction netaction = UpdateInstruction.Disconnect;
 		String message = "Unable To Connect, Try Again";
-		switch( action.getFirstInstruction()){
+		switch( instruction){
 			case Connect:
-				String name = (String)action.getData( UpdateKey.Name);
-				String ip = (String)action.getData( UpdateKey.IP);
-				int port = (Integer)action.getData( UpdateKey.Port);
+				String name = (String)data.getData( UpdateKey.Name);
+				String ip = (String)data.getData( UpdateKey.IP);
+				int port = (Integer)data.getData( UpdateKey.Port);
 				if( name==null || name.length()<=0){
 					message += "\nThere Must Be a Name";
 				}else{
@@ -162,13 +173,13 @@ public class ConnectionLogic implements Runnable {
 			default:
 				return;
 		}
-		UpdatePackage update = new UpdatePackage("Logic.Receive");
+		UpdatePackage update = new UpdatePackage("Logic.Receive "+(player!=null?player.getID():""));
 		update.addInstruction( netaction);
 		update.putData( UpdateKey.Message, message);
 		update.putData( UpdateKey.PlayerCount, 0);
 		update.postCommand( LOBBY);
 	}
-	
+
 	private UpdateInstruction connect(String ip, int port, String name) throws IllegalArgumentException{
 		if( connection.connectTo( ip, port)){
 			if( finished){

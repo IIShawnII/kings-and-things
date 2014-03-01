@@ -39,8 +39,8 @@ public class ConnectionLobby implements Runnable {
 	private final ArrayList< PlayerConnection> connectedPlayers;
 	private final boolean demoMode;
 	
-	public ConnectionLobby(boolean isDemoMode) throws IOException{
-		if(isDemoMode){
+	public ConnectionLobby( boolean isDemoMode) throws IOException{
+		if( isDemoMode){
 			Logger.getStandardLogger().info("Server started in demo mode.");
 			new ConsoleMessage( "Starting in demo mode.", Level.Notice).postCommand();
 		}
@@ -89,6 +89,7 @@ public class ConnectionLobby implements Runnable {
 	            	PlayerConnection pc = new PlayerConnection( player, connection);
 	            	EventDispatch.registerForNotificationEvents( pc);
 	            	startTask( pc, pc.getName());
+	            	//send PlayerInfo object to connected player
 	            	pc.sendNotificationToClient( new PlayerState( info));
 	            	connectedPlayers.add( pc);
 	            	count++;

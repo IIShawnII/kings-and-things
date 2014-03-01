@@ -36,8 +36,12 @@ public class UpdatePackage extends AbstractEvent {
 		instructions.add( instruction);
 	}
 	
-	public UpdateInstruction getFirstInstruction(){
-		return instructions.removeFirst();
+	public UpdateInstruction[] getInstructions(){
+		return instructions.toArray( new UpdateInstruction[0]);
+	}
+	
+	public UpdateInstruction peekFirstInstruction(){
+		return instructions.peekFirst();
 	}
 
 	public Object getData( Object key){
@@ -67,6 +71,10 @@ public class UpdatePackage extends AbstractEvent {
 
 	public boolean isModified() {
 		return hasData()||hasInstructions();
+	}
+	
+	public void setSource( String source){
+		this.source = source;
 	}
 	
 	@Override

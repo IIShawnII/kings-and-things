@@ -29,7 +29,6 @@ import common.game.PlayerInfo;
 import common.Constants.Category;
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
-import static common.Constants.LOBBY;
 import static common.Constants.LOGIC;
 import static common.Constants.PROGRESS;
 import static common.Constants.SERVER_IP;
@@ -40,9 +39,8 @@ import static common.Constants.IP_COLUMN_COUNT;
 import static common.Constants.PORT_COLUMN_COUNT;
 
 @SuppressWarnings("serial")
-public class LoadingDialog extends JDialog{
+public class LoadingDialog extends JDialog implements Runnable{
 
-	private int players = 0;
 	private InputControl control;
 	private String title;
 	private Runnable task;
@@ -62,7 +60,8 @@ public class LoadingDialog extends JDialog{
 		control = new InputControl();
 	}
 
-	public int run() {
+	@Override
+	public void run() {
 		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE);
 		addWindowListener( new InputControl());
 		setContentPane( createGUI());
@@ -74,7 +73,6 @@ public class LoadingDialog extends JDialog{
 		thread.setDaemon( true);
 		thread.start();
 		setVisible( true);
-		return players;
 	}
 	
 	private JPanel createGUI(){
@@ -289,32 +287,31 @@ public class LoadingDialog extends JDialog{
 				update.addInstruction( UpdateInstruction.ReadyState);
 				update.postCommand(LOGIC);
 			}else if( source==jbClose){
-				players = 0;
 				close();
 			}
 		}
 		
 		@Override
 		public void windowClosing(WindowEvent e){
-			players = 0;
 			close();
 		}
 	}
 
 	@Subscribe
 	public void receiveUpdatePackage( UpdatePackage update){
-		if( update.isPublic()){
-			return;
-		}
-		if( update.getID()==LOBBY){
-			updateDialog( update);
-		}else if( update.getID()==PROGRESS){
-			updateProgress( update);
+		try{
+			if( update.isPublic()){
+				updateDialog( update);
+			}else if( update.getID()==PROGRESS){
+				updateProgress( update);
+			}
+		}catch( Exception ex){
+			ex.printStackTrace();
 		}
 	}
 
 	private void updateDialog( UpdatePackage update){
-		switch( (UpdateInstruction)update.getFirstInstruction()){
+		switch(update.getInstructions()[0]){
 			case Connect:
 				isConnected = true;
 				jbConnect.setText( "Disconnect");
@@ -331,7 +328,6 @@ public class LoadingDialog extends JDialog{
 				listModel.removeAllElements();
 				break;
 			case Start:
-				players = (Integer)update.getData( UpdateKey.PlayerCount);
 				close();
 				break;
 			case ReadyState:
@@ -353,8 +349,7 @@ public class LoadingDialog extends JDialog{
 		if( !progress){
 			return;
 		}
-		UpdateInstruction instruction = (UpdateInstruction)load.getFirstInstruction(); 
-		if( instruction==UpdateInstruction.Category){
+		if(load.getInstructions()[0]==UpdateInstruction.Category){
 			Category category = (Category)load.getData( UpdateKey.Command);
 			switch( category){
 				case Building:
