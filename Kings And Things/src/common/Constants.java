@@ -1,22 +1,20 @@
 package common;
 
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Dimension;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-
-import javax.imageio.ImageIO;
 
 import com.google.common.collect.ImmutableBiMap;
 
 import common.game.TileProperties;
-
 
 public final class Constants {
 	
@@ -24,7 +22,7 @@ public final class Constants {
 	public static final boolean BYPASS_MIN_PLAYER = false;
 	public static final boolean BYPASS_MOUSE_CLICK = false;
 	public static final boolean BYPASS_LOAD_IMAGES = true;
-	public static final boolean BYPASS_LOBBY = false;
+	public static final boolean BYPASS_LOBBY = true;
 	public static final boolean DRAW_LOCKS = false;
 	public static final boolean LOAD_BUILDING = false;
 	public static final boolean LOAD_SPECIAL = false;
@@ -86,12 +84,13 @@ public final class Constants {
 	public static final Color COLOR_WARNNING = DARK_YELLOW;
 	
 	//keys for events
-	public static final int PLAYER = 128;     //10000000
-	public static final int PLAYER_INC = 16;  //00010000
-	public static final int LOBBY = 0;  	  //00000000
-	public static final int LOGIC = 1;  	  //00000001
-	public static final int PROGRESS = 2;  	  //00000010
-	public static final int LOAD_RESOURCE = 4;//00000100
+	public static final int LOBBY = 0;					//00000000
+	public static final int LOGIC = 1;					//00000001
+	public static final int PROGRESS = 2;				//00000010
+	public static final int LOAD_RESOURCE = 4;			//00000100
+	public static final int GUI = 8;					//00001000
+	public static final int PLAYER_ID_MULTIPLIER = 2;	//00010010
+	public static final int PLAYER_START_ID = 16;		//00010000
 	
 	//Maximums
 	public static final int MAX_HEXES = 48;
@@ -190,18 +189,14 @@ public final class Constants {
 	//to prevent instances
 	private Constants(){}
 	
-	public static HashSet<Point> getValidStartingHexes(int playerCount)
-	{
+	public static HashSet<Point> getValidStartingHexes(int playerCount){
 		HashSet<Point> startingHexes = new HashSet<Point>();
-		if(playerCount==4)
-		{
+		if(playerCount==4){
 			startingHexes.add(new Point(1,2));
 			startingHexes.add(new Point(1,10));
 			startingHexes.add(new Point(5,10));
 			startingHexes.add(new Point(5,2));
-		}
-		else
-		{
+		}else{
 			startingHexes.add(new Point(0,2));
 			startingHexes.add(new Point(0,6));
 			startingHexes.add(new Point(2,0));
@@ -209,7 +204,6 @@ public final class Constants {
 			startingHexes.add(new Point(4,2));
 			startingHexes.add(new Point(4,6));
 		}
-		
 		return startingHexes;
 	}
 }

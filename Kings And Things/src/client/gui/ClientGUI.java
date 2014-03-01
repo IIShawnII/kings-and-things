@@ -1,6 +1,5 @@
 package client.gui;
 
-import java.awt.Insets;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -9,18 +8,21 @@ import java.awt.event.WindowAdapter;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JMenuBar;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 
-import common.Console;
-import common.Constants.UpdateInstruction;
+import com.google.common.eventbus.Subscribe;
+
+import common.game.PlayerInfo;
+import common.game.LoadResources;
 import common.event.EventDispatch;
 import common.event.UpdatePackage;
-import common.game.LoadResources;
+import common.Constants.UpdateInstruction;
 import static common.Constants.LOGIC;
-import static common.Constants.BOARD_SIZE;
 import static common.Constants.MAX_PLAYERS;
-import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.BYPASS_LOBBY;
 import static common.Constants.LOAD_RESOURCE;
 import static common.Constants.BYPASS_MIN_PLAYER;
@@ -32,7 +34,7 @@ import static common.Constants.BYPASS_LOAD_IMAGES;
 @SuppressWarnings("serial")
 public class ClientGUI extends JFrame implements Runnable{
 
-	private Console console;
+	private MultiBoardManager boards;
 	
 	/**
 	 * construct Client GUI
@@ -47,6 +49,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	 */
 	@Override
 	public void run() {
+		EventDispatch.registerForCommandEvents( this);
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		addWindowListener( new WindowListener());
         setLocationRelativeTo(null);
@@ -59,6 +62,7 @@ public class ClientGUI extends JFrame implements Runnable{
 			EventDispatch.unregisterForCommandEvents( dialog);
         	dispose();
             setUndecorated(false);
+            setJMenuBar( createMenu());
 			setContentPane( createGUI( BYPASS_MIN_PLAYER?MAX_PLAYERS:playerCount));
 			pack();
 			Dimension size = new Dimension( getWidth(), getHeight());
@@ -84,15 +88,11 @@ public class ClientGUI extends JFrame implements Runnable{
 		JPanel jpMain = new JPanel( new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
-
-		Board board = new Board( null, true);
-		EventDispatch.registerForCommandEvents( board);
-		board.setPreferredSize( BOARD_SIZE);
-		board.setSize( BOARD_SIZE);
-		board.init(playerCount);
 		constraints.gridx = 0;
 		constraints.gridy = 0;
-		jpMain.add( board, constraints);
+		
+		boards = new MultiBoardManager( jpMain, constraints, playerCount);
+		boards.creatBoards();
 
 		JScrollPane jsp = new JScrollPane( jpMain);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -101,27 +101,25 @@ public class ClientGUI extends JFrame implements Runnable{
 		return jsp;
 	}
 	
-	//TODO Add console to a separate dialog
-	@SuppressWarnings("unused")
-	private JPanel createTempPanel(){
-		JPanel jpMain = new JPanel( new GridBagLayout());
+	private JMenuBar createMenu(){
+		JMenuBar jmb = new JMenuBar();
+		jmb.setLayout( new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 5, 5, 5, 5);
-
-		console = new Console();
-		console.setEditable( false);
-		console.setPreferredSize( CONSOLE_SIZE);
-		JScrollPane jsp = new JScrollPane( console);
-		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		constraints.weighty = 1;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		jpMain.add( jsp, constraints);
+		constraints.anchor = GridBagConstraints.FIRST_LINE_START;
 		
-		return jpMain;
+		JComboBox< Object> jcbPlayers = new JComboBox<>( new Object[]{ 1,2,3,4});
+		constraints.gridx = 0;
+		constraints.gridwidth = 3;
+		constraints.weightx = 1;
+		jmb.add( jcbPlayers, constraints);
+		
+		JCheckBox jcbActive = new JCheckBox( "Active", true);
+		constraints.gridx = 3;
+		constraints.weightx = 1.3;
+		jmb.add( jcbActive, constraints);
+		
+		return jmb;
 	}
 	
 	private class WindowListener extends WindowAdapter{
@@ -135,5 +133,14 @@ public class ClientGUI extends JFrame implements Runnable{
 	private void close(){
 		new UpdatePackage( UpdateInstruction.End, "GUI.Close").postCommand( LOGIC|LOAD_RESOURCE);
 		dispose();
+	}
+	
+	@Subscribe
+	public void receiveUpdate( UpdatePackage update){
+		
+	}
+	
+	public void PlayerChanged( PlayerInfo player){
+		
 	}
 }

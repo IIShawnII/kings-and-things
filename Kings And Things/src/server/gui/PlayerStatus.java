@@ -20,8 +20,7 @@ import static common.Constants.DARK_RED;
 import static common.Constants.DARK_BLUE;
 import static common.Constants.DARK_GREEN;
 import static common.Constants.DARK_YELLOW;
-import static common.Constants.PLAYER;
-import static common.Constants.PLAYER_INC;
+import static common.Constants.PLAYER_START_ID;
 import static common.Constants.LABEL_SIZE;
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.LABEL_FONT_SIZE;
@@ -39,11 +38,11 @@ public class PlayerStatus extends JPanel{
 	private Console console;
 	
 	/**
-	 * @param PLAYER_ID - player id used in even monitor, must be a positive integer bigger or equal to common.Constants.PLAYER
+	 * @param PLAYER_ID - player id used in even monitor, must be a positive integer bigger or equal to common.Constants.PLAYER_START_ID
 	 */
 	public PlayerStatus( final int PLAYER_ID) {
 		super();
-		if( PLAYER_ID<PLAYER){
+		if( PLAYER_ID<PLAYER_START_ID){
 			String message = "ERROR - PLAYER_ID Must be bigger than common.Constants.PLAYER";
 			throw new IllegalArgumentException( message);
 		}
@@ -90,7 +89,7 @@ public class PlayerStatus extends JPanel{
 		Font player = font.deriveFont( Font.BOLD, font.getSize() + PLAYER_FONT_SIZE);
 		Font label = font.deriveFont( Font.BOLD, font.getSize() + LABEL_FONT_SIZE);
 		
-		JLabel jlPlayer = new JLabel( "Player " + (((PLAYER_ID-PLAYER)/PLAYER_INC)+1));
+		JLabel jlPlayer = new JLabel( "Player " + PLAYER_ID);
 		jlPlayer.setAlignmentX( LEFT_ALIGNMENT);
 		jlPlayer.setFont( player);
 		con.weightx = 1.0;

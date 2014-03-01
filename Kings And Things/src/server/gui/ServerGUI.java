@@ -2,8 +2,8 @@ package server.gui;
 
 import static common.Constants.CONSOLE_SIZE;
 import static common.Constants.MAX_PLAYERS;
-import static common.Constants.PLAYER;
-import static common.Constants.PLAYER_INC;
+import static common.Constants.PLAYER_START_ID;
+import static common.Constants.PLAYER_ID_MULTIPLIER;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -72,7 +72,7 @@ public class ServerGUI extends JFrame implements Runnable{
 		
 		JPanel jpPlayers = new JPanel( new GridLayout( 2, 2, 5, 5));
 		PlayerStatus player;
-		for( int ID=PLAYER, count=0; count<MAX_PLAYERS; ID+=PLAYER_INC, count++){
+		for( int ID=PLAYER_START_ID, count=0; count<MAX_PLAYERS; ID*=PLAYER_ID_MULTIPLIER, count++){
 			player = new PlayerStatus( ID);
 			player.initialize();
 			jpPlayers.add( player);

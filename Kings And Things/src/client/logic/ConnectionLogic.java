@@ -31,11 +31,14 @@ public class ConnectionLogic implements Runnable {
 	private PlayerInfo player = null;
 	private PlayerInfo[] players;
 	
+	public ConnectionLogic( ) {
+		this.connection = new Connection();
+	}
+
 	@Override
 	public void run() {
 		CurrentPhase phase = null;
 		AbstractNetwrokEvent event = null;
-		connection = new Connection();
 		while( !finished && !connection.isConnected()){
 			try {
 				Thread.sleep( 10);
@@ -111,26 +114,24 @@ public class ConnectionLogic implements Runnable {
 				if( name==null || name.length()<=0){
 					message += "\nThere Must Be a Name";
 				}else{
-					if( name.startsWith("-demo")){
-						if( name.matches(".*?([\\s+](\\w+)){2,4}")){
-							String[] names = name.split( " ");
-						}else{
-							message += "\n\"-demo\" must follow with 2-4 unique names";
+					if( name.matches("(-demo)([\\s](\\w+)){2,4}")){
+						String[] names = name.split( " ");
+						ConnectionLogic logic;
+						for( int i=1; i<names.length-1; i++){
+							try{
+								logic = new ConnectionLogic();
+								netaction = logic.connect( ip, port, names[i]);
+								startLogic( logic);
+							}catch(IllegalArgumentException ex){
+								message += "\n" + ex.getMessage();
+							}
 						}
+						name = names[names.length-1];
+					}else if( name.startsWith("-demo")){
+						message += "\n\"-demo\" must follow with 2-4 unique names";
 					}
 					try{
-						if( connection.connectTo( ip, port)){
-							netaction = UpdateInstruction.Connect;
-							if( finished){
-								finished = false;
-								startTask( this);
-							}
-							if( player!=null){
-								sendToServer( new PlayerState( player));
-							}else{
-								sendToServer( new PlayerState( name, PLAYER_READY));
-							}
-						}
+						netaction = connect( ip, port, name);
 					}catch(IllegalArgumentException ex){
 						message += "\n" + ex.getMessage();
 					}
@@ -168,8 +169,24 @@ public class ConnectionLogic implements Runnable {
 		update.postCommand( LOBBY);
 	}
 	
-	private void startTask( Runnable task){
-		new Thread( task, "Client Logic").start();
+	private UpdateInstruction connect(String ip, int port, String name) throws IllegalArgumentException{
+		if( connection.connectTo( ip, port)){
+			if( finished){
+				finished = false;
+				startLogic( this);
+			}
+			if( player!=null){
+				sendToServer( new PlayerState( player));
+			}else{
+				sendToServer( new PlayerState( name, PLAYER_READY));
+			}
+			return UpdateInstruction.Connect;
+		}
+		return UpdateInstruction.Disconnect;
+	}
+	
+	private void startLogic( ConnectionLogic logic){
+		new Thread( logic, "Client Logic").start();
 	}
 	
 	@Subscribe

@@ -55,7 +55,7 @@ public class Connection implements Closeable{
 	 * @param port - destination port
 	 * @return true if all streams are created and connection established, otherwise false
 	 */
-	public boolean connectTo( String ip, int port){
+	public boolean connectTo( String ip, int port) throws IllegalArgumentException{
 		if( socket==null && ip==null){
 			throw new IllegalArgumentException( "IP address cannot be null, port must be a positive none zero integer");
 		}

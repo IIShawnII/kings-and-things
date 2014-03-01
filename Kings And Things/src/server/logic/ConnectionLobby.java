@@ -1,7 +1,7 @@
 package server.logic;
 
-import static common.Constants.PLAYER;
-import static common.Constants.PLAYER_INC;
+import static common.Constants.PLAYER_START_ID;
+import static common.Constants.PLAYER_ID_MULTIPLIER;
 import static common.Constants.MAX_PLAYERS;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
@@ -66,7 +66,7 @@ public class ConnectionLobby implements Runnable {
 			return;
 		}
 		game.initialize();
-		int count=0, playerID = PLAYER;
+		int count=0, playerID = PLAYER_START_ID;
 		boolean oldClient = false;
 		while( !close && count<MAX_PLAYERS){
             try {
@@ -92,7 +92,7 @@ public class ConnectionLobby implements Runnable {
 	            	pc.sendNotificationToClient( new PlayerState( info));
 	            	connectedPlayers.add( pc);
 	            	count++;
-	            	playerID+=PLAYER_INC;
+	            	playerID*=PLAYER_ID_MULTIPLIER;
         			new ConsoleMessage( "Recieved connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice).postCommand();
 	            	Logger.getStandardLogger().info("Recieved connection from " + connection + ", assigned to " + pc.getPlayer());
             	}
