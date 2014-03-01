@@ -12,7 +12,7 @@ public class MultiBoardManager {
 
 	private JPanel container;
 	private Board[] boards;
-	private Board current;
+	private int current = -1;
 	private final int MAX_SIZE;
 	private GridBagConstraints constraints;
 	
@@ -21,7 +21,6 @@ public class MultiBoardManager {
 		boards = new Board[ MAX_SIZE];
 		this.container = container;
 		this.constraints = constraints;
-		current = null;
 	}
 	
 	public void creatBoards( ){
@@ -31,15 +30,16 @@ public class MultiBoardManager {
 			boards[ i].setPreferredSize( BOARD_SIZE);
 			boards[ i].setSize( BOARD_SIZE);
 			boards[ i].init( MAX_SIZE);
-			container.add( boards[ i], constraints);
 		}
 	}
 	
 	public void showBoard( int index){
-		if( current!=null){
-			container.remove( current);
+		if( current>=0){
+			boards[index].setActive( false);
+			container.remove( boards[current]);
 		}
-		container.add( boards[index]);
+		boards[index].setActive( true);
+		container.add( boards[index], constraints);
 		container.revalidate();
 	}
 }

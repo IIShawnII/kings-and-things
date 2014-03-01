@@ -22,7 +22,7 @@ public final class Constants {
 	public static final boolean BYPASS_MIN_PLAYER = false;
 	public static final boolean BYPASS_MOUSE_CLICK = false;
 	public static final boolean BYPASS_LOAD_IMAGES = true;
-	public static final boolean BYPASS_LOBBY = true;
+	public static final boolean BYPASS_LOBBY = false;
 	public static final boolean DRAW_LOCKS = false;
 	public static final boolean LOAD_BUILDING = false;
 	public static final boolean LOAD_SPECIAL = false;

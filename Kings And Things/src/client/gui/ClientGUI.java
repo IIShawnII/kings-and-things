@@ -21,6 +21,7 @@ import common.game.LoadResources;
 import common.event.EventDispatch;
 import common.event.UpdatePackage;
 import common.Constants.UpdateInstruction;
+import static common.Constants.GUI;
 import static common.Constants.LOGIC;
 import static common.Constants.MAX_PLAYERS;
 import static common.Constants.BYPASS_LOBBY;
@@ -93,6 +94,7 @@ public class ClientGUI extends JFrame implements Runnable{
 		
 		boards = new MultiBoardManager( jpMain, constraints, playerCount);
 		boards.creatBoards();
+		boards.showBoard( 0);
 
 		JScrollPane jsp = new JScrollPane( jpMain);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -137,6 +139,9 @@ public class ClientGUI extends JFrame implements Runnable{
 	
 	@Subscribe
 	public void receiveUpdate( UpdatePackage update){
+		if( update.isPublic() || update.getID()!=GUI){
+			return;
+		}
 		
 	}
 	

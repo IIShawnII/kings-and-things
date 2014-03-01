@@ -121,7 +121,7 @@ public class Board extends JPanel{
 		g2d.dispose();
 	}
 	
-	private boolean phaseDone = false;
+	private boolean phaseDone = false, isActive = false;
 
 	private LockManager locks;
 	private JTextField jtfStatus;
@@ -137,6 +137,10 @@ public class Board extends JPanel{
 	 */
 	public Board( LayoutManager layout, boolean isDoubleBuffered){
 		super( layout, isDoubleBuffered);
+	}
+
+	public void setActive( boolean active) {
+		this.isActive = active;
 	}
 	
 	/**
@@ -273,32 +277,64 @@ public class Board extends JPanel{
 		return list;
 	}
 	
+	private void noneAnimatedPlacement( Tile[] tiles){
+		Point end;
+		Dimension size;
+		for( Tile tile : tiles){
+			size = tile.getSize();
+			end = tile.getDestination();
+			tile.setLocation( end.x-size.width/2, end.y-size.height/2);
+			tile.setLockArea( locks.getLock( tile));
+			placeTileOnHex( tile, null, true);
+		}
+	}
+	
+	private void noneAnimtedFlipAll() {
+		for( Component comp : getComponents()){
+			if( comp instanceof Hex){
+				((Tile)comp).flip();
+			}
+		}
+	}
+	
 	/**
 	 * animate placement of hex tiles
 	 * @param hexes - list of HexState to populate the hexes on board
 	 */
 	private void animateHexPlacement( HexState[] hexes){
 		addTile( new Hex( new HexState()), new Rectangle(8,8,HEX_SIZE.width,HEX_SIZE.height), true);
-		MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( hexes));
-        animation.start();
+		if( !isActive){
+			noneAnimatedPlacement( setupHexesForPlacement( hexes));
+		}else{
+			MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( hexes));
+	        animation.start();
+		}
 	}
 	
 	/**
 	 * animate placement of rack tiles
 	 */
 	private void animateRackPlacement(){
-		MoveAnimation animation = new MoveAnimation( setupTilesForRack( null));
-        animation.start();
+		if( !isActive){
+			noneAnimatedPlacement( setupTilesForRack( null));
+		}else{
+			MoveAnimation animation = new MoveAnimation( setupTilesForRack( null));
+			animation.start();
+		}
 	}
 	
 	/**
 	 * Flip all hexes
 	 */
 	private void FlipAllHexes(){
-		FlipAll flip = new FlipAll( getComponents());
-		flip.start();
+		if( !isActive){
+			noneAnimtedFlipAll();
+		}else{
+			FlipAll flip = new FlipAll( getComponents());
+			flip.start();
+		}
 	}
-	
+
 	/**
 	 * place markers on the board, if no order is provided a demo setup will be placed
 	 * @param order - list of players id in order 
@@ -637,9 +673,9 @@ public class Board extends JPanel{
 		@Override
 		public void actionPerformed( ActionEvent e) {
 			//animation is done
-			if( xTemp==-1){
+			if( !isActive || xTemp==-1){
 				//list is done
-				if( index==-1 || index>=list.length){
+				if( !isActive || index==-1 || index>=list.length){
 					timer.stop();
 					phaseDone = true;
 					return;
@@ -690,7 +726,7 @@ public class Board extends JPanel{
 
 		@Override
 		public void actionPerformed( ActionEvent e) {
-			if( index>=list.length){
+			if(index>=list.length){
 				timer.stop();
 				phaseDone = true;
 			}else{
