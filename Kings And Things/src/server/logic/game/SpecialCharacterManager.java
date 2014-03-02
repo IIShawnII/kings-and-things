@@ -6,20 +6,21 @@ import java.util.Set;
 
 import server.logic.exceptions.NoMoreTilesException;
 import common.Constants;
+import common.game.ITileProperties;
 import common.game.TileProperties;
 import common.game.TwoSidedTileProperties;
 
 public class SpecialCharacterManager extends AbstractTileManager
 {
-	protected SpecialCharacterManager(Collection<? extends TileProperties> tiles)
+	public SpecialCharacterManager()
 	{
-		super(getSpecialCharacterSetFromCollection(tiles), "special character");
+		super(getSpecialCharacterSetFromCollection(Constants.SPECIAL.values()), "special character");
 	}
 	
 	public TwoSidedTileProperties drawTileByName(String heroName) throws NoMoreTilesException
 	{
-		TileProperties tileToDraw = null;
-		for(TileProperties tp : tiles)
+		ITileProperties tileToDraw = null;
+		for(ITileProperties tp : tiles)
 		{
 			if(tp.getName().equals(heroName))
 			{

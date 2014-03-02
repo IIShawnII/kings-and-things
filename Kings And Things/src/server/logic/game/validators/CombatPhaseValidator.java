@@ -2,11 +2,12 @@ package server.logic.game.validators;
 
 import server.logic.game.GameState;
 import server.logic.game.Player;
+
 import common.Constants.Ability;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public abstract class CombatPhaseValidator
 {
@@ -20,7 +21,7 @@ public abstract class CombatPhaseValidator
 	 * @throws IllegalStateException If it is not the combat phase,
 	 * or if another combat is already being resolved
 	 */
-	public static void validateCanResolveCombat(TileProperties hex, int playerNumber, GameState currentState)
+	public static void validateCanResolveCombat(ITileProperties hex, int playerNumber, GameState currentState)
 	{
 		CommandValidator.validateNoPendingRolls(currentState);
 		CommandValidator.validateIsPlayerActive(playerNumber,currentState);
@@ -63,7 +64,7 @@ public abstract class CombatPhaseValidator
 	 * @param currentState The current state of the game
 	 * @throws IllegalArgumentException If hits can not be applied according to game rules
 	 */
-	public static void validateCanApplyHits(TileProperties thing, int playerNumber, int hitCount, GameState currentState)
+	public static void validateCanApplyHits(ITileProperties thing, int playerNumber, int hitCount, GameState currentState)
 	{
 		CommandValidator.validateNoPendingRolls(currentState);
 		if(currentState.getHitsOnPlayer(playerNumber) < hitCount)

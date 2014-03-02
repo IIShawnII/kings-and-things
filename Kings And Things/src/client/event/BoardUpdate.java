@@ -5,8 +5,8 @@ import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.event.AbstractEvent;
 import common.game.HexState;
+import common.game.ITileProperties;
 import common.game.PlayerInfo;
-import common.game.TileProperties;
 
 public class BoardUpdate extends AbstractEvent {
 
@@ -15,7 +15,7 @@ public class BoardUpdate extends AbstractEvent {
 	private HexState[] hexes;
 	private PlayerInfo current;
 	private PlayerInfo[] players;
-	private TileProperties[] props;
+	private ITileProperties[] props;
 	
 	private SetupPhase setup = null;
 	private CombatPhase combat = null;
@@ -30,7 +30,7 @@ public class BoardUpdate extends AbstractEvent {
 		setup = phase;
 	}
 	
-	public BoardUpdate( TileProperties[] array) {
+	public BoardUpdate( ITileProperties[] array) {
 		props = array;
 	}
 	
@@ -107,7 +107,7 @@ public class BoardUpdate extends AbstractEvent {
 		return current;
 	}
 
-	public TileProperties[] getTileProperties(){
+	public ITileProperties[] getTileProperties(){
 		return props;
 	}
 

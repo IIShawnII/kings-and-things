@@ -1,17 +1,17 @@
 package server.event.commands;
 
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class ResolveCombat extends AbstractCommand
 {
-	private final TileProperties hex;
+	private final ITileProperties hex;
 
-	public ResolveCombat(TileProperties hex)
+	public ResolveCombat(ITileProperties hex)
 	{
 		this.hex = hex;
 	}
 
-	public TileProperties getCombatHex()
+	public ITileProperties getCombatHex()
 	{
 		return hex;
 	}

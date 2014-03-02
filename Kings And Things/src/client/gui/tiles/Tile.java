@@ -1,16 +1,18 @@
 package client.gui.tiles;
 
+import static common.Constants.IMAGES;
+import static common.Constants.IMAGE_TILE_REVERSE;
+
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.Graphics;
 
 import javax.swing.JComponent;
 
 import client.gui.LockManager.Lock;
-import common.game.TileProperties;
-import static common.Constants.IMAGES;
-import static common.Constants.IMAGE_TILE_REVERSE;
+
+import common.game.ITileProperties;
 
 @SuppressWarnings("serial")
 public class Tile extends JComponent{
@@ -18,11 +20,11 @@ public class Tile extends JComponent{
 	private boolean hasLock = false;
 	protected Image drawTile = null;
 	protected Lock lockArea = null;
-	private TileProperties prop = null;
+	private ITileProperties prop = null;
 	private Point destination;
 	private boolean canAnimate = true;
 	
-	public Tile( TileProperties prop){
+	public Tile( ITileProperties prop){
 		super();
 		this.prop = prop;
 	}
@@ -39,7 +41,7 @@ public class Tile extends JComponent{
 		return prop.isFake();
 	}
 	
-	public TileProperties getProperties(){
+	public ITileProperties getProperties(){
 		return prop;
 	}
 	

@@ -5,20 +5,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class ExchangeThingsCommand extends AbstractCommand{
 	
-	private final HashSet<TileProperties> things;
+	private final HashSet<ITileProperties> things;
 	
-	public ExchangeThingsCommand(Collection<TileProperties> things){
-		this.things = new HashSet<TileProperties>();
-		for(TileProperties thing : things){
+	public ExchangeThingsCommand(Collection<ITileProperties> things){
+		this.things = new HashSet<ITileProperties>();
+		for(ITileProperties thing : things){
 			this.things.add(thing);
 		}
 	}
 	
-	public Set<TileProperties> getThings(){
+	public Set<ITileProperties> getThings(){
 		return Collections.unmodifiableSet(things);
 	}
 }

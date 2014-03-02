@@ -11,14 +11,13 @@ import server.logic.game.Player;
 import server.logic.game.validators.RecruitingThingsPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
 import common.event.notifications.HexStatesChanged;
 import common.event.notifications.RackPlacement;
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class RecruitingThingsCommandHandler extends CommandHandler
 {
@@ -31,7 +30,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 	 * @param playerNumber The player who sent the command
 	 * @throws NoMoreTilesException If the cup runs out of things
 	 */
-	public void recruitThings(int gold, Collection<TileProperties> thingsToExchange, int playerNumber) throws NoMoreTilesException
+	public void recruitThings(int gold, Collection<ITileProperties> thingsToExchange, int playerNumber) throws NoMoreTilesException
 	{
 		paidRecruits(gold,playerNumber);
 		exchangeThings(thingsToExchange,playerNumber);
@@ -48,7 +47,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 	 * of things is invalid
 	 * @throws IllegalStateException If it is nor the proper phase for exchanging things
 	 */
-	public void exchangeThings(Collection<TileProperties> things, int playerNumber) throws NoMoreTilesException{
+	public void exchangeThings(Collection<ITileProperties> things, int playerNumber) throws NoMoreTilesException{
 		RecruitingThingsPhaseValidator.validateCanExchangeThings(things, playerNumber, getCurrentState());
 		makeThingsExchanged(things,playerNumber);
 		if(getCurrentState().getCurrentSetupPhase() != SetupPhase.SETUP_FINISHED)
@@ -92,12 +91,12 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 	 * @throws IllegalStateException If it is not the right phase for placing things on
 	 * the board
 	 */
-	public void placeThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex){
+	public void placeThingOnBoard(ITileProperties thing, int playerNumber, ITileProperties hex){
 		RecruitingThingsPhaseValidator.validateCanPlaceThingOnBoard(thing, playerNumber, hex, getCurrentState());
 		makeThingOnBoard(thing, playerNumber, hex);
 	}
 	
-	private void makeThingsExchanged(Collection<TileProperties> things, int playerNumber) throws NoMoreTilesException
+	private void makeThingsExchanged(Collection<ITileProperties> things, int playerNumber) throws NoMoreTilesException
 	{
 		int newThingCount = things.size();
 		
@@ -107,17 +106,17 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		}
 		
 		Player player = getCurrentState().getPlayerByPlayerNumber(playerNumber);
-		ArrayList<TileProperties> newThings = new ArrayList<TileProperties>(newThingCount);
+		ArrayList<ITileProperties> newThings = new ArrayList<ITileProperties>(newThingCount);
 		
 		for(int i=0; i<newThingCount; i++)
 		{
 			newThings.add(getCup().drawTile());
 		}
-		for(TileProperties oldThing : things)
+		for(ITileProperties oldThing : things)
 		{
 			getCup().reInsertTile(oldThing);
 		}
-		for(TileProperties newThing : newThings)
+		for(ITileProperties newThing : newThings)
 		{
 			player.addThingToTray(newThing);
 		}
@@ -133,7 +132,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		}
 	}
 
-	private void makeThingOnBoard(TileProperties thing, int playerNumber, TileProperties hex){
+	private void makeThingOnBoard(ITileProperties thing, int playerNumber, ITileProperties hex){
 		HexState hs = getCurrentState().getBoard().getHexStateForHex(hex);
 		if(thing.isCreature() && thing.isFaceUp())
 		{
@@ -148,7 +147,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 	{
 		RackPlacement toClient = new RackPlacement(getCurrentState().getPlayerByPlayerNumber(playerNumber).getTrayThings().size());
 		int i=0;
-		for(TileProperties tp : getCurrentState().getPlayerByPlayerNumber(playerNumber).getTrayThings())
+		for(ITileProperties tp : getCurrentState().getPlayerByPlayerNumber(playerNumber).getTrayThings())
 		{
 			toClient.getArray()[i++] = tp;
 		}

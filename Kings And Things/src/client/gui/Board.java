@@ -34,6 +34,7 @@ import common.Constants.Restriction;
 import common.Constants.SetupPhase;
 import common.event.notifications.HexOwnershipChanged;
 import common.game.HexState;
+import common.game.ITileProperties;
 import common.game.PlayerInfo;
 import common.game.TileProperties;
 import static common.Constants.STATE;
@@ -126,7 +127,7 @@ public class Board extends JPanel{
 	private LockManager locks;
 	private JTextField jtfStatus;
 	private MouseInput mouseInput;
-	private TileProperties playerMarker;
+	private ITileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
 	private Font font = new Font("default", Font.BOLD, 30);
 	
@@ -253,7 +254,7 @@ public class Board extends JPanel{
 	 * @param prop - list of tiles to be placed, if null fakes will be created
 	 * @return array of tiles in order they were created
 	 */
-	private Tile[] setupTilesForRack( TileProperties[] prop) {
+	private Tile[] setupTilesForRack( ITileProperties[] prop) {
 		Tile tile = null;
 		Tile[] list = new Tile[MAX_RACK_SIZE];
 		Lock lock = locks.getPermanentLock( Category.Cup);
@@ -466,9 +467,9 @@ public class Board extends JPanel{
 	 * currently in order 1 to 4, colors go as Yellow, Gray, Green and Red
 	 * order -1 is special for getting the battle tile.
 	 * @param order - player order number
-	 * @return TileProperties corresponding to the order
+	 * @return ITileProperties corresponding to the order
 	 */
-	private TileProperties getPlayerMarker( int order){
+	private ITileProperties getPlayerMarker( int order){
 		switch( order){
 			case -1: return STATE.get( Restriction.Battle);
 			case 0: return STATE.get( Restriction.Yellow);

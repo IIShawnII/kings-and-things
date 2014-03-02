@@ -1,6 +1,7 @@
 package server.logic.game.handlers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import server.event.DiceRolled;
 import server.event.GameStarted;
@@ -12,23 +13,24 @@ import server.logic.game.CupManager;
 import server.logic.game.GameState;
 import server.logic.game.HexTileManager;
 import server.logic.game.Player;
+import server.logic.game.RollModification;
+import server.logic.game.SpecialCharacterManager;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
-
-import common.Logger;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
+import common.Logger;
 import common.event.EventDispatch;
 import common.event.notifications.DieRoll;
 import common.event.notifications.HexOwnershipChanged;
 import common.event.notifications.PlayerState;
 import common.event.notifications.RackPlacement;
 import common.game.HexState;
+import common.game.ITileProperties;
 import common.game.Roll;
-import common.game.TileProperties;
 
 public abstract class CommandHandler
 {
@@ -39,6 +41,7 @@ public abstract class CommandHandler
 	private BoardGenerator boardGenerator;
 	private GameState currentState;
 	private boolean isDemoMode;
+	private SpecialCharacterManager bankHeroes;
 	
 	/**
 	 * call this method to initialize this class before sending it commands
@@ -74,7 +77,7 @@ public abstract class CommandHandler
 	 * @throws IllegalArgumentException If the game is not currently waiting for any
 	 * rolls, and the reason for rolling is not RollReason.ENTERTAINMENT
 	 */
-	public void rollDice(RollReason reasonForRoll, int playerNumber, TileProperties tile)
+	public void rollDice(RollReason reasonForRoll, int playerNumber, ITileProperties tile)
 	{
 		CommandValidator.validateCanRollDice(reasonForRoll, playerNumber, tile, currentState);
 		makeDiceRoll(reasonForRoll, playerNumber, tile);
@@ -94,6 +97,11 @@ public abstract class CommandHandler
 	{
 		return boardGenerator;
 	}
+	
+	protected final SpecialCharacterManager getBankHeroManager()
+	{
+		return bankHeroes;
+	}
 
 	protected final GameState getCurrentState()
 	{
@@ -105,7 +113,7 @@ public abstract class CommandHandler
 		return isDemoMode;
 	}
 
-	protected void makeHexOwnedByPlayer(TileProperties hex, int playerNumber)
+	protected void makeHexOwnedByPlayer(ITileProperties hex, int playerNumber)
 	{
 		for(Player p : currentState.getPlayers())
 		{
@@ -269,7 +277,7 @@ public abstract class CommandHandler
 					{
 						try
 						{
-							TileProperties thing = cup.drawTile();
+							ITileProperties thing = cup.drawTile();
 							p.addThingToTray(thing);
 							tray.getArray()[i] = thing;
 						}
@@ -310,7 +318,7 @@ public abstract class CommandHandler
 				//replenish move points of all creatures in preparation for next round
 				for(HexState hs : currentState.getBoard().getHexesAsList())
 				{
-					for(TileProperties tp : hs.getCreaturesInHex())
+					for(ITileProperties tp : hs.getCreaturesInHex())
 					{
 						tp.setMoveSpeed(4);
 					}
@@ -329,18 +337,30 @@ public abstract class CommandHandler
 		}
 	}
 
-	private void makeDiceRoll(RollReason reasonForRoll, int playerNumber, TileProperties tile)
+	private void makeDiceRoll(RollReason reasonForRoll, int playerNumber, ITileProperties tile)
 	{
 		if(reasonForRoll == RollReason.ENTERTAINMENT)
 		{
 			currentState.addNeededRoll(new Roll(1, null, RollReason.ENTERTAINMENT, playerNumber));
+		}
+		else if(reasonForRoll == RollReason.RECRUIT_SPECIAL_CHARACTER)
+		{
+			currentState.addNeededRoll(new Roll(2, tile, RollReason.RECRUIT_SPECIAL_CHARACTER, playerNumber));
 		}
 		
 		for(Roll r : currentState.getRecordedRolls())
 		{
 			if(Roll.rollSatisfiesParameters(r, reasonForRoll, playerNumber, tile) && r.needsRoll())
 			{
-				r.addRoll(rollDie());
+				r.addBaseRoll(rollDie());
+				if(currentState.hasRollModificationFor(r))
+				{
+					List<RollModification> modifications = currentState.getRollModificationsFor(r);
+					for(RollModification rm : modifications)
+					{
+						r.addRollModificationFor(rm.getRollIndexToModify(), rm.getAmountToAdd());
+					}
+				}
 				//notifies players of die roll
 				new DieRoll(r).postNotification(playerNumber);
 				break;
@@ -366,6 +386,7 @@ public abstract class CommandHandler
 		bank = event.getBank();
 		boardGenerator = event.getBoardGenerator();
 		currentState = event.getCurrentState();
+		bankHeroes = event.getBankHeroManager();
 		isDemoMode = event.isDemoMode();
 	}
 

@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 
 import common.Constants;
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class HexContentsPanel extends JPanel
 {
@@ -31,7 +31,7 @@ public class HexContentsPanel extends JPanel
 	{
 		this.setLayout(new FlowLayout(FlowLayout.LEFT));
 		
-		for(TileProperties tp : model.getThingsInHex())
+		for(ITileProperties tp : model.getThingsInHex())
 		{
 			Image tileImage = Constants.IMAGES.get(tp.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT);
 			add(new JLabel(new ImageIcon(tileImage)));

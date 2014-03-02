@@ -1,22 +1,22 @@
 package server.event.commands;
 
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class PlaceThingOnBoardCommand extends AbstractCommand{
 	
-	private final TileProperties hex;
-	private final TileProperties thing;
+	private final ITileProperties hex;
+	private final ITileProperties thing;
 	
-	public PlaceThingOnBoardCommand(TileProperties thing, TileProperties hex){
+	public PlaceThingOnBoardCommand(ITileProperties thing, ITileProperties hex){
 		this.thing = thing;
 		this.hex = hex;
 	}
 	
-	public TileProperties getThing(){
+	public ITileProperties getThing(){
 		return thing;
 	}
 	
-	public TileProperties getHex(){
+	public ITileProperties getHex(){
 		return hex;
 	}
 }

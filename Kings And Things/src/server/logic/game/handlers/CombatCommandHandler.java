@@ -11,7 +11,6 @@ import server.logic.game.Player;
 import server.logic.game.validators.CombatPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants.Ability;
 import common.Constants.CombatPhase;
 import common.Constants.RollReason;
@@ -19,8 +18,8 @@ import common.Logger;
 import common.event.notifications.CombatHits;
 import common.event.notifications.HexStatesChanged;
 import common.game.HexState;
+import common.game.ITileProperties;
 import common.game.Roll;
-import common.game.TileProperties;
 
 public class CombatCommandHandler extends CommandHandler
 {
@@ -33,19 +32,19 @@ public class CombatCommandHandler extends CommandHandler
 	 * @throws IllegalStateException If it is not the combat phase,
 	 * or if another combat is already being resolved
 	 */
-	public void resolveCombat(TileProperties hex, int playerNumber)
+	public void resolveCombat(ITileProperties hex, int playerNumber)
 	{
 		CombatPhaseValidator.validateCanResolveCombat(hex,playerNumber,getCurrentState());
 		beginCombatResolution(hex, playerNumber);
 	}
 
-	public void applyHits(TileProperties thing, int playerNumber, int hitCount)
+	public void applyHits(ITileProperties thing, int playerNumber, int hitCount)
 	{
 		CombatPhaseValidator.validateCanApplyHits(thing, playerNumber, hitCount, getCurrentState());
 		makeHitsApplied(thing,playerNumber,hitCount);
 	}
 
-	private void beginCombatResolution(TileProperties hex, int playerNumber)
+	private void beginCombatResolution(ITileProperties hex, int playerNumber)
 	{
 		boolean isExploration = true;
 		Player defender = null;
@@ -76,7 +75,7 @@ public class CombatCommandHandler extends CommandHandler
 		}
 	}
 
-	private void makeHitsApplied(TileProperties thing, int playerNumber, int hitCount)
+	private void makeHitsApplied(ITileProperties thing, int playerNumber, int hitCount)
 	{
 		Player player = getCurrentState().getPlayerByPlayerNumber(playerNumber);
 		
@@ -120,14 +119,14 @@ public class CombatCommandHandler extends CommandHandler
 		
 		HexState combatHex = getCurrentState().getCombatHex();
 		getCurrentState().setCurrentCombatPhase(nextPhase);
-		Set<TileProperties> things = combatHex.getFightingThingsInHex();
+		Set<ITileProperties> things = combatHex.getFightingThingsInHex();
 		if(nextPhase == CombatPhase.RETREAT)
 		{
 			nextPhase = CombatPhase.MAGIC_ATTACK;
 		}
 		if(nextPhase == CombatPhase.MAGIC_ATTACK || nextPhase == CombatPhase.RANGED_ATTACK || nextPhase == CombatPhase.MELEE_ATTACK)
 		{
-			for(TileProperties thing : things)
+			for(ITileProperties thing : things)
 			{
 				if((nextPhase == CombatPhase.MAGIC_ATTACK && thing.hasAbility(Ability.Magic)) ||
 					(nextPhase == CombatPhase.RANGED_ATTACK && thing.hasAbility(Ability.Range)) ||
@@ -176,12 +175,12 @@ public class CombatCommandHandler extends CommandHandler
 				{
 					handledRolls.add(r);
 					attackedWithCreature = true;
-					//TODO handle 3 and 4 way combat by adding targetting mechanism
+					//TODO handle 3 and 4 way combat by adding targeting mechanism
 					Player rollingPlayer = getCurrentState().getPlayerByPlayerNumber(r.getRollingPlayerID());
 					int hitCount = 0;
 					final int rollingPlayerID = rollingPlayer.getID();
 					
-					for(int roll : r.getRolls())
+					for(int roll : r.getFinalRolls())
 					{
 						if(roll <= r.getRollTarget().getValue())
 						{
@@ -192,7 +191,7 @@ public class CombatCommandHandler extends CommandHandler
 					{
 						for(Player p : getCurrentState().getPlayers())
 						{
-							for(TileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+							for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
 							{
 								if(p.ownsThingOnBoard(tp) && !p.equals(rollingPlayer))
 								{

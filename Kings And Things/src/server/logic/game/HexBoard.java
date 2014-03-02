@@ -13,7 +13,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableBiMap;
 
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 /**
  * This class provides a convenient mechanism for representing the hex board inside out code.
@@ -29,7 +29,7 @@ public class HexBoard
 	 * layout pattern and can contain any number of rings, but must not contain an incomplete ring.
 	 * @throws IllegalArgumentException if tiles is null, empty, or contains non-hex tiles
 	 */
-	public HexBoard(List<? extends TileProperties> tiles)
+	public HexBoard(List<? extends ITileProperties> tiles)
 	{
 		if(tiles==null || tiles.size()<1)
 		{
@@ -41,7 +41,7 @@ public class HexBoard
 		int numRings = 0;
 		int i = 0;
 		int nextRingLength = 1;
-		for(TileProperties tp : tiles)
+		for(ITileProperties tp : tiles)
 		{
 			if(!tp.isHexTile())
 			{
@@ -207,7 +207,7 @@ public class HexBoard
 	 * @throws IllegalArgumentException if the entered tile is null, is
 	 * not a hex, or doesn't exist in this board
 	 */
-	public Point getRowColumnOfHex(TileProperties hex)
+	public Point getRowColumnOfHex(ITileProperties hex)
 	{
 		Point xy = getXYCoordinatesOfHex(hex);
 		return new Point(xy.y,xy.x);
@@ -221,7 +221,7 @@ public class HexBoard
 	 * @throws IllegalArgumentException if the entered tile is null, is
 	 * not a hex, or doesn't exist in this board
 	 */
-	public Point getXYCoordinatesOfHex(TileProperties hex)
+	public Point getXYCoordinatesOfHex(ITileProperties hex)
 	{
 		if(hex==null)
 		{
@@ -249,7 +249,7 @@ public class HexBoard
 	 * @throws IllegalArgumentException if the entered tile is null, is
 	 * not a hex, or doesn't exist in this board
 	 */
-	public HexState getHexStateForHex(TileProperties hex)
+	public HexState getHexStateForHex(ITileProperties hex)
 	{
 		Point coords = getXYCoordinatesOfHex(hex);
 		return getHexByXY(coords.x,coords.y);
@@ -264,7 +264,7 @@ public class HexBoard
 	 * @throws IllegalArgumentException if the entered tile is null, is
 	 * not a hex, or doesn't exist in this board
 	 */
-	public List<HexState> getAdjacentHexesTo(TileProperties hex)
+	public List<HexState> getAdjacentHexesTo(ITileProperties hex)
 	{
 		Point coords = getXYCoordinatesOfHex(hex);
 		int x = coords.x;
@@ -305,7 +305,7 @@ public class HexBoard
 	 * @return true if the entered list of hexes are all
 	 * connected to each other
 	 */
-	public boolean areHexesConnected(List<TileProperties> hexes)
+	public boolean areHexesConnected(List<ITileProperties> hexes)
 	{
 		for(int i=0; i<hexes.size()-1; i++)
 		{

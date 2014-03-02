@@ -2,24 +2,27 @@ package common.game;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import common.Constants.RollReason;
 
 public class Roll
 {
-	private final ArrayList<Integer> rolls;
-	private final TileProperties rollTarget;
+	private final ArrayList<Integer> baseRolls;
+	private final HashMap<Integer,Integer> rollModifications;
+	private final ITileProperties rollTarget;
 	private final int diceCount;
 	private final RollReason rollReason;
 	private final int playerNumber;
 	
-	public Roll(int diceCount, TileProperties tileToRollFor, RollReason reason, int playerRolling)
+	public Roll(int diceCount, ITileProperties tileToRollFor, RollReason reason, int playerRolling)
 	{
 		this.diceCount = diceCount;
 		this.rollTarget = tileToRollFor;
 		rollReason = reason;
-		rolls = new ArrayList<Integer>();
+		baseRolls = new ArrayList<Integer>();
+		rollModifications = new HashMap<>();
 		playerNumber = playerRolling;
 	}
 	
@@ -28,21 +31,21 @@ public class Roll
 		return diceCount;
 	}
 	
-	public TileProperties getRollTarget()
+	public ITileProperties getRollTarget()
 	{
 		return rollTarget;
 	}
 	
-	public List<Integer> getRolls()
+	public List<Integer> getBaseRolls()
 	{
-		return Collections.unmodifiableList(rolls);
+		return Collections.unmodifiableList(baseRolls);
 	}
 	
-	public void addRoll(int roll)
+	public void addBaseRoll(int roll)
 	{
 		if(needsRoll())
 		{
-			rolls.add(roll);
+			baseRolls.add(roll);
 		}
 		else
 		{
@@ -50,9 +53,34 @@ public class Roll
 		}
 	}
 	
+	public List<Integer> getFinalRolls()
+	{
+		ArrayList<Integer> finalRolls = new ArrayList<Integer>();
+		for(int i=0; i<baseRolls.size(); i++)
+		{
+			int baseRoll = baseRolls.get(i);
+			if(rollModifications.containsKey(i))
+			{
+				baseRoll += rollModifications.get(i);
+			}
+			finalRolls.add(baseRoll);
+		}
+		return Collections.unmodifiableList(finalRolls);
+	}
+	
+	public void addRollModificationFor(int baseRollIndex, int amount)
+	{
+		int previousModification = 0;
+		if(rollModifications.containsKey(baseRollIndex))
+		{
+			previousModification = rollModifications.get(baseRollIndex);
+		}
+		rollModifications.put(baseRollIndex, amount + previousModification);
+	}
+	
 	public boolean needsRoll()
 	{
-		return rolls.size() < diceCount;
+		return baseRolls.size() < diceCount;
 	}
 	
 	public RollReason getRollReason()
@@ -65,7 +93,7 @@ public class Roll
 		return playerNumber;
 	}
 	
-	public static boolean rollSatisfiesParameters(Roll r,RollReason reasonForRoll, int playerNumber, TileProperties tileToRollFor)
+	public static boolean rollSatisfiesParameters(Roll r,RollReason reasonForRoll, int playerNumber, ITileProperties tileToRollFor)
 	{
 		return r.getRollingPlayerID() == playerNumber && r.getRollReason()==reasonForRoll && (r.getRollTarget()==null? tileToRollFor==null : r.getRollTarget().equals(tileToRollFor));
 	}

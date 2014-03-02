@@ -3,9 +3,10 @@ package server.logic.game;
 import java.util.Iterator;
 
 import server.logic.exceptions.NoMoreTilesException;
+
 import common.Constants;
 import common.Constants.Biome;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 /**
  * this class encapsulates the logic of drawing hex tiles from the bank, and placing
@@ -34,7 +35,7 @@ public class HexTileManager extends AbstractTileManager
 	 * @throws NoMoreTilesException If there are no more tiles left to draw.
 	 */
 	@Override
-	public TileProperties drawTile() throws NoMoreTilesException
+	public ITileProperties drawTile() throws NoMoreTilesException
 	{
 		if(!isDemoMode)
 		{
@@ -113,14 +114,14 @@ public class HexTileManager extends AbstractTileManager
 	 * @return A hex tile.
 	 * @throws NoMoreTilesException If there are no more tiles left to draw.
 	 */
-	public TileProperties drawHexTileByType(Biome hexType) throws NoMoreTilesException
+	public ITileProperties drawHexTileByType(Biome hexType) throws NoMoreTilesException
 	{
 		synchronized(tiles)
 		{
-			Iterator<TileProperties> it = tiles.iterator();
+			Iterator<ITileProperties> it = tiles.iterator();
 			while(it.hasNext())
 			{
-				TileProperties hex = it.next();
+				ITileProperties hex = it.next();
 				if(hex.getName().equals(hexType.name()))
 				{
 					it.remove();
@@ -139,7 +140,7 @@ public class HexTileManager extends AbstractTileManager
 	 * @throws IllegalArgumentException if tile is null or is not a hex
 	 */
 	@Override
-	public void reInsertTile(TileProperties tile)
+	public void reInsertTile(ITileProperties tile)
 	{
 		if(tile==null)
 		{

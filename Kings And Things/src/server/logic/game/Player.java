@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import common.game.ITileProperties;
 import common.game.PlayerInfo;
-import common.game.TileProperties;
 
 /**
  * This class represents a player in the game
@@ -17,9 +17,9 @@ public class Player implements Serializable{
 	
 	private PlayerInfo info;
 
-	private final HashSet<TileProperties> tray;
-	private final HashSet<TileProperties> ownedHexes;
-	private final HashSet<TileProperties> ownedThingsOnBoard;
+	private final HashSet<ITileProperties> tray;
+	private final HashSet<ITileProperties> ownedHexes;
+	private final HashSet<ITileProperties> ownedThingsOnBoard;
 	
 	/**
 	 * Create a new player with the given info
@@ -32,9 +32,9 @@ public class Player implements Serializable{
 			throw new IllegalArgumentException("The entered player info must not be null");
 		}
 		this.info = player;
-		ownedHexes = new HashSet<TileProperties>();
-		ownedThingsOnBoard = new HashSet<TileProperties>();
-		tray = new HashSet<TileProperties>();
+		ownedHexes = new HashSet<ITileProperties>();
+		ownedThingsOnBoard = new HashSet<ITileProperties>();
+		tray = new HashSet<ITileProperties>();
 		info.setCardonRack(0);
 	}
 
@@ -121,7 +121,7 @@ public class Player implements Serializable{
 	 * Get a set of all hexes owned by this player
 	 * @return Set of all hexes owned by this player
 	 */
-	public Set<TileProperties> getOwnedHexes()
+	public Set<ITileProperties> getOwnedHexes()
 	{
 		return Collections.unmodifiableSet(ownedHexes);
 	}
@@ -134,7 +134,7 @@ public class Player implements Serializable{
 	 * @throws IllegalArgumentException if tile is null
 	 * or is not a hex tile
 	 */
-	public boolean addOwnedHex(TileProperties tile)
+	public boolean addOwnedHex(ITileProperties tile)
 	{
 		validateIsHex(tile);
 		return ownedHexes.add(tile);
@@ -148,7 +148,7 @@ public class Player implements Serializable{
 	 * @throws IllegalArgumentException if tile is null
 	 * or is not a hex tile
 	 */
-	public boolean removeHexFromOwnership(TileProperties tile)
+	public boolean removeHexFromOwnership(ITileProperties tile)
 	{
 		validateIsHex(tile);
 		return ownedHexes.remove(tile);
@@ -160,7 +160,7 @@ public class Player implements Serializable{
 	 * special income counters, not just creatures.
 	 * @return Set of all things on the board owned by this player
 	 */
-	public Set<TileProperties> getOwnedThingsOnBoard()
+	public Set<ITileProperties> getOwnedThingsOnBoard()
 	{
 		return Collections.unmodifiableSet(ownedThingsOnBoard);
 	}
@@ -172,7 +172,7 @@ public class Player implements Serializable{
 	 * was already in the list
 	 * @throws IllegalArgumentException if tile is null
 	 */
-	public boolean addOwnedThingOnBoard(TileProperties tile)
+	public boolean addOwnedThingOnBoard(ITileProperties tile)
 	{
 		validateNotNull(tile);
 		return ownedThingsOnBoard.add(tile);
@@ -186,7 +186,7 @@ public class Player implements Serializable{
 	 * if it was not in the list to begin with
 	 * @throws IllegalArgumentException if tile is null
 	 */
-	public boolean removeOwnedThingOnBoard(TileProperties tile)
+	public boolean removeOwnedThingOnBoard(ITileProperties tile)
 	{
 		validateNotNull(tile);
 		return ownedThingsOnBoard.remove(tile);
@@ -196,7 +196,7 @@ public class Player implements Serializable{
 	 * Get list of things in this players tray
 	 * @return Set of all things in this player's tray
 	 */
-	public Set<TileProperties> getTrayThings()
+	public Set<ITileProperties> getTrayThings()
 	{
 		return Collections.unmodifiableSet(tray);
 	}
@@ -209,7 +209,7 @@ public class Player implements Serializable{
 	 * @throws IllegalArgumentException if tile is null
 	 * or if player has 10 things in his tray
 	 */
-	public boolean addThingToTray(TileProperties tile)
+	public boolean addThingToTray(ITileProperties tile)
 	{
 		if (tray.size() >= 10) {
 			throw new IllegalArgumentException("You cannot have more than 10 things in your tray!");
@@ -228,7 +228,7 @@ public class Player implements Serializable{
 	 * tray, false if it was not on the tray to begin with
 	 * @throws IllegalArgumentException if tile is null
 	 */
-	public boolean removeThingFromTray(TileProperties tile)
+	public boolean removeThingFromTray(ITileProperties tile)
 	{
 		validateNotNull(tile);
 		
@@ -245,7 +245,7 @@ public class Player implements Serializable{
 	 * @throws IllegalArgumentException if tile is null, or is
 	 * not in this player's tray
 	 */
-	public void placeThingFromTrayOnBoard(TileProperties tile)
+	public void placeThingFromTrayOnBoard(ITileProperties tile)
 	{
 		validateNotNull(tile);
 		if(!tray.contains(tile))
@@ -263,7 +263,7 @@ public class Player implements Serializable{
 	 * false otherwise
 	 * @throws IllegalArgumentException if tile is null
 	 */
-	public boolean ownsThingOnBoard(TileProperties tile)
+	public boolean ownsThingOnBoard(ITileProperties tile)
 	{
 		validateNotNull(tile);
 		return ownedThingsOnBoard.contains(tile);
@@ -277,7 +277,7 @@ public class Player implements Serializable{
 	 * @throws IllegalArgumentException if tile is null
 	 * or is not a hex
 	 */
-	public boolean ownsHex(TileProperties hex)
+	public boolean ownsHex(ITileProperties hex)
 	{
 		validateNotNull(hex);
 		validateIsHex(hex);
@@ -291,7 +291,7 @@ public class Player implements Serializable{
 	 * false otherwise
 	 * @throws IllegalArgumentException if tile is null
 	 */
-	public boolean ownsThingInTray(TileProperties tile)
+	public boolean ownsThingInTray(ITileProperties tile)
 	{
 		validateNotNull(tile);
 		return tray.contains(tile);
@@ -304,7 +304,7 @@ public class Player implements Serializable{
 	 * @return True if this player owns the tile, false otherwise
 	 * @throws IllegalArgumentException if tile is null
 	 */
-	public boolean ownsTile(TileProperties tile)
+	public boolean ownsTile(ITileProperties tile)
 	{
 		validateNotNull(tile);
 		return ownedThingsOnBoard.contains(tile) || ownedHexes.contains(tile) || tray.contains(tile);
@@ -372,7 +372,7 @@ public class Player implements Serializable{
 		int specialIncomeGold = 0;	//keeps track of gold pieces for each special income counter
 			
 			//
-		for (TileProperties thing : ownedThingsOnBoard) {
+		for (ITileProperties thing : ownedThingsOnBoard) {
 			if( !event && thing.isSpecialIncomeCounter()) {
 				specialIncomeGold += thing.getValue();
 			} else if (thing.isBuildableBuilding()) {
@@ -383,7 +383,7 @@ public class Player implements Serializable{
 		return ownedHexes.size() + buildingGold + specialIncomeGold;
 	}
 	
-	private static void validateIsHex(TileProperties tile)
+	private static void validateIsHex(ITileProperties tile)
 	{
 		validateNotNull(tile);
 		if(!tile.isHexTile())
@@ -392,7 +392,7 @@ public class Player implements Serializable{
 		}
 	}
 	
-	private static void validateNotNull(TileProperties tile)
+	private static void validateNotNull(ITileProperties tile)
 	{
 		if(tile == null)
 		{

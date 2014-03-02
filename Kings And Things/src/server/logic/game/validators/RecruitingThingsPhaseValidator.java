@@ -6,11 +6,12 @@ import java.util.Collection;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
 import server.logic.game.Player;
+
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public abstract class RecruitingThingsPhaseValidator
 {
@@ -25,7 +26,7 @@ public abstract class RecruitingThingsPhaseValidator
 	 * of things is invalid
 	 * @throws IllegalStateException If it is nor the proper phase for exchanging things
 	 */
-	public static void validateCanExchangeThings(Collection<TileProperties> things, int playerNumber, GameState currentState)
+	public static void validateCanExchangeThings(Collection<ITileProperties> things, int playerNumber, GameState currentState)
 	{
 		CommandValidator.validateIsPlayerActive(playerNumber,currentState);
 		CommandValidator.validateNoPendingRolls(currentState);
@@ -38,7 +39,7 @@ public abstract class RecruitingThingsPhaseValidator
 			throw new IllegalArgumentException("Can not exchange things during the " + (sp==SetupPhase.SETUP_FINISHED? rp : sp) + " phase");
 		}
 		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
-		for(TileProperties tp : things)
+		for(ITileProperties tp : things)
 		{
 			if(!player.ownsThingInTray(tp))
 			{
@@ -98,7 +99,7 @@ public abstract class RecruitingThingsPhaseValidator
 	 * @throws IllegalStateException If it is not the right phase for placing things on
 	 * the board
 	 */
-	public static void validateCanPlaceThingOnBoard(final TileProperties thing, int playerNumber, TileProperties hex, GameState currentState)
+	public static void validateCanPlaceThingOnBoard(final ITileProperties thing, int playerNumber, ITileProperties hex, GameState currentState)
 	{
 		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
 		CombatPhase combatPhase = currentState.getCurrentCombatPhase();
@@ -128,7 +129,7 @@ public abstract class RecruitingThingsPhaseValidator
 			throw new IllegalArgumentException("Can only place things that the player owns in their tray");
 		}
 		
-		ArrayList<TileProperties> stuff = new ArrayList<>();
+		ArrayList<ITileProperties> stuff = new ArrayList<>();
 		stuff.add(thing);
 		CommandValidator.validateCreatureLimitInHexNotExceeded(playerNumber,hex,currentState,stuff);
 		

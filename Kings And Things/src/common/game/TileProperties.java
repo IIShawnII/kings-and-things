@@ -2,15 +2,14 @@ package common.game;
 
 import static common.Constants.INFINITE_TILE;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
-import common.Constants.Biome;
 import common.Constants.Ability;
+import common.Constants.Biome;
 import common.Constants.Category;
 import common.Constants.Restriction;
 
-public class TileProperties implements Serializable{
+public class TileProperties implements ITileProperties{
 
 	private static final long serialVersionUID = 3896952672735323992L;
 	
@@ -68,6 +67,7 @@ public class TileProperties implements Serializable{
 		biome = null;
 	}
 	
+	@Override
 	public boolean isFake(){
 		return fake;
 	}
@@ -76,10 +76,12 @@ public class TileProperties implements Serializable{
 		tileType = category;
 	}
 	
+	@Override
 	public Category getCategory(){
 		return tileType;
 	}
 
+	@Override
 	public int getNumber() {
 		return number;
 	}
@@ -88,29 +90,35 @@ public class TileProperties implements Serializable{
 		this.number = number;
 	}
 
+	@Override
 	public int getValue() {
 		return value;
 	}
-	
+
+	@Override
 	public void setValue( int value) {
 		this.value = value;
 	}
 
+	@Override
 	public void resetValue()
 	{
 		value = baseValue;
 	}
-	
+
+	@Override
 	// retrieves moveSpeed
 	public int getMoveSpeed () {
 		return moveSpeed;
 	}
-	
+
+	@Override
 	// assigns new moveSpeed
 	public void setMoveSpeed(int moveSpeed) {
 		this.moveSpeed = moveSpeed;
 	}
-	
+
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -125,7 +133,8 @@ public class TileProperties implements Serializable{
 		}catch( IllegalArgumentException ex){}
 		restrictions.add( restriction);
 	}
-	
+
+	@Override
 	public Ability[] getAbilities() {
 		Ability[] array = new Ability[ abilities.size()];
 		abilities.toArray( array);
@@ -139,11 +148,13 @@ public class TileProperties implements Serializable{
 	protected void setSpecialFlip() {
 		specialFlip = true;
 	}
-	
+
+	@Override
 	public void flip(){
 		isFaceUp = !isFaceUp;
 	}
-	
+
+	@Override
 	public boolean isFaceUp()
 	{
 		return isFaceUp;
@@ -152,7 +163,8 @@ public class TileProperties implements Serializable{
 	protected void setNoFlip() {
 		hasFlip = false;
 	}
-	
+
+	@Override
 	public boolean hasFlip(){
 		return hasFlip;
 	}
@@ -160,72 +172,92 @@ public class TileProperties implements Serializable{
 	protected void setInfinite() {
 		number = INFINITE_TILE;
 	}
-	
+
+	@Override
 	public boolean isInfinit(){
 		return number == INFINITE_TILE;
 	}
-	
+
+	@Override
 	public boolean isHexTile()
 	{
 		return tileType == Category.Hex;
 	}
-	
+
+	@Override
 	public boolean isBuilding()
 	{
 		return tileType == Category.Building || isBuildableBuilding();
 	}
-	
+
+	@Override
 	public boolean isBuildableBuilding()
 	{
 		return tileType == Category.Buildable;
 	}
-	
+
+	@Override
 	public boolean isRestrictedToBiome()
 	{
 		return getBiomeRestriction()!=null;
 	}
-	
+
+	@Override
 	public boolean isEvent()
 	{
 		return tileType == Category.Event;
 	}
-	
+
+	@Override
 	public boolean isMagicItem()
 	{
 		return tileType == Category.Magic;
 	}
-	
+
+	@Override
 	public boolean isTreasure()
 	{
 		return tileType == Category.Treasure;
 	}
-	
+
+	@Override
 	public boolean isCreature()
 	{
-		return tileType == Category.Creature;
+		return tileType == Category.Creature || tileType == Category.Special;
 	}
-	
+
+	@Override
+	public boolean isSpecialCharacter()
+	{
+		return tileType == Category.Special;
+	}
+
+	@Override
 	public boolean hasAbility(Ability ability)
 	{
 		return abilities.contains( ability);
 	}
-	
+
+	@Override
 	public boolean isSpecialCreatureWithAbility(Ability ability)
 	{
 		return isCreature() && hasAbility(ability);
 	}
-	
+
+	@Override
 	public Biome getBiomeRestriction()
 	{
 		return biome;
 	}
-	
+
+	@Override
 	public boolean isSpecialIncomeCounter()
 	{
 		
 		return (restrictions.contains(Restriction.Treasure) && isRestrictedToBiome()) || (isBuilding() && !isBuildableBuilding());
 	}
-	
+
+	@Override
 	public Restriction getRestriction( int index){
 		return restrictions.get( index);
 	}
@@ -262,6 +294,7 @@ public class TileProperties implements Serializable{
 		return "-n " + name + " -a " + value + " -c " + number;
 	}
 
+	@Override
 	public boolean hasRestriction() {
 		return restrictions.size()>=1;
 	}

@@ -1,14 +1,14 @@
 package server.event.commands;
 
 import common.Constants.BuildableBuilding;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class ConstructBuildingCommand extends AbstractCommand{
 	
 	private final BuildableBuilding building;
-	private final TileProperties hex;
+	private final ITileProperties hex;
 	
-	public ConstructBuildingCommand(BuildableBuilding building, TileProperties hex){
+	public ConstructBuildingCommand(BuildableBuilding building, ITileProperties hex){
 		this.building = building;
 		this.hex = hex;
 	}
@@ -17,7 +17,7 @@ public class ConstructBuildingCommand extends AbstractCommand{
 		return building;
 	}
 	
-	public TileProperties getHex(){
+	public ITileProperties getHex(){
 		return hex;
 	}
 }

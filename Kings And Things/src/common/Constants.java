@@ -1,19 +1,19 @@
 package common;
 
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.awt.Dimension;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+
+import javax.imageio.ImageIO;
 
 import com.google.common.collect.ImmutableBiMap;
-
 import common.game.TileProperties;
 
 public final class Constants {
@@ -162,7 +162,7 @@ public final class Constants {
 																												.put("Jungle_Lord","Arch_Cleric")
 																												.put("Baron_Munchausen","Desert_Master")
 																												.put("Elf_Lord","Ice_Lord")
-																												.put("Arch_Mage","Ghaog_ll")
+																												.put("Arch_Mage","Ghaog_II")
 																												.put("Dwarf_King","Warlord")
 																												.put("Deerhunter","Grand_Duke")
 																												.put("Marksman","Forest_King")

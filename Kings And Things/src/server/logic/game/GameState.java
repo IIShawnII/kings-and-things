@@ -2,6 +2,7 @@ package server.logic.game;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ public class GameState
 	private int defenderPlayerNumber;
 	private Point combatLocation;
 	private final ArrayList<Roll> rolls;
+	private final ArrayList<RollModification> rollModifications;
 	private final HashMap<Integer,Integer> hitsToApply;
 	private final HashSet<HexState> hexesContainingBuiltObjects;
 
@@ -57,7 +59,9 @@ public class GameState
 		this.currentCombatPhase = currentCombatPhase;
 		this.defenderPlayerNumber = defenderPlayerNumber;
 		this.combatLocation = combatLocation;
-		this.rolls = new ArrayList<Roll>();
+		rolls = new ArrayList<Roll>();
+		rollModifications = new ArrayList<RollModification>();
+		
 		hitsToApply = new HashMap<>();
 		this.hexesContainingBuiltObjects = new HashSet<HexState>();
 		for(Player p : players)
@@ -239,6 +243,45 @@ public class GameState
 	}
 	
 	/**
+	 * Given a roll, find out if someone has elected to modify
+	 * that roll, through paying gold or using a magic card.
+	 * @param r The roll to check for
+	 * @return True if the given roll ought to be modified,
+	 * false otherwise
+	 */
+	public boolean hasRollModificationFor(Roll r)
+	{
+		for(RollModification rm : rollModifications)
+		{
+			if(Roll.rollSatisfiesParameters(rm.getRollToModify(), r.getRollReason(), r.getRollingPlayerID(), r.getRollTarget()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Given a roll, find all recorded modifications that need to be
+	 * applied to it.
+	 * @param r The roll to check for
+	 * @return List of all roll modifications that need to be applied
+	 * to the given roll
+	 */
+	public List<RollModification> getRollModificationsFor(Roll r)
+	{
+		ArrayList<RollModification> modifications = new ArrayList<RollModification>();
+		for(RollModification rm : rollModifications)
+		{
+			if(Roll.rollSatisfiesParameters(rm.getRollToModify(), r.getRollReason(), r.getRollingPlayerID(), r.getRollTarget()))
+			{
+				modifications.add(rm);
+			}
+		}
+		return Collections.unmodifiableList(modifications);
+	}
+	
+	/**
 	 * Checks if there are any players who still have to apply
 	 * hits to their creatures
 	 * @return True if some players still need to apply hits,
@@ -327,6 +370,46 @@ public class GameState
 	{
 		rolls.remove(roll);
 	}
+
+	/**
+	 * Given a roll modification, at it to this object's list
+	 * of recorded roll modifications that need to be performed
+	 * @param modification The modification to record
+	 * @return True if the item was added successfully, false otherwise
+	 */
+	public boolean addRollModification(RollModification modification)
+	{
+		return rollModifications.add(modification);
+	}
+	
+	/**
+	 * Given a list of roll modifications, remove all elements from the list
+	 * that occur in this game state.
+	 * @param modifications The list of roll modifications to remove
+	 * @return True if at least one element from the supplied list was
+	 * removed from this object
+	 */
+	public boolean removeRollModifications(Collection<RollModification> modifications)
+	{
+		boolean oneRemoved = false;
+		for(RollModification rm : modifications)
+		{
+			oneRemoved = removeRollModification(rm) || oneRemoved;
+		}
+		
+		return oneRemoved;
+	}
+
+	/**
+	 * Given a roll modification, remove it from the list of roll modifications
+	 *  that occur in this game state.
+	 * @param modifications The roll modification to remove
+	 * @return True if the supplied modification was removed from this object
+	 */
+	public boolean removeRollModification(RollModification modification)
+	{
+		return rollModifications.remove(modification);
+	}
 	
 	/**
 	 * Add a number to the amount of hits that a player
@@ -359,6 +442,11 @@ public class GameState
 	public void removeAllRecordedRolls()
 	{
 		rolls.clear();
+	}
+	
+	public void removeAllRecordedRollModifications()
+	{
+		rollModifications.clear();
 	}
 	
 	/**

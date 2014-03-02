@@ -8,6 +8,7 @@ import server.logic.game.handlers.CombatCommandHandler;
 import server.logic.game.handlers.CommandHandler;
 import server.logic.game.handlers.ConstructBuildingCommandHandler;
 import server.logic.game.handlers.MovementCommandHandler;
+import server.logic.game.handlers.RecruitSpecialCharacterCommandHandler;
 import server.logic.game.handlers.RecruitingThingsCommandHandler;
 import server.logic.game.handlers.SetupPhaseCommandHandler;
 
@@ -24,6 +25,7 @@ public class CommandHandlerManager{
 		commandHandlers.add(new MovementCommandHandler());
 		commandHandlers.add(new RecruitingThingsCommandHandler());
 		commandHandlers.add(new SetupPhaseCommandHandler());
+		commandHandlers.add(new RecruitSpecialCharacterCommandHandler());
 	}
 	
 	/**

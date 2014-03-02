@@ -1,16 +1,16 @@
 package server.event.commands;
 
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class GiveHexToPlayerCommand extends AbstractCommand{
 	
-	private final TileProperties hex;
+	private final ITileProperties hex;
 	
-	public GiveHexToPlayerCommand(TileProperties hex){
+	public GiveHexToPlayerCommand(ITileProperties hex){
 		this.hex = hex;
 	}
 	
-	public TileProperties getHex(){
+	public ITileProperties getHex(){
 		return hex;
 	}
 }

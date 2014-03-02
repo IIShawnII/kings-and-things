@@ -1,12 +1,13 @@
 package server.logic.game;
 
-import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.HashSet;
+
+import server.logic.exceptions.NoMoreTilesException;
 
 import common.Constants;
 import common.Constants.Biome;
-import common.game.TileProperties;
-import server.logic.exceptions.NoMoreTilesException;
+import common.game.ITileProperties;
 
 /**
  * This class creates a playing board according to the rules for removing
@@ -17,7 +18,7 @@ public class BoardGenerator
 {
 	private final int numPlayers;
 	private final HexTileManager hexManager;
-	private final HashSet<TileProperties> temporarilyRemovedHexes;
+	private final HashSet<ITileProperties> temporarilyRemovedHexes;
 	
 	/**
 	 * Creates a new BoardGenerator, setup to create boards for the specified
@@ -40,7 +41,7 @@ public class BoardGenerator
 		}
 		this.numPlayers = numPlayers;
 		this.hexManager = hexManager;
-		temporarilyRemovedHexes = new HashSet<TileProperties>();
+		temporarilyRemovedHexes = new HashSet<ITileProperties>();
 	}
 	
 	/**
@@ -67,12 +68,12 @@ public class BoardGenerator
 			tempRemoveHexesOfType(Biome.Sea, 3);
 		}
 		
-		ArrayList<TileProperties> hexes = new ArrayList<TileProperties>();
+		ArrayList<ITileProperties> hexes = new ArrayList<ITileProperties>();
 		
 		int boardSize = (numPlayers==Constants.MAX_PLAYERS||Constants.BYPASS_MIN_PLAYER)? Constants.MAX_HEXES_ON_BOARD : Constants.MIN_HEXES_ON_BOARD;
 		for(int i=0; i<boardSize; i++)
 		{
-			TileProperties hex = hexManager.drawTile();
+			ITileProperties hex = hexManager.drawTile();
 			if(hex.isFaceUp())
 			{
 				hex.flip();
@@ -90,7 +91,7 @@ public class BoardGenerator
 	 * @throws IllegalArgumentException if hex is null, or does not
 	 * represent a hex tile.
 	 */
-	public void putHexBack(TileProperties hex)
+	public void putHexBack(ITileProperties hex)
 	{
 		hexManager.reInsertTile(hex);
 	}
@@ -102,7 +103,7 @@ public class BoardGenerator
 	 */
 	public void setupFinished()
 	{
-		for(TileProperties tp : temporarilyRemovedHexes)
+		for(ITileProperties tp : temporarilyRemovedHexes)
 		{
 			putHexBack(tp);
 		}
@@ -117,7 +118,7 @@ public class BoardGenerator
 	 * @throws IllegalArgumentException if hex is null or does not represent
 	 * a hex tile.
 	 */
-	public void placeHexAside(TileProperties hex)
+	public void placeHexAside(ITileProperties hex)
 	{
 		if(hex == null)
 		{

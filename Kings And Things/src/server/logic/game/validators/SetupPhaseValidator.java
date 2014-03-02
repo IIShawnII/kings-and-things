@@ -12,7 +12,7 @@ import server.logic.game.Player;
 import common.Constants;
 import common.Constants.Biome;
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public abstract class SetupPhaseValidator
 {
@@ -43,7 +43,7 @@ public abstract class SetupPhaseValidator
 	 * @throws IllegalStateException if it is not the correct phase for selecting
 	 * starting hexes
 	 */
-	public static void validateCanGiveHexToPlayer(TileProperties hex, int playerNumber, GameState currentState)
+	public static void validateCanGiveHexToPlayer(ITileProperties hex, int playerNumber, GameState currentState)
 	{
 		CommandValidator.validateIsPlayerActive(playerNumber, currentState);
 		CommandValidator.validateNoPendingRolls(currentState);
@@ -77,7 +77,7 @@ public abstract class SetupPhaseValidator
 	 * sea hex can not be exchanged according to game rules
 	 * @throws IllegalStateException If it is nor the proper phase for exchanging sea hexes
 	 */
-	public static void validateCanExchangeSeaHex(TileProperties hex, int playerNumber, GameState currentState)
+	public static void validateCanExchangeSeaHex(ITileProperties hex, int playerNumber, GameState currentState)
 	{
 		CommandValidator.validateIsPlayerActive(playerNumber,currentState);
 		CommandValidator.validateNoPendingRolls(currentState);
@@ -94,7 +94,7 @@ public abstract class SetupPhaseValidator
 			throw new IllegalArgumentException("Can only exchange sea hexes.");
 		}
 		
-		TileProperties startingHex = currentState.getPlayerByPlayerNumber(playerNumber).getOwnedHexes().iterator().next();
+		ITileProperties startingHex = currentState.getPlayerByPlayerNumber(playerNumber).getOwnedHexes().iterator().next();
 		List<HexState> adjacentHexes = currentState.getBoard().getAdjacentHexesTo(startingHex);
 		
 		HexState hexState = currentState.getBoard().getHexStateForHex(hex);
@@ -131,7 +131,7 @@ public abstract class SetupPhaseValidator
 	 * @param currentState The current state of the game to do the validation check on
 	 * @throws IllegalArgumentException If hex is null, or is not a valid starting position
 	 */
-	public static void validateIsHexStartingPosition(TileProperties hex, GameState currentState)
+	public static void validateIsHexStartingPosition(ITileProperties hex, GameState currentState)
 	{
 		Point desiredHex = currentState.getBoard().getXYCoordinatesOfHex(hex);
 		HashSet<Point> validChoices = Constants.getValidStartingHexes(currentState.getPlayers().size());
@@ -148,7 +148,7 @@ public abstract class SetupPhaseValidator
 		}
 	}
 
-	private static void validateCanPickSetupPhaseHex(TileProperties hex, int playerNumber, GameState currentState)
+	private static void validateCanPickSetupPhaseHex(ITileProperties hex, int playerNumber, GameState currentState)
 	{
 		boolean playerHasOneAdjacentHex = false;
 		for(HexState hs : currentState.getBoard().getAdjacentHexesTo(hex))

@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import server.logic.exceptions.NoMoreTilesException;
-import common.game.TileProperties;
+
+import common.game.ITileProperties;
 
 
 /**
@@ -13,7 +14,7 @@ import common.game.TileProperties;
  */
 public abstract class AbstractTileManager
 {
-	protected final ArrayList<TileProperties> tiles;
+	protected final ArrayList<ITileProperties> tiles;
 	private final String tileType;
 
 	/**
@@ -21,9 +22,9 @@ public abstract class AbstractTileManager
 	 * @param tiles Our list of available tiles
 	 * @param tileType A string indicated the kind of tiles we're managing, for exceptions
 	 */
-	protected AbstractTileManager(Collection<? extends TileProperties> tiles, String tileType)
+	protected AbstractTileManager(Collection<? extends ITileProperties> tiles, String tileType)
 	{
-		this.tiles = new ArrayList<TileProperties>(tiles);
+		this.tiles = new ArrayList<ITileProperties>(tiles);
 		this.tileType = tileType;
 	}
 
@@ -32,7 +33,7 @@ public abstract class AbstractTileManager
 	 * @return A tile.
 	 * @throws NoMoreTilesException If there are no more tiles left to draw.
 	 */
-	public TileProperties drawTile() throws NoMoreTilesException
+	public ITileProperties drawTile() throws NoMoreTilesException
 	{
 		synchronized(tiles)
 		{
@@ -51,7 +52,7 @@ public abstract class AbstractTileManager
 	 * @param tile The tile to add back in.
 	 * @throws IllegalArgumentException if tile is null.
 	 */
-	public void reInsertTile(TileProperties tile)
+	public void reInsertTile(ITileProperties tile)
 	{
 		if(tile==null)
 		{

@@ -26,9 +26,9 @@ public class HexState implements Serializable{
 	private static final long serialVersionUID = -1871329628938580400L;
 
 	private Image markerImage;
-	private TileProperties marker;
-	private TileProperties hex;
-	private final HashSet<TileProperties> thingsInHex;
+	private ITileProperties marker;
+	private ITileProperties hex;
+	private final HashSet<ITileProperties> thingsInHex;
 	private boolean isInBattle = false;
 	
 	//only used by Client GUI for display purpose
@@ -36,7 +36,7 @@ public class HexState implements Serializable{
 	
 	public HexState(){
 		isFake = true;
-		thingsInHex = new HashSet<TileProperties>();
+		thingsInHex = new HashSet<ITileProperties>();
 		hex = new TileProperties( Category.Hex);
 	}
 	
@@ -54,8 +54,8 @@ public class HexState implements Serializable{
 	 * @throws IllegalArgumentException if hex is null or
 	 * not a hex tile
 	 */
-	public HexState(TileProperties hex){
-		this(hex, new HashSet<TileProperties>());
+	public HexState(ITileProperties hex){
+		this(hex, new HashSet<ITileProperties>());
 	}
 	
 	/**
@@ -65,7 +65,7 @@ public class HexState implements Serializable{
 	 * @throws IllegalArgumentException if hex is null or not
 	 * a hex tile, or if ThingsInHex is invalid
 	 */
-	public HexState(TileProperties hex, Collection<TileProperties> thingsInHex)
+	public HexState(ITileProperties hex, Collection<ITileProperties> thingsInHex)
 	{
 		isFake = false;
 		validateTileNotNull(hex);
@@ -76,15 +76,15 @@ public class HexState implements Serializable{
 		}
 		
 		this.hex = hex;
-		this.thingsInHex = new HashSet<TileProperties>();
-		for(TileProperties tp : thingsInHex)
+		this.thingsInHex = new HashSet<ITileProperties>();
+		for(ITileProperties tp : thingsInHex)
 		{
 			addThingToHex(tp);
 		}
 	}
 	
 	public void addHex( HexState state){
-		for(TileProperties tp : state.thingsInHex){
+		for(ITileProperties tp : state.thingsInHex){
 			addThingToHex(tp);
 		}
 		if( !marker.equals( state.marker)){
@@ -108,7 +108,7 @@ public class HexState implements Serializable{
 		return marker!=null;
 	}
 	
-	public void setMarker( TileProperties marker){
+	public void setMarker( ITileProperties marker){
 		this.marker = marker;
 		markerImage = Constants.IMAGES.get( marker.hashCode());
 	}
@@ -137,7 +137,7 @@ public class HexState implements Serializable{
 	 * Get the hex of this hexState
 	 * @return The hex of this hex state
 	 */
-	public TileProperties getHex()
+	public ITileProperties getHex()
 	{
 		return hex;
 	}
@@ -148,7 +148,7 @@ public class HexState implements Serializable{
 	 * @throws IllegalArgumentException if hex is null
 	 * or is not a hex tile
 	 */
-	public void setHex(TileProperties hex)
+	public void setHex(ITileProperties hex)
 	{
 		validateTileNotNull(hex);
 		validateIsHexTile(hex);
@@ -160,7 +160,7 @@ public class HexState implements Serializable{
 	 * hex state
 	 * @return Set of things in this hex
 	 */
-	public Set<TileProperties> getThingsInHex()
+	public Set<ITileProperties> getThingsInHex()
 	{
 		return Collections.unmodifiableSet(thingsInHex);
 	}
@@ -169,10 +169,10 @@ public class HexState implements Serializable{
 	 * Gets all of the 'creature' tiles included in this hex.
 	 * @return Set of all creatures in this hex
 	 */
-	public Set<TileProperties> getCreaturesInHex()
+	public Set<ITileProperties> getCreaturesInHex()
 	{
-		HashSet<TileProperties> things = new HashSet<>();
-		for(TileProperties tp : thingsInHex)
+		HashSet<ITileProperties> things = new HashSet<>();
+		for(ITileProperties tp : thingsInHex)
 		{
 			if(tp.isCreature())
 			{
@@ -191,7 +191,7 @@ public class HexState implements Serializable{
 	 * @throws IllegalArgumentException if tile is null,
 	 * or can not be added due to game rules
 	 */
-	public boolean addThingToHex(TileProperties tile){
+	public boolean addThingToHex(ITileProperties tile){
 		//Restriction.Special is just a place holder to force default in switch
 		Restriction res = tile.hasRestriction()? tile.getRestriction( 0):Restriction.Special; 
 		switch( res){
@@ -217,7 +217,7 @@ public class HexState implements Serializable{
 	 * @throws IllegalArgumentException if tile is null,
 	 * or can not be added due to game rules
 	 */
-	public void validateCanAddThingToHex(TileProperties tile)
+	public void validateCanAddThingToHex(ITileProperties tile)
 	{
 		validateTileNotNull(tile);
 		if(!tile.isCreature() && !tile.isSpecialIncomeCounter() && !tile.isBuilding())
@@ -248,9 +248,9 @@ public class HexState implements Serializable{
 	 * @return The special income counter in this hex, if one
 	 * exists, null otherwise
 	 */
-	public TileProperties getSpecialIncomeCounter()
+	public ITileProperties getSpecialIncomeCounter()
 	{
-		for(TileProperties tp : getThingsInHex())
+		for(ITileProperties tp : getThingsInHex())
 		{
 			if(tp.isSpecialIncomeCounter())
 			{
@@ -266,10 +266,10 @@ public class HexState implements Serializable{
 	 * capable of participating in combat
 	 * @return Set of things that can fight
 	 */
-	public Set<TileProperties> getFightingThingsInHex()
+	public Set<ITileProperties> getFightingThingsInHex()
 	{
-		HashSet<TileProperties> fightingThings = new HashSet<TileProperties>();
-		for(TileProperties thing : getThingsInHex())
+		HashSet<ITileProperties> fightingThings = new HashSet<ITileProperties>();
+		for(ITileProperties thing : getThingsInHex())
 		{
 			if((thing.isCreature() || thing.isBuilding()) && thing.getValue()>0)
 			{
@@ -306,9 +306,9 @@ public class HexState implements Serializable{
 	 * @return The building in this hex if one exists,
 	 * null otherwise
 	 */
-	public TileProperties getBuilding()
+	public ITileProperties getBuilding()
 	{
-		for(TileProperties tp : getThingsInHex())
+		for(ITileProperties tp : getThingsInHex())
 		{
 			if(tp.isBuilding())
 			{
@@ -337,7 +337,7 @@ public class HexState implements Serializable{
 	 * false  if it was not present to begin with
 	 * @throws IllegalArgumentException if tile is null
 	 */
-	public boolean removeThingFromHex(TileProperties tile)
+	public boolean removeThingFromHex(ITileProperties tile)
 	{
 		validateTileNotNull(tile);
 		return thingsInHex.remove(tile);
@@ -349,16 +349,16 @@ public class HexState implements Serializable{
 	 * @return Set of all things in this hex owned by the entered player
 	 * @throws IllegalArgumentException if p is null
 	 */
-	public Set<TileProperties> getThingsInHexOwnedByPlayer(Player p)
+	public Set<ITileProperties> getThingsInHexOwnedByPlayer(Player p)
 	{
 		if(p==null)
 		{
 			throw new IllegalArgumentException("The entered player must not be null");
 		}
 		
-		HashSet<TileProperties> returnSet = new HashSet<TileProperties>();
+		HashSet<ITileProperties> returnSet = new HashSet<ITileProperties>();
 		
-		for(TileProperties tp : getThingsInHex())
+		for(ITileProperties tp : getThingsInHex())
 		{
 			if(p.ownsThingOnBoard(tp))
 			{
@@ -391,7 +391,7 @@ public class HexState implements Serializable{
 		return result;
 	}
 	
-	private static void validateTileNotNull(TileProperties tile)
+	private static void validateTileNotNull(ITileProperties tile)
 	{
 		if(tile==null)
 		{
@@ -399,7 +399,7 @@ public class HexState implements Serializable{
 		}
 	}
 	
-	private static void validateIsHexTile(TileProperties hex)
+	private static void validateIsHexTile(ITileProperties hex)
 	{
 		if(!hex.isHexTile())
 		{

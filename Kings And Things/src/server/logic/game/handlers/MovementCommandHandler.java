@@ -7,11 +7,10 @@ import server.event.commands.MoveThingsCommand;
 import server.logic.game.validators.MovementValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Logger;
 import common.event.notifications.HexStatesChanged;
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class MovementCommandHandler extends CommandHandler
 {
@@ -21,13 +20,13 @@ public class MovementCommandHandler extends CommandHandler
 	 * @param playerNumber The player who sent the command
 	 * @param hexes The hexes the player wants to move through
 	 */
-	public void moveThings(Collection<TileProperties> things, int playerNumber, List<TileProperties> hexes)
+	public void moveThings(Collection<ITileProperties> things, int playerNumber, List<ITileProperties> hexes)
 	{
 		MovementValidator.validateCanMove(playerNumber, getCurrentState(), hexes, things);
 		makeThingsMoved(things, playerNumber, hexes);
 	}
 	
-	private void makeThingsMoved(Collection<TileProperties> things, int playerNumber, List<TileProperties> hexes)
+	private void makeThingsMoved(Collection<ITileProperties> things, int playerNumber, List<ITileProperties> hexes)
 	{
 		int moveCost = 0;
 		for(int i=1; i<hexes.size(); i++)
@@ -38,7 +37,7 @@ public class MovementCommandHandler extends CommandHandler
 		HexState firstHex = getCurrentState().getBoard().getHexStateForHex(hexes.get(0));
 		HexState lastHex = getCurrentState().getBoard().getHexStateForHex(hexes.get(hexes.size()-1));
 		
-		for(TileProperties thing : things)
+		for(ITileProperties thing : things)
 		{
 			thing.setMoveSpeed(thing.getMoveSpeed() - moveCost);
 			firstHex.removeThingFromHex(thing);

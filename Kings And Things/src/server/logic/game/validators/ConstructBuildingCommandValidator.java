@@ -3,10 +3,11 @@ package server.logic.game.validators;
 import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.GameState;
 import server.logic.game.Player;
+
 import common.Constants.BuildableBuilding;
 import common.Constants.SetupPhase;
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public abstract class ConstructBuildingCommandValidator
 {
@@ -20,7 +21,7 @@ public abstract class ConstructBuildingCommandValidator
 	 * building or hex tile is invalid, or if construction can not be done due to game rules
 	 * @throws IllegalStateException if it is not the correct phase for building things
 	 */
-	public static void validateCanBuildBuilding(BuildableBuilding building, int playerNumber, TileProperties hex, GameState currentState)
+	public static void validateCanBuildBuilding(BuildableBuilding building, int playerNumber, ITileProperties hex, GameState currentState)
 	{
 		CommandValidator.validateIsPlayerActive(playerNumber,currentState);
 		CommandValidator.validateNoPendingRolls(currentState);

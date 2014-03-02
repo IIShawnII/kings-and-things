@@ -7,12 +7,13 @@ import java.util.List;
 
 import server.logic.game.GameState;
 import server.logic.game.Player;
+
 import common.Constants.Ability;
 import common.Constants.Biome;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public abstract class MovementValidator
 {
@@ -26,7 +27,7 @@ public abstract class MovementValidator
 	 * @throws IllegalArgumentException If the move can't be completed due
 	 * to game rules
 	 */
-	public static void validateCanMove(int playerNumber, GameState currentState, List<TileProperties> Hexes, Collection<TileProperties> Creatures) {
+	public static void validateCanMove(int playerNumber, GameState currentState, List<ITileProperties> Hexes, Collection<ITileProperties> Creatures) {
 		
 		// checks if it's player's turn
 		CommandValidator.validateIsPlayerActive(playerNumber, currentState);
@@ -48,7 +49,7 @@ public abstract class MovementValidator
 	/*
 	 * Checks to see if player can move through hexes
 	 */
-	private static void validateMovementConditions(int playerNumber, GameState currentState, List<TileProperties> Hexes, Collection<TileProperties> Creatures) {
+	private static void validateMovementConditions(int playerNumber, GameState currentState, List<ITileProperties> Hexes, Collection<ITileProperties> Creatures) {
 		
 		int moveSpeedTotal = 0;
 		HashSet<HexState> pathOfHexes = new HashSet<>();
@@ -68,7 +69,7 @@ public abstract class MovementValidator
 		boolean hexNotOwned = true;
 		
 		for (int i = 1; i < Hexes.size(); i++) {
-			TileProperties hex = Hexes.get(i);
+			ITileProperties hex = Hexes.get(i);
 			
 			if (i < Hexes.size() - 1) {
 				nextHex = currentState.getBoard().getHexStateForHex(Hexes.get(i));
@@ -94,7 +95,7 @@ public abstract class MovementValidator
 			}
 		}
 
-		for (TileProperties creature : Creatures) {
+		for (ITileProperties creature : Creatures) {
 			if(!currentState.getPlayerByPlayerNumber(playerNumber).ownsThingOnBoard(creature))
 			{
 				throw new IllegalArgumentException("You can only move your own creatures");
@@ -125,7 +126,7 @@ public abstract class MovementValidator
 		pathOfHexes.add(firstHex);
 		Player playerMoving = currentState.getPlayerByPlayerNumber(playerNumber);
 		
-		HashSet<TileProperties> thingsInHex = new HashSet<>();
+		HashSet<ITileProperties> thingsInHex = new HashSet<>();
 		for (HexState newHex : pathOfHexes) {
 			thingsInHex.clear();
 			thingsInHex.addAll(newHex.getCreaturesInHex());
@@ -134,7 +135,7 @@ public abstract class MovementValidator
 				thingsInHex.add(newHex.getBuilding());
 			}
 		
-			for (TileProperties creature : thingsInHex) {
+			for (ITileProperties creature : thingsInHex) {
 				if (!playerMoving.ownsThingOnBoard(creature)) {
 					throw new IllegalArgumentException("Can't move out of hex with enemy creatures");
 				}

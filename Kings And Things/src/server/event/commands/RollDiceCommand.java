@@ -1,14 +1,14 @@
 package server.event.commands;
 
 import common.Constants.RollReason;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class RollDiceCommand extends AbstractCommand
 {
 	private final RollReason reason;
-	private final TileProperties tile;
+	private final ITileProperties tile;
 	
-	public RollDiceCommand(RollReason reasonForRoll, TileProperties tile)
+	public RollDiceCommand(RollReason reasonForRoll, ITileProperties tile)
 	{
 		reason = reasonForRoll;
 		this.tile = tile;
@@ -19,7 +19,7 @@ public class RollDiceCommand extends AbstractCommand
 		return reason;
 	}
 	
-	public TileProperties getTileToRollFor()
+	public ITileProperties getTileToRollFor()
 	{
 		return tile;
 	}

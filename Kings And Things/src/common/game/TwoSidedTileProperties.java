@@ -5,24 +5,19 @@ import common.Constants.Biome;
 import common.Constants.Category;
 import common.Constants.Restriction;
 
-//TODO Needs to be optimized
-public class TwoSidedTileProperties extends TileProperties {
+
+public class TwoSidedTileProperties implements ITileProperties {
 	
 	private static final long serialVersionUID = -6715600368392464765L;
 	
+	private boolean isFaceUp;
 	private final TileProperties faceUp;	// keeps track of the face up property of tile
 	private final TileProperties faceDown;  // keeps track of the face up property of tile
 	
 	public TwoSidedTileProperties (TileProperties faceUp, TileProperties faceDown) {
 		this.faceUp = faceUp;
 		this.faceDown = faceDown;
-	}
-
-	@Override
-	//TODO Ask Shahriar about this
-	public boolean isFake() {
-		// TODO Auto-generated method stub
-		return super.isFake();
+		isFaceUp = true;
 	}
 
 	@Override
@@ -108,7 +103,7 @@ public class TwoSidedTileProperties extends TileProperties {
 
 	@Override
 	public boolean isFaceUp() {
-		return super.isFaceUp();
+		return isFaceUp;
 	}
 
 	@Override
@@ -138,6 +133,12 @@ public class TwoSidedTileProperties extends TileProperties {
 		} else {
 			return faceDown.isCreature();
 		}
+	}
+	
+	@Override
+	public boolean isSpecialCharacter()
+	{
+		return faceUp.isSpecialCharacter();
 	}
 
 	@Override
@@ -174,6 +175,7 @@ public class TwoSidedTileProperties extends TileProperties {
 		int result = 1;
 		result = prime * result + faceUp.hashCode();
 		result = prime * result + faceDown.hashCode();
+		result = prime * result + (isFaceUp? 1 : 0);
 		return result;
 	}
 
@@ -186,7 +188,7 @@ public class TwoSidedTileProperties extends TileProperties {
 			return false;
 		}
 		TwoSidedTileProperties o = (TwoSidedTileProperties) obj;
-		return o.faceDown.equals(faceDown) && faceUp.equals(o.faceUp);
+		return o.faceDown.equals(faceDown) && faceUp.equals(o.faceUp) && isFaceUp == o.isFaceUp;
 	}
 
 	@Override
@@ -202,5 +204,52 @@ public class TwoSidedTileProperties extends TileProperties {
 			return faceDown.hasRestriction();
 		}
 	}
-	
+
+	@Override
+	public void flip()
+	{
+		isFaceUp = !isFaceUp;
+	}
+
+	@Override
+	public boolean hasFlip()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean isHexTile()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isEvent()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isMagicItem()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isTreasure()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isSpecialIncomeCounter()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isFake()
+	{
+		return false;
+	}
 }

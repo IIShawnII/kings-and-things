@@ -5,13 +5,15 @@ import java.util.Set;
 
 import server.logic.game.GameState;
 import server.logic.game.Player;
+
 import common.Constants;
 import common.Constants.Building;
 import common.Constants.CombatPhase;
+import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.game.HexState;
+import common.game.ITileProperties;
 import common.game.Roll;
-import common.game.TileProperties;
 
 /**
  * This class checks requested commands against game states and throws appropriate
@@ -29,7 +31,7 @@ public abstract class CommandValidator
 	 * @throws IllegalArgumentException If the game is not currently waiting for any
 	 * rolls, and the reason for rolling is not RollReason.ENTERTAINMENT
 	 */
-	public static void validateCanRollDice(RollReason reasonForRoll, int playerNumber, TileProperties tileToRollFor, GameState currentState)
+	public static void validateCanRollDice(RollReason reasonForRoll, int playerNumber, ITileProperties tileToRollFor, GameState currentState)
 	{
 		boolean rollNeeded = false;
 		for(Roll r : currentState.getRecordedRolls())
@@ -37,6 +39,18 @@ public abstract class CommandValidator
 			if(Roll.rollSatisfiesParameters(r, reasonForRoll, playerNumber, tileToRollFor))
 			{
 				rollNeeded = true;
+			}
+		}
+		if(reasonForRoll == RollReason.RECRUIT_SPECIAL_CHARACTER)
+		{
+			CommandValidator.validateIsPlayerActive(playerNumber, currentState);
+			if(currentState.getCurrentRegularPhase() != RegularPhase.RECRUITING_CHARACTERS)
+			{
+				throw new IllegalArgumentException("Can only roll to recruit special characters during the recruit special characters phase.");
+			}
+			if(!tileToRollFor.isSpecialCharacter())
+			{
+				throw new IllegalArgumentException("Must specify a special character to roll for");
 			}
 		}
 		if(!rollNeeded && reasonForRoll != RollReason.ENTERTAINMENT)
@@ -155,18 +169,18 @@ public abstract class CommandValidator
 	 * @throws IllegalArgumentException If adding the things in toAdd would
 	 * exceed the creature limit in the specified hex
 	 */
-	public static void validateCreatureLimitInHexNotExceeded(int playerNumber, TileProperties hex, GameState currentState, Collection<TileProperties> toAdd)
+	public static void validateCreatureLimitInHexNotExceeded(int playerNumber, ITileProperties hex, GameState currentState, Collection<ITileProperties> toAdd)
 	{
 		Player player = currentState.getPlayerByPlayerNumber(playerNumber);
 		HexState hs = currentState.getBoard().getHexStateForHex(hex);
 		
-		for(TileProperties thing : toAdd)
+		for(ITileProperties thing : toAdd)
 		{
 			if(thing.isCreature() && !(hs.hasBuilding() && hs.getBuilding().getName().equals(Building.Citadel.name())))
 			{
-				Set<TileProperties> existingCreatures = hs.getCreaturesInHex();
+				Set<ITileProperties> existingCreatures = hs.getCreaturesInHex();
 				int ownedCreatureCount = 0;
-				for(TileProperties tp : existingCreatures)
+				for(ITileProperties tp : existingCreatures)
 				{
 					if(player.ownsThingOnBoard(tp))
 					{

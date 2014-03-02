@@ -20,10 +20,10 @@ import server.logic.game.GameState;
 import server.logic.game.HexBoard;
 import server.logic.game.HexTileManager;
 import server.logic.game.Player;
+import server.logic.game.SpecialCharacterManager;
 import server.logic.game.validators.SetupPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
@@ -34,8 +34,8 @@ import common.event.notifications.Flip;
 import common.event.notifications.HexPlacement;
 import common.event.notifications.PlayerOrderList;
 import common.game.HexState;
+import common.game.ITileProperties;
 import common.game.Roll;
-import common.game.TileProperties;
 
 public class SetupPhaseCommandHandler extends CommandHandler
 {
@@ -52,6 +52,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		CupManager cup = new CupManager(demoMode);
 		HexTileManager bank = new HexTileManager(demoMode);
 		BoardGenerator boardGenerator = new BoardGenerator(players.size(),bank);
+		SpecialCharacterManager bankHeroManager = new SpecialCharacterManager();
 		HexBoard board = boardGenerator.createNewBoard();
 		HexPlacement placement = new HexPlacement( Constants.MAX_HEXES);
 		board.fillArray( placement.getArray());
@@ -62,7 +63,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		//TODO since player order is predetermined start from SetupPhase.PICK_SECOND_HEX
 		GameState currentState = new GameState(board,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0), CombatPhase.NO_COMBAT, -1, null);
 		new Flip().postNotification();
-		new GameStarted(demoMode, cup, bank, boardGenerator, currentState).postCommand();
+		new GameStarted(demoMode, cup, bank, boardGenerator, currentState, bankHeroManager).postCommand();
 		new CurrentPhase( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNotification();
 	}
 
@@ -75,7 +76,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 	 * @throws IllegalStateException if it is not the correct phase for selecting
 	 * starting hexes
 	 */
-	public void giveHexToPlayer(TileProperties hex, int playerNumber){
+	public void giveHexToPlayer(ITileProperties hex, int playerNumber){
 		SetupPhaseValidator.validateCanGiveHexToPlayer(hex, playerNumber, getCurrentState());
 		makeHexOwnedByPlayer(hex,playerNumber);
 		
@@ -86,13 +87,13 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		else if(getCurrentState().getCurrentSetupPhase() == SetupPhase.PICK_FIRST_HEX && getCurrentState().getPlayers().size() == 4 && getCurrentState().getActivePhasePlayer().getID() == getCurrentState().getPlayerOrder().get(2))
 		{
 			//pick the last hex for player 4 automatically
-			HashSet<TileProperties> startingHexes = new HashSet<TileProperties>();
+			HashSet<ITileProperties> startingHexes = new HashSet<ITileProperties>();
 			for(Point p : Constants.getValidStartingHexes(4))
 			{
 				startingHexes.add(getCurrentState().getBoard().getHexByXY(p.x, p.y).getHex());
 			}
 			
-			for(TileProperties tp : startingHexes)
+			for(ITileProperties tp : startingHexes)
 			{
 				boolean isOwned = false;
 				for(Player p : getCurrentState().getPlayers())
@@ -123,7 +124,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 	 * sea hex can not be exchanged according to game rules
 	 * @throws IllegalStateException If it is nor the proper phase for exchanging sea hexes
 	 */
-	public void exchangeSeaHex(TileProperties hex, int playerNumber) throws NoMoreTilesException{
+	public void exchangeSeaHex(ITileProperties hex, int playerNumber) throws NoMoreTilesException{
 		SetupPhaseValidator.validateCanExchangeSeaHex(hex, playerNumber, getCurrentState());
 		makeSeaHexExchanged(hex, playerNumber);
 	}
@@ -164,7 +165,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 			if(!p.getOwnedHexes().isEmpty())
 			{
 				firstPlayerNumber = p.getID();
-				TileProperties firstHex = p.getOwnedHexes().iterator().next();
+				ITileProperties firstHex = p.getOwnedHexes().iterator().next();
 				firstHexLocation = getCurrentState().getBoard().getXYCoordinatesOfHex(firstHex);
 			}
 		}
@@ -172,7 +173,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		int offsetX = 2 - firstHexLocation.x;
 		int offsetY = 4 - firstHexLocation.y;
 		
-		TileProperties hex = getCurrentState().getBoard().getHexByXY(2 + offsetX, 4 + offsetY).getHex();
+		ITileProperties hex = getCurrentState().getBoard().getHexByXY(2 + offsetX, 4 + offsetY).getHex();
 		SetupPhaseValidator.validateIsHexStartingPosition(hex,getCurrentState());
 		
 		int secondPlayerNumber = -1;
@@ -229,10 +230,10 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		return Collections.unmodifiableList(playerOrder);
 	}
 
-	private void makeSeaHexExchanged(TileProperties hex, int playerNumber) throws NoMoreTilesException
+	private void makeSeaHexExchanged(ITileProperties hex, int playerNumber) throws NoMoreTilesException
 	{
 		getBoardGenerator().placeHexAside(hex);
-		TileProperties replacement = getBank().drawTile();
+		ITileProperties replacement = getBank().drawTile();
 		
 		for(HexState hs : getCurrentState().getBoard().getHexesAsList())
 		{

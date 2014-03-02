@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import server.logic.exceptions.NoMoreTilesException;
+
 import common.Constants;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 /**
  * this class encapsulates the logic of drawing tiles from the cup, and placing
@@ -34,7 +35,7 @@ public class CupManager extends AbstractTileManager
 	 * @throws NoMoreTilesException If there are no more tiles left to draw.
 	 */
 	@Override
-	public TileProperties drawTile() throws NoMoreTilesException
+	public ITileProperties drawTile() throws NoMoreTilesException
 	{
 		if(!isDemoMode)
 		{
@@ -58,10 +59,10 @@ public class CupManager extends AbstractTileManager
 	{
 		synchronized(tiles)
 		{
-			ArrayList<TileProperties> newDeckOrder = new ArrayList<TileProperties>();
+			ArrayList<ITileProperties> newDeckOrder = new ArrayList<ITileProperties>();
 			
 			//player 1
-			TileProperties tile = removeCreatureByNameAndAttack("Old_Dragon",4);
+			ITileProperties tile = removeCreatureByNameAndAttack("Old_Dragon",4);
 			newDeckOrder.add(tile);
 			tile = removeCreatureByNameAndAttack("Giant_Spider",1);
 			newDeckOrder.add(tile);
@@ -155,7 +156,7 @@ public class CupManager extends AbstractTileManager
 			tile = removeCreatureByNameAndAttack("Goblins",1);
 			newDeckOrder.add(tile);
 			
-			for(TileProperties tp : tiles)
+			for(ITileProperties tp : tiles)
 			{
 				newDeckOrder.add(tp);
 			}
@@ -165,14 +166,14 @@ public class CupManager extends AbstractTileManager
 		}
 	}
 	
-	private TileProperties removeCreatureByNameAndAttack(String name, int attack) throws NoMoreTilesException
+	private ITileProperties removeCreatureByNameAndAttack(String name, int attack) throws NoMoreTilesException
 	{
 		synchronized(tiles)
 		{
-			Iterator<TileProperties> it = tiles.iterator();
+			Iterator<ITileProperties> it = tiles.iterator();
 			while(it.hasNext())
 			{
-				TileProperties tp = it.next();
+				ITileProperties tp = it.next();
 				if(tp.getName().equals(name) && tp.getValue() == attack)
 				{
 					it.remove();

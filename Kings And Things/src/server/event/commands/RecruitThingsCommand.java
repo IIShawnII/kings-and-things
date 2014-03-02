@@ -5,17 +5,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 
 public class RecruitThingsCommand extends AbstractCommand {
 	
 	private final int gold;
-	private final HashSet<TileProperties> things;
+	private final HashSet<ITileProperties> things;
 	
-	public RecruitThingsCommand(int newGold, Collection<TileProperties> thingsToExchange) {
+	public RecruitThingsCommand(int newGold, Collection<ITileProperties> thingsToExchange) {
 		this.gold = newGold;
-		this.things = new HashSet<TileProperties>(thingsToExchange);
+		this.things = new HashSet<ITileProperties>(thingsToExchange);
 	}
 	
 	/**
@@ -26,7 +26,7 @@ public class RecruitThingsCommand extends AbstractCommand {
 		return gold;
 	}
 	
-	public Set<TileProperties> getThingsToExchange()
+	public Set<ITileProperties> getThingsToExchange()
 	{
 		return Collections.unmodifiableSet(things);
 	}

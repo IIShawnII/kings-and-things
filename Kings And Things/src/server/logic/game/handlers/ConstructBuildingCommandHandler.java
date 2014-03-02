@@ -5,13 +5,12 @@ import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.validators.ConstructBuildingCommandValidator;
 
 import com.google.common.eventbus.Subscribe;
-
-import common.Logger;
 import common.Constants.BuildableBuilding;
 import common.Constants.SetupPhase;
+import common.Logger;
 import common.event.notifications.HexStatesChanged;
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class ConstructBuildingCommandHandler extends CommandHandler
 {
@@ -24,7 +23,7 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 	 * building or hex tile is invalid, or if construction can not be done due to game rules
 	 * @throws IllegalStateException if it is not the correct phase for building things
 	 */
-	public void constructBuilding(BuildableBuilding building, int playerNumber, TileProperties hex){
+	public void constructBuilding(BuildableBuilding building, int playerNumber, ITileProperties hex){
 		ConstructBuildingCommandValidator.validateCanBuildBuilding(building, playerNumber, hex, getCurrentState());
 		makeBuildingConstructed(building, playerNumber, hex);
 		if(getCurrentState().getCurrentSetupPhase() == SetupPhase.PLACE_FREE_TOWER)
@@ -33,10 +32,10 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 		}
 	}
 
-	private void makeBuildingConstructed(BuildableBuilding building, int playerNumber, TileProperties hex)
+	private void makeBuildingConstructed(BuildableBuilding building, int playerNumber, ITileProperties hex)
 	{
 		HexState hs = getCurrentState().getBoard().getHexStateForHex(hex);
-		TileProperties buildingTile = BuildableBuildingGenerator.createBuildingTileForType(building);
+		ITileProperties buildingTile = BuildableBuildingGenerator.createBuildingTileForType(building);
 		hs.removeBuildingFromHex();
 		hs.addThingToHex(buildingTile);
 		getCurrentState().getPlayerByPlayerNumber(playerNumber).addOwnedThingOnBoard(buildingTile);

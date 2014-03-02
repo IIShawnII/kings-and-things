@@ -1,16 +1,16 @@
 package server.event.commands;
 
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class ExchangeSeaHexCommand extends AbstractCommand{
 	
-	private final TileProperties hex;
+	private final ITileProperties hex;
 	
-	public ExchangeSeaHexCommand(TileProperties hex){
+	public ExchangeSeaHexCommand(ITileProperties hex){
 		this.hex = hex;
 	}
 	
-	public TileProperties getHex(){
+	public ITileProperties getHex(){
 		return hex;
 	}
 }

@@ -1,19 +1,19 @@
 package common.event.notifications;
 
 import common.event.AbstractNetwrokEvent;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class RackPlacement extends AbstractNetwrokEvent {
 	
 	private static final long serialVersionUID = 3715978233138348268L;
 	
-	private TileProperties[] props; 
+	private ITileProperties[] props; 
 	
 	public RackPlacement( int tileCount) {
-		props = new TileProperties[tileCount];
+		props = new ITileProperties[tileCount];
 	}
 
-	public TileProperties[] getArray(){
+	public ITileProperties[] getArray(){
 		return props;
 	}
 	

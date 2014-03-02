@@ -6,25 +6,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class MoveThingsCommand extends AbstractCommand
 {
-	private final Set<TileProperties> things;
-	private final List<TileProperties> hexes;
+	private final Set<ITileProperties> things;
+	private final List<ITileProperties> hexes;
 	
-	public MoveThingsCommand(Set<TileProperties> things, List<TileProperties> hexes)
+	public MoveThingsCommand(Set<ITileProperties> things, List<ITileProperties> hexes)
 	{
-		this.things = new HashSet<TileProperties>(things);
-		this.hexes = new ArrayList<TileProperties>(hexes);
+		this.things = new HashSet<ITileProperties>(things);
+		this.hexes = new ArrayList<ITileProperties>(hexes);
 	}
 
-	public Set<TileProperties> getThings()
+	public Set<ITileProperties> getThings()
 	{
 		return Collections.unmodifiableSet(things);
 	}
 	
-	public List<TileProperties> getHexes()
+	public List<ITileProperties> getHexes()
 	{
 		return Collections.unmodifiableList(hexes);
 	}

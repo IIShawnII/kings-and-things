@@ -13,18 +13,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import com.google.common.eventbus.Subscribe;
-
 import server.event.commands.ApplyHitsCommand;
 import server.event.commands.RollDiceCommand;
 import server.logic.game.Player;
+
+import com.google.common.eventbus.Subscribe;
 import common.Constants;
 import common.Constants.RollReason;
 import common.event.notifications.CombatHits;
 import common.event.notifications.DieRoll;
 import common.event.notifications.HexStatesChanged;
 import common.game.HexState;
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class CombatPanel extends JPanel
 {
@@ -35,7 +35,7 @@ public class CombatPanel extends JPanel
 	private JLabel hitsToApply;
 	private int hitsToApplyNum;
 	private final Player p;
-	private final HashMap<TileProperties,JLabel> rolls;
+	private final HashMap<ITileProperties,JLabel> rolls;
 
 	public CombatPanel(HexState hs, Player p)
 	{
@@ -45,7 +45,7 @@ public class CombatPanel extends JPanel
 		hitsToApplyNum = 0;
 		setLayout(new GridBagLayout());
 		hitsToApply = new JLabel(HITS_TO_APPLY_TEXT + hitsToApplyNum);
-		rolls = new HashMap<TileProperties,JLabel>();
+		rolls = new HashMap<ITileProperties,JLabel>();
 		init();
 	}
 	
@@ -68,7 +68,7 @@ public class CombatPanel extends JPanel
 		add(hitsToApply,constraints);
 		constraints.gridy++;
 		
-		for(TileProperties thing : hs.getFightingThingsInHex())
+		for(ITileProperties thing : hs.getFightingThingsInHex())
 		{
 			if(p.ownsThingOnBoard(thing))
 			{
@@ -80,7 +80,7 @@ public class CombatPanel extends JPanel
 		constraints.gridx++;
 		constraints.gridy = 0;
 
-		for(TileProperties thing : hs.getFightingThingsInHex())
+		for(ITileProperties thing : hs.getFightingThingsInHex())
 		{
 			if(!p.ownsThingOnBoard(thing))
 			{
@@ -90,7 +90,7 @@ public class CombatPanel extends JPanel
 				}
 				else
 				{
-					for(TileProperties b : Constants.BUILDING.values())
+					for(ITileProperties b : Constants.BUILDING.values())
 					{
 						if(b.getName().equals(thing.getName()))
 						{
@@ -113,7 +113,7 @@ public class CombatPanel extends JPanel
 			}});
 	}
 	
-	private JPanel generateCreatureRollPanel(final TileProperties thing)
+	private JPanel generateCreatureRollPanel(final ITileProperties thing)
 	{
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridBagLayout());
@@ -135,7 +135,7 @@ public class CombatPanel extends JPanel
 		}
 		else
 		{
-			for(TileProperties b : Constants.BUILDING.values())
+			for(ITileProperties b : Constants.BUILDING.values())
 			{
 				if(b.getName().equals(thing.getName()))
 				{
@@ -187,8 +187,8 @@ public class CombatPanel extends JPanel
 				@Override
 				public void run()
 				{
-					int rollNum = r.getDieRoll().getRolls().get(0);
-					valueLabel.setText(valueLabel.getText().equals("")? "" + rollNum : valueLabel.getText() + ", " + r.getDieRoll().getRolls().get(1));
+					int rollNum = r.getDieRoll().getBaseRolls().get(0);
+					valueLabel.setText(valueLabel.getText().equals("")? "" + rollNum : valueLabel.getText() + ", " + r.getDieRoll().getBaseRolls().get(1));
 				}});
 		}
 	}

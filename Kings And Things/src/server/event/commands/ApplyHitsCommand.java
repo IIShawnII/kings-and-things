@@ -1,13 +1,13 @@
 package server.event.commands;
 
-import common.game.TileProperties;
+import common.game.ITileProperties;
 
 public class ApplyHitsCommand extends AbstractCommand
 {
 	private final int numHits;
-	private final TileProperties target;
+	private final ITileProperties target;
 	
-	public ApplyHitsCommand(int numHits, TileProperties target)
+	public ApplyHitsCommand(int numHits, ITileProperties target)
 	{
 		this.numHits = numHits;
 		this.target = target;
@@ -18,7 +18,7 @@ public class ApplyHitsCommand extends AbstractCommand
 		return numHits;
 	}
 	
-	public TileProperties getTarget()
+	public ITileProperties getTarget()
 	{
 		return target;
 	}
