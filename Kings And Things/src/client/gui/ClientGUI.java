@@ -53,30 +53,33 @@ public class ClientGUI extends JFrame implements Runnable{
 		EventDispatch.registerForCommandEvents( this);
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		addWindowListener( new WindowListener());
+		LoadingDialog dialog = null;
 		if( !BYPASS_LOBBY){
 	        setLocationRelativeTo(null);
 	        setUndecorated(true);
 	        setVisible(true);
-			LoadingDialog dialog = new LoadingDialog( new LoadResources( !BYPASS_LOAD_IMAGES), "Lobby", true, true, getGraphicsConfiguration());
+	        dialog = new LoadingDialog( new LoadResources( !BYPASS_LOAD_IMAGES), "Lobby", true, true, getGraphicsConfiguration());
 			EventDispatch.registerForCommandEvents( dialog);
 			dialog.run();
 			EventDispatch.unregisterForCommandEvents( dialog);
         	dispose();
 		}
-        setUndecorated(false);
-        setJMenuBar( createMenu());
-		setContentPane( createGUI());
-		pack();
-		Dimension size = new Dimension( getWidth(), getHeight());
-		setMinimumSize( size);
-        setLocationRelativeTo(null);
-		/*setMinimumSize( MIN_CLIENT_SIZE);
-		setExtendedState( MAXIMIZED_BOTH);
-		Rectangle bound = getBounds();
-		bound.width -= bound.x*2;
-		bound.height -= bound.y*2;
-		bound.x = bound.y = 0;*/
-		setVisible( true);
+		if(dialog==null || !dialog.isForceClosed()){
+	        setUndecorated(false);
+	        setJMenuBar( createMenu());
+			setContentPane( createGUI());
+			pack();
+			Dimension size = new Dimension( getWidth(), getHeight());
+			setMinimumSize( size);
+	        setLocationRelativeTo(null);
+			/*setMinimumSize( MIN_CLIENT_SIZE);
+			setExtendedState( MAXIMIZED_BOTH);
+			Rectangle bound = getBounds();
+			bound.width -= bound.x*2;
+			bound.height -= bound.y*2;
+			bound.x = bound.y = 0;*/
+			setVisible( true);
+		}
 	}
 
 	/**

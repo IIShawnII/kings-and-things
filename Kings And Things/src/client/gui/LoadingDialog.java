@@ -47,10 +47,10 @@ public class LoadingDialog extends JDialog implements Runnable{
 	private JPanel jpProgress;
 	private DefaultListModel< PlayerInfo> listModel;
 	private JTextField jtfIP, jtfPort, jtfName;
-	private JButton jbConnect, jbReady, jbClose;
+	private JButton jbConnect, jbReady;
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
 	private JProgressBar jpbGold, jpbSpecial, jpbState;
-	private boolean isConnected = false, progress;
+	private boolean isConnected = false, progress, forceClose = true;
 	
 	public LoadingDialog( Runnable task, String title, boolean modal, boolean progress, GraphicsConfiguration gc) {
 		super( (Frame)null, title, modal, gc);
@@ -90,12 +90,6 @@ public class LoadingDialog extends JDialog implements Runnable{
 		jbReady.addActionListener( control);
 		constraints.gridy = 1;
 		jpMain.add( jbReady, constraints);
-		
-		jbClose = new JButton( "Close");
-		jbClose.setActionCommand( "Cancel");
-		jbClose.addActionListener( control);
-		constraints.gridy = 2;
-		jpMain.add( jbClose, constraints);
 		
 		jbConnect = new JButton( "Connect");
 		jbConnect.setEnabled( false);
@@ -265,6 +259,10 @@ public class LoadingDialog extends JDialog implements Runnable{
 		dispose();
 	}
 	
+	public boolean isForceClosed(){
+		return forceClose;
+	}
+	
 	private class InputControl extends WindowAdapter implements ActionListener {
 		
 		private UpdatePackage update = new UpdatePackage("Dialog.Control");
@@ -286,8 +284,6 @@ public class LoadingDialog extends JDialog implements Runnable{
 			}else if( isConnected && source==jbReady){
 				update.addInstruction( UpdateInstruction.ReadyState);
 				update.postCommand(LOGIC);
-			}else if( source==jbClose){
-				close();
 			}
 		}
 		
@@ -328,6 +324,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 				listModel.removeAllElements();
 				break;
 			case Start:
+				forceClose = false;
 				close();
 				break;
 			case ReadyState:
