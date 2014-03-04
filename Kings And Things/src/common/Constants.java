@@ -42,7 +42,7 @@ public final class Constants {
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea,
 			Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
-	public enum RandomEvents {}
+	public enum RandomEvent {Big_Juju, Dark_Plague, Defection, Good_Harvest, Mother_Lode, Teenie_Pox, Terrain_Disaster, Vandalism, Weather_Control, Willing_Workers}
 	
 	
 	//Note, phase progression is dependent on the order of the declarations in the following enum type
