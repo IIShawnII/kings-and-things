@@ -1,5 +1,5 @@
 <!-- ant srcipt for building jar files -->
-<project name="YouSendIt" basedir="." default="build">
+<project name="Kings And Things" basedir="." default="build">
 	<tstamp>
 		<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
 	</tstamp>
