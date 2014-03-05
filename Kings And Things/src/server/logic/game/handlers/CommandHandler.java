@@ -48,7 +48,7 @@ public abstract class CommandHandler
 	 */
 	public void initialize()
 	{
-		EventDispatch.registerForCommandEvents(this);
+		EventDispatch.registerForInternalEvents(this);
 	}
 	
 	/**

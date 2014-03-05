@@ -24,7 +24,7 @@ public class MultiBoardManager {
 		boards = new Board[count];
 		for( int i=0; i<count; i++){
 			boards[ i] = new Board( null, true);
-			EventDispatch.registerForCommandEvents( boards[ i]);
+			EventDispatch.registerForInternalEvents( boards[ i]);
 			boards[ i].setPreferredSize( BOARD_SIZE);
 			boards[ i].setSize( BOARD_SIZE);
 			boards[ i].init( count);

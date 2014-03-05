@@ -25,7 +25,7 @@ public class Client {
 		}
 		
 		ConnectionLogic logic = new ConnectionLogic();
-		EventDispatch.registerForCommandEvents( logic);
+		EventDispatch.registerForInternalEvents( logic);
 		new Thread( logic, "Client Logic").start();
 		ClientGUI clientGUI = new ClientGUI( GAME_TITLE);
 		SwingUtilities.invokeLater( clientGUI);

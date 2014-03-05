@@ -50,7 +50,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	 */
 	@Override
 	public void run() {
-		EventDispatch.registerForCommandEvents( this);
+		EventDispatch.registerForInternalEvents( this);
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		addWindowListener( new WindowListener());
 		LoadingDialog dialog = null;
@@ -59,7 +59,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	        setUndecorated(true);
 	        setVisible(true);
 	        dialog = new LoadingDialog( new LoadResources( !BYPASS_LOAD_IMAGES), "Lobby", true, true, getGraphicsConfiguration());
-			EventDispatch.registerForCommandEvents( dialog);
+			EventDispatch.registerForInternalEvents( dialog);
 			dialog.run();
 			EventDispatch.unregisterForCommandEvents( dialog);
         	dispose();

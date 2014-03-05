@@ -101,7 +101,7 @@ public class ConnectionLogic implements Runnable {
 	
 	@Subscribe
 	public void receiveUpdate( UpdatePackage update){
-		if( update.isPublic() || (update.getID()&LOGIC)!=LOGIC){
+		if( update.isPublic() || (update.getID()&LOGIC)!=LOGIC || update.isValidID( player)){
 			return;
 		}
 		try{
@@ -202,6 +202,7 @@ public class ConnectionLogic implements Runnable {
 	
 	@Subscribe
 	public void sendToServer( AbstractNetwrokEvent event){
+		
 		Logger.getStandardLogger().info( "Sent: " + event);
 		connection.send( event);
 	}

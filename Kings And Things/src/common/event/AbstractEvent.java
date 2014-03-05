@@ -1,5 +1,7 @@
 package common.event;
 
+import common.game.PlayerInfo;
+
 /**
  * This is the abstract super class of all events
  */
@@ -41,5 +43,9 @@ public abstract class AbstractEvent{
 	
 	public boolean isPublic(){
 		return ID==-1;
+	}
+	
+	public boolean isValidID( PlayerInfo player){
+		return ID==player.getID();
 	}
 }

@@ -41,7 +41,7 @@ public class Server {
 			}
 		}
 		ServerGUI serverGUI = new ServerGUI( serverGUITitle);
-		EventDispatch.registerForCommandEvents( serverGUI);
+		EventDispatch.registerForInternalEvents( serverGUI);
 		//start GUI on AWT Thread
 		SwingUtilities.invokeLater( serverGUI);
 		while( !serverGUI.isVisible()){
@@ -53,7 +53,7 @@ public class Server {
 
 		try {
 			ConnectionLobby lobby = new ConnectionLobby(isDemoMode);
-			EventDispatch.registerForCommandEvents(lobby);
+			EventDispatch.registerForInternalEvents(lobby);
 			new Thread( lobby, "GAME LOGIC").start();
 		} catch ( Exception e) {
 			e.printStackTrace();
