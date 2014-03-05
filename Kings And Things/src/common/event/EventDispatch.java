@@ -19,19 +19,19 @@ public abstract class EventDispatch
 	static final EventBus COMMAND = new EventBus();
 	static final EventBus NOTIFICATION = new EventBus();
 	
-	public static void registerForInternalEvents( Object obj){
+	public static void registerOnInternalEvents( Object obj){
 		COMMAND.register( obj);
 	}
 	
-	public static void registerForNetwrokEvents( Object obj){
+	public static void registerOnNetwrokEvents( Object obj){
 		NOTIFICATION.register( obj);
 	}
 
-	public static void unregisterForCommandEvents( Object obj) {
+	public static void unregisterFromInternalEvents( Object obj) {
 		COMMAND.unregister( obj);
 	}
 
-	public static void unregisterForNotificationEvents( Object obj) {
+	public static void unregisterFromNetworkEvents( Object obj) {
 		NOTIFICATION.unregister( obj);
 	}
 }

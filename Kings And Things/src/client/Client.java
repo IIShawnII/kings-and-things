@@ -7,7 +7,6 @@ import org.apache.log4j.PropertyConfigurator;
 
 import client.logic.ConnectionLogic;
 import client.gui.ClientGUI;
-import common.event.EventDispatch;
 import static common.Constants.GAME_TITLE;
 
 /**
@@ -25,7 +24,6 @@ public class Client {
 		}
 		
 		ConnectionLogic logic = new ConnectionLogic();
-		EventDispatch.registerForInternalEvents( logic);
 		new Thread( logic, "Client Logic").start();
 		ClientGUI clientGUI = new ClientGUI( GAME_TITLE);
 		SwingUtilities.invokeLater( clientGUI);

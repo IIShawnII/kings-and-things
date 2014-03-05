@@ -22,7 +22,7 @@ public final class Constants {
 	public static final boolean BYPASS_MIN_PLAYER = false;
 	public static final boolean BYPASS_MOUSE_CLICK = false;
 	public static final boolean BYPASS_LOAD_IMAGES = true;
-	public static final boolean BYPASS_LOBBY = true;
+	public static final boolean BYPASS_LOBBY = false;
 	public static final boolean DRAW_LOCKS = false;
 	public static final boolean LOAD_BUILDING = false;
 	public static final boolean LOAD_SPECIAL = false;
@@ -84,7 +84,7 @@ public final class Constants {
 	public static final Color COLOR_WARNNING = DARK_YELLOW;
 	
 	//keys for events
-	public static final int LOBBY = 0;					//00000000
+	public static final int BOARD = 0;					//00000000
 	public static final int LOGIC = 1;					//00000001
 	public static final int PROGRESS = 2;				//00000010
 	public static final int LOAD_RESOURCE = 4;			//00000100

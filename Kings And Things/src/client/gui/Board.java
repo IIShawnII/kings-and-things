@@ -1,17 +1,15 @@
 package client.gui;
 
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
-import com.google.common.eventbus.Subscribe;
-
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Graphics;
+import java.awt.Dimension;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.Graphics2D;
@@ -29,15 +27,18 @@ import client.gui.tiles.Tile;
 import client.gui.LockManager.Lock;
 import client.event.BoardUpdate;
 import common.Constants.Category;
-import common.Constants.RegularPhase;
-import common.Constants.Restriction;
 import common.Constants.SetupPhase;
+import common.Constants.Restriction;
+import common.Constants.RegularPhase;
+import common.event.AbstractUpdateReceiver;
 import common.event.notifications.HexOwnershipChanged;
 import common.game.HexState;
-import common.game.ITileProperties;
 import common.game.PlayerInfo;
 import common.game.TileProperties;
+import common.game.ITileProperties;
+import static common.Constants.GUI;
 import static common.Constants.STATE;
+import static common.Constants.BOARD;
 import static common.Constants.HEX_SIZE;
 import static common.Constants.TILE_SIZE;
 import static common.Constants.DRAW_LOCKS;
@@ -172,6 +173,7 @@ public class Board extends JPanel{
 		addTile( new Tile( new TileProperties( Category.Special)), bound, true);
 		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Cup)), bound, true);*/
+		new UpdateReceiver();
 	}
 	
 	/**
@@ -367,45 +369,61 @@ public class Board extends JPanel{
 		animation.start();
 	}
 	
+	private class UpdateReceiver extends AbstractUpdateReceiver<BoardUpdate>{
+
+		protected UpdateReceiver() {
+			super( INTERNAL, BOARD);
+		}
+
+		@Override
+		public void handle( BoardUpdate update) {
+			if( update.isPublic()){
+				updateBoard( update);
+			}else if( update.getID()==GUI){
+				
+			}
+		}
+
+		@Override
+		public boolean verify( BoardUpdate update) {
+			return true;
+		}
+	}
+	
 	/**
 	 * update the board with new information, such as hex placement, flip all, player order and rack info
 	 * this method handles all events in client.event
 	 * @param update - event wrapper containing update information
 	 */
-	@Subscribe
 	public void updateBoard( BoardUpdate update){
-		try{
-			//TODO complete Board update
-			if( update.hasPlayerInfo()){
-				if(update.getCurrent()!=null){
-				currentPlayer = update.getCurrent();
-				}
-				if(update.getPlayers()!=null){
-				players = update.getPlayers();
-				}
-				repaint();
-				phaseDone = true;
+		//TODO complete Board update
+		if( update.hasPlayerInfo()){
+			if(update.getCurrent()!=null){
+			currentPlayer = update.getCurrent();
 			}
-			if( update.hasHexes()){
-				animateHexPlacement( update.getHexes());
-			}else if( update.flipAll()){
-				FlipAllHexes();
-			}else if( update.isPlayerOder()){
-				placeMarkers( update.getPlayerOrder());
-			}else if( update.isRack()){
-				animateRackPlacement();
-			}else if( update.isSetupPhase()){
-				manageSetupPhase( update.getSetup());
-			}else if( update.isRegularPhase()){
-				manageRegularPhase( update.getRegular());
+			if(update.getPlayers()!=null){
+			players = update.getPlayers();
 			}
-			while( !phaseDone){
-				try {
-					Thread.sleep( 100);
-				} catch ( InterruptedException e) {}
-			}
-		}catch(Exception ex){
-			ex.printStackTrace();
+			repaint();
+			phaseDone = true;
+		}
+		if( update.hasHexes()){
+			animateHexPlacement( update.getHexes());
+		}else if( update.flipAll()){
+			FlipAllHexes();
+		}else if( update.isPlayerOder()){
+			placeMarkers( update.getPlayerOrder());
+		}else if( update.isRack()){
+			animateRackPlacement();
+		}else if( update.isSetupPhase()){
+			manageSetupPhase( update.getSetup());
+		}else if( update.isRegularPhase()){
+			manageRegularPhase( update.getRegular());
+		}
+		while( !phaseDone){
+			try {
+				Thread.sleep( 100);
+			} catch ( InterruptedException e) {}
 		}
 	}
 	

@@ -14,11 +14,9 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 
-import com.google.common.eventbus.Subscribe;
-
 import common.game.PlayerInfo;
 import common.game.LoadResources;
-import common.event.EventDispatch;
+import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
 import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
@@ -43,6 +41,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	 */
 	public ClientGUI( String title){
 		super( title);
+		new UpdateReceiver();
 	}
 
 	/**
@@ -50,7 +49,6 @@ public class ClientGUI extends JFrame implements Runnable{
 	 */
 	@Override
 	public void run() {
-		EventDispatch.registerForInternalEvents( this);
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		addWindowListener( new WindowListener());
 		LoadingDialog dialog = null;
@@ -59,9 +57,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	        setUndecorated(true);
 	        setVisible(true);
 	        dialog = new LoadingDialog( new LoadResources( !BYPASS_LOAD_IMAGES), "Lobby", true, true, getGraphicsConfiguration());
-			EventDispatch.registerForInternalEvents( dialog);
 			dialog.run();
-			EventDispatch.unregisterForCommandEvents( dialog);
         	dispose();
 		}
 		if(dialog==null || !dialog.isForceClosed()){
@@ -137,16 +133,24 @@ public class ClientGUI extends JFrame implements Runnable{
 		dispose();
 	}
 	
-	@Subscribe
-	public void receiveUpdate( UpdatePackage update){
-		try{
+	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
+
+		protected UpdateReceiver() {
+			super( INTERNAL, GUI);
+		}
+
+		@Override
+		public void handle( UpdatePackage update) {
 			if( update.isPublic()){
 				changeBoad( update);
 			}else if( update.getID()==GUI){
 				
 			}
-		}catch(Exception ex){
-			ex.printStackTrace();
+		}
+
+		@Override
+		public boolean verify( UpdatePackage update) {
+			return true;
 		}
 	}
 	

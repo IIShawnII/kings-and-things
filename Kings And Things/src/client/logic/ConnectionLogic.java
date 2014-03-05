@@ -1,15 +1,14 @@
 package client.logic;
 
-import com.google.common.eventbus.Subscribe;
-
 import client.event.BoardUpdate;
 import common.Logger;
 import common.game.PlayerInfo;
 import common.network.Connection;
-import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
-import common.event.AbstractNetwrokEvent;
+import common.Constants.UpdateInstruction;
+import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
+import common.event.AbstractNetwrokEvent;
 import common.event.notifications.Flip;
 import common.event.notifications.StartGame;
 import common.event.notifications.PlayersList;
@@ -21,7 +20,6 @@ import common.event.notifications.PlayerOrderList;
 import common.event.notifications.HexStatesChanged;
 import common.event.notifications.HexOwnershipChanged;
 import static common.Constants.LOGIC;
-import static common.Constants.LOBBY;
 import static common.Constants.PLAYER_READY;
 
 public class ConnectionLogic implements Runnable {
@@ -32,6 +30,8 @@ public class ConnectionLogic implements Runnable {
 	
 	public ConnectionLogic( ) {
 		this.connection = new Connection();
+		new UpdateReceiver();
+		new UpdateTransmitter();
 	}
 
 	@Override
@@ -99,22 +99,27 @@ public class ConnectionLogic implements Runnable {
 		Logger.getStandardLogger().warn( "logic disconnected");
 	}
 	
-	@Subscribe
-	public void receiveUpdate( UpdatePackage update){
-		if( update.isPublic() || (update.getID()&LOGIC)!=LOGIC || update.isValidID( player)){
-			return;
+	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
+
+		protected UpdateReceiver() {
+			super( INTERNAL, LOGIC);
 		}
-		try{
+
+		@Override
+		public void handle( UpdatePackage update) {
 			UpdateInstruction[] instructions = update.getInstructions();
 			for( UpdateInstruction instruction : instructions){
-				handle( instruction, update);
+				process( instruction, update);
 			}
-		}catch( Exception ex){
-			ex.printStackTrace();
+		}
+
+		@Override
+		public boolean verify( UpdatePackage update) {
+			return (!update.isPublic() && (update.getID()&ID)!=ID && update.isValidID( player));
 		}
 	}
 	
-	private void handle( UpdateInstruction instruction, UpdatePackage data) {
+	private void process( UpdateInstruction instruction, UpdatePackage data) {
 		UpdateInstruction netaction = UpdateInstruction.Disconnect;
 		String message = "Unable To Connect, Try Again";
 		switch( instruction){
@@ -177,7 +182,7 @@ public class ConnectionLogic implements Runnable {
 		update.addInstruction( netaction);
 		update.putData( UpdateKey.Message, message);
 		update.putData( UpdateKey.PlayerCount, 0);
-		update.postCommand( LOBBY);
+		update.postCommand();
 	}
 
 	private UpdateInstruction connect(String ip, int port, String name) throws IllegalArgumentException{
@@ -200,9 +205,24 @@ public class ConnectionLogic implements Runnable {
 		new Thread( logic, "Client Logic").start();
 	}
 	
-	@Subscribe
+	private class UpdateTransmitter extends AbstractUpdateReceiver<AbstractNetwrokEvent>{
+
+		protected UpdateTransmitter() {
+			super( NETWORK, LOGIC);
+		}
+
+		@Override
+		public void handle( AbstractNetwrokEvent update) {
+			sendToServer( update);
+		}
+
+		@Override
+		public boolean verify( AbstractNetwrokEvent update) {
+			return (!update.isPublic() && (update.getID()&ID)!=ID && update.isValidID( player));
+		}
+	}
+
 	public void sendToServer( AbstractNetwrokEvent event){
-		
 		Logger.getStandardLogger().info( "Sent: " + event);
 		connection.send( event);
 	}

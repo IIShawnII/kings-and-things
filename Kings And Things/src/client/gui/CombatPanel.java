@@ -17,9 +17,9 @@ import server.event.commands.ApplyHitsCommand;
 import server.event.commands.RollDiceCommand;
 import server.logic.game.Player;
 
-import com.google.common.eventbus.Subscribe;
 import common.Constants;
 import common.Constants.RollReason;
+import common.event.AbstractUpdateReceiver;
 import common.event.notifications.CombatHits;
 import common.event.notifications.DieRoll;
 import common.event.notifications.HexStatesChanged;
@@ -47,6 +47,9 @@ public class CombatPanel extends JPanel
 		hitsToApply = new JLabel(HITS_TO_APPLY_TEXT + hitsToApplyNum);
 		rolls = new HashMap<ITileProperties,JLabel>();
 		init();
+		new DieRollReceiver();
+		new HexChangedReceiver();
+		new HitsReceiver();
 	}
 	
 	private void init()
@@ -176,53 +179,80 @@ public class CombatPanel extends JPanel
 		return panel;
 	}
 	
-	@Subscribe
-	public void recieveRollNotification(DieRoll roll)
-	{
-		final DieRoll r = roll;
-		if(roll.getID() == p.getID())
-		{
-			final JLabel valueLabel = rolls.get(roll.getDieRoll().getRollTarget());
-			SwingUtilities.invokeLater(new Runnable(){
+	private class DieRollReceiver extends AbstractUpdateReceiver<DieRoll>{
+
+		protected DieRollReceiver() {
+			super( INTERNAL, -1);
+		}
+
+		@Override
+		public void handle( DieRoll update) {
+			final DieRoll r = update;
+			final JLabel valueLabel = rolls.get(update.getDieRoll().getRollTarget());
+			SwingUtilities.invokeLater( new Runnable(){
 				@Override
-				public void run()
-				{
+				public void run(){
 					int rollNum = r.getDieRoll().getBaseRolls().get(0);
 					valueLabel.setText(valueLabel.getText().equals("")? "" + rollNum : valueLabel.getText() + ", " + r.getDieRoll().getBaseRolls().get(1));
-				}});
-		}
-	}
-
-	@Subscribe
-	public void recieveHitsNotification(final CombatHits hitsNotification)
-	{
-		if(hitsNotification.getPlayerReceivingHitID() == p.getID())
-		{
-			hitsToApplyNum += hitsNotification.getNumberOfHits();
-			updateHitsToApplyLabel();
-		}
-
-		SwingUtilities.invokeLater(new Runnable(){
-			@Override
-			public void run()
-			{
-				for(JLabel rollLabel : rolls.values())
-				{
-					rollLabel.setText("");
 				}
-			}});
-	}
+			});
+		}
 
-	@Subscribe
-	public void recieveHexChangedNotification(final HexStatesChanged hexChangeNotification)
-	{
-		hs = hexChangeNotification.getArray()[0];
-		SwingUtilities.invokeLater(new Runnable(){
-			@Override
-			public void run()
-			{
-				init();
-				invalidate();
-			}});
+		@Override
+		public boolean verify( DieRoll update) {
+			return update.getID() == p.getID();
+		}
+	}
+	
+	private class HitsReceiver extends AbstractUpdateReceiver<CombatHits>{
+
+		protected HitsReceiver() {
+			super( INTERNAL, -1);
+		}
+
+		@Override
+		public void handle( CombatHits update) {
+			if(update.getPlayerReceivingHitID() == p.getID()){
+				hitsToApplyNum += update.getNumberOfHits();
+				updateHitsToApplyLabel();
+			}
+			SwingUtilities.invokeLater(new Runnable(){
+				@Override
+				public void run(){
+					for(JLabel rollLabel : rolls.values()){
+						rollLabel.setText("");
+					}
+				}
+			});
+		}
+
+		@Override
+		public boolean verify( CombatHits update) {
+			return true;
+		}
+	}
+	
+	private class HexChangedReceiver extends AbstractUpdateReceiver<HexStatesChanged>{
+
+		protected HexChangedReceiver() {
+			super( INTERNAL, -1);
+		}
+
+		@Override
+		public void handle( HexStatesChanged update) {
+			hs = update.getArray()[0];
+			SwingUtilities.invokeLater(new Runnable(){
+				@Override
+				public void run(){
+					init();
+					invalidate();
+				}
+			});
+		}
+
+		@Override
+		public boolean verify( HexStatesChanged update) {
+			return true;
+		}
 	}
 }

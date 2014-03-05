@@ -87,7 +87,7 @@ public class ConnectionLobby implements Runnable {
             		info = new PlayerInfo( info, playerID);
 	            	Player player = new Player( new PlayerInfo( info, playerID));
 	            	PlayerConnection pc = new PlayerConnection( player, connection);
-	            	EventDispatch.registerForNetwrokEvents( pc);
+	            	EventDispatch.registerOnNetwrokEvents( pc);
 	            	startTask( pc, pc.getName());
 	            	//send PlayerInfo object to connected player
 	            	pc.sendNotificationToClient( new PlayerState( info));

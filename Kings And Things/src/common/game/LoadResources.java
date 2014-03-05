@@ -2,8 +2,6 @@ package common.game;
 
 import javax.imageio.ImageIO;
 
-import com.google.common.eventbus.Subscribe;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -36,6 +34,7 @@ import common.Constants.Category;
 import common.Constants.UpdateKey;
 import common.Constants.Restriction;
 import common.Constants.UpdateInstruction;
+import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
 
 public class LoadResources implements Runnable, FileVisitor< Path>{
@@ -56,6 +55,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		RESOURCES_DIRECTORY = Paths.get(directory);
 		this.loadImages = loadImages;
 		update = new UpdatePackage("LoadResources");
+		new UpdateReceiver();
 	}
 	
 	@Override
@@ -230,13 +230,22 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		return result;
 	}
 	
-	@Subscribe
-	public void receiveUpdate( UpdatePackage update){
-		if( update.isPublic() || (update.getID()&LOAD_RESOURCE)!=LOAD_RESOURCE){
-			return;
+	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
+
+		protected UpdateReceiver() {
+			super( INTERNAL, LOAD_RESOURCE);
 		}
-		if( update.hasInstructions() && update.getInstructions()[0]==UpdateInstruction.End){
-			result = FileVisitResult.TERMINATE;
+
+		@Override
+		public void handle( UpdatePackage update) {
+			if( update.hasInstructions() && update.getInstructions()[0]==UpdateInstruction.End){
+				result = FileVisitResult.TERMINATE;
+			}
+		}
+
+		@Override
+		public boolean verify( UpdatePackage update) {
+			return (!update.isPublic() && (update.getID()&ID)==ID);
 		}
 	}
 }

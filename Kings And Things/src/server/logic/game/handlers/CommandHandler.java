@@ -48,7 +48,7 @@ public abstract class CommandHandler
 	 */
 	public void initialize()
 	{
-		EventDispatch.registerForInternalEvents(this);
+		EventDispatch.registerOnInternalEvents(this);
 	}
 	
 	/**
@@ -56,7 +56,7 @@ public abstract class CommandHandler
 	 */
 	public void dispose()
 	{
-		EventDispatch.unregisterForCommandEvents(this);
+		EventDispatch.unregisterFromInternalEvents(this);
 	}
 
 	/**

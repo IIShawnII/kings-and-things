@@ -11,8 +11,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.DefaultListModel;
 
-import com.google.common.eventbus.Subscribe;
-
 import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.Dimension;
@@ -24,6 +22,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.ActionListener;
 
+import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
 import common.game.PlayerInfo;
 import common.Constants.Category;
@@ -51,6 +50,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
 	private JProgressBar jpbGold, jpbSpecial, jpbState;
 	private boolean isConnected = false, progress, forceClose = true;
+	private UpdateReceiver receiver;
 	
 	public LoadingDialog( Runnable task, String title, boolean modal, boolean progress, GraphicsConfiguration gc) {
 		super( (Frame)null, title, modal, gc);
@@ -58,6 +58,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 		this.title = title;
 		this.progress = progress;
 		control = new InputControl();
+		receiver = new UpdateReceiver();
 	}
 
 	@Override
@@ -257,6 +258,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 		setVisible( false);
 		task = null;
 		dispose();
+		receiver.unregisterFromEventBus();
 	}
 	
 	public boolean isForceClosed(){
@@ -292,18 +294,27 @@ public class LoadingDialog extends JDialog implements Runnable{
 			close();
 		}
 	}
+	
+	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
-	@Subscribe
-	public void receiveUpdatePackage( UpdatePackage update){
-		try{
+		protected UpdateReceiver() {
+			super( INTERNAL, -1);
+		}
+
+		@Override
+		public void handle( UpdatePackage update) {
 			if( update.isPublic()){
 				updateDialog( update);
 			}else if( update.getID()==PROGRESS){
 				updateProgress( update);
 			}
-		}catch( Exception ex){
-			ex.printStackTrace();
 		}
+
+		@Override
+		public boolean verify( UpdatePackage update) {
+			return true;
+		}
+		
 	}
 
 	private void updateDialog( UpdatePackage update){

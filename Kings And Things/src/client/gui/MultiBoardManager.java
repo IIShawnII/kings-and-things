@@ -1,12 +1,8 @@
 package client.gui;
 
 import static common.Constants.BOARD_SIZE;
-
 import java.awt.GridBagConstraints;
-
 import javax.swing.JPanel;
-
-import common.event.EventDispatch;
 
 public class MultiBoardManager {
 
@@ -24,7 +20,6 @@ public class MultiBoardManager {
 		boards = new Board[count];
 		for( int i=0; i<count; i++){
 			boards[ i] = new Board( null, true);
-			EventDispatch.registerForInternalEvents( boards[ i]);
 			boards[ i].setPreferredSize( BOARD_SIZE);
 			boards[ i].setSize( BOARD_SIZE);
 			boards[ i].init( count);
