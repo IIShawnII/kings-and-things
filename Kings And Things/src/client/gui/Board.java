@@ -383,11 +383,6 @@ public class Board extends JPanel{
 				
 			}
 		}
-
-		@Override
-		public boolean verify( BoardUpdate update) {
-			return true;
-		}
 	}
 	
 	/**

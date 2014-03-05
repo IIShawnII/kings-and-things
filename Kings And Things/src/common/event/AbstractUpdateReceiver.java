@@ -78,7 +78,10 @@ public abstract class AbstractUpdateReceiver<T> {
 	/**
 	 * check to see if all conditions (i.e ID, public) for processing 
 	 * update are valid, if valid, call handle, otherwise skip.
+	 * by default this method returns true unless overridden by subclass.
 	 * @return true if all conditions are valid, false otherwise
 	 */
-	public abstract boolean verify( T update);
+	public boolean verify( T update){
+		return true;
+	}
 }

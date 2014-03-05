@@ -309,12 +309,6 @@ public class LoadingDialog extends JDialog implements Runnable{
 				updateProgress( update);
 			}
 		}
-
-		@Override
-		public boolean verify( UpdatePackage update) {
-			return true;
-		}
-		
 	}
 
 	private void updateDialog( UpdatePackage update){

@@ -147,11 +147,6 @@ public class ClientGUI extends JFrame implements Runnable{
 				
 			}
 		}
-
-		@Override
-		public boolean verify( UpdatePackage update) {
-			return true;
-		}
 	}
 	
 	private void changeBoad( UpdatePackage update){

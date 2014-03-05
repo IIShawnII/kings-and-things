@@ -225,11 +225,6 @@ public class CombatPanel extends JPanel
 				}
 			});
 		}
-
-		@Override
-		public boolean verify( CombatHits update) {
-			return true;
-		}
 	}
 	
 	private class HexChangedReceiver extends AbstractUpdateReceiver<HexStatesChanged>{
@@ -248,11 +243,6 @@ public class CombatPanel extends JPanel
 					invalidate();
 				}
 			});
-		}
-
-		@Override
-		public boolean verify( HexStatesChanged update) {
-			return true;
 		}
 	}
 }
