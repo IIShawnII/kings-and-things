@@ -46,7 +46,7 @@ public class ConnectionLogic implements Runnable {
 			}
 		}
 		Logger.getStandardLogger().info( "listening");
-		UpdatePackage update = new UpdatePackage("Logic.Run");
+		UpdatePackage update = new UpdatePackage("Logic.Run", this);
 		while( !finished && (event = connection.recieve())!=null){
 			update.clear();
 			Logger.getStandardLogger().info( "Received: " + event);
@@ -102,7 +102,7 @@ public class ConnectionLogic implements Runnable {
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
-			super( INTERNAL, LOGIC);
+			super( INTERNAL, LOGIC, ConnectionLogic.this);
 		}
 
 		@Override
@@ -178,7 +178,7 @@ public class ConnectionLogic implements Runnable {
 			default:
 				return;
 		}
-		UpdatePackage update = new UpdatePackage("Logic.Receive "+(player!=null?player.getID():""));
+		UpdatePackage update = new UpdatePackage("Logic.Receive "+(player!=null?player.getID():""), this);
 		update.addInstruction( netaction);
 		update.putData( UpdateKey.Message, message);
 		update.putData( UpdateKey.PlayerCount, 0);
@@ -208,7 +208,7 @@ public class ConnectionLogic implements Runnable {
 	private class UpdateTransmitter extends AbstractUpdateReceiver<AbstractNetwrokEvent>{
 
 		protected UpdateTransmitter() {
-			super( NETWORK, LOGIC);
+			super( NETWORK, LOGIC, ConnectionLogic.this);
 		}
 
 		@Override

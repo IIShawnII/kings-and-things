@@ -8,23 +8,26 @@ import com.google.common.eventbus.Subscribe;
  * from event bus. and since Guava library tends to wrap exceptions in a vague and
  * unreachable wrapper this class allows for exceptions to be caught by the user.
  */
-public abstract class AbstractUpdateReceiver<T> {
+public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 
 	public static final int NETWORK = 0;
 	public static final int INTERNAL = 1;
 	
+	protected final Object OWNER;
 	protected final int ID; 
 	private final int BUS;
+	
 	
 	/**
 	 * create an instance of <code>AbstractUpdateReceiver</code> and 
 	 * register on either network or internal event bus
 	 * @param BUS - AbstractUpdateReceiver.NETWORK(0) or AbstractUpdateReceiver.INTERNAL(1)
 	 */
-	protected AbstractUpdateReceiver( final int BUS, final int ID){
+	protected AbstractUpdateReceiver( final int BUS, final int ID, final Object OWNER){
 		registerOnEventBus( BUS);
 		this.ID = ID;
 		this.BUS = BUS;
+		this.OWNER = OWNER;
 	}
 	
 	/**
@@ -38,8 +41,10 @@ public abstract class AbstractUpdateReceiver<T> {
 	@Subscribe
 	public final void receiveUpdate( T update){
 		try{
-			if( verify( update)){
-				handle( update);
+			if(update.getOwner()!=OWNER){
+				if( verify( update)){
+					handle( update);
+				}
 			}
 		}catch( Exception ex){
 			Logger.getErrorLogger().fatal( ex.getMessage(), ex);

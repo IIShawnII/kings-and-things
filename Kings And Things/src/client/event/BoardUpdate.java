@@ -3,12 +3,12 @@ package client.event;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
-import common.event.AbstractEvent;
+import common.event.AbstractCommand;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.PlayerInfo;
 
-public class BoardUpdate extends AbstractEvent {
+public class BoardUpdate extends AbstractCommand {
 
 	private int[] list;
 	private boolean flipAll=false;

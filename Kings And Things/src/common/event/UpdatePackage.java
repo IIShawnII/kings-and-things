@@ -17,14 +17,15 @@ public class UpdatePackage extends AbstractEvent {
 	private HashMap< UpdateKey, Object> data;
 	private String source;
 	
-	public UpdatePackage( String source){
+	public UpdatePackage( String source, final Object OWNER){
+		super(OWNER);
 		this.source = source;
 		data = new HashMap<>();
 		instructions = new LinkedList<>();
 	}
 	
-	public UpdatePackage( UpdateInstruction instruction, String source){
-		this( source);
+	public UpdatePackage( UpdateInstruction instruction, String source, final Object OWNER){
+		this( source, OWNER);
 		addInstruction( instruction);
 	}
 	
@@ -79,6 +80,6 @@ public class UpdatePackage extends AbstractEvent {
 	
 	@Override
 	public String toString(){
-		return "Network/UpdatePackage:\t\nSource: " + source + ",\n\tDate: " + data.keySet() + ",\n\tInstructions count: " + instructions;
+		return "Network/UpdatePackage:\t\nSource: " + source + ",\n\tData: " + data.keySet() + ",\n\tInstructions: " + instructions;
 	}
 }

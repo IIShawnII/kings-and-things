@@ -6,8 +6,17 @@ import common.game.PlayerInfo;
  * This is the abstract super class of all events
  */
 public abstract class AbstractEvent{
-	
+
+	protected final Object Owner;
 	private int ID = -1;
+	
+	protected AbstractEvent( final Object OWNER){
+		this.Owner = OWNER;
+	}
+	
+	public Object getOwner(){
+		return Owner;
+	}
 
 	/**
 	 * post this notification on command BusEvent
@@ -46,6 +55,6 @@ public abstract class AbstractEvent{
 	}
 	
 	public boolean isValidID( PlayerInfo player){
-		return ID==player.getID();
+		return player!=null && ID==player.getID();
 	}
 }

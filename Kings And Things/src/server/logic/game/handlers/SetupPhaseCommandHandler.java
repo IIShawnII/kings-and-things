@@ -8,9 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import server.event.DiceRolled;
-import server.event.GameStarted;
+import server.event.commands.DiceRolled;
 import server.event.commands.ExchangeSeaHexCommand;
+import server.event.commands.GameStarted;
 import server.event.commands.GiveHexToPlayerCommand;
 import server.event.commands.StartGameCommand;
 import server.logic.exceptions.NoMoreTilesException;
@@ -24,6 +24,7 @@ import server.logic.game.SpecialCharacterManager;
 import server.logic.game.validators.SetupPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;

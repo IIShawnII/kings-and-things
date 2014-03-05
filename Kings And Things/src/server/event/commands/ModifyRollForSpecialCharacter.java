@@ -1,5 +1,7 @@
 package server.event.commands;
 
+import common.event.AbstractCommand;
+
 public class ModifyRollForSpecialCharacter extends AbstractCommand {
 	
 	private final boolean hasRolled; 

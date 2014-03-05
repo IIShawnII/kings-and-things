@@ -267,7 +267,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 	
 	private class InputControl extends WindowAdapter implements ActionListener {
 		
-		private UpdatePackage update = new UpdatePackage("Dialog.Control");
+		private UpdatePackage update = new UpdatePackage("Dialog.Control", this);
 		
 		@Override
 		public void actionPerformed( ActionEvent e) {
@@ -298,7 +298,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
-			super( INTERNAL, -1);
+			super( INTERNAL, -1, LoadingDialog.this);
 		}
 
 		@Override

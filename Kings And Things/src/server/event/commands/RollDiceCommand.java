@@ -1,6 +1,7 @@
 package server.event.commands;
 
 import common.Constants.RollReason;
+import common.event.AbstractCommand;
 import common.game.ITileProperties;
 
 public class RollDiceCommand extends AbstractCommand

@@ -16,16 +16,15 @@ import javax.swing.JScrollPane;
 
 import common.game.PlayerInfo;
 import common.game.LoadResources;
-import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
-import common.Constants.UpdateInstruction;
+import common.event.AbstractUpdateReceiver;
 import common.Constants.UpdateKey;
-import static common.Constants.BOARD_SIZE;
+import common.Constants.UpdateInstruction;
 import static common.Constants.GUI;
 import static common.Constants.LOGIC;
+import static common.Constants.BOARD_SIZE;
 import static common.Constants.BYPASS_LOBBY;
 import static common.Constants.LOAD_RESOURCE;
-import static common.Constants.BYPASS_LOAD_IMAGES;
 
 /**
  * client GUI to hold all and display all game related information
@@ -56,7 +55,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	        setLocationRelativeTo(null);
 	        setUndecorated(true);
 	        setVisible(true);
-	        dialog = new LoadingDialog( new LoadResources( !BYPASS_LOAD_IMAGES), "Lobby", true, true, getGraphicsConfiguration());
+	        dialog = new LoadingDialog( new LoadResources( true), "Lobby", true, true, getGraphicsConfiguration());
 			dialog.run();
         	dispose();
 		}
@@ -129,14 +128,14 @@ public class ClientGUI extends JFrame implements Runnable{
 	}
 	
 	private void close(){
-		new UpdatePackage( UpdateInstruction.End, "GUI.Close").postCommand( LOGIC|LOAD_RESOURCE);
+		new UpdatePackage( UpdateInstruction.End, "GUI.Close", this).postCommand( LOGIC|LOAD_RESOURCE);
 		dispose();
 	}
 	
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
-			super( INTERNAL, GUI);
+			super( INTERNAL, GUI, ClientGUI.this);
 		}
 
 		@Override

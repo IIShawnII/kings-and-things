@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import server.event.DiceRolled;
 import server.event.commands.ApplyHitsCommand;
+import server.event.commands.DiceRolled;
 import server.event.commands.ResolveCombat;
 import server.logic.game.Player;
 import server.logic.game.validators.CombatPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants.Ability;
 import common.Constants.CombatPhase;
 import common.Constants.RollReason;

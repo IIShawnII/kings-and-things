@@ -3,9 +3,9 @@ package server.logic.game.handlers;
 import java.util.ArrayList;
 import java.util.List;
 
-import server.event.DiceRolled;
-import server.event.GameStarted;
+import server.event.commands.DiceRolled;
 import server.event.commands.EndPlayerTurnCommand;
+import server.event.commands.GameStarted;
 import server.event.commands.RollDiceCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.BoardGenerator;
@@ -18,6 +18,7 @@ import server.logic.game.SpecialCharacterManager;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;

@@ -182,7 +182,7 @@ public class CombatPanel extends JPanel
 	private class DieRollReceiver extends AbstractUpdateReceiver<DieRoll>{
 
 		protected DieRollReceiver() {
-			super( INTERNAL, -1);
+			super( INTERNAL, -1, CombatPanel.this);
 		}
 
 		@Override
@@ -207,7 +207,7 @@ public class CombatPanel extends JPanel
 	private class HitsReceiver extends AbstractUpdateReceiver<CombatHits>{
 
 		protected HitsReceiver() {
-			super( INTERNAL, -1);
+			super( INTERNAL, -1, CombatPanel.this);
 		}
 
 		@Override
@@ -230,7 +230,7 @@ public class CombatPanel extends JPanel
 	private class HexChangedReceiver extends AbstractUpdateReceiver<HexStatesChanged>{
 
 		protected HexChangedReceiver() {
-			super( INTERNAL, -1);
+			super( INTERNAL, -1, CombatPanel.this);
 		}
 
 		@Override

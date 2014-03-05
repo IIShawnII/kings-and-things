@@ -42,7 +42,7 @@ public class ConnectionLobby implements Runnable {
 	public ConnectionLobby( boolean isDemoMode) throws IOException{
 		if( isDemoMode){
 			Logger.getStandardLogger().info("Server started in demo mode.");
-			new ConsoleMessage( "Starting in demo mode.", Level.Notice).postCommand();
+			new ConsoleMessage( "Starting in demo mode.", Level.Notice, this).postCommand();
 		}
 		
 		demoMode = isDemoMode;
@@ -52,17 +52,17 @@ public class ConnectionLobby implements Runnable {
 
 	@Override
 	public void run() {
-		new ConsoleMessage( "Loading Resources", Level.Plain).postCommand();
+		new ConsoleMessage( "Loading Resources", Level.Plain, this).postCommand();
 		new LoadResources( false).run();
-		new ConsoleMessage( "Loaded Resources", Level.Plain).postCommand();
+		new ConsoleMessage( "Loaded Resources", Level.Plain, this).postCommand();
 		try {
 			serverSocket = new ServerSocket( SERVER_PORT);
             serverSocket.setSoTimeout( SERVER_TIMEOUT*1000);
 			Logger.getStandardLogger().info("Listening on port " + SERVER_PORT);
-			new ConsoleMessage( "Listening on port " + SERVER_PORT, Level.Notice).postCommand();
+			new ConsoleMessage( "Listening on port " + SERVER_PORT, Level.Notice, this).postCommand();
 		} catch ( IOException e) {
 			Logger.getErrorLogger().error("Failed to open port " + SERVER_PORT, e);
-			new ConsoleMessage( "Failed to open port " + SERVER_PORT + ", Restart Server", Level.Error).postCommand();
+			new ConsoleMessage( "Failed to open port " + SERVER_PORT + ", Restart Server", Level.Error, this).postCommand();
 			return;
 		}
 		game.initialize();
@@ -78,7 +78,7 @@ public class ConnectionLobby implements Runnable {
             			oldClient = true;
             			pc.setConnection( connection);
             			startTask( pc, pc.getName());
-            			new ConsoleMessage( "Restablished connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice).postCommand();
+            			new ConsoleMessage( "Restablished connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice, this).postCommand();
             			Logger.getStandardLogger().info("Restablished connection from " + connection + ", assigned to " + pc.getPlayer());
             			break;
             		}
@@ -94,23 +94,23 @@ public class ConnectionLobby implements Runnable {
 	            	connectedPlayers.add( pc);
 	            	count++;
 	            	playerID*=PLAYER_ID_MULTIPLIER;
-        			new ConsoleMessage( "Recieved connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice).postCommand();
+        			new ConsoleMessage( "Recieved connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice, this).postCommand();
 	            	Logger.getStandardLogger().info("Recieved connection from " + connection + ", assigned to " + pc.getPlayer());
             	}
-    			new ConsoleMessage( "Player count is " + count + " out of " + MAX_PLAYERS + " players, need players: " + (MAX_PLAYERS-count), Level.Notice).postCommand();
+    			new ConsoleMessage( "Player count is " + count + " out of " + MAX_PLAYERS + " players, need players: " + (MAX_PLAYERS-count), Level.Notice, this).postCommand();
             	Logger.getStandardLogger().info("Player count is " + count + " out of " + MAX_PLAYERS + " players, need players: " + (MAX_PLAYERS-count));
             	playerUpdated( null);
             } catch( SocketTimeoutException ex){
                 //try again for incoming connections
             } catch ( IOException e) {
-    			new ConsoleMessage( "Problem closing player connections", Level.Error).postCommand();
+    			new ConsoleMessage( "Problem closing player connections", Level.Error, this).postCommand();
             	Logger.getErrorLogger().error("Problem with player connections: ", e);
 			}
         }
 		try {
 			serverSocket.close();
 		} catch ( IOException e) {
-			new ConsoleMessage( "Problem closing player connections", Level.Error).postCommand();
+			new ConsoleMessage( "Problem closing player connections", Level.Error, this).postCommand();
 			Logger.getErrorLogger().error("Problem closing player connections: ", e);
 		}
 	}

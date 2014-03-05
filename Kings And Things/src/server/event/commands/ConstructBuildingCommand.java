@@ -1,6 +1,7 @@
 package server.event.commands;
 
 import common.Constants.BuildableBuilding;
+import common.event.AbstractCommand;
 import common.game.ITileProperties;
 
 public class ConstructBuildingCommand extends AbstractCommand{

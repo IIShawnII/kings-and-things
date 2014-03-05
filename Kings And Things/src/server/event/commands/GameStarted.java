@@ -1,13 +1,14 @@
-package server.event;
+package server.event.commands;
 
-import common.event.AbstractEvent;
+import common.event.AbstractCommand;
+
 import server.logic.game.BoardGenerator;
 import server.logic.game.CupManager;
 import server.logic.game.GameState;
 import server.logic.game.HexTileManager;
 import server.logic.game.SpecialCharacterManager;
 
-public class GameStarted extends AbstractEvent
+public class GameStarted extends AbstractCommand
 {
 	private final boolean isDemoMode;
 	private final CupManager cup;

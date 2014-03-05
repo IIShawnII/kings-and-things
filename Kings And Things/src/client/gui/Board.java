@@ -372,7 +372,7 @@ public class Board extends JPanel{
 	private class UpdateReceiver extends AbstractUpdateReceiver<BoardUpdate>{
 
 		protected UpdateReceiver() {
-			super( INTERNAL, BOARD);
+			super( INTERNAL, BOARD, Board.this);
 		}
 
 		@Override

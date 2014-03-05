@@ -7,7 +7,8 @@ public class ConsoleMessage extends AbstractEvent {
 	private String message;
 	private Level level;
 	
-	public ConsoleMessage( String message, Level level){
+	public ConsoleMessage( String message, Level level, final Object OWNER){
+		super( OWNER);
 		this.message = message; 
 		this.level = level;
 	}

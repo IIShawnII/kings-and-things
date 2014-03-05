@@ -2,10 +2,11 @@ package server.logic.game.handlers;
 
 import java.util.ArrayList;
 
-import server.event.DiceRolled;
+import server.event.commands.DiceRolled;
 import server.logic.game.Player;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Logger;
 import common.game.Roll;
 
