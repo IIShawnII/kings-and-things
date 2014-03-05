@@ -1,15 +1,16 @@
 package server.event.commands;
 
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
-public class ApplyRandomEventsCommand extends AbstractCommand {
+public class ApplyRandomEventsCommand extends AbstractInternalEvent {
 	
 	private final ITileProperties eventOfPlayer;
 	
 	
 	// constructor
-	public ApplyRandomEventsCommand (ITileProperties eventOfPlayer) {
+	public ApplyRandomEventsCommand (ITileProperties eventOfPlayer, final Object OWNER){
+		super( OWNER);
 		this.eventOfPlayer = eventOfPlayer;
 	}
 	

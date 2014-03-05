@@ -7,6 +7,6 @@ public class AbstractNetwrokEvent extends AbstractEvent implements Serializable 
 	private static final long serialVersionUID = -940737105754878689L;
 	
 	protected AbstractNetwrokEvent(){
-		super(null);
+		super( null);
 	}
 }

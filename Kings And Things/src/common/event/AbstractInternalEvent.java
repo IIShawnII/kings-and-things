@@ -2,12 +2,12 @@ package common.event;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AbstractCommand extends AbstractEvent
+public class AbstractInternalEvent extends AbstractEvent
 {
 	private final AtomicBoolean isUnhandled = new AtomicBoolean(true);
 	
-	protected AbstractCommand(){
-		super(null);
+	protected AbstractInternalEvent( final Object OWNER){
+		super( OWNER);
 	}
 	
 	/**

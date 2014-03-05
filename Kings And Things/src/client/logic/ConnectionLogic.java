@@ -64,16 +64,16 @@ public class ConnectionLogic implements Runnable {
 				update.setSource( "Logic.Run "+player.getID());
 			} 
 			else if( event instanceof HexPlacement){
-				new BoardUpdate(((HexPlacement)event).getArray()).postCommand();
+				new BoardUpdate(((HexPlacement)event).getArray(), this).postCommand();
 			} 
 			else if( event instanceof Flip){
-				new BoardUpdate(((Flip)event).flipAll()).postCommand();
+				new BoardUpdate(((Flip)event).flipAll(), this).postCommand();
 			} 
 			else if( event instanceof PlayerOrderList){
-				new BoardUpdate(((PlayerOrderList)event).getList()).postCommand();
+				new BoardUpdate(((PlayerOrderList)event).getList(), this).postCommand();
 			} 
 			else if( event instanceof RackPlacement){
-				new BoardUpdate(((RackPlacement)event).getArray()).postCommand();
+				new BoardUpdate(((RackPlacement)event).getArray(), this).postCommand();
 			}
 			else if( event instanceof CurrentPhase){
 				phase = (CurrentPhase) event;

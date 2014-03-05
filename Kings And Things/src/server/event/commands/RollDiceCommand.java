@@ -1,16 +1,16 @@
 package server.event.commands;
 
 import common.Constants.RollReason;
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
-public class RollDiceCommand extends AbstractCommand
+public class RollDiceCommand extends AbstractInternalEvent
 {
 	private final RollReason reason;
 	private final ITileProperties tile;
 	
-	public RollDiceCommand(RollReason reasonForRoll, ITileProperties tile)
-	{
+	public RollDiceCommand(RollReason reasonForRoll, ITileProperties tile, final Object OWNER){
+		super( OWNER);
 		reason = reasonForRoll;
 		this.tile = tile;
 	}

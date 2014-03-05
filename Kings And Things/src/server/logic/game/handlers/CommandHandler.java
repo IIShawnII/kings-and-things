@@ -5,7 +5,7 @@ import java.util.List;
 
 import server.event.commands.DiceRolled;
 import server.event.commands.EndPlayerTurnCommand;
-import server.event.commands.GameStarted;
+import server.event.commands.SetupPhaseComplete;
 import server.event.commands.RollDiceCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.BoardGenerator;
@@ -371,7 +371,7 @@ public abstract class CommandHandler
 		//if we are no longer waiting for more rolls, then we can apply the effects now
 		if(!currentState.isWaitingForRolls())
 		{
-			new DiceRolled().postCommand();
+			new DiceRolled( this).postCommand();
 		}
 	}
 
@@ -381,7 +381,7 @@ public abstract class CommandHandler
 	}
 	
 	@Subscribe
-	public void receiveGameStartedEvent(GameStarted event)
+	public void receiveGameStartedEvent(SetupPhaseComplete event)
 	{
 		cup = event.getCup();
 		bank = event.getBank();

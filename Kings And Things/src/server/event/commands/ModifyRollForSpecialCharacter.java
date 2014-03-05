@@ -1,13 +1,14 @@
 package server.event.commands;
 
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 
-public class ModifyRollForSpecialCharacter extends AbstractCommand {
+public class ModifyRollForSpecialCharacter extends AbstractInternalEvent {
 	
 	private final boolean hasRolled; 
 	private final int goldAmount;
 	
-	public ModifyRollForSpecialCharacter (boolean hasRolled, int goldAmount) {
+	public ModifyRollForSpecialCharacter (boolean hasRolled, int goldAmount, final Object OWNER){
+		super( OWNER);
 		this.hasRolled = hasRolled;
 		this.goldAmount = goldAmount;
 	}

@@ -4,18 +4,18 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 
 import server.logic.game.Player;
 
-public class StartGameCommand extends AbstractCommand{
+public class StartSetupPhase extends AbstractInternalEvent{
 
 	private final boolean demoMode;
 	
 	private final HashSet<Player> players;
 	
-	public StartGameCommand(boolean demoMode, Set<Player> players)
-	{
+	public StartSetupPhase(boolean demoMode, Set<Player> players, final Object OWNER){
+		super( OWNER);
 		this.demoMode = demoMode;
 		this.players = new HashSet<Player>();
 		for(Player p : players)

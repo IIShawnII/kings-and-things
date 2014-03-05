@@ -6,16 +6,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
-public class MoveThingsCommand extends AbstractCommand
+public class MoveThingsCommand extends AbstractInternalEvent
 {
 	private final Set<ITileProperties> things;
 	private final List<ITileProperties> hexes;
 	
-	public MoveThingsCommand(Set<ITileProperties> things, List<ITileProperties> hexes)
-	{
+	public MoveThingsCommand(Set<ITileProperties> things, List<ITileProperties> hexes, final Object OWNER){
+		super( OWNER);
 		this.things = new HashSet<ITileProperties>(things);
 		this.hexes = new ArrayList<ITileProperties>(hexes);
 	}

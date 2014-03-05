@@ -5,16 +5,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
 
-public class RecruitThingsCommand extends AbstractCommand {
+public class RecruitThingsCommand extends AbstractInternalEvent {
 	
 	private final int gold;
 	private final HashSet<ITileProperties> things;
 	
-	public RecruitThingsCommand(int newGold, Collection<ITileProperties> thingsToExchange) {
+	public RecruitThingsCommand(int newGold, Collection<ITileProperties> thingsToExchange, final Object OWNER){
+		super( OWNER);
 		this.gold = newGold;
 		this.things = new HashSet<ITileProperties>(thingsToExchange);
 	}

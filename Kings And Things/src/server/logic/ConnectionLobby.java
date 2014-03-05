@@ -18,7 +18,7 @@ import server.logic.game.Player;
 import server.logic.game.CommandHandlerManager;
 import server.event.commands.EndServer;
 import server.event.commands.PlayerUpdated;
-import server.event.commands.StartGameCommand;
+import server.event.commands.StartSetupPhase;
 import common.Logger;
 import common.Constants;
 import common.Constants.Level;
@@ -138,7 +138,7 @@ public class ConnectionLobby implements Runnable {
 				set.add( pc.getPlayer());
 			}
 			new StartGame( Constants.BYPASS_MIN_PLAYER? MAX_PLAYERS:set.size()).postNotification();
-			new StartGameCommand( demoMode, set).postCommand();
+			new StartSetupPhase( demoMode, set, this).postCommand();
 		}
 	}
 	

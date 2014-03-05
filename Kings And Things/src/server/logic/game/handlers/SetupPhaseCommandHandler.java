@@ -10,9 +10,9 @@ import java.util.Set;
 
 import server.event.commands.DiceRolled;
 import server.event.commands.ExchangeSeaHexCommand;
-import server.event.commands.GameStarted;
+import server.event.commands.SetupPhaseComplete;
 import server.event.commands.GiveHexToPlayerCommand;
-import server.event.commands.StartGameCommand;
+import server.event.commands.StartSetupPhase;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.BoardGenerator;
 import server.logic.game.CupManager;
@@ -64,7 +64,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		//TODO since player order is predetermined start from SetupPhase.PICK_SECOND_HEX
 		GameState currentState = new GameState(board,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0), CombatPhase.NO_COMBAT, -1, null);
 		new Flip().postNotification();
-		new GameStarted(demoMode, cup, bank, boardGenerator, currentState, bankHeroManager).postCommand();
+		new SetupPhaseComplete(demoMode, cup, bank, boardGenerator, currentState, bankHeroManager, this).postCommand();
 		new CurrentPhase( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNotification();
 	}
 
@@ -260,7 +260,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 	}
 
 	@Subscribe
-	public void recieveGameStartCommand(StartGameCommand command)
+	public void recieveGameStartCommand(StartSetupPhase command)
 	{
 		if(command.isUnhandled())
 		{

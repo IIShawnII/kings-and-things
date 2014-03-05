@@ -1,11 +1,11 @@
 package server.event.commands;
 
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 
 
-public class EndPlayerTurnCommand extends AbstractCommand{
+public class EndPlayerTurnCommand extends AbstractInternalEvent{
 
-	public EndPlayerTurnCommand(){
-		
+	public EndPlayerTurnCommand( final Object OWNER){
+		super( OWNER);
 	}
 }

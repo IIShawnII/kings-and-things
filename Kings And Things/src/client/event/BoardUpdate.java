@@ -3,12 +3,12 @@ package client.event;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.PlayerInfo;
 
-public class BoardUpdate extends AbstractCommand {
+public class BoardUpdate extends AbstractInternalEvent {
 
 	private int[] list;
 	private boolean flipAll=false;
@@ -21,53 +21,59 @@ public class BoardUpdate extends AbstractCommand {
 	private CombatPhase combat = null;
 	private RegularPhase regular = null;
 	
-	public BoardUpdate( boolean flipAll){
+	public BoardUpdate( boolean flipAll, final Object OWNER){
+		super(OWNER);
 		this.flipAll = flipAll;
 		hexes = null;
 	}
 	
-	public BoardUpdate( SetupPhase phase) {
+	public BoardUpdate( SetupPhase phase, final Object OWNER){
+		super(OWNER);
 		setup = phase;
 	}
 	
-	public BoardUpdate( ITileProperties[] array) {
+	public BoardUpdate( ITileProperties[] array, final Object OWNER){
+		super(OWNER);
 		props = array;
 	}
 	
-	public BoardUpdate( HexState[] array) {
+	public BoardUpdate( HexState[] array, final Object OWNER){
+		super(OWNER);
 		hexes = array;
 	}
 	
-	public BoardUpdate( int[] list) {
+	public BoardUpdate( int[] list, final Object OWNER){
+		super(OWNER);
 		this.list = list;
 	}
 	
-	public BoardUpdate( PlayerInfo[] players) {
-		this( players, null, null, null);
+	public BoardUpdate( PlayerInfo[] players, final Object OWNER) {
+		this( players, null, null, null, OWNER);
 	}
 	
-	public BoardUpdate( PlayerInfo[] players, PlayerInfo current) {
-		this( players, null, null, null);
+	public BoardUpdate( PlayerInfo[] players, PlayerInfo current, final Object OWNER) {
+		this( players, null, null, null, OWNER);
 		this.current = current;
 	}
 	
-	private BoardUpdate( PlayerInfo[] infos, SetupPhase setup, RegularPhase regular, CombatPhase combat){
+	private BoardUpdate( PlayerInfo[] infos, SetupPhase setup, RegularPhase regular, CombatPhase combat, final Object OWNER){
+		super(OWNER);
 		this.setup = setup;
 		this.regular = regular;
 		this.combat = combat;
 		this.players = infos;
 	}
 	
-	public BoardUpdate( PlayerInfo[] infos, SetupPhase phase){
-		this( infos, phase, null, CombatPhase.NO_COMBAT);
+	public BoardUpdate( PlayerInfo[] infos, SetupPhase phase, final Object OWNER){
+		this( infos, phase, null, CombatPhase.NO_COMBAT, OWNER);
 	}
 	
-	public BoardUpdate( PlayerInfo[] infos, RegularPhase phase){
-		this( infos, SetupPhase.SETUP_FINISHED, phase, CombatPhase.NO_COMBAT);
+	public BoardUpdate( PlayerInfo[] infos, RegularPhase phase, final Object OWNER){
+		this( infos, SetupPhase.SETUP_FINISHED, phase, CombatPhase.NO_COMBAT, OWNER);
 	}
 	
-	public BoardUpdate( PlayerInfo[] infos, CombatPhase phase){
-		this( infos, SetupPhase.SETUP_FINISHED, RegularPhase.COMBAT, phase);
+	public BoardUpdate( PlayerInfo[] infos, CombatPhase phase, final Object OWNER){
+		this( infos, SetupPhase.SETUP_FINISHED, RegularPhase.COMBAT, phase, OWNER);
 	}
 
 	

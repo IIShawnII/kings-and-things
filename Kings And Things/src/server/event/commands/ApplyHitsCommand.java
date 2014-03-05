@@ -1,15 +1,15 @@
 package server.event.commands;
 
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
-public class ApplyHitsCommand extends AbstractCommand
+public class ApplyHitsCommand extends AbstractInternalEvent
 {
 	private final int numHits;
 	private final ITileProperties target;
 	
-	public ApplyHitsCommand(int numHits, ITileProperties target)
-	{
+	public ApplyHitsCommand(int numHits, ITileProperties target, final Object OWNER){
+		super( OWNER);
 		this.numHits = numHits;
 		this.target = target;
 	}

@@ -86,13 +86,13 @@ public class PlayerConnection implements Runnable{
 				player.setIsPlaying( ((PlayerState)notification).getPlayer().isReady());
 			}else if ( notification instanceof HexOwnershipChanged){
 				HexOwnershipChanged event = (HexOwnershipChanged)notification;
-				new GiveHexToPlayerCommand( event.getChangedHex().getHex()).postCommand( player.getID());
+				new GiveHexToPlayerCommand( event.getChangedHex().getHex(), this).postCommand( player.getID());
 			}
-			new PlayerUpdated( player).postCommand();
+			new PlayerUpdated( player, this).postCommand();
 		}
 		player.setIsPlaying(false);
 		player.setConnected( false);
-		new PlayerUpdated( player).postCommand();
+		new PlayerUpdated( player, this).postCommand();
 		Logger.getStandardLogger().warn( player + " lost connection");
 	}
 	

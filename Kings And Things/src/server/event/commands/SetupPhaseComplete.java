@@ -1,14 +1,13 @@
 package server.event.commands;
 
-import common.event.AbstractCommand;
-
+import common.event.AbstractInternalEvent;
 import server.logic.game.BoardGenerator;
 import server.logic.game.CupManager;
 import server.logic.game.GameState;
 import server.logic.game.HexTileManager;
 import server.logic.game.SpecialCharacterManager;
 
-public class GameStarted extends AbstractCommand
+public class SetupPhaseComplete extends AbstractInternalEvent
 {
 	private final boolean isDemoMode;
 	private final CupManager cup;
@@ -17,8 +16,8 @@ public class GameStarted extends AbstractCommand
 	private final GameState currentState;
 	private final SpecialCharacterManager bankHeroManager;
 
-	public GameStarted(boolean isDemoMode, CupManager cup, HexTileManager bank,	BoardGenerator boardGenerator, GameState currentState, SpecialCharacterManager bankHeroManager)
-	{
+	public SetupPhaseComplete(boolean isDemoMode, CupManager cup, HexTileManager bank,	BoardGenerator boardGenerator, GameState currentState, SpecialCharacterManager bankHeroManager, final Object OWNER){
+		super( OWNER);
 		this.isDemoMode = isDemoMode;
 		this.cup = cup;
 		this.bank = bank;

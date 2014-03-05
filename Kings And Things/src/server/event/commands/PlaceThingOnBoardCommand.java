@@ -1,14 +1,15 @@
 package server.event.commands;
 
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
-public class PlaceThingOnBoardCommand extends AbstractCommand{
+public class PlaceThingOnBoardCommand extends AbstractInternalEvent{
 	
 	private final ITileProperties hex;
 	private final ITileProperties thing;
 	
-	public PlaceThingOnBoardCommand(ITileProperties thing, ITileProperties hex){
+	public PlaceThingOnBoardCommand(ITileProperties thing, ITileProperties hex, final Object OWNER){
+		super( OWNER);
 		this.thing = thing;
 		this.hex = hex;
 	}

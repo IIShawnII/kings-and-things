@@ -1,8 +1,11 @@
 package server.event.commands;
 
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 
 
-public class EndServer extends AbstractCommand {
-
+public class EndServer extends AbstractInternalEvent {
+	
+	public EndServer( final Object OWNER){
+		super( OWNER);
+	}
 }

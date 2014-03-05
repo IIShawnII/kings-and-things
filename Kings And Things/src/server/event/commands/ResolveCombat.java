@@ -1,14 +1,14 @@
 package server.event.commands;
 
-import common.event.AbstractCommand;
+import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
-public class ResolveCombat extends AbstractCommand
+public class ResolveCombat extends AbstractInternalEvent
 {
 	private final ITileProperties hex;
 
-	public ResolveCombat(ITileProperties hex)
-	{
+	public ResolveCombat(ITileProperties hex, final Object OWNER){
+		super( OWNER);
 		this.hex = hex;
 	}
 
