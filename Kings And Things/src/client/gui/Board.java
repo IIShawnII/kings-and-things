@@ -36,7 +36,6 @@ import common.game.HexState;
 import common.game.PlayerInfo;
 import common.game.TileProperties;
 import common.game.ITileProperties;
-import static common.Constants.GUI;
 import static common.Constants.STATE;
 import static common.Constants.BOARD;
 import static common.Constants.HEX_SIZE;
@@ -376,12 +375,8 @@ public class Board extends JPanel{
 		}
 
 		@Override
-		public void handle( BoardUpdate update) {
-			if( update.isPublic()){
-				updateBoard( update);
-			}else if( update.getID()==GUI){
-				
-			}
+		public void handlePublic( BoardUpdate update) {
+			updateBoard( update);
 		}
 	}
 	

@@ -113,16 +113,26 @@ public class ConnectionLogic implements Runnable {
 		}
 
 		@Override
-		public void handle( UpdatePackage update) {
+		public void handlePublic( UpdatePackage update) {
+			if( update.peekFirstInstruction()==UpdateInstruction.End){
+				if( connection!=null){
+					connection.disconnect();
+				}
+				finished = true;
+			}
+		}
+
+		@Override
+		public void handlePrivate( UpdatePackage update) {
 			UpdateInstruction[] instructions = update.getInstructions();
 			for( UpdateInstruction instruction : instructions){
 				process( instruction, update);
 			}
 		}
-
+		
 		@Override
-		public boolean verify( UpdatePackage update) {
-			return (!update.isPublic() && (update.isValidID(ID) || update.isValidID(player)));
+		public boolean verifyPrivate( UpdatePackage update){
+			return update.isValidID(ID) || update.isValidID(player);
 		}
 	}
 	
@@ -172,18 +182,8 @@ public class ConnectionLogic implements Runnable {
 				message = !player.isReady()? "Ready":"UnReady";
 				sendToServer( new PlayerState( player));
 				break;
-			case End:
-				if( connection!=null){
-					connection.disconnect();
-				}
-				finished = true;
-				return;
-			case Send:
-				//TODO add support for sending UpdatePackage
-				//sendToServer( action);
-				return;
 			default:
-				return;
+				throw new IllegalArgumentException( "No handle for instruction: " + instruction);
 		}
 		UpdatePackage update = new UpdatePackage("Logic.Receive "+(player!=null?player.getID():""), this);
 		update.addInstruction( netaction);
@@ -225,13 +225,13 @@ public class ConnectionLogic implements Runnable {
 		}
 
 		@Override
-		public void handle( AbstractNetwrokEvent update) {
+		public void handlePrivate( AbstractNetwrokEvent update) {
 			sendToServer( update);
 		}
 
 		@Override
-		public boolean verify( AbstractNetwrokEvent update) {
-			return (!update.isPublic() && (update.getID()&ID)!=ID && update.isValidID( player));
+		public boolean verifyPrivate( AbstractNetwrokEvent update) {
+			return update.isValidID(ID) || update.isValidID(player);
 		}
 	}
 

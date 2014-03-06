@@ -302,12 +302,18 @@ public class LoadingDialog extends JDialog implements Runnable{
 		}
 
 		@Override
-		public void handle( UpdatePackage update) {
-			if( update.isPublic()){
-				updateDialog( update);
-			}else if( update.getID()==PROGRESS){
-				updateProgress( update);
-			}
+		public void handlePrivate( UpdatePackage update) {
+			updateProgress( update);
+		}
+
+		@Override
+		public void handlePublic( UpdatePackage update) {
+			updateDialog( update);
+		}
+		
+		@Override
+		public boolean verifyPrivate( UpdatePackage update){
+			return update.isValidID( PROGRESS);
 		}
 	}
 

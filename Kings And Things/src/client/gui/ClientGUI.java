@@ -139,12 +139,8 @@ public class ClientGUI extends JFrame implements Runnable{
 		}
 
 		@Override
-		public void handle( UpdatePackage update) {
-			if( update.isPublic()){
-				changeBoad( update);
-			}else if( update.getID()==GUI){
-				
-			}
+		public void handlePublic( UpdatePackage update) {
+			changeBoad( update);
 		}
 	}
 	

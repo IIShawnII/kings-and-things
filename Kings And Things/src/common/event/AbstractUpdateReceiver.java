@@ -1,6 +1,7 @@
 package common.event;
 
 import common.Logger;
+
 import com.google.common.eventbus.Subscribe;
 
 /**
@@ -22,6 +23,8 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 	 * create an instance of <code>AbstractUpdateReceiver</code> and 
 	 * register on either network or internal event bus
 	 * @param BUS - AbstractUpdateReceiver.NETWORK(0) or AbstractUpdateReceiver.INTERNAL(1)
+	 * @param ID - specific unique ID from Constants to represent this receiver (ex. GUI, LOGIC, BOARD, PROGRESS, LOAD_RESOURCE)
+	 * @param OWNER - this must be the most outer class that holds AbstractUpdateReceiver
 	 */
 	protected AbstractUpdateReceiver( final int BUS, final int ID, final Object OWNER){
 		registerOnEventBus( BUS);
@@ -31,19 +34,20 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 	}
 	
 	/**
-	 * main method to receive update from event bus. this methods will call
-	 * verify and if result are true it will continue to call handle, otherwise
-	 * the method ends without doing anything else. all exceptions that may occur
-	 * in handle or verify methods will be caught in this method and logged as
-	 * fatal error message.
+	 * main method to receive update from event bus. this methods will
+	 * ensure that event received is not from the same OWNER first, then
+	 * update is checked for private or public status and appropriate
+	 * handlePrivate or handlePublic methods is called to process update.
 	 * @param update - update received from event bus
 	 */
 	@Subscribe
 	public final void receiveUpdate( T update){
 		try{
 			if(update.getOwner()!=OWNER){
-				if( verify( update)){
-					handle( update);
+				if( verifyPublic( update)){
+					handlePublic( update);
+				}else if(verifyPrivate( update)){
+					handlePrivate( update);
 				}
 			}
 		}catch(ClassCastException ex){
@@ -78,18 +82,44 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 	}
 	
 	/**
-	 * called after verify method has returned true. this method 
-	 * is meant to handle any needed code for processing update.
+	 * called after update.isPublic() method has returned true.
+	 * this method is meant to handle any needed code for processing
+	 * public events not private events.
+	 * @throws IllegalStateException - if this methods is not overridden and called
 	 */
-	public abstract void handle( T update);
+	public void handlePublic( T update){
+		throw new IllegalStateException( "This method must be Overridden");
+	}
 	
 	/**
-	 * check to see if all conditions (i.e ID, public) for processing 
-	 * update are valid, if valid, call handle, otherwise skip.
-	 * by default this method returns true unless overridden by subclass.
+	 * called after verifyPrivate method has returned true. this method 
+	 * is meant to handle any needed code for processing update for
+	 * private events not public event.
+	 * @throws IllegalStateException - if this methods is not overridden and called
+	 */
+	public void handlePrivate( T update){
+		throw new IllegalStateException( "This method must be Overridden");
+	}
+	
+	/**
+	 * check to see if all conditions (i.e ID or client specific) for processing 
+	 * update are valid, if valid, return true. this will result in calling of
+	 * handlePrivate, otherwise skip. by default this method returns false unless
+	 * overridden by subclass.
 	 * @return true if all conditions are valid, false otherwise
 	 */
-	public boolean verify( T update){
-		return true;
+	public boolean verifyPrivate( T update){
+		return false;
+	}
+	
+	/**
+	 * check to see if this update is public, if public, return true. will result
+	 * in calling of handlePublic, otherwise skip. by default this method calls
+	 * update.isPublic() and returns the result. can be overridden for more detail
+	 * verification.
+	 * @return true if all conditions are valid, false otherwise
+	 */
+	public boolean verifyPublic( T update){
+		return update.isPublic();
 	}
 }
