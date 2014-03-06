@@ -161,7 +161,7 @@ public abstract class CommandHandler
 		currentState.setDefendingPlayerNumber(-1);
 		currentState.removeAllHexesWithBuiltInObjects();
 		
-		new PlayerState(currentState.getActivePhasePlayer().getPlayerInfo()).postNotification();
+		new PlayerState(currentState.getActivePhasePlayer().getPlayerInfo()).postNetworkEvent();
 	}
 	
 	protected void advanceActiveTurnPlayer(){
@@ -289,8 +289,8 @@ public abstract class CommandHandler
 						}
 					}
 					
-					tray.postNotification();
-					new PlayerState(p.getPlayerInfo()).postNotification();
+					tray.postNetworkEvent();
+					new PlayerState(p.getPlayerInfo()).postNetworkEvent();
 				}
 				break;
 			}
@@ -371,7 +371,7 @@ public abstract class CommandHandler
 		//if we are no longer waiting for more rolls, then we can apply the effects now
 		if(!currentState.isWaitingForRolls())
 		{
-			new DiceRolled( this).postCommand();
+			new DiceRolled( this).postInternalEvent();
 		}
 	}
 

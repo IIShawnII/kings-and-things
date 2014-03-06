@@ -16,22 +16,22 @@ public abstract class EventDispatch
 	 * See GameFlowManager for an example on registering for events and handling them, see Command
 	 * for an example on posting events.
 	 */
-	static final EventBus COMMAND = new EventBus();
-	static final EventBus NOTIFICATION = new EventBus();
+	static final EventBus INTERNAL = new EventBus();
+	static final EventBus NETWORK = new EventBus();
 	
 	public static void registerOnInternalEvents( Object obj){
-		COMMAND.register( obj);
+		INTERNAL.register( obj);
 	}
 	
 	public static void registerOnNetwrokEvents( Object obj){
-		NOTIFICATION.register( obj);
+		NETWORK.register( obj);
 	}
 
 	public static void unregisterFromInternalEvents( Object obj) {
-		COMMAND.unregister( obj);
+		INTERNAL.unregister( obj);
 	}
 
 	public static void unregisterFromNetworkEvents( Object obj) {
-		NOTIFICATION.unregister( obj);
+		NETWORK.unregister( obj);
 	}
 }

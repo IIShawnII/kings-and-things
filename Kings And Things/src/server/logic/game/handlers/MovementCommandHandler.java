@@ -57,7 +57,7 @@ public class MovementCommandHandler extends CommandHandler
 				HexStatesChanged changedHex = new HexStatesChanged(2);
 				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHexes().get(0));
 				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHexes().get(1));
-				changedHex.postNotification();
+				changedHex.postNetworkEvent();
 			}
 			catch(Throwable t)
 			{

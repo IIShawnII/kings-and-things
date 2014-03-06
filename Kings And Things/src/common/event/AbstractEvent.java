@@ -10,6 +10,10 @@ public abstract class AbstractEvent{
 	protected final Object Owner;
 	private int ID = -1;
 	
+	protected AbstractEvent(){
+		this( null);
+	}
+	
 	protected AbstractEvent( final Object OWNER){
 		this.Owner = OWNER;
 	}
@@ -19,27 +23,27 @@ public abstract class AbstractEvent{
 	}
 
 	/**
-	 * post this notification on command BusEvent
+	 * post this event on Internal BusEvent
 	 */
-	public void postCommand(){
-		EventDispatch.COMMAND.post( this);
+	public void postInternalEvent(){
+		EventDispatch.INTERNAL.post( this);
 	}
 
 	/**
-	 * post this notification on notification BusEvent
+	 * post this event on Network BusEvent
 	 */
-	public void postNotification(){
-		EventDispatch.NOTIFICATION.post( this);
+	public void postNetworkEvent(){
+		EventDispatch.NETWORK.post( this);
 	}
 	
 	public void postNotification( int ID){
 		setID( ID);
-		postNotification();
+		postNetworkEvent();
 	}
 	
 	public void postCommand( int ID){
 		setID( ID);
-		postCommand();
+		postInternalEvent();
 	}
 	
 	protected void setID( int ID){
@@ -55,6 +59,10 @@ public abstract class AbstractEvent{
 	}
 	
 	public boolean isValidID( PlayerInfo player){
-		return player!=null && ID==player.getID();
+		return player!=null && isValidID(player.getID());
+	}
+	
+	public boolean isValidID( final int ID){
+		return (ID&this.ID)==this.ID;
 	}
 }

@@ -1,5 +1,7 @@
 package client.logic;
 
+import java.io.IOException;
+
 import client.event.BoardUpdate;
 import common.Logger;
 import common.game.PlayerInfo;
@@ -38,6 +40,7 @@ public class ConnectionLogic implements Runnable {
 	public void run() {
 		CurrentPhase phase = null;
 		AbstractNetwrokEvent event = null;
+		Logger.getStandardLogger().info( "Starting");
 		while( !finished && !connection.isConnected()){
 			try {
 				Thread.sleep( 10);
@@ -47,53 +50,57 @@ public class ConnectionLogic implements Runnable {
 		}
 		Logger.getStandardLogger().info( "listening");
 		UpdatePackage update = new UpdatePackage("Logic.Run", this);
-		while( !finished && (event = connection.recieve())!=null){
-			update.clear();
-			Logger.getStandardLogger().info( "Received: " + event);
-			if( event instanceof PlayersList){
-				update.addInstruction( UpdateInstruction.UpdatePlayers);
-				update.putData( UpdateKey.Players, ((PlayersList)event).getPlayers());
-			} 
-			else if( event instanceof StartGame){
-				update.addInstruction( UpdateInstruction.Start);
-				update.putData( UpdateKey.PlayerCount, ((StartGame)event).getPlayerCount());
-			} 
-			else if( event instanceof PlayerState){
-				//first data from server, with PlayerInfo object
-				player = ((PlayerState)event).getPlayer();
-				update.setSource( "Logic.Run "+player.getID());
-			} 
-			else if( event instanceof HexPlacement){
-				new BoardUpdate(((HexPlacement)event).getArray(), this).postCommand();
-			} 
-			else if( event instanceof Flip){
-				new BoardUpdate(((Flip)event).flipAll(), this).postCommand();
-			} 
-			else if( event instanceof PlayerOrderList){
-				new BoardUpdate(((PlayerOrderList)event).getList(), this).postCommand();
-			} 
-			else if( event instanceof RackPlacement){
-				new BoardUpdate(((RackPlacement)event).getArray(), this).postCommand();
-			}
-			else if( event instanceof CurrentPhase){
-				phase = (CurrentPhase) event;
-				if( phase.isSetupPhase()){
-					new BoardUpdate(phase.getPlayers(),phase.getSetup()).postCommand();
-				}else if( phase.isRegularPhase()){
-					
-				}else if( phase.isCombatPhase()){
-					
+		try {
+			while( !finished && (event = connection.recieve())!=null){
+				update.clear();
+				Logger.getStandardLogger().info( "Received: " + event);
+				if( event instanceof PlayersList){
+					update.addInstruction( UpdateInstruction.UpdatePlayers);
+					update.putData( UpdateKey.Players, ((PlayersList)event).getPlayers());
+				} 
+				else if( event instanceof StartGame){
+					update.addInstruction( UpdateInstruction.Start);
+					update.putData( UpdateKey.PlayerCount, ((StartGame)event).getPlayerCount());
+				} 
+				else if( event instanceof PlayerState){
+					//first data from server, with PlayerInfo object
+					player = ((PlayerState)event).getPlayer();
+					update.setSource( "Logic.Run "+player.getID());
+				} 
+				else if( event instanceof HexPlacement){
+					new BoardUpdate(((HexPlacement)event).getArray(), this).postInternalEvent();
+				} 
+				else if( event instanceof Flip){
+					new BoardUpdate(((Flip)event).flipAll(), this).postInternalEvent();
+				} 
+				else if( event instanceof PlayerOrderList){
+					new BoardUpdate(((PlayerOrderList)event).getList(), this).postInternalEvent();
+				} 
+				else if( event instanceof RackPlacement){
+					new BoardUpdate(((RackPlacement)event).getArray(), this).postInternalEvent();
+				}
+				else if( event instanceof CurrentPhase){
+					phase = (CurrentPhase) event;
+					if( phase.isSetupPhase()){
+						new BoardUpdate(phase.getPlayers(),phase.getSetup()).postInternalEvent();
+					}else if( phase.isRegularPhase()){
+						
+					}else if( phase.isCombatPhase()){
+						
+					}
+				}
+				else if(event instanceof HexOwnershipChanged){
+					//TODO handle
+				}
+				else if(event instanceof HexStatesChanged){
+					//TODO handle
+				}
+				if( update.isModified()){
+					update.postInternalEvent();
 				}
 			}
-			else if(event instanceof HexOwnershipChanged){
-				//TODO handle
-			}
-			else if(event instanceof HexStatesChanged){
-				//TODO handle
-			}
-			if( update.isModified()){
-				update.postCommand();
-			}
+		} catch ( ClassNotFoundException | IOException e) {
+			Logger.getStandardLogger().warn( e);
 		}
 		finished = true;
 		Logger.getStandardLogger().warn( "logic disconnected");
@@ -115,7 +122,7 @@ public class ConnectionLogic implements Runnable {
 
 		@Override
 		public boolean verify( UpdatePackage update) {
-			return (!update.isPublic() && (update.getID()&ID)!=ID && update.isValidID( player));
+			return (!update.isPublic() && (update.isValidID(ID) || update.isValidID(player)));
 		}
 	}
 	
@@ -138,7 +145,7 @@ public class ConnectionLogic implements Runnable {
 								logic = new ConnectionLogic();
 								netaction = logic.connect( ip, port, names[i]);
 								startLogic( logic);
-							}catch(IllegalArgumentException ex){
+							}catch(IllegalArgumentException | IOException ex){
 								message += "\n" + ex.getMessage();
 							}
 						}
@@ -148,7 +155,7 @@ public class ConnectionLogic implements Runnable {
 					}
 					try{
 						netaction = connect( ip, port, name);
-					}catch(IllegalArgumentException ex){
+					}catch(IllegalArgumentException | IOException ex){
 						message += "\n" + ex.getMessage();
 					}
 				}
@@ -182,22 +189,28 @@ public class ConnectionLogic implements Runnable {
 		update.addInstruction( netaction);
 		update.putData( UpdateKey.Message, message);
 		update.putData( UpdateKey.PlayerCount, 0);
-		update.postCommand();
+		update.postInternalEvent();
 	}
 
-	private UpdateInstruction connect(String ip, int port, String name) throws IllegalArgumentException{
+	private UpdateInstruction connect(String ip, int port, String name) throws IllegalArgumentException, IOException{
+		Logger.getStandardLogger().info( "Connecting");
 		if( connection.connectTo( ip, port)){
+			Logger.getStandardLogger().info( "Connected");
 			if( finished){
+				Logger.getStandardLogger().info( "Starting Thread");
 				finished = false;
 				startLogic( this);
 			}
 			if( player!=null){
+				Logger.getStandardLogger().info( "Send Old Player");
 				sendToServer( new PlayerState( player));
 			}else{
+				Logger.getStandardLogger().info( "Send New Player");
 				sendToServer( new PlayerState( name, PLAYER_READY));
 			}
 			return UpdateInstruction.Connect;
 		}
+		Logger.getStandardLogger().info( "Failed Connecting");
 		return UpdateInstruction.Disconnect;
 	}
 	
@@ -224,6 +237,10 @@ public class ConnectionLogic implements Runnable {
 
 	public void sendToServer( AbstractNetwrokEvent event){
 		Logger.getStandardLogger().info( "Sent: " + event);
-		connection.send( event);
+		try {
+			connection.send( event);
+		} catch ( IOException e) {
+			Logger.getStandardLogger().warn( e);
+		}
 	}
 }

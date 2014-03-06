@@ -56,7 +56,7 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 
 				HexStatesChanged changedHex = new HexStatesChanged(1);
 				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHex());
-				changedHex.postNotification();
+				changedHex.postNetworkEvent();
 			}
 			catch(Throwable t)
 			{

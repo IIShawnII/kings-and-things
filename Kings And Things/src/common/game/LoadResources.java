@@ -184,7 +184,6 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			}
 			copyTile = 0;
 		}
-		update.addInstruction( UpdateInstruction.Category);
 		update.putData( UpdateKey.Command, currentCategory);
 		update.postCommand( PROGRESS);
 		return result;

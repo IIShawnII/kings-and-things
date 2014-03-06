@@ -46,6 +46,9 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 					handle( update);
 				}
 			}
+		}catch(ClassCastException ex){
+			//temporary error that will be resolved by
+			//full implementation of UpatePakcage
 		}catch( Exception ex){
 			Logger.getErrorLogger().fatal( ex.getMessage(), ex);
 		}

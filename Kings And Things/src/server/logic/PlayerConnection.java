@@ -1,5 +1,7 @@
 package server.logic;
 
+import java.io.IOException;
+
 import server.event.commands.GiveHexToPlayerCommand;
 import server.event.commands.PlayerUpdated;
 import server.logic.game.Player;
@@ -80,25 +82,33 @@ public class PlayerConnection implements Runnable{
 	@Override
 	public void run(){
 		AbstractEvent notification = null;
-		while ((notification = connection.recieve())!=null){
-			Logger.getStandardLogger().info( "(" + player + ")Received: " +notification);
-			if( notification instanceof PlayerState){
-				player.setIsPlaying( ((PlayerState)notification).getPlayer().isReady());
-			}else if ( notification instanceof HexOwnershipChanged){
-				HexOwnershipChanged event = (HexOwnershipChanged)notification;
-				new GiveHexToPlayerCommand( event.getChangedHex().getHex(), this).postCommand( player.getID());
+		try {
+			while ((notification = connection.recieve())!=null){
+				Logger.getStandardLogger().info( "(" + player + ")Received: " +notification);
+				if( notification instanceof PlayerState){
+					player.setIsPlaying( ((PlayerState)notification).getPlayer().isReady());
+				}else if ( notification instanceof HexOwnershipChanged){
+					HexOwnershipChanged event = (HexOwnershipChanged)notification;
+					new GiveHexToPlayerCommand( event.getChangedHex().getHex(), this).postCommand( player.getID());
+				}
+				new PlayerUpdated( player, this).postInternalEvent();
 			}
-			new PlayerUpdated( player, this).postCommand();
+		} catch ( ClassNotFoundException | IOException e) {
+			Logger.getStandardLogger().warn( e);
 		}
 		player.setIsPlaying(false);
 		player.setConnected( false);
-		new PlayerUpdated( player, this).postCommand();
+		new PlayerUpdated( player, this).postInternalEvent();
 		Logger.getStandardLogger().warn( player + " lost connection");
 	}
 	
 	@Subscribe
 	public void sendNotificationToClient( AbstractNetwrokEvent event){
-		connection.send( event);
+		try {
+			connection.send( event);
+		} catch ( IOException e) {
+			Logger.getStandardLogger().warn( e);
+		}
 		Logger.getStandardLogger().info( "(" + player + ")Sent: " +event);
 	}
 

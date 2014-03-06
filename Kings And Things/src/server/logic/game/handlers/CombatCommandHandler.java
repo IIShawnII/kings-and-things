@@ -102,7 +102,7 @@ public class CombatCommandHandler extends CommandHandler
 			}
 			HexStatesChanged notification = new HexStatesChanged(1);
 			notification.getArray()[0] = getCurrentState().getCombatHex();
-			notification.postNotification();
+			notification.postNetworkEvent();
 		}
 		
 		getCurrentState().removeHitsFromPlayer(playerNumber, hitCount);
@@ -198,7 +198,7 @@ public class CombatCommandHandler extends CommandHandler
 								{
 									getCurrentState().addHitsToPlayer(p.getID(), hitCount);
 									//notifies players of hits
-									new CombatHits(rollingPlayerID,p.getID(),hitCount).postNotification();
+									new CombatHits(rollingPlayerID,p.getID(),hitCount).postNetworkEvent();
 									break;
 								}
 							}

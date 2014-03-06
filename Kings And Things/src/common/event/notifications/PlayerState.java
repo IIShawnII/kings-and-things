@@ -5,9 +5,13 @@ import common.game.PlayerInfo;
 
 public class PlayerState extends AbstractNetwrokEvent{
 	
-	private static final long serialVersionUID = -4342116267397416570L;
+	private static final long serialVersionUID = -4123363630559056214L;
 	
 	private PlayerInfo player;
+	
+	public PlayerState(){
+		super();
+	}
 	
 	public PlayerState( PlayerInfo player){
 		this.player = player;

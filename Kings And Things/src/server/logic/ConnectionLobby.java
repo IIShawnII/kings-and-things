@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 
 import com.google.common.eventbus.Subscribe;
@@ -42,7 +43,7 @@ public class ConnectionLobby implements Runnable {
 	public ConnectionLobby( boolean isDemoMode) throws IOException{
 		if( isDemoMode){
 			Logger.getStandardLogger().info("Server started in demo mode.");
-			new ConsoleMessage( "Starting in demo mode.", Level.Notice, this).postCommand();
+			new ConsoleMessage( "Starting in demo mode.", Level.Notice, this).postInternalEvent();
 		}
 		
 		demoMode = isDemoMode;
@@ -52,41 +53,57 @@ public class ConnectionLobby implements Runnable {
 
 	@Override
 	public void run() {
-		new ConsoleMessage( "Loading Resources", Level.Plain, this).postCommand();
+		new ConsoleMessage( "Loading Resources", Level.Plain, this).postInternalEvent();
 		new LoadResources( false).run();
-		new ConsoleMessage( "Loaded Resources", Level.Plain, this).postCommand();
+		new ConsoleMessage( "Loaded Resources", Level.Plain, this).postInternalEvent();
 		try {
 			serverSocket = new ServerSocket( SERVER_PORT);
             serverSocket.setSoTimeout( SERVER_TIMEOUT*1000);
 			Logger.getStandardLogger().info("Listening on port " + SERVER_PORT);
-			new ConsoleMessage( "Listening on port " + SERVER_PORT, Level.Notice, this).postCommand();
+			new ConsoleMessage( "Listening on port " + SERVER_PORT, Level.Notice, this).postInternalEvent();
 		} catch ( IOException e) {
 			Logger.getErrorLogger().error("Failed to open port " + SERVER_PORT, e);
-			new ConsoleMessage( "Failed to open port " + SERVER_PORT + ", Restart Server", Level.Error, this).postCommand();
+			new ConsoleMessage( "Failed to open port " + SERVER_PORT + ", Restart Server", Level.Error, this).postInternalEvent();
 			return;
 		}
 		game.initialize();
 		int count=0, playerID = PLAYER_START_ID;
 		boolean oldClient = false;
+		Socket socket = null;
+		Connection connection = null;
+		PlayerState playerState = null;
+		PlayerInfo info = null;
+		PlayerConnection pc = null;
+		Player player = null;
 		while( !close && count<MAX_PLAYERS){
             try {
             	oldClient = false;
-            	Connection connection = new Connection( serverSocket.accept());
-            	PlayerInfo info = ((PlayerState)connection.recieve()).getPlayer();
-            	for( PlayerConnection pc : connectedPlayers){
-            		if( pc.equals( info)){
+            	connection = new Connection();
+            	socket = serverSocket.accept();
+            	if( connection.connectTo( socket)){
+            		playerState = (PlayerState)connection.recieve();
+            	}else{
+            		new ConsoleMessage( "Connection to: " + socket + " failed", Level.Warning,this).postInternalEvent();
+            		Logger.getStandardLogger().warn("Connection to: " + socket + " failed");
+            		connection.disconnect();
+            		socket.close();
+            		continue;
+            	}
+            	info = playerState.getPlayer();
+            	for( PlayerConnection playerConnection : connectedPlayers){
+            		if( playerConnection.equals( info)){
             			oldClient = true;
-            			pc.setConnection( connection);
-            			startTask( pc, pc.getName());
-            			new ConsoleMessage( "Restablished connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice, this).postCommand();
-            			Logger.getStandardLogger().info("Restablished connection from " + connection + ", assigned to " + pc.getPlayer());
+            			playerConnection.setConnection( connection);
+            			startTask( playerConnection, playerConnection.getName());
+            			new ConsoleMessage( "Restablished connection from " + connection + ", assigned to " + playerConnection.getPlayer(), Level.Notice, this).postInternalEvent();
+            			Logger.getStandardLogger().info("Restablished connection from " + connection + ", assigned to " + playerConnection.getPlayer());
             			break;
             		}
             	}
             	if( !oldClient){
             		info = new PlayerInfo( info, playerID);
-	            	Player player = new Player( new PlayerInfo( info, playerID));
-	            	PlayerConnection pc = new PlayerConnection( player, connection);
+	            	player = new Player( new PlayerInfo( info, playerID));
+	            	pc = new PlayerConnection( player, connection);
 	            	EventDispatch.registerOnNetwrokEvents( pc);
 	            	startTask( pc, pc.getName());
 	            	//send PlayerInfo object to connected player
@@ -94,23 +111,26 @@ public class ConnectionLobby implements Runnable {
 	            	connectedPlayers.add( pc);
 	            	count++;
 	            	playerID*=PLAYER_ID_MULTIPLIER;
-        			new ConsoleMessage( "Recieved connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice, this).postCommand();
+        			new ConsoleMessage( "Recieved connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice, this).postInternalEvent();
 	            	Logger.getStandardLogger().info("Recieved connection from " + connection + ", assigned to " + pc.getPlayer());
             	}
-    			new ConsoleMessage( "Player count is " + count + " out of " + MAX_PLAYERS + " players, need players: " + (MAX_PLAYERS-count), Level.Notice, this).postCommand();
+    			new ConsoleMessage( "Player count is " + count + " out of " + MAX_PLAYERS + " players, need players: " + (MAX_PLAYERS-count), Level.Notice, this).postInternalEvent();
             	Logger.getStandardLogger().info("Player count is " + count + " out of " + MAX_PLAYERS + " players, need players: " + (MAX_PLAYERS-count));
             	playerUpdated( null);
             } catch( SocketTimeoutException ex){
                 //try again for incoming connections
-            } catch ( IOException e) {
-    			new ConsoleMessage( "Problem closing player connections", Level.Error, this).postCommand();
-            	Logger.getErrorLogger().error("Problem with player connections: ", e);
+            } catch ( IOException ex) {
+    			new ConsoleMessage( "Problem with player connection", Level.Error, this).postInternalEvent();
+            	Logger.getErrorLogger().error("Problem with player connection: ", ex);
+			} catch ( ClassNotFoundException ex) {
+    			new ConsoleMessage( "Recieved Invalid Package: " + ex.getMessage(), Level.Error, this).postInternalEvent();
+            	Logger.getErrorLogger().error("Recieved Invalid Package: ", ex);
 			}
         }
 		try {
 			serverSocket.close();
 		} catch ( IOException e) {
-			new ConsoleMessage( "Problem closing player connections", Level.Error, this).postCommand();
+			new ConsoleMessage( "Problem closing player connections", Level.Error, this).postInternalEvent();
 			Logger.getErrorLogger().error("Problem closing player connections: ", e);
 		}
 	}
@@ -130,15 +150,15 @@ public class ConnectionLobby implements Runnable {
 			}
 		}
 		if( connections.getPlayers().length>0){
-			connections.postNotification();
+			connections.postNetworkEvent();
 		}
 		if( !anyUnReady && ((connectedPlayers.size()==MAX_PLAYERS)||Constants.BYPASS_MIN_PLAYER)){
 			HashSet< Player> set = new HashSet<>();
 			for( PlayerConnection pc : connectedPlayers){
 				set.add( pc.getPlayer());
 			}
-			new StartGame( Constants.BYPASS_MIN_PLAYER? MAX_PLAYERS:set.size()).postNotification();
-			new StartSetupPhase( demoMode, set, this).postCommand();
+			new StartGame( Constants.BYPASS_MIN_PLAYER? MAX_PLAYERS:set.size()).postNetworkEvent();
+			new StartSetupPhase( demoMode, set, this).postInternalEvent();
 		}
 	}
 	

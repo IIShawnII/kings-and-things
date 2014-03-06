@@ -7,7 +7,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.InetSocketAddress;
 
-import common.Logger;
 import common.event.AbstractNetwrokEvent;
 
 /**
@@ -19,21 +18,7 @@ public class Connection implements Closeable{
 	private ObjectInputStream input;
 	private ObjectOutputStream output;
 	private InetSocketAddress address;
-	private boolean isConnected = false;
-	
-	/**
-	 * create a connection with a specific socket, used primarily
-	 * by server side after receiving connection from client, no
-	 * need to call connectTo when using this constructor.
-	 * setEventID must be called
-	 * @param socket - established socket
-	 */
-	public Connection( Socket socket){
-		this.socket = socket;
-		connectTo( null, 0);
-	}
-	
-	public Connection() {}
+	private volatile boolean isConnected = false;
 
 	/**
 	 * state of the current connection
@@ -50,26 +35,46 @@ public class Connection implements Closeable{
 	}
 	
 	/**
-	 * connect to a specific address and create in out streams
+	 * connect to a specific IP and port; and create in out streams
 	 * @param ip - destination IP address
 	 * @param port - destination port
 	 * @return true if all streams are created and connection established, otherwise false
+	 * @throws IOException - any caught exception will be thrown again
 	 */
-	public boolean connectTo( String ip, int port) throws IllegalArgumentException{
-		if( socket==null && ip==null){
+	public boolean connectTo( String ip, int port) throws IOException{
+		if( ip==null || port<=0){
 			throw new IllegalArgumentException( "IP address cannot be null, port must be a positive none zero integer");
 		}
 		try {
-			if( socket==null){
-				address = new InetSocketAddress( ip, port);
-				socket = new Socket();
-				socket.connect( address);
-			}
+			address = new InetSocketAddress( ip, port);
+			socket = new Socket();
+			socket.connect( address);
+			connectTo( socket);
+		} catch( IOException e){
+			disconnect();
+			throw e;
+		}
+		return isConnected;
+	}
+	
+	/**
+	 * connect to a specific socket and create in out streams
+	 * @param socket destination socket containing valid address
+	 * @return true if all streams are created and connection established, otherwise false
+	 * @throws IOException - any caught exception will be thrown again
+	 */
+	public boolean connectTo( Socket socket) throws IOException{
+		if( socket==null){
+			throw new IllegalArgumentException( "Socket cannot be null");
+		}
+		this.socket = socket;
+		try {
 			output = new ObjectOutputStream( socket.getOutputStream());
             input = new ObjectInputStream( socket.getInputStream());
 			isConnected = true;
-		} catch( Exception e){
+		} catch( IOException e){
 			disconnect();
+			throw e;
 		}
 		return isConnected;
 	}
@@ -103,8 +108,8 @@ public class Connection implements Closeable{
 			input = null;
 			output = null;
 			socket = null;
-			isConnected = false;
 		}
+		isConnected = false;
 	}
 	
 	/**
@@ -112,40 +117,30 @@ public class Connection implements Closeable{
 	 * @param message - information to be sent
 	 * @return true if information has been sent, else false
 	 */
-	public boolean send( AbstractNetwrokEvent event){
+	public void send( AbstractNetwrokEvent event) throws IOException{
 		if( isConnected){
-			try {
-				output.reset();
-				output.writeObject( event);
-				return true;
-			} catch ( IOException e) {
-				e.printStackTrace();
-			}
+			output.reset();
+			output.writeObject( event);
+		}else{
+			throw new IOException( "No connection is avalibale");
 		}
-		return false;
 	}
 	
 	/**
 	 * Receive response from destination in form of a text
 	 * @return a string if message is received, otherwise null
 	 */
-	public AbstractNetwrokEvent recieve(){
+	public AbstractNetwrokEvent recieve() throws IOException, ClassNotFoundException{
 		if( isConnected){
 			AbstractNetwrokEvent event = null;
-			try {
-				event = (AbstractNetwrokEvent) input.readObject();
-			} catch ( IOException e) {
-				//Logger.getStandardLogger().warn( "lost connection", e);
-			} catch ( ClassNotFoundException e) {
-				Logger.getErrorLogger().error( "invalied package received", e);
-			}
-			if( event!=null){
-				return event;
-			}else{
+			event = (AbstractNetwrokEvent) input.readObject();
+			if( event==null){
 				isConnected = false;
 			}
+			return event;
+		}else{
+			throw new IOException( "No connection is avalibale");
 		}
-		return null;
 	}
 
 	@Override

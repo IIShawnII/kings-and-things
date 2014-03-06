@@ -151,7 +151,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		{
 			toClient.getArray()[i++] = tp;
 		}
-		toClient.postNotification();
+		toClient.postNetworkEvent();
 	}
 
 	@Subscribe
@@ -183,7 +183,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 				
 				HexStatesChanged changedHex = new HexStatesChanged(1);
 				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHex());
-				changedHex.postNotification();
+				changedHex.postNetworkEvent();
 				//notify client
 				notifyClientsOfPlayerTray(command.getID());
 			}
