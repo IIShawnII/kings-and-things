@@ -89,7 +89,7 @@ public class PlayerConnection implements Runnable{
 					player.setIsPlaying( ((PlayerState)notification).getPlayer().isReady());
 				}else if ( notification instanceof HexOwnershipChanged){
 					HexOwnershipChanged event = (HexOwnershipChanged)notification;
-					new GiveHexToPlayerCommand( event.getChangedHex().getHex(), this).postCommand( player.getID());
+					new GiveHexToPlayerCommand( event.getChangedHex().getHex(), this).postInternalEvent( player.getID());
 				}
 				new PlayerUpdated( player, this).postInternalEvent();
 			}

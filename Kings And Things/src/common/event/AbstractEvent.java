@@ -36,12 +36,12 @@ public abstract class AbstractEvent{
 		EventDispatch.NETWORK.post( this);
 	}
 	
-	public void postNotification( int ID){
+	public void postNetworkEvent( int ID){
 		setID( ID);
 		postNetworkEvent();
 	}
 	
-	public void postCommand( int ID){
+	public void postInternalEvent( int ID){
 		setID( ID);
 		postInternalEvent();
 	}
@@ -63,6 +63,6 @@ public abstract class AbstractEvent{
 	}
 	
 	public boolean isValidID( final int ID){
-		return (ID&this.ID)==this.ID;
+		return (ID&this.ID)==ID;
 	}
 }

@@ -152,7 +152,7 @@ public class CombatPanel extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				new ApplyHitsCommand(1, thing, CombatPanel.this).postCommand(p.getID());
+				new ApplyHitsCommand(1, thing, CombatPanel.this).postInternalEvent(p.getID());
 				hitsToApplyNum--;
 				updateHitsToApplyLabel();
 			}});
@@ -166,7 +166,7 @@ public class CombatPanel extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				new RollDiceCommand(RollReason.ATTACK_WITH_CREATURE,thing, CombatPanel.this).postCommand(p.getID());
+				new RollDiceCommand(RollReason.ATTACK_WITH_CREATURE,thing, CombatPanel.this).postInternalEvent(p.getID());
 			}});
 
 		panel.add(rollButton,constraints);

@@ -54,7 +54,7 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 			//temporary error that will be resolved by
 			//full implementation of UpatePakcage
 		}catch( Exception ex){
-			Logger.getErrorLogger().fatal( ex.getMessage(), ex);
+			Logger.getErrorLogger().fatal( ex.getMessage() + ", Owner: " + OWNER, ex);
 		}
 	}
 	

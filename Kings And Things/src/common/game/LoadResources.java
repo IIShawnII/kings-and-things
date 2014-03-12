@@ -67,7 +67,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			Files.walkFileTree( RESOURCES_DIRECTORY, this);
 			update.clearDate();
 			update.putData( UpdateKey.Command, Category.END);
-			update.postCommand( PROGRESS);
+			update.postInternalEvent( PROGRESS);
 		} catch ( IOException e) {
 			e.printStackTrace();
 		}
@@ -185,7 +185,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			copyTile = 0;
 		}
 		update.putData( UpdateKey.Command, currentCategory);
-		update.postCommand( PROGRESS);
+		update.postInternalEvent( PROGRESS);
 		return result;
 	}
 	
@@ -231,15 +231,10 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		}
 
 		@Override
-		public void handlePrivate( UpdatePackage update) {
+		public void handlePublic( UpdatePackage update) {
 			if( update.hasInstructions() && update.getInstructions()[0]==UpdateInstruction.End){
 				result = FileVisitResult.TERMINATE;
 			}
-		}
-
-		@Override
-		public boolean verifyPrivate( UpdatePackage update) {
-			return update.isValidID(ID);
 		}
 	}
 }

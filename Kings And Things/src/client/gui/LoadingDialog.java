@@ -282,10 +282,10 @@ public class LoadingDialog extends JDialog implements Runnable{
 				}else{
 					update.addInstruction( UpdateInstruction.Disconnect);
 				}
-				update.postCommand(LOGIC);
+				update.postInternalEvent(LOGIC);
 			}else if( isConnected && source==jbReady){
 				update.addInstruction( UpdateInstruction.ReadyState);
-				update.postCommand(LOGIC);
+				update.postInternalEvent(LOGIC);
 			}
 		}
 		

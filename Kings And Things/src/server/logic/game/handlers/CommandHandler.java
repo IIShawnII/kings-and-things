@@ -127,7 +127,7 @@ public abstract class CommandHandler
 		currentState.getPlayerByPlayerNumber(playerNumber).addOwnedHex(hex);
 
 		HexState hs = getCurrentState().getBoard().getHexStateForHex(hex);
-		new HexOwnershipChanged(hs).postNotification( playerNumber);
+		new HexOwnershipChanged(hs).postNetworkEvent( playerNumber);
 	}
 
 	protected void advanceActivePhasePlayer(){
@@ -363,7 +363,7 @@ public abstract class CommandHandler
 					}
 				}
 				//notifies players of die roll
-				new DieRoll(r).postNotification(playerNumber);
+				new DieRoll(r).postNetworkEvent(playerNumber);
 				break;
 			}
 		}

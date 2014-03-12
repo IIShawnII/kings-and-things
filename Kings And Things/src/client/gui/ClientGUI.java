@@ -74,6 +74,8 @@ public class ClientGUI extends JFrame implements Runnable{
 			bound.height -= bound.y*2;
 			bound.x = bound.y = 0;*/
 			setVisible( true);
+		}else{
+			close();
 		}
 	}
 
@@ -128,7 +130,7 @@ public class ClientGUI extends JFrame implements Runnable{
 	}
 	
 	private void close(){
-		new UpdatePackage( UpdateInstruction.End, "GUI.Close", this).postCommand( LOGIC|LOAD_RESOURCE);
+		new UpdatePackage( UpdateInstruction.End, "GUI.Close", this).postInternalEvent();
 		dispose();
 	}
 	

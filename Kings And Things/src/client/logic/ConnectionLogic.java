@@ -53,7 +53,7 @@ public class ConnectionLogic implements Runnable {
 		try {
 			while( !finished && (event = connection.recieve())!=null){
 				update.clear();
-				Logger.getStandardLogger().info( "Received: " + event);
+				Logger.getStandardLogger().info( "Logic.Process.Receive "+(player!=null?player.getID():"") + event);
 				if( event instanceof PlayersList){
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
 					update.putData( UpdateKey.Players, ((PlayersList)event).getPlayers());
@@ -185,7 +185,7 @@ public class ConnectionLogic implements Runnable {
 			default:
 				throw new IllegalArgumentException( "No handle for instruction: " + instruction);
 		}
-		UpdatePackage update = new UpdatePackage("Logic.Receive "+(player!=null?player.getID():""), this);
+		UpdatePackage update = new UpdatePackage("Logic.Process.Receive "+(player!=null?player.getID():""), this);
 		update.addInstruction( netaction);
 		update.putData( UpdateKey.Message, message);
 		update.putData( UpdateKey.PlayerCount, 0);
