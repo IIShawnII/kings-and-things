@@ -34,6 +34,7 @@ public class GameState
 	private final ArrayList<RollModification> rollModifications;
 	private final HashMap<Integer,Integer> hitsToApply;
 	private final HashSet<HexState> hexesContainingBuiltObjects;
+	private final HashMap<HexState,Integer> plagueAffectedHexes;
 
 	/**
 	 * Creates a new GameState object
@@ -69,6 +70,7 @@ public class GameState
 			hitsToApply.put(p.getID(), 0);
 		}
 		this.setActivePhasePlayer(activePhasePlayerNumber);
+		this.plagueAffectedHexes = new HashMap<> ();
 	}
 	
 	/**
@@ -447,6 +449,32 @@ public class GameState
 	public void removeAllRecordedRollModifications()
 	{
 		rollModifications.clear();
+	}
+	
+	/**
+	 * Records which hexes have been affected by the Dark Plague Random Event
+	 * and number of creatures needed to be removed from the hex
+	 */
+	public void addPlagueAffectedHex(HexState hex, int numberOfCreaturesToRemove) 
+	{
+		plagueAffectedHexes.put(hex,numberOfCreaturesToRemove);
+	}
+	
+	/**
+	 * Once all the creatures have been removed, the plague affected hex will be
+	 * removed
+	 */
+	public void removePlagueAffectedHex(HexState hex) 
+	{
+		plagueAffectedHexes.remove(hex);
+	}
+	
+	/**
+	 * Returns number of things to be removed from hexes
+	 */
+	public int thingsToRemoveFromHex(HexState hex)
+	{
+		return plagueAffectedHexes.get(hex);
 	}
 	
 	/**
