@@ -28,10 +28,18 @@ public abstract class EventDispatch
 	}
 
 	public static void unregisterFromInternalEvents( Object obj) {
-		INTERNAL.unregister( obj);
+		try{
+			INTERNAL.unregister( obj);
+		}catch(IllegalArgumentException ex){
+			//nothing, object was either not registered or already removed
+		}
 	}
 
 	public static void unregisterFromNetworkEvents( Object obj) {
-		NETWORK.unregister( obj);
+		try{
+			NETWORK.unregister( obj);
+		}catch(IllegalArgumentException ex){
+			//nothing, object was either not registered or already removed
+		}
 	}
 }
