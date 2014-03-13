@@ -87,7 +87,7 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 	 * public events not private events.
 	 * @throws IllegalStateException - if this methods is not overridden and called
 	 */
-	public void handlePublic( T update){
+	protected void handlePublic( T update){
 		throw new IllegalStateException( "This method must be Overridden");
 	}
 	
@@ -97,7 +97,7 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 	 * private events not public event.
 	 * @throws IllegalStateException - if this methods is not overridden and called
 	 */
-	public void handlePrivate( T update){
+	protected void handlePrivate( T update){
 		throw new IllegalStateException( "This method must be Overridden");
 	}
 	
@@ -108,7 +108,7 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 	 * overridden by subclass.
 	 * @return true if all conditions are valid, false otherwise
 	 */
-	public boolean verifyPrivate( T update){
+	protected boolean verifyPrivate( T update){
 		return false;
 	}
 	
@@ -119,7 +119,7 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 	 * verification.
 	 * @return true if all conditions are valid, false otherwise
 	 */
-	public boolean verifyPublic( T update){
+	protected boolean verifyPublic( T update){
 		return update.isPublic();
 	}
 }

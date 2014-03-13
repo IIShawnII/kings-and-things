@@ -21,10 +21,8 @@ import common.event.AbstractUpdateReceiver;
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
 import static common.Constants.GUI;
-import static common.Constants.LOGIC;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.BYPASS_LOBBY;
-import static common.Constants.LOAD_RESOURCE;
 
 /**
  * client GUI to hold all and display all game related information
@@ -90,8 +88,14 @@ public class ClientGUI extends JFrame implements Runnable{
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.gridx = 0;
 		constraints.gridy = 0;
-		
-		boards = new MultiBoardManager( jpMain, constraints);
+
+		while(boards==null){
+			try {
+				Thread.sleep(20);
+			} catch ( InterruptedException e) {}
+		}
+		boards.setProperties( jpMain, constraints);
+		boards.showBoard( 0);
 
 		JScrollPane jsp = new JScrollPane( jpMain);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -141,17 +145,19 @@ public class ClientGUI extends JFrame implements Runnable{
 		}
 
 		@Override
-		public void handlePublic( UpdatePackage update) {
+		protected void handlePublic( UpdatePackage update) {
 			changeBoad( update);
 		}
 	}
 	
 	private void changeBoad( UpdatePackage update){
-		switch( update.getInstructions()[0]){
+		switch( update.peekFirstInstruction()){
 			case Start:
 				Integer count = (Integer)update.getData( UpdateKey.PlayerCount);
-				boards.creatBoards( count);
-				boards.showBoard( 0);
+				if( boards==null){
+					boards = new MultiBoardManager();
+					boards.creatBoards( count);
+				}
 			default:
 		}
 	}

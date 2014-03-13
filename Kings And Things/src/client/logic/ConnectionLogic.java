@@ -53,7 +53,7 @@ public class ConnectionLogic implements Runnable {
 		try {
 			while( !finished && (event = connection.recieve())!=null){
 				update.clear();
-				Logger.getStandardLogger().info( "Logic.Process.Receive "+(player!=null?player.getID():"") + event);
+				Logger.getStandardLogger().info( "Logic.Process.Receive "+(player!=null?player.getID()+" ":"") + event);
 				if( event instanceof PlayersList){
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
 					update.putData( UpdateKey.Players, ((PlayersList)event).getPlayers());
@@ -113,7 +113,7 @@ public class ConnectionLogic implements Runnable {
 		}
 
 		@Override
-		public void handlePublic( UpdatePackage update) {
+		protected void handlePublic( UpdatePackage update) {
 			if( update.peekFirstInstruction()==UpdateInstruction.End){
 				if( connection!=null){
 					connection.disconnect();
@@ -123,7 +123,7 @@ public class ConnectionLogic implements Runnable {
 		}
 
 		@Override
-		public void handlePrivate( UpdatePackage update) {
+		protected void handlePrivate( UpdatePackage update) {
 			UpdateInstruction[] instructions = update.getInstructions();
 			for( UpdateInstruction instruction : instructions){
 				process( instruction, update);
@@ -131,7 +131,7 @@ public class ConnectionLogic implements Runnable {
 		}
 		
 		@Override
-		public boolean verifyPrivate( UpdatePackage update){
+		protected boolean verifyPrivate( UpdatePackage update){
 			return update.isValidID(ID) || update.isValidID(player);
 		}
 	}
@@ -185,7 +185,7 @@ public class ConnectionLogic implements Runnable {
 			default:
 				throw new IllegalArgumentException( "No handle for instruction: " + instruction);
 		}
-		UpdatePackage update = new UpdatePackage("Logic.Process.Receive "+(player!=null?player.getID():""), this);
+		UpdatePackage update = new UpdatePackage("Logic.Process.Receive "+(player!=null?player.getID()+" ":""), this);
 		update.addInstruction( netaction);
 		update.putData( UpdateKey.Message, message);
 		update.putData( UpdateKey.PlayerCount, 0);
@@ -225,12 +225,12 @@ public class ConnectionLogic implements Runnable {
 		}
 
 		@Override
-		public void handlePrivate( AbstractNetwrokEvent update) {
+		protected void handlePrivate( AbstractNetwrokEvent update) {
 			sendToServer( update);
 		}
 
 		@Override
-		public boolean verifyPrivate( AbstractNetwrokEvent update) {
+		protected boolean verifyPrivate( AbstractNetwrokEvent update) {
 			return update.isValidID(ID) || update.isValidID(player);
 		}
 	}

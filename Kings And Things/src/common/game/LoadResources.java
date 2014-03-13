@@ -231,8 +231,8 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		}
 
 		@Override
-		public void handlePublic( UpdatePackage update) {
-			if( update.hasInstructions() && update.getInstructions()[0]==UpdateInstruction.End){
+		protected void handlePublic( UpdatePackage update) {
+			if( update.hasInstructions() && update.peekFirstInstruction()==UpdateInstruction.End){
 				result = FileVisitResult.TERMINATE;
 			}
 		}

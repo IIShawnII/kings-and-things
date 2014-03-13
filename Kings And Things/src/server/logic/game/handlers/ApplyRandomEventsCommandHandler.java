@@ -19,8 +19,8 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 		
 		switch (evt) {
 			case Big_Juju:
-				// need checks to see if target is current player's hex or enemy player's hex
-				this.getCurrentState().getBoard().getHexStateForHex(targetOfEvent).setHex(hex);
+				//TODO - need checks to see if target is current player's hex or enemy player's hex
+				//this.getCurrentState().getBoard().getHexStateForHex(targetOfEvent).setHex(hex);
 				break;
 			case Dark_Plague:
 				int sumOfCombatValue = 0;

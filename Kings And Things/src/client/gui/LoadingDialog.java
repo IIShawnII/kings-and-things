@@ -302,23 +302,23 @@ public class LoadingDialog extends JDialog implements Runnable{
 		}
 
 		@Override
-		public void handlePrivate( UpdatePackage update) {
+		protected void handlePrivate( UpdatePackage update) {
 			updateProgress( update);
 		}
 
 		@Override
-		public void handlePublic( UpdatePackage update) {
+		protected void handlePublic( UpdatePackage update) {
 			updateDialog( update);
 		}
 		
 		@Override
-		public boolean verifyPrivate( UpdatePackage update){
+		protected boolean verifyPrivate( UpdatePackage update){
 			return update.isValidID( PROGRESS);
 		}
 	}
 
 	private void updateDialog( UpdatePackage update){
-		switch(update.getInstructions()[0]){
+		switch(update.peekFirstInstruction()){
 			case Connect:
 				isConnected = true;
 				jbConnect.setText( "Disconnect");
@@ -357,7 +357,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 		if( !progress){
 			return;
 		}
-		if(load.getInstructions()[0]==UpdateInstruction.Category){
+		if(load.peekFirstInstruction()==UpdateInstruction.Category){
 			Category category = (Category)load.getData( UpdateKey.Command);
 			switch( category){
 				case Building:

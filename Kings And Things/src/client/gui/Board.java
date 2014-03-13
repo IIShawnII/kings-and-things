@@ -134,10 +134,9 @@ public class Board extends JPanel{
 	/**
 	 * basic super constructor warper for JPanel
 	 * @param layout
-	 * @param isDoubleBuffered
 	 */
-	public Board( LayoutManager layout, boolean isDoubleBuffered){
-		super( layout, isDoubleBuffered);
+	public Board( LayoutManager layout){
+		super( layout, true);
 	}
 
 	public void setActive( boolean active) {
@@ -375,7 +374,7 @@ public class Board extends JPanel{
 		}
 
 		@Override
-		public void handlePublic( BoardUpdate update) {
+		protected void handlePublic( BoardUpdate update) {
 			updateBoard( update);
 		}
 	}

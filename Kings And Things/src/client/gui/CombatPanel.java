@@ -186,7 +186,7 @@ public class CombatPanel extends JPanel
 		}
 
 		@Override
-		public void handlePrivate( DieRoll update) {
+		protected void handlePrivate( DieRoll update) {
 			final DieRoll r = update;
 			final JLabel valueLabel = rolls.get(update.getDieRoll().getRollTarget());
 			SwingUtilities.invokeLater( new Runnable(){
@@ -199,7 +199,7 @@ public class CombatPanel extends JPanel
 		}
 
 		@Override
-		public boolean verifyPrivate( DieRoll update) {
+		protected boolean verifyPrivate( DieRoll update) {
 			return update.isValidID( p.getID());
 		}
 	}
@@ -211,7 +211,7 @@ public class CombatPanel extends JPanel
 		}
 
 		@Override
-		public void handlePublic( CombatHits update) {
+		protected void handlePublic( CombatHits update) {
 			if(update.getPlayerReceivingHitID() == p.getID()){
 				hitsToApplyNum += update.getNumberOfHits();
 				updateHitsToApplyLabel();
@@ -234,7 +234,7 @@ public class CombatPanel extends JPanel
 		}
 
 		@Override
-		public void handlePublic( HexStatesChanged update) {
+		protected void handlePublic( HexStatesChanged update) {
 			hs = update.getArray()[0];
 			SwingUtilities.invokeLater(new Runnable(){
 				@Override
