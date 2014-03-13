@@ -23,7 +23,6 @@ public class Server {
 			//failed to change look and feel
 		}
 		
-		//TODO change true to false
 		boolean isDemoMode = false;
 		String serverGUITitle = "Kings And Things Server";
 		if( args!=null){

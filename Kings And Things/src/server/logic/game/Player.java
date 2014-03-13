@@ -17,6 +17,7 @@ public class Player implements Serializable{
 	
 	private PlayerInfo info;
 
+	private final HashSet<ITileProperties> hand;
 	private final HashSet<ITileProperties> tray;
 	private final HashSet<ITileProperties> ownedHexes;
 	private final HashSet<ITileProperties> ownedThingsOnBoard;
@@ -35,6 +36,7 @@ public class Player implements Serializable{
 		ownedHexes = new HashSet<ITileProperties>();
 		ownedThingsOnBoard = new HashSet<ITileProperties>();
 		tray = new HashSet<ITileProperties>();
+		hand = new HashSet<ITileProperties>();
 		info.setCardonRack(0);
 	}
 
@@ -48,6 +50,27 @@ public class Player implements Serializable{
 
 	public boolean isConnected() {
 		return info.isConnected();
+	}
+	
+	public boolean hasCardsInHand()
+	{
+		return !hand.isEmpty();
+	}
+	
+	public Set<ITileProperties> getCardsInHand()
+	{
+		return Collections.unmodifiableSet(hand);
+	}
+	
+	public void addCardToHand(ITileProperties card)
+	{
+		validateNotNull(card);
+		hand.add(card);
+	}
+	
+	public void removeCardFromHand(ITileProperties card)
+	{
+		hand.remove(card);
 	}
 
 	public void setConnected( boolean connected) {
@@ -255,6 +278,25 @@ public class Player implements Serializable{
 		removeThingFromTray(tile);
 		addOwnedThingOnBoard(tile);
 	}
+
+	/**
+	 * Remove something from this player's hand and place it in
+	 * their list of owned things on the board.
+	 * @param tile The tile to remove from the hand and place on
+	 * the board
+	 * @throws IllegalArgumentException if tile is null, or is
+	 * not in this player's hand
+	 */
+	public void placeThingFromHandOnBoard(ITileProperties tile)
+	{
+		validateNotNull(tile);
+		if(!hand.contains(tile))
+		{
+			throw new IllegalArgumentException("The entered tile is not in this player's hand");
+		}
+		removeCardFromHand(tile);
+		addOwnedThingOnBoard(tile);
+	}
 	
 	/**
 	 * Check if this player owns something on the board
@@ -296,6 +338,12 @@ public class Player implements Serializable{
 		validateNotNull(tile);
 		return tray.contains(tile);
 	}
+
+	public boolean ownsThingInHand(ITileProperties thing)
+	{
+		validateNotNull(thing);
+		return hand.contains(thing);
+	}
 	
 	/**
 	 * Check if this player owns a particular tile, in any
@@ -307,7 +355,7 @@ public class Player implements Serializable{
 	public boolean ownsTile(ITileProperties tile)
 	{
 		validateNotNull(tile);
-		return ownedThingsOnBoard.contains(tile) || ownedHexes.contains(tile) || tray.contains(tile);
+		return ownedThingsOnBoard.contains(tile) || ownedHexes.contains(tile) || tray.contains(tile) || hand.contains(tile);
 	}
 	/**
 	 * Determines income during the gold collection phase

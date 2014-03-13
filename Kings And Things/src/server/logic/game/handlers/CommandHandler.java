@@ -5,20 +5,15 @@ import java.util.List;
 
 import server.event.commands.DiceRolled;
 import server.event.commands.EndPlayerTurnCommand;
-import server.event.commands.SetupPhaseComplete;
 import server.event.commands.RollDiceCommand;
+import server.event.commands.SetupPhaseComplete;
 import server.logic.exceptions.NoMoreTilesException;
-import server.logic.game.BoardGenerator;
-import server.logic.game.CupManager;
 import server.logic.game.GameState;
-import server.logic.game.HexTileManager;
 import server.logic.game.Player;
 import server.logic.game.RollModification;
-import server.logic.game.SpecialCharacterManager;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;
@@ -37,12 +32,8 @@ public abstract class CommandHandler
 {
 	//sub classes can not and should not change these fields,
 	//they are to be set only after handling a start game command
-	private CupManager cup;
-	private HexTileManager bank;
-	private BoardGenerator boardGenerator;
 	private GameState currentState;
 	private boolean isDemoMode;
-	private SpecialCharacterManager bankHeroes;
 	
 	/**
 	 * call this method to initialize this class before sending it commands
@@ -82,26 +73,6 @@ public abstract class CommandHandler
 	{
 		CommandValidator.validateCanRollDice(reasonForRoll, playerNumber, tile, currentState);
 		makeDiceRoll(reasonForRoll, playerNumber, tile);
-	}
-	
-	protected final CupManager getCup()
-	{
-		return cup;
-	}
-
-	protected final HexTileManager getBank()
-	{
-		return bank;
-	}
-
-	protected final BoardGenerator getBoardGenerator()
-	{
-		return boardGenerator;
-	}
-	
-	protected final SpecialCharacterManager getBankHeroManager()
-	{
-		return bankHeroes;
 	}
 
 	protected final GameState getCurrentState()
@@ -158,6 +129,7 @@ public abstract class CommandHandler
 		currentState.setCurrentRegularPhase(nextRegularPhase);
 		currentState.setCurrentCombatPhase(CombatPhase.NO_COMBAT);
 		currentState.setCombatLocation(null);
+		currentState.recordRollForSpecialCharacter(null);
 		currentState.setDefendingPlayerNumber(-1);
 		currentState.removeAllHexesWithBuiltInObjects();
 		
@@ -278,7 +250,7 @@ public abstract class CommandHandler
 					{
 						try
 						{
-							ITileProperties thing = cup.drawTile();
+							ITileProperties thing = currentState.getCup().drawTile();
 							p.addThingToTray(thing);
 							tray.getArray()[i] = thing;
 						}
@@ -296,7 +268,7 @@ public abstract class CommandHandler
 			}
 			case SETUP_FINISHED:
 			{
-				boardGenerator.setupFinished();
+				currentState.getBoardGenerator().setupFinished();
 				regularPhaseChanged(currentState.getCurrentRegularPhase());
 			}
 			default:
@@ -344,29 +316,34 @@ public abstract class CommandHandler
 		{
 			currentState.addNeededRoll(new Roll(1, null, RollReason.ENTERTAINMENT, playerNumber));
 		}
-		else if(reasonForRoll == RollReason.RECRUIT_SPECIAL_CHARACTER)
-		{
-			currentState.addNeededRoll(new Roll(2, tile, RollReason.RECRUIT_SPECIAL_CHARACTER, playerNumber));
-		}
 		
+		Roll rollToAddTo = null;
 		for(Roll r : currentState.getRecordedRolls())
 		{
 			if(Roll.rollSatisfiesParameters(r, reasonForRoll, playerNumber, tile) && r.needsRoll())
 			{
-				r.addBaseRoll(rollDie());
-				if(currentState.hasRollModificationFor(r))
-				{
-					List<RollModification> modifications = currentState.getRollModificationsFor(r);
-					for(RollModification rm : modifications)
-					{
-						r.addRollModificationFor(rm.getRollIndexToModify(), rm.getAmountToAdd());
-					}
-				}
-				//notifies players of die roll
-				new DieRoll(r).postNetworkEvent(playerNumber);
+				rollToAddTo = r;
 				break;
 			}
 		}
+		if(rollToAddTo == null && reasonForRoll == RollReason.RECRUIT_SPECIAL_CHARACTER)
+		{
+			rollToAddTo = new Roll(2, tile, RollReason.RECRUIT_SPECIAL_CHARACTER, playerNumber);
+			currentState.addNeededRoll(rollToAddTo);
+		}
+
+		rollToAddTo.addBaseRoll(rollDie());
+		if(currentState.hasRollModificationFor(rollToAddTo))
+		{
+			List<RollModification> modifications = currentState.getRollModificationsFor(rollToAddTo);
+			for(RollModification rm : modifications)
+			{
+				rollToAddTo.addRollModificationFor(rm.getRollIndexToModify(), rm.getAmountToAdd());
+				currentState.removeRollModification(rm);
+			}
+		}
+		//notifies players of die roll
+		new DieRoll(rollToAddTo).postNetworkEvent(playerNumber);
 		
 		//if we are no longer waiting for more rolls, then we can apply the effects now
 		if(!currentState.isWaitingForRolls())
@@ -375,19 +352,15 @@ public abstract class CommandHandler
 		}
 	}
 
-	private static int rollDie()
+	private int rollDie()
 	{
-		return (int) Math.round((Math.random() * 5) + 1);
+		return isDemoMode? 3 : (int) Math.round((Math.random() * 5) + 1);
 	}
 	
 	@Subscribe
 	public void receiveGameStartedEvent(SetupPhaseComplete event)
 	{
-		cup = event.getCup();
-		bank = event.getBank();
-		boardGenerator = event.getBoardGenerator();
 		currentState = event.getCurrentState();
-		bankHeroes = event.getBankHeroManager();
 		isDemoMode = event.isDemoMode();
 	}
 

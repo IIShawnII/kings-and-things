@@ -115,7 +115,8 @@ public abstract class RecruitingThingsPhaseValidator
 		CommandValidator.validateNoPendingRolls(currentState);
 		SetupPhase setupPhase = currentState.getCurrentSetupPhase();
 		RegularPhase regularPhase = currentState.getCurrentRegularPhase();
-		if(setupPhase != SetupPhase.PLACE_FREE_THINGS && setupPhase != SetupPhase.PLACE_EXCHANGED_THINGS && regularPhase != RegularPhase.RECRUITING_THINGS && combatPhase != CombatPhase.PLACE_THINGS)
+		if(setupPhase != SetupPhase.PLACE_FREE_THINGS && setupPhase != SetupPhase.PLACE_EXCHANGED_THINGS && regularPhase != RegularPhase.RECRUITING_THINGS && combatPhase != CombatPhase.PLACE_THINGS
+				&& !player.ownsThingInHand(thing))
 		{
 			throw new IllegalStateException("Can not place things on the board during the " + (setupPhase==SetupPhase.SETUP_FINISHED? regularPhase : setupPhase) + " phase");
 		}
@@ -124,9 +125,9 @@ public abstract class RecruitingThingsPhaseValidator
 		{
 			throw new IllegalArgumentException("Can not place things onto someone else's hex");
 		}
-		if(!player.ownsThingInTray(thing))
+		if(!player.ownsThingInTray(thing) && !player.ownsThingInHand(thing))
 		{
-			throw new IllegalArgumentException("Can only place things that the player owns in their tray");
+			throw new IllegalArgumentException("Can only place things that the player owns in their tray or in their hand");
 		}
 		
 		ArrayList<ITileProperties> stuff = new ArrayList<>();

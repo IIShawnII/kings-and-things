@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import server.logic.exceptions.NoMoreTilesException;
+import common.Logger;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
@@ -21,6 +23,10 @@ import common.game.Roll;
  */
 public class GameState
 {
+	private CupManager cup;
+	private HexTileManager bank;
+	private BoardGenerator boardGenerator;
+	private SpecialCharacterManager bankHeroes;
 	private HexBoard board;
 	private final HashSet<Player> players;
 	private final ArrayList<Integer> playerOrder;
@@ -34,11 +40,12 @@ public class GameState
 	private final ArrayList<RollModification> rollModifications;
 	private final HashMap<Integer,Integer> hitsToApply;
 	private final HashSet<HexState> hexesContainingBuiltObjects;
+	private Roll recordedRollForSpecialCharacter;
 	private final HashMap<HexState,Integer> plagueAffectedHexes;
 
 	/**
 	 * Creates a new GameState object
-	 * @param board The current game board
+	 * @param demoMode Set to true to start a game in demo mode
 	 * @param players The set of players playing the game
 	 * @param playerOrder A list of player ids in the order in which players will take turns
 	 * @param currentSetupPhase The current setup phase
@@ -48,10 +55,9 @@ public class GameState
 	 * @param defenderPlayerNumber The player who is acting as the defender
 	 * @param combatLocation The (x,y) coordinates of the hex where combat is taking place
 	 */
-	public GameState(HexBoard board, Set<Player> players, List<Integer> playerOrder, SetupPhase currentSetupPhase, RegularPhase currentRegularPhase,
+	public GameState(boolean demoMode, Set<Player> players, List<Integer> playerOrder, SetupPhase currentSetupPhase, RegularPhase currentRegularPhase,
 			int activeTurnPlayerNumber, int activePhasePlayerNumber, CombatPhase currentCombatPhase, int defenderPlayerNumber, Point combatLocation)
 	{
-		this.board = board;
 		this.players = new HashSet<Player>(players);
 		this.playerOrder = new ArrayList<Integer>(playerOrder);
 		this.currentSetupPhase = currentSetupPhase;
@@ -70,7 +76,22 @@ public class GameState
 			hitsToApply.put(p.getID(), 0);
 		}
 		this.setActivePhasePlayer(activePhasePlayerNumber);
+		recordedRollForSpecialCharacter = null;
 		this.plagueAffectedHexes = new HashMap<> ();
+		
+
+		cup = new CupManager(demoMode);
+		bank = new HexTileManager(demoMode);
+		boardGenerator = new BoardGenerator(players.size(),bank);
+		bankHeroes = new SpecialCharacterManager(demoMode);
+		try
+		{
+			board = boardGenerator.createNewBoard();
+		}
+		catch (NoMoreTilesException e)
+		{
+			Logger.getErrorLogger().error("Unable to start game due to: ", e);
+		}
 	}
 	
 	/**
@@ -122,6 +143,26 @@ public class GameState
 		return currentSetupPhase;
 	}
 	
+	public CupManager getCup()
+	{
+		return cup;
+	}
+	
+	public HexTileManager getBank()
+	{
+		return bank;
+	}
+	
+	public BoardGenerator getBoardGenerator()
+	{
+		return boardGenerator;
+	}
+	
+	public SpecialCharacterManager getBankHeroes()
+	{
+		return bankHeroes;
+	}
+	
 	/**
 	 * Get the current regular phase of the game
 	 * @return The regular phase of the game
@@ -129,6 +170,21 @@ public class GameState
 	public RegularPhase getCurrentRegularPhase()
 	{
 		return currentRegularPhase;
+	}
+	
+	public boolean hasRecordedRollForSpecialCharacter()
+	{
+		return recordedRollForSpecialCharacter != null;
+	}
+	
+	public Roll getRecordedRollForSpecialCharacter()
+	{
+		return recordedRollForSpecialCharacter;
+	}
+	
+	public void recordRollForSpecialCharacter(Roll r)
+	{
+		recordedRollForSpecialCharacter = r;
 	}
 	
 	/**

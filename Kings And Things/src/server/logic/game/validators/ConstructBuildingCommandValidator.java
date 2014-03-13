@@ -48,19 +48,26 @@ public abstract class ConstructBuildingCommandValidator
 		
 		if(currentState.getCurrentSetupPhase() == SetupPhase.SETUP_FINISHED)
 		{
-			//TODO check gold/income requirements for general case
 			if (owningPlayer.getGold() < 5) {
 				throw new IllegalArgumentException("You need more than 5 gold pieces to build a building");
 			}
 			
 			//Checks if a player is eligible to build a citadel
-			if (currentState.getPlayers().size() == 4) {
-				if ((owningPlayer.getGold() >= 5 && owningPlayer.getGold() < 20) && building == BuildableBuilding.Citadel) {
-					throw new IllegalArgumentException("You are not eligible to build a citadel");
+			if(building == BuildableBuilding.Citadel)
+			{
+				for(ITileProperties thing : owningPlayer.getOwnedThingsOnBoard())
+				{
+					if(thing.isBuildableBuilding() && thing.getName().equals(building.name()))
+					{
+						throw new IllegalStateException("You can not construct a Citadel if you already own one.");
+					}
 				}
-			} else {
-				if ((owningPlayer.getGold() >= 5 && owningPlayer.getGold() < 15) && building == BuildableBuilding.Citadel) {
-					throw new IllegalArgumentException("You are not eligible to build a citadel");
+				if (currentState.getPlayers().size() == 4) {
+					if (owningPlayer.getIncome() < 20) {
+						throw new IllegalArgumentException("You are not eligible to build a citadel");
+					}
+				} else if (owningPlayer.getIncome() < 15) {
+						throw new IllegalArgumentException("You are not eligible to build a citadel");
 				}
 			}
 			
@@ -75,13 +82,13 @@ public abstract class ConstructBuildingCommandValidator
 			case Castle:
 				if (hexState.getBuilding() == null || hexState.getBuilding().getName().equals(BuildableBuilding.Keep.name()))
 				{
-					throw new IllegalArgumentException("Can't build keep unless you have a keep");
+					throw new IllegalArgumentException("Can't build castle unless you have a keep");
 				}
 				break;
 			case Citadel:
 				if (hexState.getBuilding() == null || hexState.getBuilding().getName().equals(BuildableBuilding.Castle.name()))
 				{
-					throw new IllegalArgumentException("Can't build keep unless you have a castle");
+					throw new IllegalArgumentException("Can't build citadel unless you have a castle");
 				}
 				break;
 			default:

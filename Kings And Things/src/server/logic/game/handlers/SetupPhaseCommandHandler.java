@@ -10,17 +10,12 @@ import java.util.Set;
 
 import server.event.commands.DiceRolled;
 import server.event.commands.ExchangeSeaHexCommand;
-import server.event.commands.SetupPhaseComplete;
 import server.event.commands.GiveHexToPlayerCommand;
+import server.event.commands.SetupPhaseComplete;
 import server.event.commands.StartSetupPhase;
 import server.logic.exceptions.NoMoreTilesException;
-import server.logic.game.BoardGenerator;
-import server.logic.game.CupManager;
 import server.logic.game.GameState;
-import server.logic.game.HexBoard;
-import server.logic.game.HexTileManager;
 import server.logic.game.Player;
-import server.logic.game.SpecialCharacterManager;
 import server.logic.game.validators.SetupPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
@@ -30,10 +25,7 @@ import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
-import common.event.notifications.CurrentPhase;
-import common.event.notifications.Flip;
 import common.event.notifications.HexPlacement;
-import common.event.notifications.PlayerOrderList;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Roll;
@@ -50,21 +42,20 @@ public class SetupPhaseCommandHandler extends CommandHandler
 	 */
 	public void startNewGame(boolean demoMode, Set<Player> players) throws NoMoreTilesException{
 		SetupPhaseValidator.validateStartNewGame(demoMode, players);
-		CupManager cup = new CupManager(demoMode);
-		HexTileManager bank = new HexTileManager(demoMode);
-		BoardGenerator boardGenerator = new BoardGenerator(players.size(),bank);
-		SpecialCharacterManager bankHeroManager = new SpecialCharacterManager();
-		HexBoard board = boardGenerator.createNewBoard();
-		HexPlacement placement = new HexPlacement( Constants.MAX_HEXES);
-		board.fillArray( placement.getArray());
-		placement.postNetworkEvent();
+
 		List<Integer> playerOrder = determinePlayerOrder(players,demoMode);
 		//TODO handle dice rolls for player order
+		GameState currentState = new GameState(demoMode,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0), CombatPhase.NO_COMBAT, -1, null);
+		
+		HexPlacement placement = new HexPlacement( Constants.MAX_HEXES);
+		currentState.getBoard().fillArray( placement.getArray());
+		placement.postNetworkEvent();
+		
+		
 		//new PlayerOrderList( playerOrder).postNetworkEvent();
-		//TODO since player order is predetermined start from SetupPhase.PICK_SECOND_HEX
-		GameState currentState = new GameState(board,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0), CombatPhase.NO_COMBAT, -1, null);
+		
 		//new Flip().postNetworkEvent();
-		//new SetupPhaseComplete(demoMode, cup, bank, boardGenerator, currentState, bankHeroManager, this).postInternalEvent();
+		new SetupPhaseComplete(demoMode, currentState, this).postInternalEvent();
 		//new CurrentPhase( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNetworkEvent();
 	}
 
@@ -233,8 +224,8 @@ public class SetupPhaseCommandHandler extends CommandHandler
 
 	private void makeSeaHexExchanged(ITileProperties hex, int playerNumber) throws NoMoreTilesException
 	{
-		getBoardGenerator().placeHexAside(hex);
-		ITileProperties replacement = getBank().drawTile();
+		getCurrentState().getBoardGenerator().placeHexAside(hex);
+		ITileProperties replacement = getCurrentState().getBank().drawTile();
 		
 		for(HexState hs : getCurrentState().getBoard().getHexesAsList())
 		{

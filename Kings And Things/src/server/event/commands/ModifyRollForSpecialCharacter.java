@@ -1,28 +1,28 @@
 package server.event.commands;
 
 import common.event.AbstractInternalEvent;
+import common.game.ITileProperties;
 
 public class ModifyRollForSpecialCharacter extends AbstractInternalEvent {
 	
-	private final boolean hasRolled; 
 	private final int goldAmount;
+	private final ITileProperties target;
 	
-	public ModifyRollForSpecialCharacter (boolean hasRolled, int goldAmount, final Object OWNER){
+	public ModifyRollForSpecialCharacter (int goldAmount, ITileProperties target, final Object OWNER){
 		super( OWNER);
-		this.hasRolled = hasRolled;
 		this.goldAmount = goldAmount;
+		this.target = target;
 	}
 	
 	/*Getter Methods*/
-	
-	// checks if the player has rolled
-	public boolean checkRolled () {
-		return this.hasRolled;
-	}
 	
 	// gets the amount of gold the player wants to pay
 	public int retrieveGoldAmount () {
 		return this.goldAmount;
 	}
 
+	public ITileProperties getTarget()
+	{
+		return target;
+	}
 }

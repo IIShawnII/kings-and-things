@@ -94,9 +94,17 @@ public class CombatCommandHandler extends CommandHandler
 			}
 			else
 			{
-				//TODO check if special character first
+				//TODO let user choose to flip if it's a special character
+				thing.flip();
 				thing.resetValue();
-				getCup().reInsertTile(thing);
+				if(thing.isSpecialCharacter())
+				{
+					getCurrentState().getBankHeroes().reInsertTile(thing);
+				}
+				else
+				{
+					getCurrentState().getCup().reInsertTile(thing);
+				}
 				player.removeOwnedThingOnBoard(thing);
 				getCurrentState().getCombatHex().removeThingFromHex(thing);
 			}

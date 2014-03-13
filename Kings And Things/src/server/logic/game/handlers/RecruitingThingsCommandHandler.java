@@ -76,7 +76,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		
 		// adds things to the players tray for every 5 gold pieces
 		for(int i = 0; i < (gold/5); i++) {
-			player.addThingToTray(getCup().drawTile());
+			player.addThingToTray(getCurrentState().getCup().drawTile());
 		}
 	}
 
@@ -110,11 +110,11 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		
 		for(int i=0; i<newThingCount; i++)
 		{
-			newThings.add(getCup().drawTile());
+			newThings.add(getCurrentState().getCup().drawTile());
 		}
 		for(ITileProperties oldThing : things)
 		{
-			getCup().reInsertTile(oldThing);
+			getCurrentState().getCup().reInsertTile(oldThing);
 		}
 		for(ITileProperties newThing : newThings)
 		{
@@ -128,19 +128,25 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		int freeThings = (int) Math.ceil(((double)player.getOwnedHexes().size()) / (double)2);
 		for(int i=0; i<freeThings; i++)
 		{
-			player.addThingToTray(getCup().drawTile());
+			player.addThingToTray(getCurrentState().getCup().drawTile());
 		}
 	}
 
 	private void makeThingOnBoard(ITileProperties thing, int playerNumber, ITileProperties hex){
 		HexState hs = getCurrentState().getBoard().getHexStateForHex(hex);
-		if(thing.isCreature() && thing.isFaceUp())
+		if(thing.isCreature() && thing.isFaceUp() && !thing.isSpecialCharacter())
 		{
-			//TODO check if this is a special character first
 			thing.flip();
 		}
 		hs.addThingToHex(thing);
-		getCurrentState().getPlayerByPlayerNumber(playerNumber).placeThingFromTrayOnBoard(thing);
+		if(getCurrentState().getPlayerByPlayerNumber(playerNumber).ownsThingInTray(thing))
+		{
+			getCurrentState().getPlayerByPlayerNumber(playerNumber).placeThingFromTrayOnBoard(thing);
+		}
+		else
+		{
+			getCurrentState().getPlayerByPlayerNumber(playerNumber).placeThingFromHandOnBoard(thing);
+		}
 	}
 	
 	private void notifyClientsOfPlayerTray(int playerNumber)

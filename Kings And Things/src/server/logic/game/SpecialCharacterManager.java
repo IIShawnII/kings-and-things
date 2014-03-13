@@ -12,9 +12,9 @@ import common.game.TwoSidedTileProperties;
 
 public class SpecialCharacterManager extends AbstractTileManager
 {
-	public SpecialCharacterManager()
+	public SpecialCharacterManager(boolean demoMode)
 	{
-		super(getSpecialCharacterSetFromCollection(Constants.SPECIAL.values()), "special character");
+		super(getSpecialCharacterSetFromCollection(Constants.SPECIAL.values(), demoMode), "special character");
 	}
 	
 	public TwoSidedTileProperties drawTileByName(String heroName) throws NoMoreTilesException
@@ -34,8 +34,20 @@ public class SpecialCharacterManager extends AbstractTileManager
 		
 		return (TwoSidedTileProperties) tileToDraw;
 	}
+	
+	public boolean heroIsAvailable(String heroName)
+	{
+		for(ITileProperties tp : tiles)
+		{
+			if(tp.getName().equals(heroName))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
-	private static Set<TwoSidedTileProperties> getSpecialCharacterSetFromCollection(Collection<? extends TileProperties> tiles)
+	private static Set<TwoSidedTileProperties> getSpecialCharacterSetFromCollection(Collection<? extends TileProperties> tiles, boolean demoMode)
 	{
 		LinkedHashSet<TwoSidedTileProperties> heroes = new LinkedHashSet<TwoSidedTileProperties>();
 		for(TileProperties tp : tiles)
@@ -55,11 +67,14 @@ public class SpecialCharacterManager extends AbstractTileManager
 			}
 		}
 		
-		for(TwoSidedTileProperties tp : heroes)
+		if(!demoMode)
 		{
-			if(Math.random()<0.5d)
+			for(TwoSidedTileProperties tp : heroes)
 			{
-				tp.flip();
+				if(Math.random()<0.5d)
+				{
+					tp.flip();
+				}
 			}
 		}
 		

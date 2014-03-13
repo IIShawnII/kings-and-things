@@ -29,7 +29,7 @@ public abstract class CommandValidator
 	 * @param tileToRollFor The tile being rolled for (might be creature, hex, tower etc)
 	 * @param currentState The current state of the game
 	 * @throws IllegalArgumentException If the game is not currently waiting for any
-	 * rolls, and the reason for rolling is not RollReason.ENTERTAINMENT
+	 * rolls, and the reason for rolling is not RollReason.ENTERTAINMENT or RollReason.RECRUIT_SPECIAL_CHARACTER
 	 */
 	public static void validateCanRollDice(RollReason reasonForRoll, int playerNumber, ITileProperties tileToRollFor, GameState currentState)
 	{
@@ -53,7 +53,7 @@ public abstract class CommandValidator
 				throw new IllegalArgumentException("Must specify a special character to roll for");
 			}
 		}
-		if(!rollNeeded && reasonForRoll != RollReason.ENTERTAINMENT)
+		if(!rollNeeded && reasonForRoll != RollReason.ENTERTAINMENT && reasonForRoll != RollReason.RECRUIT_SPECIAL_CHARACTER)
 		{
 			throw new IllegalArgumentException("Not currently waiting for " + reasonForRoll + " type roll from player " + playerNumber + " targeting tile: " + tileToRollFor);
 		}
@@ -69,6 +69,10 @@ public abstract class CommandValidator
 	public static void validateCanEndPlayerTurn(int playerNumber, GameState currentState)
 	{
 		CommandValidator.validateNoPendingRolls(currentState);
+		if(currentState.getPlayerByPlayerNumber(playerNumber).hasCardsInHand())
+		{
+			throw new IllegalStateException("You must place the cards in your hand on the board, or return them to the cup.");
+		}
 		if(currentState.getCurrentCombatPhase() == CombatPhase.NO_COMBAT)
 		{
 			CommandValidator.validateIsPlayerActive(playerNumber, currentState);
