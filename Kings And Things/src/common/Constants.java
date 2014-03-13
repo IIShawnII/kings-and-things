@@ -31,8 +31,8 @@ public final class Constants {
 	public static final boolean LOAD_CUP = false;
 	public static final boolean LOAD_HEX = true;
 
-	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP}
-	public enum UpdateInstruction {Connect, Disconnect, ReadyState, Start, UpdatePlayers, Category, End, Send}
+	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP, CurrentPlayer, Hex}
+	public enum UpdateInstruction {Connect, Disconnect, ReadyState, Start, UpdatePlayers,Category, End, Send, PlaceBoard}
 	public enum UpdateContent {Setup, Regular, Combat, PlayerInfo, PlayerOrder}
 	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
 	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
@@ -84,6 +84,7 @@ public final class Constants {
 	public static final Color COLOR_WARNNING = DARK_YELLOW;
 	
 	//keys for events
+	public static final int PUBLIC = -1;
 	public static final int BOARD = 0;					//00000000
 	public static final int LOGIC = 1;					//00000001
 	public static final int PROGRESS = 2;				//00000010

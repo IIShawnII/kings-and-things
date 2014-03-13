@@ -25,11 +25,12 @@ import java.awt.image.BufferedImage;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
 import client.gui.LockManager.Lock;
-import client.event.BoardUpdate;
 import common.Constants.Category;
+import common.Constants.UpdateKey;
 import common.Constants.SetupPhase;
 import common.Constants.Restriction;
 import common.Constants.RegularPhase;
+import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
 import common.event.notifications.HexOwnershipChanged;
 import common.game.HexState;
@@ -367,38 +368,43 @@ public class Board extends JPanel{
 		animation.start();
 	}
 	
-	private class UpdateReceiver extends AbstractUpdateReceiver<BoardUpdate>{
+	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
 			super( INTERNAL, BOARD, Board.this);
 		}
 
 		@Override
-		protected void handlePublic( BoardUpdate update) {
+		protected void handlePrivate( UpdatePackage update) {
 			updateBoard( update);
+		}
+
+		@Override
+		protected boolean verifyPrivate( UpdatePackage update) {
+			return update.isValidID(ID|currentPlayer.getID());
 		}
 	}
 	
 	/**
-	 * update the board with new information, such as hex placement, flip all, player order and rack info
-	 * this method handles all events in client.event
+	 * update the board with new information, such as
+	 * hex placement, flip all, player order and rack info.
 	 * @param update - event wrapper containing update information
 	 */
-	public void updateBoard( BoardUpdate update){
-		//TODO complete Board update
-		if( update.hasPlayerInfo()){
-			if(update.getCurrent()!=null){
-			currentPlayer = update.getCurrent();
-			}
-			if(update.getPlayers()!=null){
-			players = update.getPlayers();
-			}
-			repaint();
-			phaseDone = true;
+	public void updateBoard( UpdatePackage update){
+		switch( update.peekFirstInstruction()){
+			case UpdatePlayers:
+				currentPlayer = (PlayerInfo) update.getData( UpdateKey.CurrentPlayer);
+				players = (PlayerInfo[]) update.getData( UpdateKey.Players);
+				repaint();
+				phaseDone = true;
+				break;
+			case PlaceBoard:
+				animateHexPlacement( (HexState[]) update.getData( UpdateKey.Hex));
+				break;
+			default:
 		}
-		if( update.hasHexes()){
-			animateHexPlacement( update.getHexes());
-		}else if( update.flipAll()){
+		
+		/*if( update.flipAll()){
 			FlipAllHexes();
 		}else if( update.isPlayerOder()){
 			placeMarkers( update.getPlayerOrder());
@@ -408,7 +414,8 @@ public class Board extends JPanel{
 			manageSetupPhase( update.getSetup());
 		}else if( update.isRegularPhase()){
 			manageRegularPhase( update.getRegular());
-		}
+		}*/
+		
 		while( !phaseDone){
 			try {
 				Thread.sleep( 100);

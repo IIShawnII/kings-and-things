@@ -146,6 +146,7 @@ public class ClientGUI extends JFrame implements Runnable{
 
 		@Override
 		protected void handlePublic( UpdatePackage update) {
+			System.out.println(update.peekFirstInstruction().name());
 			changeBoad( update);
 		}
 	}

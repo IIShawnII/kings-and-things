@@ -1,6 +1,7 @@
 package common.event;
 
 import common.game.PlayerInfo;
+import static common.Constants.PUBLIC;
 
 /**
  * This is the abstract super class of all events
@@ -8,7 +9,7 @@ import common.game.PlayerInfo;
 public abstract class AbstractEvent{
 
 	protected final Object Owner;
-	private int ID = -1;
+	private int ID = PUBLIC;
 	
 	protected AbstractEvent(){
 		this( null);
@@ -55,7 +56,7 @@ public abstract class AbstractEvent{
 	}
 	
 	public boolean isPublic(){
-		return ID==-1;
+		return ID==PUBLIC;
 	}
 	
 	public boolean isValidID( PlayerInfo player){

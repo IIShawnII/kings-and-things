@@ -2,7 +2,6 @@ package client.logic;
 
 import java.io.IOException;
 
-import client.event.BoardUpdate;
 import common.Logger;
 import common.game.PlayerInfo;
 import common.network.Connection;
@@ -22,13 +21,15 @@ import common.event.notifications.PlayerOrderList;
 import common.event.notifications.HexStatesChanged;
 import common.event.notifications.HexOwnershipChanged;
 import static common.Constants.LOGIC;
+import static common.Constants.BOARD;
+import static common.Constants.PUBLIC;
 import static common.Constants.PLAYER_READY;
 
 public class ConnectionLogic implements Runnable {
 
 	private Connection connection;
-	private boolean finished = false;
 	private PlayerInfo player = null;
+	private boolean finished = false, gameStarted= false;
 	
 	public ConnectionLogic( ) {
 		this.connection = new Connection();
@@ -50,17 +51,25 @@ public class ConnectionLogic implements Runnable {
 		}
 		Logger.getStandardLogger().info( "listening");
 		UpdatePackage update = new UpdatePackage("Logic.Run", this);
+		int ID = PUBLIC;
 		try {
 			while( !finished && (event = connection.recieve())!=null){
 				update.clear();
+				ID = player==null ? PUBLIC: player.getID()|BOARD;
 				Logger.getStandardLogger().info( "Logic.Process.Receive "+(player!=null?player.getID()+" ":"") + event);
 				if( event instanceof PlayersList){
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
+					update.putData( UpdateKey.CurrentPlayer, player);
 					update.putData( UpdateKey.Players, ((PlayersList)event).getPlayers());
+					if( !gameStarted){
+						ID = PUBLIC;
+					}
 				} 
 				else if( event instanceof StartGame){
 					update.addInstruction( UpdateInstruction.Start);
 					update.putData( UpdateKey.PlayerCount, ((StartGame)event).getPlayerCount());
+					gameStarted = true;
+					ID = PUBLIC;//public event
 				} 
 				else if( event instanceof PlayerState){
 					//first data from server, with PlayerInfo object
@@ -68,27 +77,28 @@ public class ConnectionLogic implements Runnable {
 					update.setSource( "Logic.Run "+player.getID());
 				} 
 				else if( event instanceof HexPlacement){
-					new BoardUpdate(((HexPlacement)event).getArray(), this).postInternalEvent();
+					update.addInstruction( UpdateInstruction.PlaceBoard);
+					update.putData( UpdateKey.Hex, ((HexPlacement)event).getArray());
 				} 
-				else if( event instanceof Flip){
-					new BoardUpdate(((Flip)event).flipAll(), this).postInternalEvent();
+				/*else if( event instanceof Flip){
+					new BoardUpdate(((Flip)event).flipAll(), this).postInternalEvent(BOARD|player.getID());
 				} 
 				else if( event instanceof PlayerOrderList){
-					new BoardUpdate(((PlayerOrderList)event).getList(), this).postInternalEvent();
+					new BoardUpdate(((PlayerOrderList)event).getList(), this).postInternalEvent(BOARD|player.getID());
 				} 
 				else if( event instanceof RackPlacement){
-					new BoardUpdate(((RackPlacement)event).getArray(), this).postInternalEvent();
+					new BoardUpdate(((RackPlacement)event).getArray(), this).postInternalEvent(BOARD|player.getID());
 				}
 				else if( event instanceof CurrentPhase){
 					phase = (CurrentPhase) event;
 					if( phase.isSetupPhase()){
-						new BoardUpdate(phase.getPlayers(),phase.getSetup()).postInternalEvent();
+						new BoardUpdate(phase.getPlayers(),phase.getSetup()).postInternalEvent(BOARD|player.getID());
 					}else if( phase.isRegularPhase()){
 						
 					}else if( phase.isCombatPhase()){
 						
 					}
-				}
+				}*/
 				else if(event instanceof HexOwnershipChanged){
 					//TODO handle
 				}
@@ -96,7 +106,7 @@ public class ConnectionLogic implements Runnable {
 					//TODO handle
 				}
 				if( update.isModified()){
-					update.postInternalEvent();
+					update.postInternalEvent( ID);
 				}
 			}
 		} catch ( ClassNotFoundException | IOException e) {

@@ -85,10 +85,9 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 	 * called after update.isPublic() method has returned true.
 	 * this method is meant to handle any needed code for processing
 	 * public events not private events.
-	 * @throws IllegalStateException - if this methods is not overridden and called
 	 */
 	protected void handlePublic( T update){
-		throw new IllegalStateException( "This method must be Overridden");
+		Logger.getStandardLogger().warn( "No handle for: " + update + "\nOwner: " + OWNER);
 	}
 	
 	/**

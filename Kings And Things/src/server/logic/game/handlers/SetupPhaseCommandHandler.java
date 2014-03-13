@@ -60,12 +60,12 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		placement.postNetworkEvent();
 		List<Integer> playerOrder = determinePlayerOrder(players,demoMode);
 		//TODO handle dice rolls for player order
-		new PlayerOrderList( playerOrder).postNetworkEvent();
+		//new PlayerOrderList( playerOrder).postNetworkEvent();
 		//TODO since player order is predetermined start from SetupPhase.PICK_SECOND_HEX
 		GameState currentState = new GameState(board,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0), CombatPhase.NO_COMBAT, -1, null);
-		new Flip().postNetworkEvent();
-		new SetupPhaseComplete(demoMode, cup, bank, boardGenerator, currentState, bankHeroManager, this).postInternalEvent();
-		new CurrentPhase( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNetworkEvent();
+		//new Flip().postNetworkEvent();
+		//new SetupPhaseComplete(demoMode, cup, bank, boardGenerator, currentState, bankHeroManager, this).postInternalEvent();
+		//new CurrentPhase( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNetworkEvent();
 	}
 
 	/**
