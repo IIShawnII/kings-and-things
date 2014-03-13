@@ -5,15 +5,12 @@ import java.util.Random;
 import javax.swing.Timer;
 import javax.swing.JPanel;
 
-import java.awt.Image;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import static common.Constants.DICE; 
 
 @SuppressWarnings("serial")
 public class Die extends JPanel implements ActionListener{
@@ -21,61 +18,9 @@ public class Die extends JPanel implements ActionListener{
 	private static final int WIDTH = 60;
 	private static final int HEIGHT = 60;
 	private static final int MAX_ROLLS = 10;
-	private static final int SPOT_DIAM = 12;
 	private static final Random rand = new Random();
-	private static final Image[] FACES = new Image[6];
-	
-	static{
-		System.out.println("Setup");
-		for( int i=0; i<FACES.length; i++){
-			FACES[i] = draw( i+1);
-		}
-	}
-	
-	private static Image draw( int face){
-		BufferedImage image = new BufferedImage( WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-		Graphics2D g2d = (Graphics2D) image.getGraphics();
-		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
-		g2d.setColor( Color.BLUE);
-		g2d.fillRect( 0, 0, WIDTH, HEIGHT);
-		g2d.setColor( Color.GREEN);
-		g2d.drawRect( 0, 0, WIDTH - 1, HEIGHT - 1);
-
-		if( face==1 || face==3 || face==5){
-			face--;
-			drawSpot( g2d, 7);
-		}
-		if( face>0){
-			drawSpot( g2d, 1);
-			drawSpot( g2d, 6);
-			
-			switch( face) {
-				case 6:
-					drawSpot( g2d, 3);
-					drawSpot( g2d, 4);
-				case 4:
-					drawSpot( g2d, 2);
-					drawSpot( g2d, 5);
-					break;
-			}
-		}
-		return image;
-	}
-
-	private static void drawSpot( Graphics2D g2d, int spot) {
-		int x=WIDTH/4, y=HEIGHT/4;
-		switch( spot){
-			case 2: x*=3; break;
-			case 3: y*=2; break;
-			case 4: x*=3; y*=2; break;
-			case 5: y*=3; break;
-			case 6: x*=3; y*=3; break;
-			case 7: x*=2; y*=2; break;
-		}
-		g2d.fillOval( x-(SPOT_DIAM/2), y-(SPOT_DIAM/2), SPOT_DIAM, SPOT_DIAM);
-	}
+	//clockwise dice, possible face for 1 and 6, 2 and 5 and finally 3 and 4
+	private static final int[][] FACES ={{2,3,4,5},{1,3,4,6},{1,2,5,6}}; 
 
 	private Timer timer;
 	private Parent parent;
@@ -87,14 +32,16 @@ public class Die extends JPanel implements ActionListener{
 	}
 	
 	public Die init(){
+		faceValue = 1;
 		setFace();
+		setOpaque( false);
 		timer = new Timer( 125, this);
 		setPreferredSize( new Dimension( WIDTH, HEIGHT));
 		return this;
 	}
 	
 	public void setResult( int face){
-		target = face-1;
+		target = face;
 	}
 	
 	public void roll(){
@@ -105,7 +52,18 @@ public class Die extends JPanel implements ActionListener{
 	}
 	
 	private void setFace(){
-		faceValue = rand.nextInt(6);
+		int index = 0;
+		switch( faceValue){
+			case 1: case 6:
+				index = 0; break;
+			case 2: case 5:
+				index = 1; break;
+			case 3: case 4:
+				index = 2; break;
+			default:
+				throw new IllegalStateException( "ERROR - fave Value can only be 1-6, received: " + faceValue);
+		}
+		faceValue = FACES[index][rand.nextInt(4)];
 	}
 
 	@Override
@@ -122,6 +80,6 @@ public class Die extends JPanel implements ActionListener{
 	@Override
 	public void paintComponent( Graphics g) {
 		super.paintComponent( g);
-		g.drawImage( FACES[faceValue], 0, 0, getWidth(), getHeight(), null);
+		g.drawImage( DICE[faceValue], 0, 0, getWidth(), getHeight(), null);
 	}
 }

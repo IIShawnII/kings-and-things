@@ -58,6 +58,7 @@ public final class Constants {
 	public enum RollReason {DETERMINE_PLAYER_ORDER, EXPLORE_HEX, ATTACK_WITH_CREATURE, CALCULATE_DAMAGE_TO_TILE, ENTERTAINMENT, RECRUIT_SPECIAL_CHARACTER}
 	
 	//Resources
+	public static final Image DICE[];
 	public static final Image IMAGE_BACKGROUND;
 	public static final Image IMAGE_HEX_REVERSE; 
 	public static final Image IMAGE_TILE_REVERSE;
@@ -177,6 +178,14 @@ public final class Constants {
 		IMAGE_BACKGROUND = loadImage( "Resources\\Misc\\-n Woodboard.jpg");
 		IMAGE_HEX_REVERSE = loadImage( "Resources\\Misc\\-n Hex_Reverse.png");
 		IMAGE_TILE_REVERSE = loadImage( "Resources\\Misc\\-n Tile_Reverse.png");
+		DICE = new Image[7];
+		DICE[0] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 0.png");
+		DICE[1] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 1.png");
+		DICE[2] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 2.png");
+		DICE[3] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 3.png");
+		DICE[4] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 4.png");
+		DICE[5] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 5.png");
+		DICE[6] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 6.png");
 	}
 	
 	private static Image loadImage( String path){
