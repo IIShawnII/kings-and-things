@@ -6,6 +6,8 @@ import java.awt.GridBagConstraints;
 
 import javax.swing.JPanel;
 
+import common.game.PlayerInfo;
+
 public class MultiBoardManager {
 
 	private Board[] boards;
@@ -20,7 +22,7 @@ public class MultiBoardManager {
 	
 	public MultiBoardManager(){}
 	
-	public void creatBoards( final int count){
+	public void creatBoards( final int count, final PlayerInfo[] players){
 		if( count<=1 || count>=5){
 			throw new IllegalArgumentException( "Error - Count must be between 2 and 4");
 		}
@@ -33,6 +35,7 @@ public class MultiBoardManager {
 			boards[ i].setPreferredSize( BOARD_SIZE);
 			boards[ i].setSize( BOARD_SIZE);
 			boards[ i].init( count);
+			boards[ i].setCurrentPlayer( players[i]);
 		}
 		created = true;
 	}

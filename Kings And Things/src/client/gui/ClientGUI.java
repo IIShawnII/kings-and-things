@@ -30,7 +30,9 @@ import static common.Constants.BYPASS_LOBBY;
 @SuppressWarnings("serial")
 public class ClientGUI extends JFrame implements Runnable{
 
+	private PlayerInfo[] players;
 	private MultiBoardManager boards;
+	private JComboBox< Object> jcbPlayers;
 	
 	/**
 	 * construct Client GUI
@@ -111,7 +113,7 @@ public class ClientGUI extends JFrame implements Runnable{
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.anchor = GridBagConstraints.FIRST_LINE_START;
 		
-		JComboBox< Object> jcbPlayers = new JComboBox<>( new Object[]{ 1,2,3,4});
+		jcbPlayers = new JComboBox<>( new Object[]{ 1,2,3,4});
 		constraints.gridx = 0;
 		constraints.gridwidth = 3;
 		constraints.weightx = 1;
@@ -146,7 +148,6 @@ public class ClientGUI extends JFrame implements Runnable{
 
 		@Override
 		protected void handlePublic( UpdatePackage update) {
-			System.out.println(update.peekFirstInstruction().name());
 			changeBoad( update);
 		}
 	}
@@ -157,8 +158,11 @@ public class ClientGUI extends JFrame implements Runnable{
 				Integer count = (Integer)update.getData( UpdateKey.PlayerCount);
 				if( boards==null){
 					boards = new MultiBoardManager();
-					boards.creatBoards( count);
+					boards.creatBoards( count, players);
 				}
+			case UpdatePlayers:
+				players = (PlayerInfo[])update.getData( UpdateKey.Players);
+				break;
 			default:
 		}
 	}

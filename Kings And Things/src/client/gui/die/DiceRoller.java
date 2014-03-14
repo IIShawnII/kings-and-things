@@ -3,6 +3,7 @@ package client.gui.die;
 import java.util.Random;
 import java.util.ArrayList;
 
+import javax.swing.Timer;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -11,27 +12,41 @@ import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
+import java.awt.event.ActionListener;
+
+import static common.Constants.DICE;
+import static common.Constants.DICE_SIZE;
 
 @SuppressWarnings("serial")
-public class DiceRoller extends JPanel implements Parent{
+public class DiceRoller extends JPanel implements Parent, ActionListener{
 
 	private ArrayList<Die> dice;
 	private Random rand = new Random();
 	private int dieCount, rollingCount;
+	private Timer timer;
 
 	public DiceRoller() {
 		super( true);
 	}
 
 	private DiceRoller init() {
+		timer = new Timer( 0, this);
+		setPreferredSize( new Dimension( DICE_SIZE,DICE_SIZE));
 		setBackground( Color.RED);
 		addMouseListener( new MouseListener());
 		dice = new ArrayList< Die>();
 		setLayout( new FlowLayout());
-		setResult( 3, rand.nextInt( 6)+1, rand.nextInt( 6)+1, rand.nextInt( 6)+1);
 		return this;
+	}
+
+	@Override
+	public void actionPerformed( ActionEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	public void setResult( int count, int...results){
@@ -69,6 +84,12 @@ public class DiceRoller extends JPanel implements Parent{
 	@Override
 	public void doneRolling() {
 		rollingCount--;
+	}
+	
+	@Override
+	public void paintComponent( Graphics g){
+		super.paintComponent( g);
+		g.drawImage( DICE[0], (getWidth()/2)-DICE_SIZE/2, getHeight()-DICE_SIZE, DICE_SIZE, DICE_SIZE, null);
 	}
 	
 	private class MouseListener extends MouseAdapter{

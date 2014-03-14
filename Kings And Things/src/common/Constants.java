@@ -95,6 +95,7 @@ public final class Constants {
 	public static final int PLAYER_START_ID = 16;		//00010000
 	
 	//Maximums
+	public static final int MAX_ROLLS = 10;
 	public static final int MAX_HEXES = 48;
 	public static final int MAX_PLAYERS = 4;
 	public static final int MAX_RACK_SIZE = 10;
@@ -108,6 +109,7 @@ public final class Constants {
 	public static final Dimension MIN_CLIENT_SIZE = new Dimension( 1300,720);
 	
 	//Sizes
+	public static final int DICE_SIZE = 80;
 	public static final int LOCK_SIZE = 28;
 	public static final int HEX_HEIGHT = 70;
 	public static final Polygon HEX_OUTLINE;

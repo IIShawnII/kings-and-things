@@ -175,6 +175,10 @@ public class Board extends JPanel{
 		new UpdateReceiver();
 	}
 	
+	public void setCurrentPlayer( PlayerInfo player){
+		currentPlayer = player;
+	}
+	
 	/**
 	 * add a tile to the board
 	 * @param tile - tile to be added, must not be null

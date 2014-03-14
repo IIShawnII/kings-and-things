@@ -183,9 +183,9 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					//will never be called
 			}
 			copyTile = 0;
+			update.putData( UpdateKey.Command, currentCategory);
+			update.postInternalEvent( PROGRESS);
 		}
-		update.putData( UpdateKey.Command, currentCategory);
-		update.postInternalEvent( PROGRESS);
 		return result;
 	}
 	

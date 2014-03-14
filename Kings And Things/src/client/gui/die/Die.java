@@ -10,16 +10,15 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static common.Constants.DICE; 
+import static common.Constants.DICE;
+import static common.Constants.DICE_SIZE;
+import static common.Constants.MAX_ROLLS;
 
 @SuppressWarnings("serial")
 public class Die extends JPanel implements ActionListener{
 	
-	private static final int WIDTH = 60;
-	private static final int HEIGHT = 60;
-	private static final int MAX_ROLLS = 10;
 	private static final Random rand = new Random();
-	//clockwise dice, possible face for 1 and 6, 2 and 5 and finally 3 and 4
+	//clockwise dice, possible faces for 1 and 6, 2 and 5 and finally 3 and 4
 	private static final int[][] FACES ={{2,3,4,5},{1,3,4,6},{1,2,5,6}}; 
 
 	private Timer timer;
@@ -36,7 +35,7 @@ public class Die extends JPanel implements ActionListener{
 		setFace();
 		setOpaque( false);
 		timer = new Timer( 125, this);
-		setPreferredSize( new Dimension( WIDTH, HEIGHT));
+		setPreferredSize( new Dimension( DICE_SIZE, DICE_SIZE));
 		return this;
 	}
 	

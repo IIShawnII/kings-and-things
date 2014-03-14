@@ -336,15 +336,18 @@ public class LoadingDialog extends JDialog implements Runnable{
 				break;
 			case Start:
 				forceClose = false;
+				listModel = null;
 				close();
 				break;
 			case ReadyState:
 				jbReady.setText( (String)update.getData( UpdateKey.Message));
 				break;
 			case UpdatePlayers:
-				listModel.removeAllElements();
-				for( PlayerInfo player: (PlayerInfo[])update.getData( UpdateKey.Players)){
-					listModel.addElement( player);
+				if( listModel!=null){
+					listModel.removeAllElements();
+					for( PlayerInfo player: (PlayerInfo[])update.getData( UpdateKey.Players)){
+						listModel.addElement( player);
+					}
 				}
 				break;
 			default:
