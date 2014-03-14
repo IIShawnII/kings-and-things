@@ -3,6 +3,8 @@ package client.gui;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
 
@@ -28,11 +30,11 @@ import static common.Constants.BYPASS_LOBBY;
  * client GUI to hold all and display all game related information
  */
 @SuppressWarnings("serial")
-public class ClientGUI extends JFrame implements Runnable{
+public class ClientGUI extends JFrame implements Runnable, ActionListener{
 
 	private PlayerInfo[] players;
 	private MultiBoardManager boards;
-	private JComboBox< Object> jcbPlayers;
+	private JComboBox< PlayerInfo> jcbPlayers;
 	
 	/**
 	 * construct Client GUI
@@ -91,13 +93,9 @@ public class ClientGUI extends JFrame implements Runnable{
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 
-		while(boards==null){
-			try {
-				Thread.sleep(20);
-			} catch ( InterruptedException e) {}
-		}
-		boards.setProperties( jpMain, constraints);
-		boards.showBoard( 0);
+		boards = new MultiBoardManager( jpMain, constraints);
+		boards.creatBoards( players);
+		boards.show( -1);
 
 		JScrollPane jsp = new JScrollPane( jpMain);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -113,7 +111,8 @@ public class ClientGUI extends JFrame implements Runnable{
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.anchor = GridBagConstraints.FIRST_LINE_START;
 		
-		jcbPlayers = new JComboBox<>( new Object[]{ 1,2,3,4});
+		jcbPlayers = new JComboBox<>();
+		jcbPlayers.addActionListener( this);
 		constraints.gridx = 0;
 		constraints.gridwidth = 3;
 		constraints.weightx = 1;
@@ -127,17 +126,22 @@ public class ClientGUI extends JFrame implements Runnable{
 		return jmb;
 	}
 	
+	private void close(){
+		new UpdatePackage( UpdateInstruction.End, "GUI.Close", this).postInternalEvent();
+		dispose();
+	}
+
+	@Override
+	public void actionPerformed( ActionEvent e) {
+		boards.show( ((PlayerInfo)jcbPlayers.getSelectedItem()).getID());
+	}
+	
 	private class WindowListener extends WindowAdapter{
 		
 		@Override
 		public void windowClosing(WindowEvent e){
 			close();
 		}
-	}
-	
-	private void close(){
-		new UpdatePackage( UpdateInstruction.End, "GUI.Close", this).postInternalEvent();
-		dispose();
 	}
 	
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
@@ -154,20 +158,15 @@ public class ClientGUI extends JFrame implements Runnable{
 	
 	private void changeBoad( UpdatePackage update){
 		switch( update.peekFirstInstruction()){
-			case Start:
-				Integer count = (Integer)update.getData( UpdateKey.PlayerCount);
-				if( boards==null){
-					boards = new MultiBoardManager();
-					boards.creatBoards( count, players);
-				}
 			case UpdatePlayers:
 				players = (PlayerInfo[])update.getData( UpdateKey.Players);
+				if( jcbPlayers!=null){
+					for(PlayerInfo player:players){
+						jcbPlayers.addItem( player);
+					}
+				}
 				break;
 			default:
 		}
-	}
-	
-	public void PlayerChanged( PlayerInfo player){
-		
 	}
 }

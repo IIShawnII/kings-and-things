@@ -179,6 +179,10 @@ public class Board extends JPanel{
 		currentPlayer = player;
 	}
 	
+	public boolean matchPlayer( final int ID){
+		return currentPlayer.getID()==ID;
+	}
+	
 	/**
 	 * add a tile to the board
 	 * @param tile - tile to be added, must not be null
@@ -287,6 +291,9 @@ public class Board extends JPanel{
 		Point end;
 		Dimension size;
 		for( Tile tile : tiles){
+			if( tile==null){
+				continue;
+			}
 			size = tile.getSize();
 			end = tile.getDestination();
 			tile.setLocation( end.x-size.width/2, end.y-size.height/2);

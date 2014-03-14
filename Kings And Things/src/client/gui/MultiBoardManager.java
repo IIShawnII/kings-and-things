@@ -12,29 +12,25 @@ public class MultiBoardManager {
 
 	private Board[] boards;
 	private JPanel container;
+	private Board currentBoard = null;
 	private GridBagConstraints constraints;
-	private int current = -1;
+	private int currentID = -1;
 	private boolean created = false;
 	
 	public MultiBoardManager( JPanel container, GridBagConstraints constraints){
 		setProperties( container, constraints);
 	}
 	
-	public MultiBoardManager(){}
-	
-	public void creatBoards( final int count, final PlayerInfo[] players){
-		if( count<=1 || count>=5){
-			throw new IllegalArgumentException( "Error - Count must be between 2 and 4");
-		}
+	public void creatBoards(final PlayerInfo[] players){
 		if(created){
 			return;
 		}
-		boards = new Board[count];
-		for( int i=0; i<count; i++){
+		boards = new Board[players.length];
+		for( int i=0; i<boards.length; i++){
 			boards[ i] = new Board( null);
 			boards[ i].setPreferredSize( BOARD_SIZE);
 			boards[ i].setSize( BOARD_SIZE);
-			boards[ i].init( count);
+			boards[ i].init( boards.length);
 			boards[ i].setCurrentPlayer( players[i]);
 		}
 		created = true;
@@ -48,17 +44,30 @@ public class MultiBoardManager {
 		this.constraints = constraints;
 	}
 	
-	public void showBoard( int index){
-		if(current==index){
+	public void show( final int ID){
+		if( ID==-1){
+			//only for initial initiation
+			setNewBoard( ID, boards[0]);
+		}
+		if(currentID==ID){
 			return;
 		}
-		if( current>=0){
-			boards[index].setActive( false);
-			container.remove( boards[current]);
+		for( Board board:boards){
+			if( board.matchPlayer( ID)){
+				if(	currentBoard!=null){
+					container.remove( currentBoard);
+					currentBoard.setActive( false);
+				}
+				setNewBoard( ID, board);
+			}
 		}
-		current = index;
-		boards[index].setActive( true);
-		container.add( boards[index], constraints);
+	}
+	
+	private void setNewBoard( final int ID, Board board){
+		currentID = ID;
+		currentBoard = board;
+		currentBoard.setActive( true);
+		container.add( currentBoard, constraints);
 		container.revalidate();
 	}
 }
