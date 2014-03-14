@@ -5,6 +5,7 @@ import java.util.List;
 
 import server.event.commands.DiceRolled;
 import server.event.commands.EndPlayerTurnCommand;
+import server.event.commands.PlayerWaivedRetreat;
 import server.event.commands.RollDiceCommand;
 import server.event.commands.SetupPhaseComplete;
 import server.logic.exceptions.NoMoreTilesException;
@@ -14,6 +15,7 @@ import server.logic.game.RollModification;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;
@@ -58,7 +60,14 @@ public abstract class CommandHandler
 	 */
 	public void endPlayerTurn(int playerNumber){
 		CommandValidator.validateCanEndPlayerTurn(playerNumber, currentState);
-		advanceActivePhasePlayer();
+		if(currentState.getCurrentCombatPhase() == CombatPhase.ATTACKER_RETREAT || currentState.getCurrentCombatPhase() == CombatPhase.DEFENDER_RETREAT)
+		{
+			new PlayerWaivedRetreat(this).postInternalEvent(playerNumber);
+		}
+		else
+		{
+			advanceActivePhasePlayer();
+		}
 	}
 
 	/**

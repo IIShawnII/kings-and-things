@@ -67,6 +67,11 @@ public abstract class CombatPhaseValidator
 	public static void validateCanApplyHits(ITileProperties thing, int playerNumber, int hitCount, GameState currentState)
 	{
 		CommandValidator.validateNoPendingRolls(currentState);
+		if(currentState.getCurrentCombatPhase() != CombatPhase.APPLY_MAGIC_HITS && currentState.getCurrentCombatPhase() != CombatPhase.APPLY_MELEE_HITS
+				&& currentState.getCurrentCombatPhase() != CombatPhase.APPLY_RANGED_HITS)
+		{
+			throw new IllegalStateException("Can not apply hits to creatures during the: " + currentState.getCurrentCombatPhase() + " combat phase.");
+		}
 		if(currentState.getHitsOnPlayer(playerNumber) < hitCount)
 		{
 			throw new IllegalArgumentException("You do not need to apply that many hits to your creatures");

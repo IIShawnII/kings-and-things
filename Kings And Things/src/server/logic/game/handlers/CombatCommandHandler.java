@@ -1,18 +1,22 @@
 package server.logic.game.handlers;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import server.event.commands.ApplyHitsCommand;
 import server.event.commands.DiceRolled;
+import server.event.commands.PlayerWaivedRetreat;
 import server.event.commands.ResolveCombat;
+import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.Player;
 import server.logic.game.validators.CombatPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants.Ability;
+import common.Constants.BuildableBuilding;
+import common.Constants.Building;
 import common.Constants.CombatPhase;
 import common.Constants.RollReason;
 import common.Logger;
@@ -70,6 +74,13 @@ public class CombatCommandHandler extends CommandHandler
 		}
 		else
 		{
+			for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+			{
+				if(!tp.isFaceUp())
+				{
+					tp.flip();
+				}
+			}
 			getCurrentState().setDefendingPlayerNumber(defender.getID());
 			getCurrentState().setCurrentCombatPhase(CombatPhase.SELECT_TARGET_PLAYER);
 			advanceToNextCombatPhase();
@@ -88,14 +99,10 @@ public class CombatCommandHandler extends CommandHandler
 		if(thing.getValue() == 0 || !thing.hasAbility(Ability.Armor))
 		{
 			//buildings are now neutralized
-			if(thing.isBuilding())
+			//TODO let user choose to flip if it's a special character
+			thing.flip();
+			if(!thing.isBuilding())
 			{
-				thing.flip();
-			}
-			else
-			{
-				//TODO let user choose to flip if it's a special character
-				thing.flip();
 				thing.resetValue();
 				if(thing.isSpecialCharacter())
 				{
@@ -106,7 +113,11 @@ public class CombatCommandHandler extends CommandHandler
 					getCurrentState().getCup().reInsertTile(thing);
 				}
 				player.removeOwnedThingOnBoard(thing);
-				getCurrentState().getCombatHex().removeThingFromHex(thing);
+				boolean success = getCurrentState().getCombatHex().removeThingFromHex(thing);
+				if(!success)
+				{
+					throw new IllegalStateException("Unable to remove combat creature from hex");
+				}
 			}
 			HexStatesChanged notification = new HexStatesChanged(1);
 			notification.getArray()[0] = getCurrentState().getCombatHex();
@@ -115,9 +126,111 @@ public class CombatCommandHandler extends CommandHandler
 		
 		getCurrentState().removeHitsFromPlayer(playerNumber, hitCount);
 		
-		if(!getCurrentState().hitsToApply())
+		boolean someoneNeedsToApplyHits = false;
+		HashSet<Integer> playersStillInCombat = new HashSet<Integer>();
+		for(Player p : getCurrentState().getPlayers())
+		{
+			for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+			{
+				if(p.ownsThingOnBoard(tp))
+				{
+					playersStillInCombat.add(p.getID());
+					if(getCurrentState().getHitsOnPlayer(p.getID())>0)
+					{
+						someoneNeedsToApplyHits = true;
+					}
+				}
+			}
+			if(someoneNeedsToApplyHits && playersStillInCombat.size()>1)
+			{
+				break;
+			}
+		}
+		
+		if(!someoneNeedsToApplyHits)
+		{
+			if(playersStillInCombat.size()>1)
+			{
+				advanceToNextCombatPhase();
+			}
+			else
+			{
+				getCurrentState().removeAllHitsFromAllPlayers();
+				getCurrentState().setCurrentCombatPhase(CombatPhase.DETERMINE_DAMAGE);
+				for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+				{
+					if(tp.isFaceUp() && tp.isCreature() && !tp.isSpecialCharacter())
+					{
+						tp.flip();
+					}
+				}
+				Player oldOwner = null;
+				Player newOwner = null;
+				for(Player p : getCurrentState().getPlayers())
+				{
+					if(p.ownsHex(getCurrentState().getCombatHex().getHex()))
+					{
+						oldOwner = p;
+						break;
+					}
+				}
+				for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+				{
+					for(Player p : getCurrentState().getPlayers())
+					{
+						if(p.ownsThingOnBoard(tp))
+						{
+							newOwner = p;
+							break;
+						}
+					}
+				}
+				if(newOwner != null && !oldOwner.equals(newOwner))
+				{
+					oldOwner.removeHexFromOwnership(getCurrentState().getCombatHex().getHex());
+					newOwner.addOwnedHex(getCurrentState().getCombatHex().getHex());
+					if(getCurrentState().getCombatHex().hasSpecialIncomeCounter())
+					{
+						oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getSpecialIncomeCounter());
+						newOwner.addOwnedThingOnBoard(getCurrentState().getCombatHex().getSpecialIncomeCounter());
+					}
+					if(getCurrentState().getCombatHex().hasBuilding())
+					{
+						oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
+						newOwner.addOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
+					}
+				}
+				if(getCurrentState().getCombatHex().hasSpecialIncomeCounter())
+				{
+					getCurrentState().addNeededRoll(new Roll(1,getCurrentState().getCombatHex().getSpecialIncomeCounter(),RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
+				}
+				if(getCurrentState().getCombatHex().hasBuilding())
+				{
+					ITileProperties building = getCurrentState().getCombatHex().getBuilding();
+					if(!building.getName().equals(Building.Citadel.name()))
+					{
+						getCurrentState().addNeededRoll(new Roll(1,building,RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
+					}
+				}
+			}
+		}
+	}
+	
+	private void playerWaivedRetreat(int playerNumber)
+	{
+		if(getCurrentState().getCurrentCombatPhase() == CombatPhase.ATTACKER_RETREAT)
 		{
 			advanceToNextCombatPhase();
+		}
+		else if(getCurrentState().getCurrentCombatPhase() == CombatPhase.DEFENDER_RETREAT)
+		{
+			//wrap around to magic attack
+			getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(CombatPhase.MAGIC_ATTACK.ordinal()-1));
+			advanceToNextCombatPhase();
+		}
+		else
+		{
+			throw new IllegalStateException("No one has the option of retreating.");
 		}
 	}
 	
@@ -129,10 +242,6 @@ public class CombatCommandHandler extends CommandHandler
 		HexState combatHex = getCurrentState().getCombatHex();
 		getCurrentState().setCurrentCombatPhase(nextPhase);
 		Set<ITileProperties> things = combatHex.getFightingThingsInHex();
-		if(nextPhase == CombatPhase.RETREAT)
-		{
-			nextPhase = CombatPhase.MAGIC_ATTACK;
-		}
 		if(nextPhase == CombatPhase.MAGIC_ATTACK || nextPhase == CombatPhase.RANGED_ATTACK || nextPhase == CombatPhase.MELEE_ATTACK)
 		{
 			for(ITileProperties thing : things)
@@ -176,6 +285,7 @@ public class CombatCommandHandler extends CommandHandler
 	{
 		ArrayList<Roll> handledRolls = new ArrayList<Roll>();
 		boolean attackedWithCreature = false;
+		boolean determinedDamage = false;
 		for(Roll r : getCurrentState().getFinishedRolls())
 		{
 			switch(r.getRollReason())
@@ -215,9 +325,55 @@ public class CombatCommandHandler extends CommandHandler
 					break;
 				}
 				case CALCULATE_DAMAGE_TO_TILE:
+				{
 					handledRolls.add(r);
-					//TODO handle
+					determinedDamage = true;
+					int roll = r.getFinalRolls().get(0);
+					if(roll == 1 || roll == 6)
+					{
+						ITileProperties rollTarget = r.getRollTarget();
+						Player owningPlayer = null;
+						for(Player p : getCurrentState().getPlayers())
+						{
+							if(p.ownsThingOnBoard(rollTarget))
+							{
+								owningPlayer = p;
+								break;
+							}
+						}
+						owningPlayer.removeOwnedThingOnBoard(rollTarget);
+						getCurrentState().getCombatHex().removeThingFromHex(rollTarget);
+						if(rollTarget.isSpecialIncomeCounter())
+						{
+							getCurrentState().getCup().reInsertTile(rollTarget);
+						}
+						else if(!rollTarget.getName().equals(Building.Tower) && rollTarget.isBuildableBuilding())
+						{
+							if(rollTarget.getName().equals(BuildableBuilding.Castle))
+							{
+								ITileProperties newBuilding = BuildableBuildingGenerator.createBuildingTileForType(BuildableBuilding.Keep);
+								getCurrentState().getCombatHex().addThingToHex(newBuilding);
+								owningPlayer.addOwnedThingOnBoard(newBuilding);
+							}
+							else if(rollTarget.getName().equals(BuildableBuilding.Keep))
+							{
+								ITileProperties newBuilding = BuildableBuildingGenerator.createBuildingTileForType(BuildableBuilding.Tower);
+								getCurrentState().getCombatHex().addThingToHex(newBuilding);
+								owningPlayer.addOwnedThingOnBoard(newBuilding);
+							}
+							else
+							{
+								throw new IllegalStateException("Unrecognized building type: " + rollTarget.getName());
+							}
+						}
+					}
+					if(getCurrentState().getCombatHex().hasBuilding() && !getCurrentState().getCombatHex().getBuilding().isFaceUp())
+					{
+						getCurrentState().getCombatHex().getBuilding().flip();
+						getCurrentState().getCombatHex().getBuilding().resetValue();
+					}
 					break;
+				}
 				case EXPLORE_HEX:
 				{
 					handledRolls.add(r);
@@ -239,22 +395,42 @@ public class CombatCommandHandler extends CommandHandler
 		}
 		if(attackedWithCreature)
 		{
-			int nextOrdinal = getCurrentState().getCurrentCombatPhase().ordinal() + 1;
-			for(CombatPhase phase : CombatPhase.values())
-			{
-				if(phase.ordinal() == nextOrdinal)
-				{
-					getCurrentState().setCurrentCombatPhase(phase);
-				}
-			}
+			getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(getCurrentState().getCurrentCombatPhase().ordinal() + 1));
 			if(!getCurrentState().hitsToApply())
 			{
 				advanceToNextCombatPhase();
 			}
 		}
+		if(determinedDamage)
+		{
+			for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+			{
+				if(!tp.isFaceUp() && tp.isBuilding())
+				{
+					tp.flip();
+				}
+			}
+			getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(getCurrentState().getCurrentCombatPhase().ordinal() + 1));
+		}
 		for(Roll r : handledRolls)
 		{
 			getCurrentState().removeRoll(r);
+		}
+	}
+	
+	@Subscribe
+	public void receivePlayerWaivedRetreat(PlayerWaivedRetreat event)
+	{
+		if(event.isUnhandled())
+		{
+			try
+			{
+				playerWaivedRetreat(event.getID());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process PlayerWaivedRetreat due to: ", t);
+			}
 		}
 	}
 	

@@ -1,9 +1,11 @@
 package server.logic.game;
 
 import common.Constants;
+import common.Constants.Ability;
 import common.Constants.BuildableBuilding;
 import common.game.ITileProperties;
 import common.game.TileProperties;
+import common.game.TwoSidedTileProperties;
 
 public abstract class BuildableBuildingGenerator
 {
@@ -11,22 +13,29 @@ public abstract class BuildableBuildingGenerator
 	
 	public static ITileProperties createBuildingTileForType(BuildableBuilding building)
 	{
-		ITileProperties baseBuilding = null;
+		TileProperties buildingFaceUp = null;
+		TileProperties buildingFaceDown = null;
 		
-		for(ITileProperties tp : Constants.BUILDING.values())
+		for(TileProperties tp : Constants.BUILDING.values())
 		{
 			if(tp.getName().equals(building.name()))
 			{
-				baseBuilding = tp;
-				break;
+				if(tp.hasAbility(Ability.Neutralised))
+				{
+					buildingFaceDown = tp;
+				}
+				else
+				{
+					buildingFaceUp = tp;
+				}
 			}
 		}
 		
-		if(baseBuilding == null)
+		if(buildingFaceUp == null || buildingFaceDown == null)
 		{
 			throw new IllegalArgumentException("No building tiles found for type: " + building);
 		}
 		
-		return new TileProperties((TileProperties) baseBuilding,id++);
+		return new TwoSidedTileProperties(new TileProperties(buildingFaceUp,id++),new TileProperties(buildingFaceUp,id++));
 	}
 }

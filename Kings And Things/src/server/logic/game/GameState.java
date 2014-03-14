@@ -492,6 +492,17 @@ public class GameState
 		int totalHits = hitsToApply.get(playerNumber) - hitCount;
 		hitsToApply.put(playerNumber, totalHits);
 	}
+
+	/**
+	 * Remove all recorded combat hits against all players
+	 */
+	public void removeAllHitsFromAllPlayers()
+	{
+		for(Player p : players)
+		{
+			hitsToApply.put(p.getID(), 0);
+		}
+	}
 	
 	/**
 	 * Clears the list of rolls that need to

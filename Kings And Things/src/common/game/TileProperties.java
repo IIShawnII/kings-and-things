@@ -12,10 +12,11 @@ import common.Constants.Restriction;
 public class TileProperties implements ITileProperties{
 
 	private static final long serialVersionUID = 3896952672735323992L;
+	private static long counter;
 	
 	private int number;
 	private int value;
-	private final int baseValue;
+	private int baseValue;
 	private int moveSpeed;
 	private String name;
 	private boolean hasFlip;
@@ -25,6 +26,8 @@ public class TileProperties implements ITileProperties{
 	private ArrayList< Restriction> restrictions;
 	private Category tileType;
 	private Biome biome;
+	
+	private final long id;
 	
 	private boolean fake = false;
 	
@@ -38,6 +41,8 @@ public class TileProperties implements ITileProperties{
 		baseValue = 0;
 		this.abilities = new ArrayList<>();
 		this.restrictions = new ArrayList<>();
+		isFaceUp = true;
+		id = counter++;
 	}
 	
 	TileProperties(){
@@ -58,13 +63,14 @@ public class TileProperties implements ITileProperties{
 		this.name = name;
 		this.hasFlip = true;
 		this.value = attack;
-		baseValue = value;
+		baseValue = attack;
 		this.number = number;
 		this.specialFlip = false;
 		this.abilities = abilities==null? new ArrayList<Ability>() : new ArrayList<>( abilities);
 		this.restrictions = restrictions==null? new ArrayList<Restriction>() : new ArrayList<>( restrictions);
 		isFaceUp = specialFlip;
 		biome = null;
+		id = counter++;
 	}
 	
 	@Override
@@ -93,6 +99,11 @@ public class TileProperties implements ITileProperties{
 	@Override
 	public int getValue() {
 		return value;
+	}
+	
+	void setBaseValue(int value)
+	{
+		baseValue = value;
 	}
 
 	@Override
@@ -264,14 +275,7 @@ public class TileProperties implements ITileProperties{
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + number;
-		result = prime * result + value;
-		result = prime * result + (name==null?0:name.hashCode());
-		result = prime * result + (abilities==null?0:abilities.hashCode());
-		result = prime * result + (restrictions==null?0:restrictions.hashCode());
-		return result;
+		return new Long(id).hashCode();
 	}
 
 	@Override
@@ -283,10 +287,7 @@ public class TileProperties implements ITileProperties{
 			return false;
 		}
 		TileProperties other = (TileProperties) obj;
-		if ( number != other.number || value != other.value || (name!=null&&!name.equals( other.name))  || !(restrictions.equals( other.restrictions)) || !(abilities.equals( other.abilities))) {
-			return false;
-		}
-		return true;
+		return id==other.id;
 	}
 	
 	@Override

@@ -77,6 +77,43 @@ public abstract class CommandValidator
 		{
 			CommandValidator.validateIsPlayerActive(playerNumber, currentState);
 		}
+		else
+		{
+			if(currentState.getCombatHex().getThingsInHexOwnedByPlayer(currentState.getPlayerByPlayerNumber(playerNumber)).size()==0
+					&& !currentState.getPlayerByPlayerNumber(playerNumber).ownsHex(currentState.getCombatHex().getHex()))
+			{
+				throw new IllegalStateException("It is not " + currentState.getPlayerByPlayerNumber(playerNumber) + " turn to move.");
+			}
+			switch(currentState.getCurrentCombatPhase())
+			{
+				case ATTACKER_RETREAT:
+				{
+					if(currentState.getPlayerByPlayerNumber(playerNumber).ownsHex(currentState.getCombatHex().getHex()))
+					{
+						throw new IllegalStateException("The attackers must choose to retreat or fight before the defender.");
+					}
+					break;
+				}
+				case DEFENDER_RETREAT:
+				{
+					if(!currentState.getPlayerByPlayerNumber(playerNumber).ownsHex(currentState.getCombatHex().getHex()))
+					{
+						throw new IllegalStateException("Only the defender may choose to retreat or fight at this time.");
+					}
+					break;
+				}
+				case PLACE_THINGS:
+				{
+					if(!currentState.getPlayerByPlayerNumber(playerNumber).ownsHex(currentState.getCombatHex().getHex()))
+					{
+						throw new IllegalStateException("Only the hex owner may place things in the hex after combat");
+					}
+					break;
+				}
+				default:
+					break;
+			}
+		}
 		switch(currentState.getCurrentSetupPhase())
 		{
 			case PICK_FIRST_HEX:
@@ -107,6 +144,22 @@ public abstract class CommandValidator
 			}
 			case NO_COMBAT:
 				break;
+			case ATTACKER_RETREAT:
+			{
+				if(currentState.getPlayerByPlayerNumber(playerNumber).ownsHex(currentState.getCombatHex().getHex()))
+				{
+					throw new IllegalStateException("Attackers must decide whether or not to retreat first.");
+				}
+				break;
+			}
+			case DEFENDER_RETREAT:
+			{
+				if(!currentState.getPlayerByPlayerNumber(playerNumber).ownsHex(currentState.getCombatHex().getHex()))
+				{
+					throw new IllegalStateException("It is not " + currentState.getPlayerByPlayerNumber(playerNumber) + " turn to move.");
+				}
+				break;
+			}
 			default:
 				throw new IllegalStateException("You must resolve the combat in the hex before ending your turn");
 			

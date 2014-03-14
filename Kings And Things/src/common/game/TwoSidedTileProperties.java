@@ -13,11 +13,13 @@ public class TwoSidedTileProperties implements ITileProperties {
 	private boolean isFaceUp;
 	private final TileProperties faceUp;	// keeps track of the face up property of tile
 	private final TileProperties faceDown;  // keeps track of the face up property of tile
+	private final int hashCode;
 	
 	public TwoSidedTileProperties (TileProperties faceUp, TileProperties faceDown) {
 		this.faceUp = faceUp;
 		this.faceDown = faceDown;
 		isFaceUp = true;
+		hashCode = calculateHashCode();
 	}
 
 	@Override
@@ -49,20 +51,14 @@ public class TwoSidedTileProperties implements ITileProperties {
 
 	@Override
 	public void setValue(int value) {
-		if (isFaceUp()) {
-			faceUp.setValue(value);
-		} else {
-			faceDown.setValue(value);
-		}
+		faceUp.setValue(value);
+		faceDown.setValue(value);
 	}
 
 	@Override
 	public void resetValue() {
-		if (isFaceUp()) {
-			faceUp.resetValue();
-		} else {
-			faceDown.resetValue();
-		}
+		faceUp.resetValue();
+		faceDown.resetValue();
 	}
 
 	@Override
@@ -169,14 +165,19 @@ public class TwoSidedTileProperties implements ITileProperties {
 		return faceUp.getRestriction(index);
 	}
 
-	@Override
-	public int hashCode() {
+	private int calculateHashCode()
+	{
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + faceUp.hashCode();
 		result = prime * result + faceDown.hashCode();
 		result = prime * result + (isFaceUp? 1 : 0);
 		return result;
+	}
+	
+	@Override
+	public int hashCode() {
+		return hashCode;
 	}
 
 	@Override
@@ -188,7 +189,7 @@ public class TwoSidedTileProperties implements ITileProperties {
 			return false;
 		}
 		TwoSidedTileProperties o = (TwoSidedTileProperties) obj;
-		return o.faceDown.equals(faceDown) && faceUp.equals(o.faceUp) && isFaceUp == o.isFaceUp;
+		return o.hashCode==o.hashCode;
 	}
 
 	@Override
