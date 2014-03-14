@@ -96,6 +96,10 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 		boards = new MultiBoardManager( jpMain, constraints);
 		boards.creatBoards( players);
 		boards.show( -1);
+		
+		for(PlayerInfo player:players){
+			jcbPlayers.addItem( player);
+		}
 
 		JScrollPane jsp = new JScrollPane( jpMain);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -114,13 +118,12 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 		jcbPlayers = new JComboBox<>();
 		jcbPlayers.addActionListener( this);
 		constraints.gridx = 0;
-		constraints.gridwidth = 3;
 		constraints.weightx = 1;
 		jmb.add( jcbPlayers, constraints);
 		
 		JCheckBox jcbActive = new JCheckBox( "Active", true);
-		constraints.gridx = 3;
-		constraints.weightx = 1.3;
+		constraints.gridx = 1;
+		constraints.weightx = 1;
 		jmb.add( jcbActive, constraints);
 		
 		return jmb;
@@ -160,11 +163,6 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 		switch( update.peekFirstInstruction()){
 			case UpdatePlayers:
 				players = (PlayerInfo[])update.getData( UpdateKey.Players);
-				if( jcbPlayers!=null){
-					for(PlayerInfo player:players){
-						jcbPlayers.addItem( player);
-					}
-				}
 				break;
 			default:
 		}

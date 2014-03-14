@@ -69,5 +69,6 @@ public class MultiBoardManager {
 		currentBoard.setActive( true);
 		container.add( currentBoard, constraints);
 		container.revalidate();
+		container.repaint();
 	}
 }
