@@ -336,7 +336,12 @@ public class HexBoard
 			Set<Player> playersInHex = new HashSet<Player>();
 			for(Player p : players)
 			{
-				if(p.ownsHex(hs.getHex()) || hs.getThingsInHexOwnedByPlayer(p).size() > 0)
+				boolean playerHasThingsInHex = hs.getThingsInHexOwnedByPlayer(p).size() > 0;
+				if(!p.ownsHex(hs.getHex()) && playerHasThingsInHex)
+				{
+					contestedHexes.add(hs);
+				}
+				else if(p.ownsHex(hs.getHex()))
 				{
 					playersInHex.add(p);
 				}

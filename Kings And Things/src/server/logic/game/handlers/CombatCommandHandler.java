@@ -347,15 +347,15 @@ public class CombatCommandHandler extends CommandHandler
 						{
 							getCurrentState().getCup().reInsertTile(rollTarget);
 						}
-						else if(!rollTarget.getName().equals(Building.Tower) && rollTarget.isBuildableBuilding())
+						else if(!rollTarget.getName().equals(Building.Tower.name()) && rollTarget.isBuildableBuilding())
 						{
-							if(rollTarget.getName().equals(BuildableBuilding.Castle))
+							if(rollTarget.getName().equals(BuildableBuilding.Castle.name()))
 							{
 								ITileProperties newBuilding = BuildableBuildingGenerator.createBuildingTileForType(BuildableBuilding.Keep);
 								getCurrentState().getCombatHex().addThingToHex(newBuilding);
 								owningPlayer.addOwnedThingOnBoard(newBuilding);
 							}
-							else if(rollTarget.getName().equals(BuildableBuilding.Keep))
+							else if(rollTarget.getName().equals(BuildableBuilding.Keep.name()))
 							{
 								ITileProperties newBuilding = BuildableBuildingGenerator.createBuildingTileForType(BuildableBuilding.Tower);
 								getCurrentState().getCombatHex().addThingToHex(newBuilding);

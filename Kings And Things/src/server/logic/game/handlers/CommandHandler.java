@@ -75,13 +75,15 @@ public abstract class CommandHandler
 	 * @param reasonForRoll The reason for this dice roll
 	 * @param playerNumber The player who sent the command
 	 * @param tile The target of the role, (could be hex, creature, building etc)
+	 * @param rollValue The desired outcome of the roll, this value is ignored unless
+	 * we are running in demo mode
 	 * @throws IllegalArgumentException If the game is not currently waiting for any
 	 * rolls, and the reason for rolling is not RollReason.ENTERTAINMENT
 	 */
-	public void rollDice(RollReason reasonForRoll, int playerNumber, ITileProperties tile)
+	public void rollDice(RollReason reasonForRoll, int playerNumber, ITileProperties tile, int rollValue)
 	{
 		CommandValidator.validateCanRollDice(reasonForRoll, playerNumber, tile, currentState);
-		makeDiceRoll(reasonForRoll, playerNumber, tile);
+		makeDiceRoll(reasonForRoll, playerNumber, tile, rollValue);
 	}
 
 	protected final GameState getCurrentState()
@@ -319,7 +321,7 @@ public abstract class CommandHandler
 		}
 	}
 
-	private void makeDiceRoll(RollReason reasonForRoll, int playerNumber, ITileProperties tile)
+	private void makeDiceRoll(RollReason reasonForRoll, int playerNumber, ITileProperties tile, int rollValue)
 	{
 		if(reasonForRoll == RollReason.ENTERTAINMENT)
 		{
@@ -341,7 +343,7 @@ public abstract class CommandHandler
 			currentState.addNeededRoll(rollToAddTo);
 		}
 
-		rollToAddTo.addBaseRoll(rollDie());
+		rollToAddTo.addBaseRoll(rollDie(rollValue));
 		if(currentState.hasRollModificationFor(rollToAddTo))
 		{
 			List<RollModification> modifications = currentState.getRollModificationsFor(rollToAddTo);
@@ -361,9 +363,9 @@ public abstract class CommandHandler
 		}
 	}
 
-	private int rollDie()
+	private int rollDie(int rollValue)
 	{
-		return isDemoMode? 3 : (int) Math.round((Math.random() * 5) + 1);
+		return isDemoMode? rollValue : (int) Math.round((Math.random() * 5) + 1);
 	}
 	
 	@Subscribe
@@ -396,7 +398,7 @@ public abstract class CommandHandler
 		{
 			try
 			{
-				rollDice(command.getReasonForRoll(), command.getID(), command.getTileToRollFor());
+				rollDice(command.getReasonForRoll(), command.getID(), command.getTileToRollFor(), command.getRollValue());
 			}
 			catch(Throwable t)
 			{
