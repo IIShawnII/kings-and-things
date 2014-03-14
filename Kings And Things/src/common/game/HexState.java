@@ -214,17 +214,18 @@ public class HexState implements Serializable{
 	/**
 	 * This method checks if a tile can be added to this hex and throws exceptions if not.
 	 * @param tile The tile to add
+	 * @param checkBuildingLimit Set to true to check fort number limit
 	 * @throws IllegalArgumentException if tile is null,
 	 * or can not be added due to game rules
 	 */
-	public void validateCanAddThingToHex(ITileProperties tile)
+	public void validateCanAddThingToHex(ITileProperties tile, boolean checkBuildingLimit)
 	{
 		validateTileNotNull(tile);
 		if(!tile.isCreature() && !tile.isSpecialIncomeCounter() && !tile.isBuilding())
 		{
 			throw new IllegalArgumentException("Can not place " + tile.getName() + " onto the board");
 		}
-		if(tile.isBuilding() && hasBuilding())
+		if(checkBuildingLimit && tile.isBuilding() && hasBuilding())
 		{
 			throw new IllegalArgumentException("Can not add more than one building to a hex");
 		}

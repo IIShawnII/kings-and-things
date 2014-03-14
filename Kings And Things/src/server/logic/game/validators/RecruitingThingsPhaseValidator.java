@@ -134,6 +134,6 @@ public abstract class RecruitingThingsPhaseValidator
 		stuff.add(thing);
 		CommandValidator.validateCreatureLimitInHexNotExceeded(playerNumber,hex,currentState,stuff);
 		
-		hs.validateCanAddThingToHex(thing);
+		hs.validateCanAddThingToHex(thing,true);
 	}
 }

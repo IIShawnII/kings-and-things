@@ -34,7 +34,8 @@ public abstract class ConstructBuildingCommandValidator
 		}
 		
 		Player owningPlayer = currentState.getPlayerByPlayerNumber(playerNumber);
-		hexState.validateCanAddThingToHex(BuildableBuildingGenerator.createBuildingTileForType(building));
+		hexState.validateCanAddThingToHex(BuildableBuildingGenerator.createBuildingTileForType(building),false);
+		
 		
 		if(!owningPlayer.ownsHex(hex))
 		{
@@ -74,19 +75,19 @@ public abstract class ConstructBuildingCommandValidator
 			//Checks if player is correctly upgrading
 			switch (building) {
 			case Keep:
-				if (hexState.getBuilding() == null || hexState.getBuilding().getName().equals(BuildableBuilding.Tower.name()))
+				if (hexState.getBuilding() == null || !hexState.getBuilding().getName().equals(BuildableBuilding.Tower.name()))
 				{
 					throw new IllegalArgumentException("Can't build keep unless you have a tower");
 				}
 				break;
 			case Castle:
-				if (hexState.getBuilding() == null || hexState.getBuilding().getName().equals(BuildableBuilding.Keep.name()))
+				if (hexState.getBuilding() == null || !hexState.getBuilding().getName().equals(BuildableBuilding.Keep.name()))
 				{
 					throw new IllegalArgumentException("Can't build castle unless you have a keep");
 				}
 				break;
 			case Citadel:
-				if (hexState.getBuilding() == null || hexState.getBuilding().getName().equals(BuildableBuilding.Castle.name()))
+				if (hexState.getBuilding() == null || !hexState.getBuilding().getName().equals(BuildableBuilding.Castle.name()))
 				{
 					throw new IllegalArgumentException("Can't build citadel unless you have a castle");
 				}
