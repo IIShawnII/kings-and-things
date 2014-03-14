@@ -36,7 +36,7 @@ public abstract class CommandValidator
 		boolean rollNeeded = false;
 		for(Roll r : currentState.getRecordedRolls())
 		{
-			if(Roll.rollSatisfiesParameters(r, reasonForRoll, playerNumber, tileToRollFor))
+			if(Roll.rollSatisfiesParameters(r, reasonForRoll, playerNumber, tileToRollFor) && r.needsRoll())
 			{
 				rollNeeded = true;
 			}
