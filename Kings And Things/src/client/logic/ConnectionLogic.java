@@ -74,6 +74,7 @@ public class ConnectionLogic implements Runnable {
 				else if( event instanceof PlayerState){
 					//first data from server, with PlayerInfo object
 					player = ((PlayerState)event).getPlayer();
+					Thread.currentThread().setName( "Client " + player.getID() + " Logic");
 					update.setSource( "Logic.Run "+player.getID());
 				} 
 				else if( event instanceof HexPlacement){

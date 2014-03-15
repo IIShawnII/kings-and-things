@@ -123,7 +123,8 @@ public class Board extends JPanel{
 		g2d.dispose();
 	}
 	
-	private boolean phaseDone = false, isActive = false;
+	private volatile boolean phaseDone = false;
+	private volatile boolean isActive = false;
 
 	private LockManager locks;
 	private JTextField jtfStatus;
@@ -318,6 +319,7 @@ public class Board extends JPanel{
 		addTile( new Hex( new HexState()), new Rectangle(8,8,HEX_SIZE.width,HEX_SIZE.height), true);
 		if( !isActive){
 			noneAnimatedPlacement( setupHexesForPlacement( hexes));
+			phaseDone = true;
 		}else{
 			MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( hexes));
 	        animation.start();
@@ -330,6 +332,7 @@ public class Board extends JPanel{
 	private void animateRackPlacement(){
 		if( !isActive){
 			noneAnimatedPlacement( setupTilesForRack( null));
+			phaseDone = true;
 		}else{
 			MoveAnimation animation = new MoveAnimation( setupTilesForRack( null));
 			animation.start();
@@ -342,6 +345,7 @@ public class Board extends JPanel{
 	private void FlipAllHexes(){
 		if( !isActive){
 			noneAnimtedFlipAll();
+			phaseDone = true;
 		}else{
 			FlipAll flip = new FlipAll( getComponents());
 			flip.start();
@@ -426,7 +430,6 @@ public class Board extends JPanel{
 		}else if( update.isRegularPhase()){
 			manageRegularPhase( update.getRegular());
 		}*/
-		
 		while( !phaseDone){
 			try {
 				Thread.sleep( 100);
