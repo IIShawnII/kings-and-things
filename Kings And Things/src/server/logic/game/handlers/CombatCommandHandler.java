@@ -2,6 +2,7 @@ package server.logic.game.handlers;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -9,11 +10,13 @@ import server.event.commands.ApplyHitsCommand;
 import server.event.commands.DiceRolled;
 import server.event.commands.PlayerWaivedRetreat;
 import server.event.commands.ResolveCombat;
+import server.event.commands.TargetPlayerCommand;
 import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.Player;
 import server.logic.game.validators.CombatPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants.Ability;
 import common.Constants.BuildableBuilding;
 import common.Constants.Building;
@@ -47,6 +50,12 @@ public class CombatCommandHandler extends CommandHandler
 	{
 		CombatPhaseValidator.validateCanApplyHits(thing, playerNumber, hitCount, getCurrentState());
 		makeHitsApplied(thing,playerNumber,hitCount);
+	}
+	
+	public void setPlayersTarget(int playerNumber, int targetPlayerNumber)
+	{
+		CombatPhaseValidator.validateCanTargetPlayer(playerNumber, targetPlayerNumber, getCurrentState());
+		makePlayersTarget(playerNumber, targetPlayerNumber);
 	}
 
 	private void beginCombatResolution(ITileProperties hex, int playerNumber)
@@ -83,7 +92,11 @@ public class CombatCommandHandler extends CommandHandler
 			}
 			getCurrentState().setDefendingPlayerNumber(defender.getID());
 			getCurrentState().setCurrentCombatPhase(CombatPhase.SELECT_TARGET_PLAYER);
-			advanceToNextCombatPhase();
+			if(!needToChooseTargets(hex))
+			{
+				autoDetermineTargets();
+				advanceToNextCombatPhase();
+			}
 		}
 	}
 
@@ -127,36 +140,27 @@ public class CombatCommandHandler extends CommandHandler
 		getCurrentState().removeHitsFromPlayer(playerNumber, hitCount);
 		
 		boolean someoneNeedsToApplyHits = false;
-		HashSet<Integer> playersStillInCombat = new HashSet<Integer>();
 		for(Player p : getCurrentState().getPlayers())
 		{
-			for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+			if(getCurrentState().getHitsOnPlayer(p.getID())>0 && !getCurrentState().getPlayersStillFightingInCombatHex().contains(p))
 			{
-				if(p.ownsThingOnBoard(tp))
-				{
-					playersStillInCombat.add(p.getID());
-					if(getCurrentState().getHitsOnPlayer(p.getID())>0)
-					{
-						someoneNeedsToApplyHits = true;
-					}
-				}
+				getCurrentState().removeHitsFromPlayer(p.getID(), getCurrentState().getHitsOnPlayer(p.getID()));
 			}
-			if(someoneNeedsToApplyHits && playersStillInCombat.size()>1)
+			else if(getCurrentState().getHitsOnPlayer(p.getID())>0)
 			{
-				break;
+				someoneNeedsToApplyHits = true;
 			}
 		}
 		
 		if(!someoneNeedsToApplyHits)
 		{
-			if(playersStillInCombat.size()>1)
+			if(getCurrentState().getPlayersStillFightingInCombatHex().size()>1)
 			{
 				advanceToNextCombatPhase();
 			}
 			else
 			{
 				getCurrentState().removeAllHitsFromAllPlayers();
-				getCurrentState().setCurrentCombatPhase(CombatPhase.DETERMINE_DAMAGE);
 				for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
 				{
 					if(tp.isFaceUp() && tp.isCreature() && !tp.isSpecialCharacter())
@@ -212,26 +216,39 @@ public class CombatCommandHandler extends CommandHandler
 						getCurrentState().addNeededRoll(new Roll(1,building,RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
 					}
 				}
+				if(getCurrentState().isWaitingForRolls())
+				{
+					getCurrentState().setCurrentCombatPhase(CombatPhase.DETERMINE_DAMAGE);
+				}
+				else
+				{
+					getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
+				}
 			}
+		}
+	}
+	
+	private void makePlayersTarget(int playerNumber, int targetPlayerNumber)
+	{
+		getCurrentState().setPlayersTarget(playerNumber, targetPlayerNumber);
+		boolean someoneNeedsToSelectTarget = false;
+		for(Player p : getCurrentState().getPlayersStillFightingInCombatHex())
+		{
+			if(getCurrentState().getPlayersTarget(p.getID()) == null)
+			{
+				someoneNeedsToSelectTarget = true;
+				break;
+			}
+		}
+		if(!someoneNeedsToSelectTarget)
+		{
+			advanceToNextCombatPhase();
 		}
 	}
 	
 	private void playerWaivedRetreat(int playerNumber)
 	{
-		if(getCurrentState().getCurrentCombatPhase() == CombatPhase.ATTACKER_RETREAT)
-		{
-			advanceToNextCombatPhase();
-		}
-		else if(getCurrentState().getCurrentCombatPhase() == CombatPhase.DEFENDER_RETREAT)
-		{
-			//wrap around to magic attack
-			getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(CombatPhase.MAGIC_ATTACK.ordinal()-1));
-			advanceToNextCombatPhase();
-		}
-		else
-		{
-			throw new IllegalStateException("No one has the option of retreating.");
-		}
+		advanceToNextCombatPhase();
 	}
 	
 	private void advanceToNextCombatPhase()
@@ -252,7 +269,7 @@ public class CombatCommandHandler extends CommandHandler
 				{
 					for(Player p : getCurrentState().getPlayers())
 					{
-						if(p.ownsThingOnBoard(thing))
+						if(p.ownsThingOnBoard(thing) && getCurrentState().getPlayersStillFightingInCombatHex().contains(getCurrentState().getPlayersTarget(p.getID())))
 						{
 							int diceCount = thing.isSpecialCreatureWithAbility(Ability.Charge)? 2 : 1;
 							getCurrentState().addNeededRoll(new Roll(diceCount,thing,RollReason.ATTACK_WITH_CREATURE,p.getID()));
@@ -266,6 +283,59 @@ public class CombatCommandHandler extends CommandHandler
 				advanceToNextCombatPhase();
 			}
 		}
+		else if(nextPhase == CombatPhase.ATTACKER_ONE_RETREAT)
+		{
+			if(getCurrentState().getAttackerByIndex(1) == null)
+			{
+				advanceToNextCombatPhase();
+			}
+		}
+		else if(nextPhase == CombatPhase.ATTACKER_TWO_RETREAT)
+		{
+			if(getCurrentState().getAttackerByIndex(2) == null)
+			{
+				advanceToNextCombatPhase();
+			}
+		}
+		else if(nextPhase == CombatPhase.ATTACKER_THREE_RETREAT)
+		{
+			if(getCurrentState().getAttackerByIndex(3) == null)
+			{
+				advanceToNextCombatPhase();
+			}
+		}
+		else if((nextPhase == CombatPhase.DEFENDER_RETREAT && !getCurrentState().getPlayersStillFightingInCombatHex().contains(getCurrentState().getDefendingPlayer())) || nextPhase == CombatPhase.DETERMINE_DAMAGE)
+		{
+			getCurrentState().clearAllPlayerTargets();
+			if(needToChooseTargets(getCurrentState().getCombatHex().getHex()))
+			{
+				//wrap around to target selection
+				getCurrentState().setCurrentCombatPhase(CombatPhase.SELECT_TARGET_PLAYER);
+			}
+			else
+			{
+				autoDetermineTargets();
+				//wrap around to magic attack
+				getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(CombatPhase.MAGIC_ATTACK.ordinal()-1));
+				advanceToNextCombatPhase();
+			}
+		}
+	}
+	
+	private boolean needToChooseTargets(ITileProperties combatHex)
+	{
+		HashSet<Integer> playersStillFighting = new HashSet<>();
+		for(ITileProperties thing : getCurrentState().getBoard().getHexStateForHex(combatHex).getFightingThingsInHex())
+		{
+			for(Player p : getCurrentState().getPlayers())
+			{
+				if(p.ownsThingOnBoard(thing))
+				{
+					playersStillFighting.add(p.getID());
+				}
+			}
+		}
+		return playersStillFighting.size() >= 3;
 	}
 	
 	private CombatPhase getCombatPhaseByOrdinal(int ordinal)
@@ -279,6 +349,17 @@ public class CombatCommandHandler extends CommandHandler
 		}
 		
 		throw new IllegalArgumentException("Recieved invalid combat phase ordinal: " + ordinal);
+	}
+	
+	private void autoDetermineTargets()
+	{
+		Player p1 = null;
+		Player p2 = null;
+		Iterator<Player> it = getCurrentState().getPlayersStillFightingInCombatHex().iterator();
+		p1 = it.next();
+		p2 = it.next();
+		getCurrentState().setPlayersTarget(p1.getID(), p2.getID());
+		getCurrentState().setPlayersTarget(p2.getID(), p1.getID());
 	}
 
 	private void applyRollEffects()
@@ -294,7 +375,7 @@ public class CombatCommandHandler extends CommandHandler
 				{
 					handledRolls.add(r);
 					attackedWithCreature = true;
-					//TODO handle 3 and 4 way combat by adding targeting mechanism
+					
 					Player rollingPlayer = getCurrentState().getPlayerByPlayerNumber(r.getRollingPlayerID());
 					int hitCount = 0;
 					final int rollingPlayerID = rollingPlayer.getID();
@@ -308,19 +389,9 @@ public class CombatCommandHandler extends CommandHandler
 					}
 					if(hitCount > 0)
 					{
-						for(Player p : getCurrentState().getPlayers())
-						{
-							for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
-							{
-								if(p.ownsThingOnBoard(tp) && !p.equals(rollingPlayer))
-								{
-									getCurrentState().addHitsToPlayer(p.getID(), hitCount);
-									//notifies players of hits
-									new CombatHits(rollingPlayerID,p.getID(),hitCount).postNetworkEvent();
-									break;
-								}
-							}
-						}
+						getCurrentState().addHitsToPlayer(getCurrentState().getPlayersTarget(rollingPlayerID).getID(), hitCount);
+						//notifies players of hits
+						new CombatHits(rollingPlayerID,getCurrentState().getPlayersTarget(rollingPlayerID).getID(),hitCount).postNetworkEvent();
 					}
 					break;
 				}
@@ -415,6 +486,22 @@ public class CombatCommandHandler extends CommandHandler
 		for(Roll r : handledRolls)
 		{
 			getCurrentState().removeRoll(r);
+		}
+	}
+	
+	@Subscribe
+	public void receiveTargetPlayerCommand(TargetPlayerCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				setPlayersTarget(command.getID(),command.getTargetID());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process TargetPlayerCommand due to: ", t);
+			}
 		}
 	}
 	

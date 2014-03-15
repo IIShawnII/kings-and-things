@@ -60,7 +60,8 @@ public abstract class CommandHandler
 	 */
 	public void endPlayerTurn(int playerNumber){
 		CommandValidator.validateCanEndPlayerTurn(playerNumber, currentState);
-		if(currentState.getCurrentCombatPhase() == CombatPhase.ATTACKER_RETREAT || currentState.getCurrentCombatPhase() == CombatPhase.DEFENDER_RETREAT)
+		if(currentState.getCurrentCombatPhase() == CombatPhase.ATTACKER_TWO_RETREAT || currentState.getCurrentCombatPhase() == CombatPhase.ATTACKER_ONE_RETREAT || 
+				currentState.getCurrentCombatPhase() == CombatPhase.ATTACKER_THREE_RETREAT || currentState.getCurrentCombatPhase() == CombatPhase.DEFENDER_RETREAT)
 		{
 			new PlayerWaivedRetreat(this).postInternalEvent(playerNumber);
 		}
@@ -143,6 +144,7 @@ public abstract class CommandHandler
 		currentState.recordRollForSpecialCharacter(null);
 		currentState.setDefendingPlayerNumber(-1);
 		currentState.removeAllHexesWithBuiltInObjects();
+		currentState.clearAllPlayerTargets();
 		
 		new PlayerState(currentState.getActivePhasePlayer().getPlayerInfo()).postNetworkEvent();
 	}

@@ -15,6 +15,7 @@ import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.game.HexState;
+import common.game.ITileProperties;
 import common.game.PlayerInfo;
 import common.game.Roll;
 
@@ -42,6 +43,7 @@ public class GameState
 	private final HashSet<HexState> hexesContainingBuiltObjects;
 	private Roll recordedRollForSpecialCharacter;
 	private final HashMap<HexState,Integer> plagueAffectedHexes;
+	private final HashMap<Integer,Integer> playerTargets;
 
 	/**
 	 * Creates a new GameState object
@@ -71,9 +73,11 @@ public class GameState
 		
 		hitsToApply = new HashMap<>();
 		this.hexesContainingBuiltObjects = new HashSet<HexState>();
+		playerTargets = new HashMap<>();
 		for(Player p : players)
 		{
 			hitsToApply.put(p.getID(), 0);
+			playerTargets.put(p.getID(), null);
 		}
 		this.setActivePhasePlayer(activePhasePlayerNumber);
 		recordedRollForSpecialCharacter = null;
@@ -202,6 +206,40 @@ public class GameState
 			}
 		}
 		throw new IllegalStateException("No active player found");
+	}
+	
+	public Player getPlayersTarget(int id)
+	{
+		Integer targetId = playerTargets.get(id);
+		if(targetId == null)
+		{
+			return null;
+		}
+		for(Player p : players)
+		{
+			if(p.getID() == targetId.intValue())
+			{
+				return p;
+			}
+		}
+		
+		return null;
+	}
+	
+	public HashSet<Player> getPlayersStillFightingInCombatHex()
+	{
+		HashSet<Player> fightingPlayers = new HashSet<>();
+		for(ITileProperties thing : getCombatHex().getFightingThingsInHex())
+		{
+			for(Player p : players)
+			{
+				if(p.ownsThingOnBoard(thing))
+				{
+					fightingPlayers.add(p);
+				}
+			}
+		}
+		return fightingPlayers;
 	}
 
 	/**
@@ -503,7 +541,19 @@ public class GameState
 			hitsToApply.put(p.getID(), 0);
 		}
 	}
+	public void setPlayersTarget(int id, int targetId)
+	{
+		playerTargets.put(id, targetId);
+	}
 	
+	public void clearAllPlayerTargets()
+	{
+		for(Player p : players)
+		{
+			playerTargets.put(p.getID(),null);
+		}
+	}
+
 	/**
 	 * Clears the list of rolls that need to
 	 * be made
@@ -600,6 +650,13 @@ public class GameState
 		{
 			p.getPlayerInfo().setIsActive(p.getID() == id);
 		}
+	}
+	
+	public Player getAttackerByIndex(int index)
+	{
+		int defenderIndex = playerOrder.indexOf(defenderPlayerNumber);
+		Player nextPlayer = getPlayerByPlayerNumber(playerOrder.get((defenderIndex + index)%playerOrder.size()));
+		return getPlayersStillFightingInCombatHex().contains(nextPlayer)? nextPlayer : null;
 	}
 
 	/**

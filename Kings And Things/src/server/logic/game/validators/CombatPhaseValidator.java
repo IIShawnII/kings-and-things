@@ -1,8 +1,9 @@
 package server.logic.game.validators;
 
+import java.util.HashSet;
+
 import server.logic.game.GameState;
 import server.logic.game.Player;
-
 import common.Constants.Ability;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
@@ -53,6 +54,26 @@ public abstract class CombatPhaseValidator
 		if(player.ownsHex(hex) && !otherPlayersOwnThingsInHex)
 		{
 			throw new IllegalArgumentException("The entered hex is not a combat hex");
+		}
+	}
+	
+	public static void validateCanTargetPlayer(int playerNumber, int targetPlayerID, GameState currentState)
+	{
+		CommandValidator.validateNoPendingRolls(currentState);
+		
+		HashSet<Player> playersInCombat = currentState.getPlayersStillFightingInCombatHex();
+		
+		if(!playersInCombat.contains(currentState.getPlayerByPlayerNumber(playerNumber)))
+		{
+			throw new IllegalArgumentException("The entered player number is not involved in combat.");
+		}
+		if(!playersInCombat.contains(currentState.getPlayerByPlayerNumber(targetPlayerID)))
+		{
+			throw new IllegalArgumentException("The entered target player is not involved in combat.");
+		}
+		if(currentState.getPlayersTarget(playerNumber) != null)
+		{
+			throw new IllegalStateException("The entered player has already chosen a target: " + currentState.getPlayerByPlayerNumber(targetPlayerID));
 		}
 	}
 
