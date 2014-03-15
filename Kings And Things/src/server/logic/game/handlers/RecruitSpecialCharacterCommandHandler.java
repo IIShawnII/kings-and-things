@@ -2,7 +2,7 @@ package server.logic.game.handlers;
 
 import java.util.ArrayList;
 
-import server.event.commands.DiceRolled;
+import server.event.DiceRolled;
 import server.event.commands.ModifyRollForSpecialCharacter;
 import server.logic.game.Player;
 import server.logic.game.RollModification;

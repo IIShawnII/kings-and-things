@@ -31,6 +31,8 @@ public class HexState implements Serializable{
 	private final HashSet<ITileProperties> thingsInHex;
 	private boolean isInBattle = false;
 	
+	private final int hashCode;
+	
 	//only used by Client GUI for display purpose
 	private boolean isFake;
 	
@@ -38,6 +40,7 @@ public class HexState implements Serializable{
 		isFake = true;
 		thingsInHex = new HashSet<ITileProperties>();
 		hex = new TileProperties( Category.Hex);
+		hashCode = calculateHashCode();
 	}
 	
 	/**
@@ -81,6 +84,7 @@ public class HexState implements Serializable{
 		{
 			addThingToHex(tp);
 		}
+		hashCode = calculateHashCode();
 	}
 	
 	public void addHex( HexState state){
@@ -379,11 +383,16 @@ public class HexState implements Serializable{
 		}
 		
 		HexState hs = (HexState) other;
-		return hex.equals(hs.hex) && thingsInHex.equals(hs.thingsInHex);
+		return hashCode == hs.hashCode;
 	}
 	
 	@Override
 	public int hashCode()
+	{
+		return hashCode;
+	}
+	
+	private int calculateHashCode()
 	{
 		final int prime = 31;
 		int result = 1;

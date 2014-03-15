@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import server.event.commands.DiceRolled;
+import server.event.DiceRolled;
+import server.event.SetupPhaseComplete;
 import server.event.commands.ExchangeSeaHexCommand;
 import server.event.commands.GiveHexToPlayerCommand;
-import server.event.commands.SetupPhaseComplete;
-import server.event.commands.StartSetupPhase;
+import server.event.commands.StartSetupPhaseCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
 import server.logic.game.Player;
@@ -251,7 +251,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 	}
 
 	@Subscribe
-	public void recieveGameStartCommand(StartSetupPhase command)
+	public void recieveGameStartCommand(StartSetupPhaseCommand command)
 	{
 		if(command.isUnhandled())
 		{

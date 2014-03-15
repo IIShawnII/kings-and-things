@@ -2,8 +2,8 @@ package server.logic;
 
 import java.io.IOException;
 
+import server.event.PlayerUpdated;
 import server.event.commands.GiveHexToPlayerCommand;
-import server.event.commands.PlayerUpdated;
 import server.logic.game.Player;
 
 import com.google.common.eventbus.Subscribe;

@@ -8,13 +8,13 @@ import common.event.AbstractInternalEvent;
 
 import server.logic.game.Player;
 
-public class StartSetupPhase extends AbstractInternalEvent{
+public class StartSetupPhaseCommand extends AbstractInternalEvent{
 
 	private final boolean demoMode;
 	
 	private final HashSet<Player> players;
 	
-	public StartSetupPhase(boolean demoMode, Set<Player> players, final Object OWNER){
+	public StartSetupPhaseCommand(boolean demoMode, Set<Player> players, final Object OWNER){
 		super( OWNER);
 		this.demoMode = demoMode;
 		this.players = new HashSet<Player>();

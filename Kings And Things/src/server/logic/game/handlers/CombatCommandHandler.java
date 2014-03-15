@@ -6,10 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import server.event.PlayerRemovedThingsFromHex;
+import server.event.PlayerWaivedRetreat;
 import server.event.commands.ApplyHitsCommand;
-import server.event.commands.DiceRolled;
-import server.event.commands.PlayerWaivedRetreat;
-import server.event.commands.ResolveCombat;
+import server.event.DiceRolled;
+import server.event.commands.ResolveCombatCommand;
+import server.event.commands.RetreatCommand;
 import server.event.commands.TargetPlayerCommand;
 import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.Player;
@@ -17,6 +19,7 @@ import server.logic.game.validators.CombatPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
 
+import common.Constants;
 import common.Constants.Ability;
 import common.Constants.BuildableBuilding;
 import common.Constants.Building;
@@ -56,6 +59,12 @@ public class CombatCommandHandler extends CommandHandler
 	{
 		CombatPhaseValidator.validateCanTargetPlayer(playerNumber, targetPlayerNumber, getCurrentState());
 		makePlayersTarget(playerNumber, targetPlayerNumber);
+	}
+	
+	public void retreatFromCombat(int playerNumber, ITileProperties destinationHex)
+	{
+		CombatPhaseValidator.validateCanRetreatFromCombat(playerNumber, destinationHex, getCurrentState());
+		retreatFromHex(playerNumber,destinationHex);
 	}
 
 	private void beginCombatResolution(ITileProperties hex, int playerNumber)
@@ -102,8 +111,6 @@ public class CombatCommandHandler extends CommandHandler
 
 	private void makeHitsApplied(ITileProperties thing, int playerNumber, int hitCount)
 	{
-		Player player = getCurrentState().getPlayerByPlayerNumber(playerNumber);
-		
 		if(thing.hasAbility(Ability.Armor))
 		{
 			thing.setValue(thing.getValue() - hitCount);
@@ -111,26 +118,14 @@ public class CombatCommandHandler extends CommandHandler
 		
 		if(thing.getValue() == 0 || !thing.hasAbility(Ability.Armor))
 		{
-			//buildings are now neutralized
-			//TODO let user choose to flip if it's a special character
-			thing.flip();
-			if(!thing.isBuilding())
+			if(thing.isBuilding())
 			{
-				thing.resetValue();
-				if(thing.isSpecialCharacter())
-				{
-					getCurrentState().getBankHeroes().reInsertTile(thing);
-				}
-				else
-				{
-					getCurrentState().getCup().reInsertTile(thing);
-				}
-				player.removeOwnedThingOnBoard(thing);
-				boolean success = getCurrentState().getCombatHex().removeThingFromHex(thing);
-				if(!success)
-				{
-					throw new IllegalStateException("Unable to remove combat creature from hex");
-				}
+				//buildings are now neutralized
+				thing.flip();
+			}
+			else
+			{
+				removePlayerThingFromBoard(playerNumber, getCurrentState().getCombatHex().getHex(), thing);
 			}
 			HexStatesChanged notification = new HexStatesChanged(1);
 			notification.getArray()[0] = getCurrentState().getCombatHex();
@@ -250,7 +245,65 @@ public class CombatCommandHandler extends CommandHandler
 	{
 		advanceToNextCombatPhase();
 	}
+
+	private void retreatFromHex(int playerNumber, ITileProperties destinationHex)
+	{
+		Player coward = getCurrentState().getPlayerByPlayerNumber(playerNumber);
+		Set<ITileProperties> runningCreatures = getCurrentState().getCombatHex().getThingsInHexOwnedByPlayer(coward);
+		for(ITileProperties thing : runningCreatures)
+		{
+			if(thing.isCreature())
+			{
+				getCurrentState().getCombatHex().removeThingFromHex(thing);
+				getCurrentState().getBoard().getHexStateForHex(destinationHex).addThingToHex(thing);
+			}
+		}
+		
+		int creatureCount = 0;
+		for(ITileProperties thing : getCurrentState().getBoard().getHexStateForHex(destinationHex).getThingsInHexOwnedByPlayer(coward))
+		{
+			if(thing.isCreature())
+			{
+				creatureCount++;
+			}
+		}
+		if(creatureCount>Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX && !(getCurrentState().getBoard().getHexStateForHex(destinationHex).hasBuilding() && getCurrentState().getBoard().getHexStateForHex(destinationHex).getBuilding().getName().equals(Building.Citadel)))
+		{
+			getCurrentState().addHexThatNeedsThingsRemoved(getCurrentState().getBoard().getHexStateForHex(destinationHex), creatureCount - Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX);
+		}
+		else
+		{
+			advanceToNextCombatPhase();
+		}
+	}
 	
+	private void removeThingsFromHex(int playerNumber, ITileProperties hex, Set<ITileProperties> things)
+	{
+		switch(getCurrentState().getCurrentCombatPhase())
+		{
+
+			case ATTACKER_ONE_RETREAT:
+			case ATTACKER_TWO_RETREAT:
+			case ATTACKER_THREE_RETREAT:
+			case DEFENDER_RETREAT:
+			{
+				for(ITileProperties thing : things)
+				{
+					removePlayerThingFromBoard(playerNumber,hex,thing);
+				}
+				HexState hs = getCurrentState().getBoard().getHexStateForHex(hex);
+				getCurrentState().updateHexThatNeedsThingsRemoved(hs, getCurrentState().getThingsToRemoveFromHex(hs) - things.size());
+				if(!getCurrentState().hasHexesThatNeedThingsRemoved())
+				{
+					advanceToNextCombatPhase();
+				}
+				break;
+			}
+			default:
+				break;
+		}
+	}
+
 	private void advanceToNextCombatPhase()
 	{
 		int currentPhaseOrdinal = getCurrentState().getCurrentCombatPhase().ordinal();
@@ -412,13 +465,8 @@ public class CombatCommandHandler extends CommandHandler
 								break;
 							}
 						}
-						owningPlayer.removeOwnedThingOnBoard(rollTarget);
-						getCurrentState().getCombatHex().removeThingFromHex(rollTarget);
-						if(rollTarget.isSpecialIncomeCounter())
-						{
-							getCurrentState().getCup().reInsertTile(rollTarget);
-						}
-						else if(!rollTarget.getName().equals(Building.Tower.name()) && rollTarget.isBuildableBuilding())
+						removePlayerThingFromBoard(owningPlayer.getID(), getCurrentState().getCombatHex().getHex(), rollTarget);
+						if(!rollTarget.getName().equals(Building.Tower.name()) && rollTarget.isBuildableBuilding())
 						{
 							if(rollTarget.getName().equals(BuildableBuilding.Castle.name()))
 							{
@@ -490,6 +538,35 @@ public class CombatCommandHandler extends CommandHandler
 	}
 	
 	@Subscribe
+	public void playerRemovedThingsFromBoard(PlayerRemovedThingsFromHex event)
+	{
+		try
+		{
+			removeThingsFromHex(event.getID(),event.getHex(),event.getThingsToRemove());
+		}
+		catch(Throwable t)
+		{
+			Logger.getErrorLogger().error("Unable to process PlayerRemovedThingsFromHex event due to: ", t);
+		}
+	}
+	
+	@Subscribe
+	public void receiveRetreatCommand(RetreatCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				retreatFromCombat(command.getID(),command.getDestinationHex());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process RetreatCommand due to: ", t);
+			}
+		}
+	}
+	
+	@Subscribe
 	public void receiveTargetPlayerCommand(TargetPlayerCommand command)
 	{
 		if(command.isUnhandled())
@@ -551,7 +628,7 @@ public class CombatCommandHandler extends CommandHandler
 	}
 
 	@Subscribe
-	public void receiveResolveCombatCommand(ResolveCombat command)
+	public void receiveResolveCombatCommand(ResolveCombatCommand command)
 	{
 		if(command.isUnhandled())
 		{

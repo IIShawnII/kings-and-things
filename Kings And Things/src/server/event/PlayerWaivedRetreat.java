@@ -1,4 +1,4 @@
-package server.event.commands;
+package server.event;
 
 import common.event.AbstractInternalEvent;
 

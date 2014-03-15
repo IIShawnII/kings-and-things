@@ -76,6 +76,35 @@ public abstract class CombatPhaseValidator
 			throw new IllegalStateException("The entered player has already chosen a target: " + currentState.getPlayerByPlayerNumber(targetPlayerID));
 		}
 	}
+	
+	public static void validateCanRetreatFromCombat(int playerNumber, ITileProperties destinationHex, GameState currentState)
+	{
+		CommandValidator.validateNoPendingRolls(currentState);
+
+		HashSet<Player> playersInCombat = currentState.getPlayersStillFightingInCombatHex();
+		
+		if(!playersInCombat.contains(currentState.getPlayerByPlayerNumber(playerNumber)))
+		{
+			throw new IllegalArgumentException("The entered player number is not involved in combat.");
+		}
+		boolean adjacentHexFound = false;
+		for(HexState hs : currentState.getBoard().getAdjacentHexesTo(currentState.getCombatHex().getHex()))
+		{
+			if(hs.getHex().equals(destinationHex))
+			{
+				adjacentHexFound = true;
+				break;
+			}
+		}
+		if(!adjacentHexFound)
+		{
+			throw new IllegalArgumentException("Can only retreat to an adjacent hex.");
+		}
+		if(!currentState.getPlayerByPlayerNumber(playerNumber).ownsHex(destinationHex) || currentState.getBoard().getContestedHexes(playersInCombat).contains(currentState.getBoard().getHexStateForHex(destinationHex)))
+		{
+			throw new IllegalArgumentException("Can only retreat to a friendly non-combat hex.");
+		}
+	}
 
 	/**
 	 * Call this to validate the apply hits command

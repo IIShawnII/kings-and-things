@@ -1,11 +1,11 @@
-package server.event.commands;
+package server.event;
 
 import common.event.AbstractInternalEvent;
 import server.logic.game.Player;
 
 public class PlayerUpdated extends AbstractInternalEvent {
 	
-	Player player;
+	private final Player player;
 	
 	public PlayerUpdated( Player player, final Object OWNER){
 		super( OWNER);

@@ -3,11 +3,11 @@ package server.event.commands;
 import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
-public class ResolveCombat extends AbstractInternalEvent
+public class ResolveCombatCommand extends AbstractInternalEvent
 {
 	private final ITileProperties hex;
 
-	public ResolveCombat(ITileProperties hex, final Object OWNER){
+	public ResolveCombatCommand(ITileProperties hex, final Object OWNER){
 		super( OWNER);
 		this.hex = hex;
 	}

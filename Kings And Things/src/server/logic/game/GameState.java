@@ -42,7 +42,7 @@ public class GameState
 	private final HashMap<Integer,Integer> hitsToApply;
 	private final HashSet<HexState> hexesContainingBuiltObjects;
 	private Roll recordedRollForSpecialCharacter;
-	private final HashMap<HexState,Integer> plagueAffectedHexes;
+	private final HashMap<HexState,Integer> hexesThatNeedThingsRemoved;
 	private final HashMap<Integer,Integer> playerTargets;
 
 	/**
@@ -81,7 +81,7 @@ public class GameState
 		}
 		this.setActivePhasePlayer(activePhasePlayerNumber);
 		recordedRollForSpecialCharacter = null;
-		this.plagueAffectedHexes = new HashMap<> ();
+		this.hexesThatNeedThingsRemoved = new HashMap<> ();
 		
 
 		cup = new CupManager(demoMode);
@@ -569,29 +569,54 @@ public class GameState
 	}
 	
 	/**
-	 * Records which hexes have been affected by the Dark Plague Random Event
-	 * and number of creatures needed to be removed from the hex
+	 * Records that a hex needs to have a certain number of creatures removed from
+	 * it, this could happen from the dark plague, or retreating in combat to an
+	 * overcrowded hex, etc
+	 * @param hex The hex that things need to be removed from
+	 * @param numberOfCreturesToRemove The number of creatures that must be removed
+	 * from that hex
 	 */
-	public void addPlagueAffectedHex(HexState hex, int numberOfCreaturesToRemove) 
+	public void addHexThatNeedsThingsRemoved(HexState hex, int numberOfCreaturesToRemove) 
 	{
-		plagueAffectedHexes.put(hex,numberOfCreaturesToRemove);
+		if(numberOfCreaturesToRemove <= 0)
+		{
+			hexesThatNeedThingsRemoved.remove(hex);
+		}
+		else
+		{
+			hexesThatNeedThingsRemoved.put(hex,numberOfCreaturesToRemove);
+		}
 	}
-	
+
 	/**
-	 * Once all the creatures have been removed, the plague affected hex will be
-	 * removed
+	 * Call this method to update the recorded number of things that need to be removed
+	 * from a hex.
+	 * @param hex The hex that things need to be removed from
+	 * @param numberOfCreturesToRemove The number of creatures that must still be removed
+	 * from the hex
 	 */
-	public void removePlagueAffectedHex(HexState hex) 
+	public void updateHexThatNeedsThingsRemoved(HexState hex, int numberOfCreaturesToRemove)
 	{
-		plagueAffectedHexes.remove(hex);
+		addHexThatNeedsThingsRemoved(hex,numberOfCreaturesToRemove);
 	}
 	
 	/**
 	 * Returns number of things to be removed from hexes
 	 */
-	public int thingsToRemoveFromHex(HexState hex)
+	public int getThingsToRemoveFromHex(HexState hex)
 	{
-		return plagueAffectedHexes.get(hex);
+		Integer val = hexesThatNeedThingsRemoved.get(hex);
+		return val==null? 0 : val;
+	}
+	
+	/**
+	 * Call this to check if there are any hexes that players still need to remove
+	 * things from
+	 * @return True if some hexes need to have things removed from them, false otherwise
+	 */
+	public boolean hasHexesThatNeedThingsRemoved()
+	{
+		return hexesThatNeedThingsRemoved.size()>0;
 	}
 	
 	/**

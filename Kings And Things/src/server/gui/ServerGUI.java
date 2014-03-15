@@ -21,7 +21,7 @@ import javax.swing.JScrollPane;
 
 import com.google.common.eventbus.Subscribe;
 
-import server.event.commands.EndServer;
+import server.event.EndServer;
 import common.Console;
 import common.event.ConsoleMessage;
 

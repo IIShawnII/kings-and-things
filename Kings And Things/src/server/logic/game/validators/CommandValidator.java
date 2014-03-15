@@ -149,6 +149,60 @@ public abstract class CommandValidator
 				break;
 		}
 	}
+	
+	public static void validateCanRemoveThingsFromHex(int playerNumber, ITileProperties hexToRemoveFrom, Set<ITileProperties> thingsToRemove, GameState currentState)
+	{
+		Player p = currentState.getPlayerByPlayerNumber(playerNumber);
+		HexState hex = currentState.getBoard().getHexStateForHex(hexToRemoveFrom);
+		if(!p.ownsHex(hex.getHex()))
+		{
+			throw new IllegalArgumentException("You can only remove things from your own hex.");
+		}
+		//can only remove creatures to satisfy the constraints
+		for(ITileProperties tp : thingsToRemove)
+		{
+			if(!p.ownsThingOnBoard(tp))
+			{
+				throw new IllegalArgumentException("Can only remove your own things");
+			}
+		}
+		if(thingsToRemove.size()==1 && thingsToRemove.iterator().next().isSpecialIncomeCounter())
+		{
+			validateIsPlayerActive(playerNumber,currentState);
+			if(currentState.getCurrentRegularPhase() == RegularPhase.COMBAT)
+			{
+				throw new IllegalStateException("You can not remove special income counters from your hexes during the combat phase.");
+			}
+		}
+		else
+		{
+			validateIsPlayerActive(playerNumber,currentState);
+			if(currentState.getThingsToRemoveFromHex(hex) < thingsToRemove.size())
+			{
+				throw new IllegalArgumentException("You only need to discard " + currentState.getThingsToRemoveFromHex(hex) + " things from that hex");
+			}
+			switch(currentState.getCurrentCombatPhase())
+			{
+				case ATTACKER_ONE_RETREAT:
+				case ATTACKER_TWO_RETREAT:
+				case ATTACKER_THREE_RETREAT:
+				case DEFENDER_RETREAT:
+				{
+					//can only remove creatures to satisfy the constraints
+					for(ITileProperties tp : thingsToRemove)
+					{
+						if(!tp.isCreature())
+						{
+							throw new IllegalArgumentException("Can only remove creatures");
+						}
+					}
+					break;
+				}
+				default:
+					break;
+			}
+		}
+	}
 
 	/**
 	 * Checks to see if the game is waiting for players to roll for something

@@ -7,13 +7,13 @@ import java.util.Set;
 import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
-public class RemoveThingFromHexCommand extends AbstractInternalEvent {
+public class RemoveThingsFromHexCommand extends AbstractInternalEvent {
 	
 	private final ITileProperties hexToRemoveSomethingFrom;
 	private final HashSet<ITileProperties> thingsToRemove;
 	
 	// constructor
-	public RemoveThingFromHexCommand (ITileProperties hexToRemoveSomethingFrom, 
+	public RemoveThingsFromHexCommand (ITileProperties hexToRemoveSomethingFrom, 
 			HashSet<ITileProperties> thingsToRemove, Object owner)
 	{
 		super(owner);

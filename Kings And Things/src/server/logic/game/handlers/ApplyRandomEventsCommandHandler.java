@@ -42,7 +42,7 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 									sumOfCombatValue += thingInHex.getValue();
 								}
 							}
-							this.getCurrentState().addPlagueAffectedHex(hex, sumOfCombatValue);
+							this.getCurrentState().addHexThatNeedsThingsRemoved(hex, sumOfCombatValue);
 						}
 					}
 					sumOfCombatValue = 0;	// resets combat value

@@ -2,12 +2,15 @@ package server.logic.game.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-import server.event.commands.DiceRolled;
+import server.event.DiceRolled;
+import server.event.PlayerRemovedThingsFromHex;
+import server.event.PlayerWaivedRetreat;
+import server.event.SetupPhaseComplete;
 import server.event.commands.EndPlayerTurnCommand;
-import server.event.commands.PlayerWaivedRetreat;
+import server.event.commands.RemoveThingsFromHexCommand;
 import server.event.commands.RollDiceCommand;
-import server.event.commands.SetupPhaseComplete;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
 import server.logic.game.Player;
@@ -15,7 +18,6 @@ import server.logic.game.RollModification;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;
@@ -86,6 +88,23 @@ public abstract class CommandHandler
 		CommandValidator.validateCanRollDice(reasonForRoll, playerNumber, tile, currentState);
 		makeDiceRoll(reasonForRoll, playerNumber, tile, rollValue);
 	}
+	
+	public void removeThingsFromBoard(int playerNumber, ITileProperties hex, Set<ITileProperties> thingsToRemove)
+	{
+		CommandValidator.validateCanRemoveThingsFromHex(playerNumber, hex, thingsToRemove, getCurrentState());
+		if(thingsToRemove.size() == 1 && thingsToRemove.iterator().next().isSpecialIncomeCounter())
+		{
+			//just remove it ourselves
+			ITileProperties counter = thingsToRemove.iterator().next();
+			currentState.getBoard().getHexStateForHex(hex).removeSpecialIncomeCounterFromHex();
+			currentState.getPlayerByPlayerNumber(playerNumber).removeOwnedThingOnBoard(counter);
+			currentState.getCup().reInsertTile(counter);
+		}
+		else
+		{
+			new PlayerRemovedThingsFromHex(hex, thingsToRemove, this).postInternalEvent(playerNumber);
+		}
+	}
 
 	protected final GameState getCurrentState()
 	{
@@ -111,6 +130,23 @@ public abstract class CommandHandler
 
 		HexState hs = getCurrentState().getBoard().getHexStateForHex(hex);
 		new HexOwnershipChanged(hs).postNetworkEvent( playerNumber);
+	}
+	
+	protected void removePlayerThingFromBoard(int playerNumber, ITileProperties hex, ITileProperties thing)
+	{
+		thing.resetValue();
+		currentState.getBoard().getHexStateForHex(hex).removeThingFromHex(thing);
+		currentState.getPlayerByPlayerNumber(playerNumber).removeOwnedThingOnBoard(thing);
+		if(thing.isCreature() || thing.isSpecialIncomeCounter())
+		{
+			currentState.getCup().reInsertTile(thing);
+		}
+		else if(thing.isSpecialCharacter())
+		{
+			//TODO let player decide to flip
+			thing.flip();
+			currentState.getBankHeroes().reInsertTile(thing);
+		}
 	}
 
 	protected void advanceActivePhasePlayer(){
@@ -368,6 +404,22 @@ public abstract class CommandHandler
 	private int rollDie(int rollValue)
 	{
 		return isDemoMode? rollValue : (int) Math.round((Math.random() * 5) + 1);
+	}
+	
+	@Subscribe
+	public void receiveRemoveThingFromBoardCommand(RemoveThingsFromHexCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				removeThingsFromBoard(command.getID(),command.getHexToRemoveSomethingFrom(),command.getThingsToRemove());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process RemoveThingFromHexCommand due to: ", t);
+			}
+		}
 	}
 	
 	@Subscribe
