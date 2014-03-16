@@ -4,12 +4,12 @@ import server.logic.game.GameState;
 
 import common.event.AbstractInternalEvent;
 
-public class SetupPhaseComplete extends AbstractInternalEvent
+public class GameStarted extends AbstractInternalEvent
 {
 	private final boolean isDemoMode;
 	private final GameState currentState;
 
-	public SetupPhaseComplete(boolean isDemoMode, GameState currentState, final Object OWNER){
+	public GameStarted(boolean isDemoMode, GameState currentState, final Object OWNER){
 		super( OWNER);
 		this.isDemoMode = isDemoMode;
 		this.currentState = currentState;

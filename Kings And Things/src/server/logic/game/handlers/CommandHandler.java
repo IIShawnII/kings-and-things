@@ -7,7 +7,7 @@ import java.util.Set;
 import server.event.DiceRolled;
 import server.event.PlayerRemovedThingsFromHex;
 import server.event.PlayerWaivedRetreat;
-import server.event.SetupPhaseComplete;
+import server.event.GameStarted;
 import server.event.commands.EndPlayerTurnCommand;
 import server.event.commands.RemoveThingsFromHexCommand;
 import server.event.commands.RollDiceCommand;
@@ -423,7 +423,7 @@ public abstract class CommandHandler
 	}
 	
 	@Subscribe
-	public void receiveGameStartedEvent(SetupPhaseComplete event)
+	public void receiveGameStartedEvent(GameStarted event)
 	{
 		currentState = event.getCurrentState();
 		isDemoMode = event.isDemoMode();

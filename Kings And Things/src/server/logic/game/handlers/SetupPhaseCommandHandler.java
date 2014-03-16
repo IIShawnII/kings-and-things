@@ -2,14 +2,12 @@ package server.logic.game.handlers;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import server.event.DiceRolled;
-import server.event.SetupPhaseComplete;
+import server.event.GameStarted;
 import server.event.commands.ExchangeSeaHexCommand;
 import server.event.commands.GiveHexToPlayerCommand;
 import server.event.commands.StartSetupPhaseCommand;
@@ -23,9 +21,11 @@ import com.google.common.eventbus.Subscribe;
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
+import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.Logger;
 import common.event.notifications.HexPlacement;
+import common.event.notifications.PlayerOrderList;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Roll;
@@ -43,19 +43,20 @@ public class SetupPhaseCommandHandler extends CommandHandler
 	public void startNewGame(boolean demoMode, Set<Player> players) throws NoMoreTilesException{
 		SetupPhaseValidator.validateStartNewGame(demoMode, players);
 
-		List<Integer> playerOrder = determinePlayerOrder(players,demoMode);
-		//TODO handle dice rolls for player order
-		GameState currentState = new GameState(demoMode,players,playerOrder,SetupPhase.PICK_FIRST_HEX, RegularPhase.RECRUITING_CHARACTERS,playerOrder.get(0),playerOrder.get(0), CombatPhase.NO_COMBAT, -1, null);
+		List<Integer> playerOrder = new ArrayList<Integer>();
+		GameState currentState = new GameState(demoMode,players,playerOrder,SetupPhase.DETERMINE_PLAYER_ORDER, RegularPhase.RECRUITING_CHARACTERS,0,0, CombatPhase.NO_COMBAT, -1, null);
+		for(Player p : currentState.getPlayers())
+		{
+			currentState.addNeededRoll(new Roll(2, null, RollReason.DETERMINE_PLAYER_ORDER, p.getID()));
+		}
 		
 		HexPlacement placement = new HexPlacement( Constants.MAX_HEXES);
 		currentState.getBoard().fillArray( placement.getArray());
 		placement.postNetworkEvent();
 		
-		
-		//new PlayerOrderList( playerOrder).postNetworkEvent();
-		
+		new GameStarted(demoMode, currentState, this).postInternalEvent();
 		//new Flip().postNetworkEvent();
-		new SetupPhaseComplete(demoMode, currentState, this).postInternalEvent();
+		//new SetupPhaseComplete(demoMode, currentState, this).postInternalEvent();
 		//new CurrentPhase( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNetworkEvent();
 	}
 
@@ -130,7 +131,6 @@ public class SetupPhaseCommandHandler extends CommandHandler
 			{
 				case DETERMINE_PLAYER_ORDER:
 					handledRolls.add(r);
-					//TODO handle
 					break;
 				default:
 					break;
@@ -138,9 +138,62 @@ public class SetupPhaseCommandHandler extends CommandHandler
 			}
 		}
 		
-		for(Roll r : handledRolls)
+		ArrayList<Roll> tiedRolls = new ArrayList<>();
+		for(int i=0; i<handledRolls.size(); i++)
 		{
-			getCurrentState().removeRoll(r);
+			Roll nextRoll = handledRolls.get(i);
+			for(int j=i+1; j<handledRolls.size(); j++)
+			{
+				Roll compareRoll = handledRolls.get(j);
+				int totalFirstRoll = nextRoll.getFinalTotal();
+				int totalSecondRoll = compareRoll.getFinalTotal();
+				if(totalFirstRoll == totalSecondRoll)
+				{
+					tiedRolls.add(nextRoll);
+					tiedRolls.add(compareRoll);
+				}
+			}
+		}
+		
+		if(handledRolls.size()>0)
+		{
+			if(tiedRolls.size() == 0)
+			{
+				ArrayList<Integer> playerOrder = new ArrayList<Integer>();
+				while(handledRolls.size() > 0)
+				{
+					int maxRoll = Integer.MIN_VALUE;
+					for(Roll r : handledRolls)
+					{
+						maxRoll = Math.max(maxRoll, r.getFinalTotal());
+					}
+					Roll highestRoll = null;
+					for(Roll r : handledRolls)
+					{
+						if(r.getFinalTotal() == maxRoll)
+						{
+							highestRoll = r;
+							break;
+						}
+					}
+					handledRolls.remove(highestRoll);
+					getCurrentState().removeRoll(highestRoll);
+					playerOrder.add(highestRoll.getRollingPlayerID());
+				}
+				getCurrentState().setPlayerOrder(playerOrder);
+				new PlayerOrderList( playerOrder).postNetworkEvent();
+				getCurrentState().setActivePhasePlayer(getCurrentState().getPlayerOrder().get(0));
+				getCurrentState().setActiveTurnPlayer(getCurrentState().getPlayerOrder().get(0));
+				getCurrentState().setCurrentSetupPhase(SetupPhase.PICK_FIRST_HEX);
+			}
+			else
+			{
+				for(Roll tie : tiedRolls)
+				{
+					getCurrentState().removeRoll(tie);
+					getCurrentState().addNeededRoll(new Roll(tie.getDiceCount(), tie.getRollTarget(), tie.getRollReason(), tie.getRollingPlayerID()));
+				}
+			}
 		}
 	}
 
@@ -180,46 +233,6 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		}
 		
 		makeHexOwnedByPlayer(hex,secondPlayerNumber);
-	}
-
-	private List<Integer> determinePlayerOrder(Set<Player> playersIn, boolean demoMode)
-	{
-		ArrayList<Player> players = new ArrayList<Player>();
-		for(Player p : playersIn)
-		{
-			players.add(p);
-		}
-		ArrayList<Integer> playerOrder = new ArrayList<Integer>(players.size());
-		
-		while(players.size()>1)
-		{
-			if(!demoMode)
-			{
-				int nextPlayerIndex = (int) Math.round(Math.random() * (players.size()-1));
-				playerOrder.add(players.remove(nextPlayerIndex).getID());
-			}
-			else
-			{
-				int nextPlayerNumber = Integer.MAX_VALUE;
-				for(Player p : players)
-				{
-					nextPlayerNumber = Math.min(nextPlayerNumber, p.getID());
-				}
-				Iterator<Player> it = players.iterator();
-				while(it.hasNext())
-				{
-					Player nextPlayer = it.next();
-					if(nextPlayer.getID() == nextPlayerNumber)
-					{
-						it.remove();
-						playerOrder.add(nextPlayerNumber);
-						break;
-					}
-				}
-			}
-		}
-		playerOrder.add(players.get(0).getID());
-		return Collections.unmodifiableList(playerOrder);
 	}
 
 	private void makeSeaHexExchanged(ITileProperties hex, int playerNumber) throws NoMoreTilesException

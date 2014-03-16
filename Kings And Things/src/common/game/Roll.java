@@ -68,6 +68,17 @@ public class Roll
 		return Collections.unmodifiableList(finalRolls);
 	}
 	
+	public int getFinalTotal()
+	{
+		int total = 0;
+		for(int roll : getFinalRolls())
+		{
+			total+= roll;
+		}
+		
+		return total;
+	}
+	
 	public void addRollModificationFor(int baseRollIndex, int amount)
 	{
 		int previousModification = 0;
