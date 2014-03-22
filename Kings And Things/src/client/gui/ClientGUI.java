@@ -16,6 +16,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 
+import client.gui.components.MultiBoardManager;
 import common.game.PlayerInfo;
 import common.game.LoadResources;
 import common.event.UpdatePackage;

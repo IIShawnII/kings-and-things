@@ -1,10 +1,11 @@
-package client.gui;
+package client.gui.util;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 
+import client.gui.Board;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
 import common.Constants.Category;

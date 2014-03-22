@@ -1,4 +1,4 @@
-package client.gui;
+package client.gui.components;
 
 import static common.Constants.BOARD_SIZE;
 
@@ -6,6 +6,7 @@ import java.awt.GridBagConstraints;
 
 import javax.swing.JPanel;
 
+import client.gui.Board;
 import common.game.PlayerInfo;
 
 public class MultiBoardManager {

@@ -1,4 +1,4 @@
-package client.gui;
+package client.gui.components;
 
 import java.awt.FlowLayout;
 import java.awt.Image;

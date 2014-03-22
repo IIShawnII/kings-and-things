@@ -24,7 +24,8 @@ import java.awt.image.BufferedImage;
 
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
-import client.gui.LockManager.Lock;
+import client.gui.util.LockManager;
+import client.gui.util.LockManager.Lock;
 import common.Constants.Category;
 import common.Constants.UpdateKey;
 import common.Constants.SetupPhase;
@@ -65,15 +66,15 @@ import static common.Constants.PLAYERS_STATE_PADDING;
 public class Board extends JPanel{
 	
 	private static final BufferedImage IMAGE;
-	static final int HEIGHT_SEGMENT = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
-	static final int WIDTH_SEGMENT = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
+	public static final int HEIGHT_SEGMENT = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
+	public static final int WIDTH_SEGMENT = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
 	//used for placing bank outlines
-	static final int INITIAL_TILE_X_SHIFT = WIDTH_SEGMENT/2;
-	static final int TILE_X_SHIFT = (int) (WIDTH_SEGMENT*1.2);
-	static final int TILE_Y_SHIFT = 13;
+	public static final int INITIAL_TILE_X_SHIFT = WIDTH_SEGMENT/2;
+	public static final int TILE_X_SHIFT = (int) (WIDTH_SEGMENT*1.2);
+	public static final int TILE_Y_SHIFT = 13;
 	private static final int HEX_Y_SHIFT = 8-3;
 	private static final int HEX_X_SHIFT = 8-2;
-	static final int PADDING = 10;
+	public static final int PADDING = 10;
 	
 	/**
 	 * create a static image with background and all outlines for faster drawing in Game 
@@ -149,7 +150,7 @@ public class Board extends JPanel{
 	 * create LockManager and mouse listeners with specific player count
 	 * @param playerCount - number of players to be playing on this board
 	 */
-	protected void init( int playerCount){
+	public void init( int playerCount){
 		mouseInput = new MouseInput();
 		addMouseListener( mouseInput);
 		addMouseWheelListener( mouseInput);

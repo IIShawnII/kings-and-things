@@ -10,8 +10,7 @@ import java.awt.Point;
 
 import javax.swing.JComponent;
 
-import client.gui.LockManager.Lock;
-
+import client.gui.util.LockManager.Lock;
 import common.game.ITileProperties;
 
 @SuppressWarnings("serial")

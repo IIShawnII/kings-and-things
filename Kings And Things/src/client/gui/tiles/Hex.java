@@ -6,7 +6,7 @@ import static common.Constants.IMAGE_HEX_REVERSE;
 import java.awt.Graphics;
 import java.awt.Point;
 
-import client.gui.LockManager.Lock;
+import client.gui.util.LockManager.Lock;
 import common.game.HexState;
 import static common.Constants.TILE_SIZE_BOARD;
 
