@@ -18,16 +18,17 @@ import server.logic.game.RollModification;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.Logger;
 import common.event.EventDispatch;
-import common.event.notifications.DieRoll;
-import common.event.notifications.HexOwnershipChanged;
-import common.event.notifications.PlayerState;
-import common.event.notifications.RackPlacement;
+import common.event.network.DieRoll;
+import common.event.network.HexOwnershipChanged;
+import common.event.network.PlayerState;
+import common.event.network.RackPlacement;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Roll;
@@ -65,7 +66,7 @@ public abstract class CommandHandler
 		if(currentState.getCurrentCombatPhase() == CombatPhase.ATTACKER_TWO_RETREAT || currentState.getCurrentCombatPhase() == CombatPhase.ATTACKER_ONE_RETREAT || 
 				currentState.getCurrentCombatPhase() == CombatPhase.ATTACKER_THREE_RETREAT || currentState.getCurrentCombatPhase() == CombatPhase.DEFENDER_RETREAT)
 		{
-			new PlayerWaivedRetreat(this).postInternalEvent(playerNumber);
+			new PlayerWaivedRetreat().postInternalEvent(playerNumber);
 		}
 		else
 		{
@@ -102,7 +103,7 @@ public abstract class CommandHandler
 		}
 		else
 		{
-			new PlayerRemovedThingsFromHex(hex, thingsToRemove, this).postInternalEvent(playerNumber);
+			new PlayerRemovedThingsFromHex(hex, thingsToRemove).postInternalEvent(playerNumber);
 		}
 	}
 
@@ -398,7 +399,7 @@ public abstract class CommandHandler
 		//if we are no longer waiting for more rolls, then we can apply the effects now
 		if(!currentState.isWaitingForRolls())
 		{
-			new DiceRolled( this).postInternalEvent();
+			new DiceRolled().postInternalEvent();
 		}
 	}
 

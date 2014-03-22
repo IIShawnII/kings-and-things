@@ -11,8 +11,8 @@ import com.google.common.eventbus.Subscribe;
 import common.Logger;
 import common.event.AbstractEvent;
 import common.event.AbstractNetwrokEvent;
-import common.event.notifications.HexOwnershipChanged;
-import common.event.notifications.PlayerState;
+import common.event.network.HexOwnershipChanged;
+import common.event.network.PlayerState;
 import common.game.PlayerInfo;
 import common.network.Connection;
 
@@ -89,16 +89,16 @@ public class PlayerConnection implements Runnable{
 					player.setIsPlaying( ((PlayerState)notification).getPlayer().isReady());
 				}else if ( notification instanceof HexOwnershipChanged){
 					HexOwnershipChanged event = (HexOwnershipChanged)notification;
-					new GiveHexToPlayerCommand( event.getChangedHex().getHex(), this).postInternalEvent( player.getID());
+					new GiveHexToPlayerCommand( event.getChangedHex().getHex()).postInternalEvent( player.getID());
 				}
-				new PlayerUpdated( player, this).postInternalEvent();
+				new PlayerUpdated( player).postInternalEvent();
 			}
 		} catch ( ClassNotFoundException | IOException e) {
 			Logger.getStandardLogger().warn( e);
 		}
 		player.setIsPlaying(false);
 		player.setConnected( false);
-		new PlayerUpdated( player, this).postInternalEvent();
+		new PlayerUpdated( player).postInternalEvent();
 		Logger.getStandardLogger().warn( player + " lost connection");
 	}
 	

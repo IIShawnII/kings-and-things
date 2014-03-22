@@ -7,8 +7,8 @@ public class ExchangeSeaHexCommand extends AbstractInternalEvent{
 	
 	private final ITileProperties hex;
 	
-	public ExchangeSeaHexCommand(ITileProperties hex, final Object OWNER){
-		super( OWNER);
+	public ExchangeSeaHexCommand(ITileProperties hex){
+		super();
 		this.hex = hex;
 	}
 	

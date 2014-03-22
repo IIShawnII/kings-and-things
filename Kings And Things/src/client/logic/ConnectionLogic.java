@@ -10,16 +10,12 @@ import common.Constants.UpdateInstruction;
 import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
 import common.event.AbstractNetwrokEvent;
-import common.event.notifications.Flip;
-import common.event.notifications.StartGame;
-import common.event.notifications.PlayersList;
-import common.event.notifications.PlayerState;
-import common.event.notifications.CurrentPhase;
-import common.event.notifications.HexPlacement;
-import common.event.notifications.RackPlacement;
-import common.event.notifications.PlayerOrderList;
-import common.event.notifications.HexStatesChanged;
-import common.event.notifications.HexOwnershipChanged;
+import common.event.network.HexOwnershipChanged;
+import common.event.network.HexPlacement;
+import common.event.network.HexStatesChanged;
+import common.event.network.PlayerState;
+import common.event.network.PlayersList;
+import common.event.network.StartGame;
 import static common.Constants.LOGIC;
 import static common.Constants.BOARD;
 import static common.Constants.PUBLIC;
@@ -39,7 +35,6 @@ public class ConnectionLogic implements Runnable {
 
 	@Override
 	public void run() {
-		CurrentPhase phase = null;
 		AbstractNetwrokEvent event = null;
 		Logger.getStandardLogger().info( "Starting");
 		while( !finished && !connection.isConnected()){

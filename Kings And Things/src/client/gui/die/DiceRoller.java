@@ -3,16 +3,15 @@ package client.gui.die;
 import java.util.Random;
 import java.util.ArrayList;
 
-import javax.swing.Timer;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -27,14 +26,12 @@ public class DiceRoller extends JPanel implements Parent, ActionListener{
 	private ArrayList<Die> dice;
 	private Random rand = new Random();
 	private int dieCount, rollingCount;
-	private Timer timer;
 
 	public DiceRoller() {
 		super( true);
 	}
 
 	private DiceRoller init() {
-		timer = new Timer( 0, this);
 		setPreferredSize( new Dimension( DICE_SIZE,DICE_SIZE));
 		setBackground( Color.RED);
 		addMouseListener( new MouseListener());

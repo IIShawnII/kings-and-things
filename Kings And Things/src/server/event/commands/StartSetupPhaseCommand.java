@@ -14,23 +14,20 @@ public class StartSetupPhaseCommand extends AbstractInternalEvent{
 	
 	private final HashSet<Player> players;
 	
-	public StartSetupPhaseCommand(boolean demoMode, Set<Player> players, final Object OWNER){
-		super( OWNER);
+	public StartSetupPhaseCommand(boolean demoMode, Set<Player> players){
+		super();
 		this.demoMode = demoMode;
 		this.players = new HashSet<Player>();
-		for(Player p : players)
-		{
+		for(Player p : players){
 			this.players.add(p);
 		}
 	}
 	
-	public Set<Player> getPlayers()
-	{
+	public Set<Player> getPlayers(){
 		return Collections.unmodifiableSet(players);
 	}
 	
-	public boolean getDemoMode()
-	{
+	public boolean getDemoMode(){
 		return demoMode;
 	}
 }

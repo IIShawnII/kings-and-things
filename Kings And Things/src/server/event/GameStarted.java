@@ -4,24 +4,22 @@ import server.logic.game.GameState;
 
 import common.event.AbstractInternalEvent;
 
-public class GameStarted extends AbstractInternalEvent
-{
+public class GameStarted extends AbstractInternalEvent{
+	
 	private final boolean isDemoMode;
 	private final GameState currentState;
 
-	public GameStarted(boolean isDemoMode, GameState currentState, final Object OWNER){
-		super( OWNER);
+	public GameStarted(boolean isDemoMode, GameState currentState){
+		super();
 		this.isDemoMode = isDemoMode;
 		this.currentState = currentState;
 	}
 
-	public boolean isDemoMode()
-	{
+	public boolean isDemoMode(){
 		return isDemoMode;
 	}
 
-	public GameState getCurrentState()
-	{
+	public GameState getCurrentState(){
 		return currentState;
 	}
 }

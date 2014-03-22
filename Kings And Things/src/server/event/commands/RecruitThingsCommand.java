@@ -8,14 +8,13 @@ import java.util.Set;
 import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
-
 public class RecruitThingsCommand extends AbstractInternalEvent {
 	
 	private final int gold;
 	private final HashSet<ITileProperties> things;
 	
-	public RecruitThingsCommand(int newGold, Collection<ITileProperties> thingsToExchange, final Object OWNER){
-		super( OWNER);
+	public RecruitThingsCommand(int newGold, Collection<ITileProperties> thingsToExchange){
+		super();
 		this.gold = newGold;
 		this.things = new HashSet<ITileProperties>(thingsToExchange);
 	}
@@ -24,12 +23,11 @@ public class RecruitThingsCommand extends AbstractInternalEvent {
 	 * Retrieves gold
 	 * @return The gold
 	 */
-	public int getGold () {
+	public int getGold(){
 		return gold;
 	}
 	
-	public Set<ITileProperties> getThingsToExchange()
-	{
+	public Set<ITileProperties> getThingsToExchange(){
 		return Collections.unmodifiableSet(things);
 	}
 }

@@ -28,9 +28,9 @@ import common.game.LoadResources;
 import common.network.Connection;
 import common.event.EventDispatch;
 import common.event.ConsoleMessage;
-import common.event.notifications.StartGame;
-import common.event.notifications.PlayerState;
-import common.event.notifications.PlayersList;
+import common.event.network.PlayerState;
+import common.event.network.PlayersList;
+import common.event.network.StartGame;
 
 public class ConnectionLobby implements Runnable {
 
@@ -158,7 +158,7 @@ public class ConnectionLobby implements Runnable {
 				set.add( pc.getPlayer());
 			}
 			new StartGame( Constants.BYPASS_MIN_PLAYER? MAX_PLAYERS:set.size()).postNetworkEvent();
-			new StartSetupPhaseCommand( demoMode, set, this).postInternalEvent();
+			new StartSetupPhaseCommand( demoMode, set).postInternalEvent();
 		}
 	}
 	

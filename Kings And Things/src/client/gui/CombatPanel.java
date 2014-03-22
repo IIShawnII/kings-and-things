@@ -16,13 +16,12 @@ import javax.swing.SwingUtilities;
 import server.event.commands.ApplyHitsCommand;
 import server.event.commands.RollDiceCommand;
 import server.logic.game.Player;
-
 import common.Constants;
 import common.Constants.RollReason;
 import common.event.AbstractUpdateReceiver;
-import common.event.notifications.CombatHits;
-import common.event.notifications.DieRoll;
-import common.event.notifications.HexStatesChanged;
+import common.event.network.CombatHits;
+import common.event.network.DieRoll;
+import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
 
@@ -152,7 +151,7 @@ public class CombatPanel extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				new ApplyHitsCommand(1, thing, CombatPanel.this).postInternalEvent(p.getID());
+				new ApplyHitsCommand(1, thing).postInternalEvent(p.getID());
 				hitsToApplyNum--;
 				updateHitsToApplyLabel();
 			}});
@@ -166,7 +165,7 @@ public class CombatPanel extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				new RollDiceCommand(RollReason.ATTACK_WITH_CREATURE,thing, CombatPanel.this).postInternalEvent(p.getID());
+				new RollDiceCommand(RollReason.ATTACK_WITH_CREATURE,thing).postInternalEvent(p.getID());
 			}});
 
 		panel.add(rollButton,constraints);

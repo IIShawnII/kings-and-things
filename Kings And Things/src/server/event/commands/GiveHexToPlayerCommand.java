@@ -7,8 +7,8 @@ public class GiveHexToPlayerCommand extends AbstractInternalEvent{
 	
 	private final ITileProperties hex;
 	
-	public GiveHexToPlayerCommand(ITileProperties hex, final Object OWNER){
-		super( OWNER);
+	public GiveHexToPlayerCommand(ITileProperties hex){
+		super();
 		this.hex = hex;
 	}
 	

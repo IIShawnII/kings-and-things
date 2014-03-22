@@ -10,6 +10,10 @@ public class AbstractInternalEvent extends AbstractEvent
 		super( OWNER);
 	}
 	
+	protected AbstractInternalEvent(){
+		super( null);
+	}
+	
 	/**
 	 * Use this for events you want to have processed only once
 	 * per event instance

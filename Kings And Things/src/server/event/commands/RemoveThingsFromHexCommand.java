@@ -13,10 +13,8 @@ public class RemoveThingsFromHexCommand extends AbstractInternalEvent {
 	private final HashSet<ITileProperties> thingsToRemove;
 	
 	// constructor
-	public RemoveThingsFromHexCommand (ITileProperties hexToRemoveSomethingFrom, 
-			HashSet<ITileProperties> thingsToRemove, Object owner)
-	{
-		super(owner);
+	public RemoveThingsFromHexCommand( ITileProperties hexToRemoveSomethingFrom, HashSet<ITileProperties> thingsToRemove){
+		super();
 		this.hexToRemoveSomethingFrom = hexToRemoveSomethingFrom;
 		this.thingsToRemove = thingsToRemove;
 	}
@@ -26,17 +24,14 @@ public class RemoveThingsFromHexCommand extends AbstractInternalEvent {
 	/**
 	 * Retrieves things to remove hexes from
 	 */
-	public ITileProperties getHexToRemoveSomethingFrom()
-	{
+	public ITileProperties getHexToRemoveSomethingFrom(){
 		return hexToRemoveSomethingFrom;
 	}
 	
 	/**
 	 * Retrieves things to remove
 	 */
-	public Set<ITileProperties> getThingsToRemove()
-	{
+	public Set<ITileProperties> getThingsToRemove(){
 		return Collections.unmodifiableSet(thingsToRemove);
 	}
-	
 }

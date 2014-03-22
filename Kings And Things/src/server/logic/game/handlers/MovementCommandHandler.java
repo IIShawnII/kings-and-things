@@ -7,8 +7,9 @@ import server.event.commands.MoveThingsCommand;
 import server.logic.game.validators.MovementValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Logger;
-import common.event.notifications.HexStatesChanged;
+import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
 

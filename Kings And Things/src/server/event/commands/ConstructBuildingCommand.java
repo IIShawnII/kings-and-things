@@ -9,8 +9,8 @@ public class ConstructBuildingCommand extends AbstractInternalEvent{
 	private final BuildableBuilding building;
 	private final ITileProperties hex;
 	
-	public ConstructBuildingCommand(BuildableBuilding building, ITileProperties hex, final Object OWNER){
-		super( OWNER);
+	public ConstructBuildingCommand(BuildableBuilding building, ITileProperties hex){
+		super();
 		this.building = building;
 		this.hex = hex;
 	}

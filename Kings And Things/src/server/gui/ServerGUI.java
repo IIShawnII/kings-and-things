@@ -99,7 +99,7 @@ public class ServerGUI extends JFrame implements Runnable{
 		
 		@Override
 		public void windowClosed(WindowEvent e){
-			new EndServer( ServerGUI.this).postInternalEvent();
+			new EndServer().postInternalEvent();
 		}
 	}
 	

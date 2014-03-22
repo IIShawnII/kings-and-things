@@ -11,20 +11,17 @@ public class PlayerRemovedThingsFromHex extends AbstractInternalEvent
 	private final ITileProperties hex;
 	private final Set<ITileProperties> thingsToRemove;
 	
-	public PlayerRemovedThingsFromHex(ITileProperties hex, Set<ITileProperties> thingsToRemove, Object OWNER)
-	{
-		super(OWNER);
+	public PlayerRemovedThingsFromHex(ITileProperties hex, Set<ITileProperties> thingsToRemove){
+		super();
 		this.hex = hex;
 		this.thingsToRemove = thingsToRemove;
 	}
 
-	public ITileProperties getHex()
-	{
+	public ITileProperties getHex(){
 		return hex;
 	}
 	
-	public Set<ITileProperties> getThingsToRemove()
-	{
+	public Set<ITileProperties> getThingsToRemove(){
 		return Collections.unmodifiableSet(thingsToRemove);
 	}
 }

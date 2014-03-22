@@ -11,11 +11,12 @@ import server.logic.game.Player;
 import server.logic.game.validators.RecruitingThingsPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
-import common.event.notifications.HexStatesChanged;
-import common.event.notifications.RackPlacement;
+import common.event.network.HexStatesChanged;
+import common.event.network.RackPlacement;
 import common.game.HexState;
 import common.game.ITileProperties;
 

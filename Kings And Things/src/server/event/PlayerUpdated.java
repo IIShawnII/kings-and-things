@@ -7,8 +7,8 @@ public class PlayerUpdated extends AbstractInternalEvent {
 	
 	private final Player player;
 	
-	public PlayerUpdated( Player player, final Object OWNER){
-		super( OWNER);
+	public PlayerUpdated( Player player){
+		super();
 		this.player = player;
 	}
 

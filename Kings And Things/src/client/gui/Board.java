@@ -32,7 +32,7 @@ import common.Constants.Restriction;
 import common.Constants.RegularPhase;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
-import common.event.notifications.HexOwnershipChanged;
+import common.event.network.HexOwnershipChanged;
 import common.game.HexState;
 import common.game.PlayerInfo;
 import common.game.TileProperties;

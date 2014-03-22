@@ -8,8 +8,8 @@ public class PlaceThingOnBoardCommand extends AbstractInternalEvent{
 	private final ITileProperties hex;
 	private final ITileProperties thing;
 	
-	public PlaceThingOnBoardCommand(ITileProperties thing, ITileProperties hex, final Object OWNER){
-		super( OWNER);
+	public PlaceThingOnBoardCommand(ITileProperties thing, ITileProperties hex){
+		super();
 		this.thing = thing;
 		this.hex = hex;
 	}

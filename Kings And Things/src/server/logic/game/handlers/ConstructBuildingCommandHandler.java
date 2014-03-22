@@ -5,10 +5,11 @@ import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.validators.ConstructBuildingCommandValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants.BuildableBuilding;
 import common.Constants.SetupPhase;
 import common.Logger;
-import common.event.notifications.HexStatesChanged;
+import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
 

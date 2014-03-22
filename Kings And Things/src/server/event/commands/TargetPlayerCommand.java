@@ -2,18 +2,16 @@ package server.event.commands;
 
 import common.event.AbstractInternalEvent;
 
-public class TargetPlayerCommand extends AbstractInternalEvent
-{
+public class TargetPlayerCommand extends AbstractInternalEvent{
+	
 	private final int targetID;
 	
-	public TargetPlayerCommand(int targetID, Object OWNER)
-	{
-		super(OWNER);
+	public TargetPlayerCommand(int targetID){
+		super();
 		this.targetID = targetID;
 	}
 	
-	public int getTargetID()
-	{
+	public int getTargetID(){
 		return targetID;
 	}
 }

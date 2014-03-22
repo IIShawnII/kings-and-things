@@ -12,8 +12,8 @@ public class ExchangeThingsCommand extends AbstractInternalEvent{
 	
 	private final HashSet<ITileProperties> things;
 	
-	public ExchangeThingsCommand(Collection<ITileProperties> things, final Object OWNER){
-		super( OWNER);
+	public ExchangeThingsCommand(Collection<ITileProperties> things){
+		super();
 		this.things = new HashSet<ITileProperties>();
 		for(ITileProperties thing : things){
 			this.things.add(thing);

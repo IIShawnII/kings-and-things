@@ -1,4 +1,4 @@
-package common.event.notifications;
+package common.event.network;
 
 import java.util.ArrayList;
 

@@ -3,7 +3,6 @@ package server.logic.game.handlers;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import server.event.DiceRolled;
@@ -24,8 +23,8 @@ import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.Logger;
-import common.event.notifications.HexPlacement;
-import common.event.notifications.PlayerOrderList;
+import common.event.network.HexPlacement;
+import common.event.network.PlayerOrderList;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Roll;
@@ -53,7 +52,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		currentState.getBoard().fillArray( placement.getArray());
 		placement.postNetworkEvent();
 		
-		new GameStarted(demoMode, currentState, this).postInternalEvent();
+		new GameStarted(demoMode, currentState).postInternalEvent();
 		//new Flip().postNetworkEvent();
 		//new SetupPhaseComplete(demoMode, currentState, this).postInternalEvent();
 		//new CurrentPhase( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNetworkEvent();
