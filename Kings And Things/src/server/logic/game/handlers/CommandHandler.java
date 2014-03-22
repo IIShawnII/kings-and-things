@@ -310,9 +310,10 @@ public abstract class CommandHandler
 						}
 					}
 					
-					tray.postNetworkEvent();
-					new PlayerState(p.getPlayerInfo()).postNetworkEvent();
+					tray.postNetworkEvent(p.getID());
+					new PlayerState(p.getPlayerInfo()).postNetworkEvent(p.getID());
 				}
+				//TODO send full player list?
 				break;
 			}
 			case SETUP_FINISHED:

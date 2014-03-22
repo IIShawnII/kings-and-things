@@ -43,8 +43,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 	public void startNewGame(boolean demoMode, Set<Player> players) throws NoMoreTilesException{
 		SetupPhaseValidator.validateStartNewGame(demoMode, players);
 
-		List<Integer> playerOrder = new ArrayList<Integer>();
-		GameState currentState = new GameState(demoMode,players,playerOrder,SetupPhase.DETERMINE_PLAYER_ORDER, RegularPhase.RECRUITING_CHARACTERS,0,0, CombatPhase.NO_COMBAT, -1, null);
+		GameState currentState = new GameState(demoMode,players,new ArrayList<Integer>(),SetupPhase.DETERMINE_PLAYER_ORDER, RegularPhase.RECRUITING_CHARACTERS,0,0, CombatPhase.NO_COMBAT, -1, null);
 		for(Player p : currentState.getPlayers())
 		{
 			currentState.addNeededRoll(new Roll(2, null, RollReason.DETERMINE_PLAYER_ORDER, p.getID()));
