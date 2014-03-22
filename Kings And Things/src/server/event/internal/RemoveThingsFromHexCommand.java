@@ -1,4 +1,4 @@
-package server.event.commands;
+package server.event.internal;
 
 import java.util.Collections;
 import java.util.HashSet;

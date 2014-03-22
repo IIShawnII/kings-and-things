@@ -1,6 +1,6 @@
 package server.logic.game.handlers;
 
-import server.event.commands.ApplyRandomEventsCommand;
+import server.event.internal.ApplyRandomEventsCommand;
 import server.logic.game.Player;
 
 import com.google.common.eventbus.Subscribe;

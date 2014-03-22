@@ -1,4 +1,4 @@
-package server.event.commands;
+package server.event.internal;
 
 import common.Constants.BuildableBuilding;
 import common.event.AbstractInternalEvent;

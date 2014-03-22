@@ -8,11 +8,11 @@ import java.util.Set;
 
 import server.event.PlayerRemovedThingsFromHex;
 import server.event.PlayerWaivedRetreat;
-import server.event.commands.ApplyHitsCommand;
 import server.event.DiceRolled;
-import server.event.commands.ResolveCombatCommand;
-import server.event.commands.RetreatCommand;
-import server.event.commands.TargetPlayerCommand;
+import server.event.internal.ApplyHitsCommand;
+import server.event.internal.ResolveCombatCommand;
+import server.event.internal.RetreatCommand;
+import server.event.internal.TargetPlayerCommand;
 import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.Player;
 import server.logic.game.validators.CombatPhaseValidator;

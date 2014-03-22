@@ -7,9 +7,9 @@ import java.util.Set;
 
 import server.event.DiceRolled;
 import server.event.GameStarted;
-import server.event.commands.ExchangeSeaHexCommand;
-import server.event.commands.GiveHexToPlayerCommand;
-import server.event.commands.StartSetupPhaseCommand;
+import server.event.internal.ExchangeSeaHexCommand;
+import server.event.internal.GiveHexToPlayerCommand;
+import server.event.internal.StartSetupPhaseCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
 import server.logic.game.Player;

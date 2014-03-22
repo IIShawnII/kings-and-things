@@ -1,4 +1,4 @@
-package server.event.commands;
+package server.event.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;

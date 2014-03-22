@@ -3,9 +3,9 @@ package server.logic.game.handlers;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import server.event.commands.ExchangeThingsCommand;
-import server.event.commands.PlaceThingOnBoardCommand;
-import server.event.commands.RecruitThingsCommand;
+import server.event.internal.ExchangeThingsCommand;
+import server.event.internal.PlaceThingOnBoardCommand;
+import server.event.internal.RecruitThingsCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.Player;
 import server.logic.game.validators.RecruitingThingsPhaseValidator;

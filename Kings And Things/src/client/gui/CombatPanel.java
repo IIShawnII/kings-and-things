@@ -13,8 +13,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import server.event.commands.ApplyHitsCommand;
-import server.event.commands.RollDiceCommand;
+import server.event.internal.ApplyHitsCommand;
+import server.event.internal.RollDiceCommand;
 import server.logic.game.Player;
 import common.Constants;
 import common.Constants.RollReason;

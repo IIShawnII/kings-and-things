@@ -19,7 +19,7 @@ import server.logic.game.Player;
 import server.logic.game.CommandHandlerManager;
 import server.event.EndServer;
 import server.event.PlayerUpdated;
-import server.event.commands.StartSetupPhaseCommand;
+import server.event.internal.StartSetupPhaseCommand;
 import common.Logger;
 import common.Constants;
 import common.Constants.Level;

@@ -3,7 +3,7 @@ package server.logic.game.handlers;
 import java.util.Collection;
 import java.util.List;
 
-import server.event.commands.MoveThingsCommand;
+import server.event.internal.MoveThingsCommand;
 import server.logic.game.validators.MovementValidator;
 
 import com.google.common.eventbus.Subscribe;

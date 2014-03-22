@@ -1,4 +1,4 @@
-package server.event.commands;
+package server.event.internal;
 
 import common.Constants.RollReason;
 import common.event.AbstractInternalEvent;

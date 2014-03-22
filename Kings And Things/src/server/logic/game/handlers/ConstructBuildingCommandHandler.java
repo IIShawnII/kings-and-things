@@ -1,6 +1,6 @@
 package server.logic.game.handlers;
 
-import server.event.commands.ConstructBuildingCommand;
+import server.event.internal.ConstructBuildingCommand;
 import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.validators.ConstructBuildingCommandValidator;
 

@@ -1,4 +1,4 @@
-package server.event.commands;
+package server.event.internal;
 
 import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
