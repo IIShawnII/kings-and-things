@@ -15,6 +15,7 @@ import server.logic.game.validators.RecruitingThingsPhaseValidator;
 import com.google.common.eventbus.Subscribe;
 
 import common.Constants;
+import common.Constants.Category;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
@@ -146,7 +147,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			{
 				p.removeThingFromTray(thing);
 			}
-			if(!thing.isSpecialCharacter())
+			if(thing.getCategory() == Category.Cup)
 			{
 				getCurrentState().getCup().reInsertTile(thing);
 			}
@@ -155,12 +156,24 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 				getCurrentState().getBankHeroes().reInsertTile(thing);
 			}
 		}
+		moveThingsFromHandToTray(p);
+	}
+	
+	private void moveThingsFromHandToTray(Player p)
+	{
 		Iterator<ITileProperties> handThings = p.getCardsInHand().iterator();
 		for(int i=p.getTrayThings().size(); i<Constants.MAX_RACK_SIZE && handThings.hasNext(); i++)
 		{
 			ITileProperties handThing = handThings.next();
-			p.removeCardFromHand(handThing);
-			p.addThingToTrayOrHand(handThing);
+			while(handThing.getCategory() != Category.Cup && handThings.hasNext())
+			{
+				handThing = handThings.next();
+			}
+			if(handThing.getCategory() == Category.Cup)
+			{
+				p.removeCardFromHand(handThing);
+				p.addThingToTrayOrHand(handThing);
+			}
 		}
 	}
 	
@@ -181,14 +194,16 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			thing.flip();
 		}
 		hs.addThingToHex(thing);
-		if(getCurrentState().getPlayerByPlayerNumber(playerNumber).ownsThingInTray(thing))
+		Player p = getCurrentState().getPlayerByPlayerNumber(playerNumber);
+		if(p.ownsThingInTray(thing))
 		{
-			getCurrentState().getPlayerByPlayerNumber(playerNumber).placeThingFromTrayOnBoard(thing);
+			p.placeThingFromTrayOnBoard(thing);
 		}
 		else
 		{
-			getCurrentState().getPlayerByPlayerNumber(playerNumber).placeThingFromHandOnBoard(thing);
+			p.placeThingFromHandOnBoard(thing);
 		}
+		moveThingsFromHandToTray(p);
 	}
 	
 	private void notifyClientsOfPlayerTray(int playerNumber)
