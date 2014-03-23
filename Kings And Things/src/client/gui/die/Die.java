@@ -10,7 +10,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static common.Constants.DICE;
+import static common.Constants.IMAGE_DICE;
 import static common.Constants.DICE_SIZE;
 import static common.Constants.MAX_ROLLS;
 
@@ -79,6 +79,6 @@ public class Die extends JPanel implements ActionListener{
 	@Override
 	public void paintComponent( Graphics g) {
 		super.paintComponent( g);
-		g.drawImage( DICE[faceValue], 0, 0, getWidth(), getHeight(), null);
+		g.drawImage( IMAGE_DICE[faceValue], 0, 0, getWidth(), getHeight(), null);
 	}
 }

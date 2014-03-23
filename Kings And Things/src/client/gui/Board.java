@@ -14,7 +14,6 @@ import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.Graphics2D;
 import java.awt.BasicStroke;
-import java.awt.LayoutManager;
 import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
@@ -22,6 +21,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
+import client.gui.die.DiceRoller;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
 import client.gui.util.LockManager;
@@ -41,6 +41,7 @@ import common.game.ITileProperties;
 import static common.Constants.STATE;
 import static common.Constants.BOARD;
 import static common.Constants.HEX_SIZE;
+import static common.Constants.DICE_SIZE;
 import static common.Constants.TILE_SIZE;
 import static common.Constants.DRAW_LOCKS;
 import static common.Constants.BOARD_SIZE;
@@ -127,6 +128,7 @@ public class Board extends JPanel{
 	private volatile boolean phaseDone = false;
 	private volatile boolean isActive = false;
 
+	private DiceRoller dice;
 	private LockManager locks;
 	private JTextField jtfStatus;
 	private MouseInput mouseInput;
@@ -138,8 +140,8 @@ public class Board extends JPanel{
 	 * basic super constructor warper for JPanel
 	 * @param layout
 	 */
-	public Board( LayoutManager layout){
-		super( layout, true);
+	public Board(){
+		super( null, true);
 	}
 
 	public void setActive( boolean active) {
@@ -155,6 +157,12 @@ public class Board extends JPanel{
 		addMouseListener( mouseInput);
 		addMouseWheelListener( mouseInput);
 		addMouseMotionListener( mouseInput);
+		
+		dice = new DiceRoller();
+		dice.setBounds( HEX_BOARD_SIZE.width+DICE_SIZE/2, getHeight()-DICE_SIZE-10, DICE_SIZE, DICE_SIZE);
+		dice.init();
+		add( dice);
+		
 		locks = new LockManager( playerCount);
 		jtfStatus = new JTextField("Welcome to Kings & Things");
 		jtfStatus.setBounds( 10, getHeight()-40, HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING, 35);
@@ -641,7 +649,7 @@ public class Board extends JPanel{
 			if( BYPASS_MOUSE_CLICK || ignore){
 				return;
 			}
-			if( phaseDone && SwingUtilities.isRightMouseButton( e)){
+			/*if( phaseDone && SwingUtilities.isRightMouseButton( e)){
 				Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
 				if( deepestComponent!=null){
 					((Tile)deepestComponent).flip();
@@ -663,7 +671,7 @@ public class Board extends JPanel{
         	            clickCount++;
         				break;
             	}
-		    }
+		    }*/
 		}
 	}
 	

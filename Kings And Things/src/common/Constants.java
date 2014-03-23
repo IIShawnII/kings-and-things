@@ -58,7 +58,8 @@ public final class Constants {
 	public enum RollReason {DETERMINE_PLAYER_ORDER, EXPLORE_HEX, ATTACK_WITH_CREATURE, CALCULATE_DAMAGE_TO_TILE, ENTERTAINMENT, RECRUIT_SPECIAL_CHARACTER}
 	
 	//Resources
-	public static final Image DICE[];
+	public static final Image IMAGE_DICE[];
+	public static final Image IMAGE_GREEN;
 	public static final Image IMAGE_BACKGROUND;
 	public static final Image IMAGE_HEX_REVERSE; 
 	public static final Image IMAGE_TILE_REVERSE;
@@ -109,7 +110,7 @@ public final class Constants {
 	public static final Dimension MIN_CLIENT_SIZE = new Dimension( 1300,720);
 	
 	//Sizes
-	public static final int DICE_SIZE = 80;
+	public static final int DICE_SIZE = 70;
 	public static final int LOCK_SIZE = 28;
 	public static final int HEX_HEIGHT = 70;
 	public static final Polygon HEX_OUTLINE;
@@ -180,14 +181,15 @@ public final class Constants {
 		IMAGE_BACKGROUND = loadImage( "Resources\\Misc\\-n Woodboard.jpg");
 		IMAGE_HEX_REVERSE = loadImage( "Resources\\Misc\\-n Hex_Reverse.png");
 		IMAGE_TILE_REVERSE = loadImage( "Resources\\Misc\\-n Tile_Reverse.png");
-		DICE = new Image[7];
-		DICE[0] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 0.png");
-		DICE[1] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 1.png");
-		DICE[2] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 2.png");
-		DICE[3] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 3.png");
-		DICE[4] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 4.png");
-		DICE[5] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 5.png");
-		DICE[6] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 6.png");
+		IMAGE_GREEN = loadImage( "Resources\\Misc\\-n Green_Surface.png");
+		IMAGE_DICE = new Image[7];
+		IMAGE_DICE[0] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 0.png");
+		IMAGE_DICE[1] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 1.png");
+		IMAGE_DICE[2] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 2.png");
+		IMAGE_DICE[3] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 3.png");
+		IMAGE_DICE[4] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 4.png");
+		IMAGE_DICE[5] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 5.png");
+		IMAGE_DICE[6] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 6.png");
 	}
 	
 	private static Image loadImage( String path){

@@ -28,7 +28,7 @@ public class MultiBoardManager {
 		}
 		boards = new Board[players.length];
 		for( int i=0; i<boards.length; i++){
-			boards[ i] = new Board( null);
+			boards[ i] = new Board();
 			boards[ i].setPreferredSize( BOARD_SIZE);
 			boards[ i].setSize( BOARD_SIZE);
 			boards[ i].init( boards.length);
