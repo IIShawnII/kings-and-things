@@ -11,6 +11,7 @@ import java.util.Set;
 
 import server.logic.exceptions.NoMoreTilesException;
 import common.Logger;
+import common.Constants.Building;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
@@ -735,5 +736,54 @@ public class GameState
 	public void removeAllHexesWithBuiltInObjects() 
 	{
 		hexesContainingBuiltObjects.clear();
+	}
+	
+	/**
+	 * Checks victory conditions to see if someone has won the game yet,
+	 * @return The player who won the game, or null if there is still no winner.
+	 */
+	public Player getWinningPlayer()
+	{
+		HashSet<HexState> hexesWithCitadels = new HashSet<HexState>();
+		
+		for(HexState hs : board.getHexesAsList())
+		{
+			ITileProperties building = hs.getBuilding();
+			if(building!=null && building.getName().equals(Building.Citadel.name()))
+			{
+				hexesWithCitadels.add(hs);
+			}
+		}
+		if(hexesWithCitadels.size()==1 && !hexesContainingBuiltObjects.contains(hexesWithCitadels.iterator().next()))
+		{
+			for(Player p : players)
+			{
+				if(p.ownsThingOnBoard(hexesWithCitadels.iterator().next().getBuilding()))
+				{
+					return currentRegularPhase == RegularPhase.SPECIAL_POWERS? p : null;
+				}
+			}
+			throw new IllegalStateException("Hex has building with no owner: " + hexesWithCitadels.iterator().next());
+		}
+		else if(hexesWithCitadels.size()>1)
+		{
+			for(Player p : players)
+			{
+				int numCitadels = 0;
+				for(ITileProperties tp : p.getOwnedThingsOnBoard())
+				{
+					if(tp.getName().equals(Building.Citadel.name()))
+					{
+						numCitadels++;
+					}
+				}
+				if(numCitadels >= 2)
+				{
+					return p;
+				}
+			}
+		}
+		
+		return null;
 	}
 }

@@ -9,6 +9,7 @@ import server.logic.game.validators.MovementValidator;
 import com.google.common.eventbus.Subscribe;
 
 import common.Logger;
+import common.event.network.CommandRejected;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
@@ -63,6 +64,7 @@ public class MovementCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process MoveThingsCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

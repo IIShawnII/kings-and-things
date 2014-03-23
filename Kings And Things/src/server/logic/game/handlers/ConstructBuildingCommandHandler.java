@@ -9,6 +9,7 @@ import com.google.common.eventbus.Subscribe;
 import common.Constants.BuildableBuilding;
 import common.Constants.SetupPhase;
 import common.Logger;
+import common.event.network.CommandRejected;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
@@ -62,6 +63,7 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ConstructBuildingCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

@@ -2,7 +2,9 @@ package server.logic.game.handlers;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
+import server.event.internal.DiscardThingsCommand;
 import server.event.internal.ExchangeThingsCommand;
 import server.event.internal.PlaceThingOnBoardCommand;
 import server.event.internal.RecruitThingsCommand;
@@ -12,9 +14,11 @@ import server.logic.game.validators.RecruitingThingsPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
 
+import common.Constants;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Logger;
+import common.event.network.CommandRejected;
 import common.event.network.HexStatesChanged;
 import common.event.network.RackPlacement;
 import common.game.HexState;
@@ -77,7 +81,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		
 		// adds things to the players tray for every 5 gold pieces
 		for(int i = 0; i < (gold/5); i++) {
-			player.addThingToTray(getCurrentState().getCup().drawTile());
+			player.addThingToTrayOrHand(getCurrentState().getCup().drawTile());
 		}
 	}
 
@@ -95,6 +99,12 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 	public void placeThingOnBoard(ITileProperties thing, int playerNumber, ITileProperties hex){
 		RecruitingThingsPhaseValidator.validateCanPlaceThingOnBoard(thing, playerNumber, hex, getCurrentState());
 		makeThingOnBoard(thing, playerNumber, hex);
+	}
+	
+	public void discardThings(Collection<ITileProperties> things, int playerNumber)
+	{
+		RecruitingThingsPhaseValidator.validateCanDiscardThings(things, playerNumber, getCurrentState());
+		makeThingsDiscarded(things,playerNumber);
 	}
 	
 	private void makeThingsExchanged(Collection<ITileProperties> things, int playerNumber) throws NoMoreTilesException
@@ -119,17 +129,48 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		}
 		for(ITileProperties newThing : newThings)
 		{
-			player.addThingToTray(newThing);
+			player.addThingToTrayOrHand(newThing);
 		}
 	}
 
+	private void makeThingsDiscarded(Collection<ITileProperties> things, int playerNumber)
+	{
+		Player p = getCurrentState().getPlayerByPlayerNumber(playerNumber);
+		for(ITileProperties thing : things)
+		{
+			if(p.ownsThingInHand(thing))
+			{
+				p.removeCardFromHand(thing);
+			}
+			else
+			{
+				p.removeThingFromTray(thing);
+			}
+			if(!thing.isSpecialCharacter())
+			{
+				getCurrentState().getCup().reInsertTile(thing);
+			}
+			else
+			{
+				getCurrentState().getBankHeroes().reInsertTile(thing);
+			}
+		}
+		Iterator<ITileProperties> handThings = p.getCardsInHand().iterator();
+		for(int i=p.getTrayThings().size(); i<Constants.MAX_RACK_SIZE && handThings.hasNext(); i++)
+		{
+			ITileProperties handThing = handThings.next();
+			p.removeCardFromHand(handThing);
+			p.addThingToTrayOrHand(handThing);
+		}
+	}
+	
 	private void drawFreeThings(int playerNumber) throws NoMoreTilesException
 	{
 		Player player = getCurrentState().getActivePhasePlayer();
 		int freeThings = (int) Math.ceil(((double)player.getOwnedHexes().size()) / (double)2);
 		for(int i=0; i<freeThings; i++)
 		{
-			player.addThingToTray(getCurrentState().getCup().drawTile());
+			player.addThingToTrayOrHand(getCurrentState().getCup().drawTile());
 		}
 	}
 
@@ -175,6 +216,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ExchangeThingsCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -197,6 +239,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process PlaceThingOnBoardCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -215,6 +258,27 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process RecruitThingsCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			}
+		}
+	}
+
+
+	@Subscribe
+	public void receiveDiscardThingsCommand(DiscardThingsCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				discardThings(command.getThingToDiscard(),command.getID());
+				//notify client
+				notifyClientsOfPlayerTray(command.getID());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process DiscardThingsCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

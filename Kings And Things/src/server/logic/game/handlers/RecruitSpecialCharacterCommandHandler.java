@@ -12,6 +12,7 @@ import com.google.common.eventbus.Subscribe;
 
 import common.Constants.RollReason;
 import common.Logger;
+import common.event.network.CommandRejected;
 import common.game.ITileProperties;
 import common.game.Roll;
 
@@ -94,7 +95,7 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 	}
 
 	@Subscribe
-	public void receiveApplyRollCommand(DiceRolled event)
+	public void receiveApplyRoll(DiceRolled event)
 	{
 		try
 		{
@@ -116,6 +117,7 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 		catch(Throwable t)
 		{
 			Logger.getErrorLogger().error("Unable to process ModifyRollForSpecialCharacter due to: ", t);
+			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 		}
 	}
 }

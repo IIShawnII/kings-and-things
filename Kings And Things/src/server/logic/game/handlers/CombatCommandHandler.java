@@ -27,6 +27,7 @@ import common.Constants.CombatPhase;
 import common.Constants.RollReason;
 import common.Logger;
 import common.event.network.CombatHits;
+import common.event.network.CommandRejected;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
@@ -197,6 +198,10 @@ public class CombatCommandHandler extends CommandHandler
 					{
 						oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
 						newOwner.addOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
+						if(getCurrentState().getCombatHex().getBuilding().getName().equals(Building.Citadel.name()))
+						{
+							getCurrentState().addHexToListOfConstructedHexes(getCurrentState().getCombatHex());
+						}
 					}
 				}
 				if(getCurrentState().getCombatHex().hasSpecialIncomeCounter())
@@ -549,39 +554,7 @@ public class CombatCommandHandler extends CommandHandler
 			Logger.getErrorLogger().error("Unable to process PlayerRemovedThingsFromHex event due to: ", t);
 		}
 	}
-	
-	@Subscribe
-	public void receiveRetreatCommand(RetreatCommand command)
-	{
-		if(command.isUnhandled())
-		{
-			try
-			{
-				retreatFromCombat(command.getID(),command.getDestinationHex());
-			}
-			catch(Throwable t)
-			{
-				Logger.getErrorLogger().error("Unable to process RetreatCommand due to: ", t);
-			}
-		}
-	}
-	
-	@Subscribe
-	public void receiveTargetPlayerCommand(TargetPlayerCommand command)
-	{
-		if(command.isUnhandled())
-		{
-			try
-			{
-				setPlayersTarget(command.getID(),command.getTargetID());
-			}
-			catch(Throwable t)
-			{
-				Logger.getErrorLogger().error("Unable to process TargetPlayerCommand due to: ", t);
-			}
-		}
-	}
-	
+
 	@Subscribe
 	public void receivePlayerWaivedRetreat(PlayerWaivedRetreat event)
 	{
@@ -599,7 +572,7 @@ public class CombatCommandHandler extends CommandHandler
 	}
 	
 	@Subscribe
-	public void receiveApplyRollCommand(DiceRolled event)
+	public void receiveApplyRoll(DiceRolled event)
 	{
 		try
 		{
@@ -612,6 +585,40 @@ public class CombatCommandHandler extends CommandHandler
 	}
 
 	@Subscribe
+	public void receiveRetreatCommand(RetreatCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				retreatFromCombat(command.getID(),command.getDestinationHex());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process RetreatCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			}
+		}
+	}
+	
+	@Subscribe
+	public void receiveTargetPlayerCommand(TargetPlayerCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				setPlayersTarget(command.getID(),command.getTargetID());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process TargetPlayerCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			}
+		}
+	}
+	
+	@Subscribe
 	public void receiveApplyHitsCommand(ApplyHitsCommand command)
 	{
 		if(command.isUnhandled())
@@ -623,6 +630,7 @@ public class CombatCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ApplyHitsCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -639,6 +647,7 @@ public class CombatCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ResolveCombatCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

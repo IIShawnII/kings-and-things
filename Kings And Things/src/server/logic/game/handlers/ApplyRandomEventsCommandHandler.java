@@ -7,6 +7,7 @@ import com.google.common.eventbus.Subscribe;
 
 import common.Constants.RandomEvent;
 import common.Logger;
+import common.event.network.CommandRejected;
 import common.game.HexState;
 import common.game.ITileProperties;
 
@@ -161,7 +162,8 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 		try {
 			applyRandomEventEffect(randomEvent.getEventOfPlayer(), randomEvent.getTargetOfEvent());
 		} catch (Throwable t) {
-			Logger.getErrorLogger().error("Unable to apply random event due to: ");
+			Logger.getErrorLogger().error("Unable to apply random event due to: ",t);
+			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 		}
 	}
 }

@@ -25,6 +25,7 @@ import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.Logger;
 import common.event.EventDispatch;
+import common.event.network.CommandRejected;
 import common.event.network.DieRoll;
 import common.event.network.HexOwnershipChanged;
 import common.event.network.PlayerState;
@@ -180,7 +181,6 @@ public abstract class CommandHandler
 		currentState.setCombatLocation(null);
 		currentState.recordRollForSpecialCharacter(null);
 		currentState.setDefendingPlayerNumber(-1);
-		currentState.removeAllHexesWithBuiltInObjects();
 		currentState.clearAllPlayerTargets();
 		
 		new PlayerState(currentState.getActivePhasePlayer().getPlayerInfo()).postNetworkEvent();
@@ -199,6 +199,7 @@ public abstract class CommandHandler
 
 		currentState.setActivePhasePlayer(nextActiveTurnPlayerNumber);
 		currentState.setActiveTurnPlayer(nextActiveTurnPlayerNumber);
+		currentState.removeAllHexesWithBuiltInObjects();
 	}
 	
 	private SetupPhase getNextSetupPhase(){
@@ -301,7 +302,7 @@ public abstract class CommandHandler
 						try
 						{
 							ITileProperties thing = currentState.getCup().drawTile();
-							p.addThingToTray(thing);
+							p.addThingToTrayOrHand(thing);
 							tray.getArray()[i] = thing;
 						}
 						catch (NoMoreTilesException e)
@@ -407,7 +408,14 @@ public abstract class CommandHandler
 	{
 		return isDemoMode? rollValue : (int) Math.round((Math.random() * 5) + 1);
 	}
-	
+
+	@Subscribe
+	public void receiveGameStartedEvent(GameStarted event)
+	{
+		currentState = event.getCurrentState();
+		isDemoMode = event.isDemoMode();
+	}
+
 	@Subscribe
 	public void receiveRemoveThingFromBoardCommand(RemoveThingsFromHexCommand command)
 	{
@@ -420,17 +428,11 @@ public abstract class CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process RemoveThingFromHexCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
 	
-	@Subscribe
-	public void receiveGameStartedEvent(GameStarted event)
-	{
-		currentState = event.getCurrentState();
-		isDemoMode = event.isDemoMode();
-	}
-
 	@Subscribe
 	public void recieveEndPlayerTurnCommand(EndPlayerTurnCommand command)
 	{
@@ -443,6 +445,7 @@ public abstract class CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process EndPlayerTurnCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -459,6 +462,7 @@ public abstract class CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process RollDieCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

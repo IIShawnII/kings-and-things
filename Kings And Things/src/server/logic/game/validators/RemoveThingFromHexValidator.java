@@ -1,5 +1,0 @@
-package server.logic.game.validators;
-
-public class RemoveThingFromHexValidator {
-
-}

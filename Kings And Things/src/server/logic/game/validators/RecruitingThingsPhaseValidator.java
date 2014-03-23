@@ -52,6 +52,20 @@ public abstract class RecruitingThingsPhaseValidator
 		}
 	}
 
+	public static void validateCanDiscardThings(Collection<ITileProperties> things, int playerNumber, GameState currentState)
+	{
+		CommandValidator.validateIsPlayerActive(playerNumber,currentState);
+		CommandValidator.validateNoPendingRolls(currentState);
+		Player p = currentState.getPlayerByPlayerNumber(playerNumber);
+		for(ITileProperties thing : things)
+		{
+			if(!p.ownsThingInHand(thing) && !p.ownsThingInTray(thing))
+			{
+				throw new IllegalArgumentException("Can only discard things from your hand or your tray.");
+			}
+		}
+	}
+	
 	/**
 	 * Call this method to validate the paid recruits command
 	 * @param amountToSpend The amount of gold the player wants to spend on recruits
@@ -116,7 +130,7 @@ public abstract class RecruitingThingsPhaseValidator
 		SetupPhase setupPhase = currentState.getCurrentSetupPhase();
 		RegularPhase regularPhase = currentState.getCurrentRegularPhase();
 		if(setupPhase != SetupPhase.PLACE_FREE_THINGS && setupPhase != SetupPhase.PLACE_EXCHANGED_THINGS && regularPhase != RegularPhase.RECRUITING_THINGS && combatPhase != CombatPhase.PLACE_THINGS
-				&& !player.ownsThingInHand(thing))
+				&& regularPhase != RegularPhase.RECRUITING_CHARACTERS)
 		{
 			throw new IllegalStateException("Can not place things on the board during the " + (setupPhase==SetupPhase.SETUP_FINISHED? regularPhase : setupPhase) + " phase");
 		}

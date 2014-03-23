@@ -225,17 +225,17 @@ public class Player implements Serializable{
 	}
 	
 	/**
-	 * Add something to this player's tray
+	 * Add something to this player's tray, unless their tray is full,
+	 * in which case, add it to their hand instead.
 	 * @param tile The thing to add
 	 * @return true if tile was added successfully,
-	 * false if this player already had it in their tray
+	 * false if this player already had it in their tray/hand
 	 * @throws IllegalArgumentException if tile is null
-	 * or if player has 10 things in his tray
 	 */
-	public boolean addThingToTray(ITileProperties tile)
+	public boolean addThingToTrayOrHand(ITileProperties tile)
 	{
 		if (tray.size() >= 10) {
-			throw new IllegalArgumentException("You cannot have more than 10 things in your tray!");
+			return hand.add(tile);
 		}
 		validateNotNull(tile);
 

@@ -23,6 +23,7 @@ import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.Logger;
+import common.event.network.CommandRejected;
 import common.event.network.HexPlacement;
 import common.event.network.PlayerOrderList;
 import common.game.HexState;
@@ -249,7 +250,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 	}
 
 	@Subscribe
-	public void receiveApplyRollCommand(DiceRolled event)
+	public void receiveApplyRoll(DiceRolled event)
 	{
 		try
 		{
@@ -273,6 +274,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process StartGameCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -289,6 +291,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ExchangeSeaHexCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -305,6 +308,7 @@ public class SetupPhaseCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process GiveHexToPlayerCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
