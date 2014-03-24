@@ -5,8 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import common.event.AbstractInternalEvent;
-
-import server.logic.game.Player;
+import common.game.Player;
 
 public class StartSetupPhaseCommand extends AbstractInternalEvent{
 

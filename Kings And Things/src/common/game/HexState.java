@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import server.logic.game.Player;
 import common.Constants;
 import common.Constants.Category;
 import common.Constants.Restriction;

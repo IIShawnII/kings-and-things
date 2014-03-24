@@ -15,7 +15,6 @@ import javax.swing.SwingUtilities;
 
 import server.event.internal.ApplyHitsCommand;
 import server.event.internal.RollDiceCommand;
-import server.logic.game.Player;
 import common.Constants;
 import common.Constants.RollReason;
 import common.event.AbstractUpdateReceiver;
@@ -24,6 +23,7 @@ import common.event.network.DieRoll;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 
 public class CombatPanel extends JPanel
 {

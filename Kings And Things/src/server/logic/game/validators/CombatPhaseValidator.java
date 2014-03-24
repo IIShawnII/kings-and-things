@@ -3,12 +3,12 @@ package server.logic.game.validators;
 import java.util.HashSet;
 
 import server.logic.game.GameState;
-import server.logic.game.Player;
 import common.Constants.Ability;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 
 public abstract class CombatPhaseValidator
 {

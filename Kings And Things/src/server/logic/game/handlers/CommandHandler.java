@@ -13,7 +13,6 @@ import server.event.internal.RemoveThingsFromHexCommand;
 import server.event.internal.RollDiceCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
-import server.logic.game.Player;
 import server.logic.game.RollModification;
 import server.logic.game.validators.CommandValidator;
 
@@ -32,6 +31,7 @@ import common.event.network.PlayerState;
 import common.event.network.RackPlacement;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 import common.game.Roll;
 
 public abstract class CommandHandler

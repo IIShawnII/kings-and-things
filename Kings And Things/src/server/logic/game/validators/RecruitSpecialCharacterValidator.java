@@ -1,8 +1,8 @@
 package server.logic.game.validators;
 
 import server.logic.game.GameState;
-import server.logic.game.Player;
 import common.game.ITileProperties;
+import common.game.Player;
 
 public class RecruitSpecialCharacterValidator {
 

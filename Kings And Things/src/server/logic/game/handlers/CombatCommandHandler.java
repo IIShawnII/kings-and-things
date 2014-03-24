@@ -14,7 +14,6 @@ import server.event.internal.ResolveCombatCommand;
 import server.event.internal.RetreatCommand;
 import server.event.internal.TargetPlayerCommand;
 import server.logic.game.BuildableBuildingGenerator;
-import server.logic.game.Player;
 import server.logic.game.validators.CombatPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
@@ -31,6 +30,7 @@ import common.event.network.CommandRejected;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 import common.game.Roll;
 
 public class CombatCommandHandler extends CommandHandler

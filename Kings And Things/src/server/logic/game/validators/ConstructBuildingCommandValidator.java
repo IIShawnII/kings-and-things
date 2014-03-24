@@ -2,12 +2,11 @@ package server.logic.game.validators;
 
 import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.GameState;
-import server.logic.game.Player;
-
 import common.Constants.BuildableBuilding;
 import common.Constants.SetupPhase;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 
 public abstract class ConstructBuildingCommandValidator
 {

@@ -6,14 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 
 import server.logic.game.GameState;
-import server.logic.game.Player;
-
 import common.Constants.Ability;
 import common.Constants.Biome;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 
 public abstract class MovementValidator
 {

@@ -5,13 +5,12 @@ import java.util.Collection;
 
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
-import server.logic.game.Player;
-
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 
 public abstract class RecruitingThingsPhaseValidator
 {

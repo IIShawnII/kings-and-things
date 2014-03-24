@@ -7,12 +7,11 @@ import java.util.Set;
 
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
-import server.logic.game.Player;
-
 import common.Constants;
 import common.Constants.Biome;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 
 public abstract class SetupPhaseValidator
 {

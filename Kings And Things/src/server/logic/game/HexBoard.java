@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableBiMap;
 
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 
 /**
  * This class provides a convenient mechanism for representing the hex board inside out code.

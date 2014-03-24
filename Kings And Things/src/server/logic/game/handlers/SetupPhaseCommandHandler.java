@@ -12,7 +12,6 @@ import server.event.internal.GiveHexToPlayerCommand;
 import server.event.internal.StartSetupPhaseCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
-import server.logic.game.Player;
 import server.logic.game.validators.SetupPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
@@ -26,8 +25,10 @@ import common.Logger;
 import common.event.network.CommandRejected;
 import common.event.network.HexPlacement;
 import common.event.network.PlayerOrderList;
+import common.event.network.PlayersList;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 import common.game.Roll;
 
 public class SetupPhaseCommandHandler extends CommandHandler
@@ -48,6 +49,8 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		{
 			currentState.addNeededRoll(new Roll(2, null, RollReason.DETERMINE_PLAYER_ORDER, p.getID()));
 		}
+		
+		new PlayersList( players).postNetworkEvent();
 		
 		HexPlacement placement = new HexPlacement( Constants.MAX_HEXES);
 		currentState.getBoard().fillArray( placement.getArray());

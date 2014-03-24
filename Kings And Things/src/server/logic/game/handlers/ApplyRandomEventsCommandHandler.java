@@ -1,7 +1,6 @@
 package server.logic.game.handlers;
 
 import server.event.internal.ApplyRandomEventsCommand;
-import server.logic.game.Player;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -10,6 +9,7 @@ import common.Logger;
 import common.event.network.CommandRejected;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 
 public class ApplyRandomEventsCommandHandler extends CommandHandler {
 	

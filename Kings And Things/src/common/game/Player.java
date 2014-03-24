@@ -1,12 +1,9 @@
-package server.logic.game;
+package common.game;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import common.game.ITileProperties;
-import common.game.PlayerInfo;
 
 /**
  * This class represents a player in the game

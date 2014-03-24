@@ -15,7 +15,6 @@ import java.net.SocketTimeoutException;
 
 import com.google.common.eventbus.Subscribe;
 
-import server.logic.game.Player;
 import server.logic.game.CommandHandlerManager;
 import server.event.EndServer;
 import server.event.PlayerUpdated;
@@ -23,6 +22,7 @@ import server.event.internal.StartSetupPhaseCommand;
 import common.Logger;
 import common.Constants;
 import common.Constants.Level;
+import common.game.Player;
 import common.game.PlayerInfo;
 import common.game.LoadResources;
 import common.network.Connection;

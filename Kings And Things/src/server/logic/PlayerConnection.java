@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import server.event.PlayerUpdated;
 import server.event.internal.GiveHexToPlayerCommand;
-import server.logic.game.Player;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -13,6 +12,7 @@ import common.event.AbstractEvent;
 import common.event.AbstractNetwrokEvent;
 import common.event.network.HexOwnershipChanged;
 import common.event.network.PlayerState;
+import common.game.Player;
 import common.game.PlayerInfo;
 import common.network.Connection;
 
@@ -104,6 +104,9 @@ public class PlayerConnection implements Runnable{
 	
 	@Subscribe
 	public void sendNotificationToClient( AbstractNetwrokEvent event){
+		if( !event.isValidID( player.getPlayerInfo())){
+			return;
+		}
 		try {
 			connection.send( event);
 		} catch ( IOException e) {

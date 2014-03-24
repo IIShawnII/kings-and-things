@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.Set;
 
 import server.logic.game.GameState;
-import server.logic.game.Player;
-
 import common.Constants;
 import common.Constants.Building;
 import common.Constants.CombatPhase;
@@ -13,6 +11,7 @@ import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 import common.game.Roll;
 
 /**

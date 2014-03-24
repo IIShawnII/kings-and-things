@@ -71,20 +71,20 @@ public class ConnectionLogic implements Runnable {
 					player = ((PlayerState)event).getPlayer();
 					Thread.currentThread().setName( "Client " + player.getID() + " Logic");
 					update.setSource( "Logic.Run "+player.getID());
-				} 
+				}
 				else if( event instanceof HexPlacement){
 					update.addInstruction( UpdateInstruction.PlaceBoard);
 					update.putData( UpdateKey.Hex, ((HexPlacement)event).getArray());
-				} 
+				}
 				/*else if( event instanceof Flip){
 					new BoardUpdate(((Flip)event).flipAll(), this).postInternalEvent(BOARD|player.getID());
-				} 
+				}
 				else if( event instanceof PlayerOrderList){
 					new BoardUpdate(((PlayerOrderList)event).getList(), this).postInternalEvent(BOARD|player.getID());
-				} 
+				}
 				else if( event instanceof RackPlacement){
 					new BoardUpdate(((RackPlacement)event).getArray(), this).postInternalEvent(BOARD|player.getID());
-				}
+				
 				else if( event instanceof CurrentPhase){
 					phase = (CurrentPhase) event;
 					if( phase.isSetupPhase()){

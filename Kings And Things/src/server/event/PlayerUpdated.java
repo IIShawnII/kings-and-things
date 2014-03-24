@@ -1,7 +1,7 @@
 package server.event;
 
 import common.event.AbstractInternalEvent;
-import server.logic.game.Player;
+import common.game.Player;
 
 public class PlayerUpdated extends AbstractInternalEvent {
 	

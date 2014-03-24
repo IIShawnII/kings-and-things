@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import server.event.DiceRolled;
 import server.event.internal.ModifyRollForSpecialCharacter;
-import server.logic.game.Player;
 import server.logic.game.RollModification;
 import server.logic.game.validators.RecruitSpecialCharacterValidator;
 
@@ -14,6 +13,7 @@ import common.Constants.RollReason;
 import common.Logger;
 import common.event.network.CommandRejected;
 import common.game.ITileProperties;
+import common.game.Player;
 import common.game.Roll;
 
 public class RecruitSpecialCharacterCommandHandler extends CommandHandler

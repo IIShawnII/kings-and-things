@@ -9,7 +9,6 @@ import server.event.internal.ExchangeThingsCommand;
 import server.event.internal.PlaceThingOnBoardCommand;
 import server.event.internal.RecruitThingsCommand;
 import server.logic.exceptions.NoMoreTilesException;
-import server.logic.game.Player;
 import server.logic.game.validators.RecruitingThingsPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
@@ -24,6 +23,7 @@ import common.event.network.HexStatesChanged;
 import common.event.network.RackPlacement;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.game.Player;
 
 public class RecruitingThingsCommandHandler extends CommandHandler
 {
