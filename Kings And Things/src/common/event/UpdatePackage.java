@@ -44,6 +44,10 @@ public class UpdatePackage extends AbstractEvent {
 	public UpdateInstruction peekFirstInstruction(){
 		return instructions.peekFirst();
 	}
+	
+	public UpdateInstruction removeFirstInstruction(){
+		return instructions.removeFirst();
+	}
 
 	public Object getData( Object key){
 		return data.get( key);

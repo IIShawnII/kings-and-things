@@ -1,35 +1,36 @@
 package server.logic.game.handlers;
 
 import java.awt.Point;
-import java.util.ArrayList;
-import java.util.HashSet;
+
 import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
 
 import server.event.DiceRolled;
 import server.event.GameStarted;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.GiveHexToPlayerCommand;
 import server.event.internal.StartSetupPhaseCommand;
-import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
+import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.validators.SetupPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
 
+import common.Logger;
+import common.game.Roll;
+import common.game.Player;
+import common.game.HexState;
+import common.game.ITileProperties;
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
-import common.Logger;
-import common.event.network.CommandRejected;
+import common.event.network.CurrentPhase;
 import common.event.network.HexPlacement;
+import common.event.network.CommandRejected;
 import common.event.network.PlayerOrderList;
-import common.event.network.PlayersList;
-import common.game.HexState;
-import common.game.ITileProperties;
-import common.game.Player;
-import common.game.Roll;
 
 public class SetupPhaseCommandHandler extends CommandHandler
 {
@@ -49,8 +50,8 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		{
 			currentState.addNeededRoll(new Roll(2, null, RollReason.DETERMINE_PLAYER_ORDER, p.getID()));
 		}
-		
-		new PlayersList( players).postNetworkEvent();
+		//send player list and current phase to clients
+		new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), SetupPhase.DETERMINE_PLAYER_ORDER).postNetworkEvent();
 		
 		HexPlacement placement = new HexPlacement( Constants.MAX_HEXES);
 		currentState.getBoard().fillArray( placement.getArray());
@@ -59,7 +60,6 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		new GameStarted(demoMode, currentState).postInternalEvent();
 		//new Flip().postNetworkEvent();
 		//new SetupPhaseComplete(demoMode, currentState, this).postInternalEvent();
-		//new CurrentPhase( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNetworkEvent();
 	}
 
 	/**

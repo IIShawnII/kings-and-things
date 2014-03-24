@@ -5,17 +5,19 @@ import java.io.IOException;
 import common.Logger;
 import common.game.PlayerInfo;
 import common.network.Connection;
+
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
-import common.event.AbstractUpdateReceiver;
+
 import common.event.UpdatePackage;
 import common.event.AbstractNetwrokEvent;
-import common.event.network.HexOwnershipChanged;
-import common.event.network.HexPlacement;
-import common.event.network.HexStatesChanged;
+import common.event.AbstractUpdateReceiver;
+import common.event.network.StartGame;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
-import common.event.network.StartGame;
+import common.event.network.CurrentPhase;
+import common.event.network.HexPlacement;
+
 import static common.Constants.LOGIC;
 import static common.Constants.BOARD;
 import static common.Constants.PUBLIC;
@@ -27,7 +29,7 @@ public class ConnectionLogic implements Runnable {
 	private PlayerInfo player = null;
 	private boolean finished = false, gameStarted= false;
 	
-	public ConnectionLogic( ) {
+	public ConnectionLogic() {
 		this.connection = new Connection();
 		new UpdateReceiver();
 		new UpdateTransmitter();
@@ -53,9 +55,11 @@ public class ConnectionLogic implements Runnable {
 				ID = player==null ? PUBLIC: player.getID()|BOARD;
 				Logger.getStandardLogger().info( "Logic.Process.Receive "+(player!=null?player.getID()+" ":"") + event);
 				if( event instanceof PlayersList){
+					PlayerInfo[] players = ((PlayersList)event).getPlayers();
+					updateCurrentPlayer( players);
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
 					update.putData( UpdateKey.CurrentPlayer, player);
-					update.putData( UpdateKey.Players, ((PlayersList)event).getPlayers());
+					update.putData( UpdateKey.Players, players);
 					if( !gameStarted){
 						ID = PUBLIC;
 					}
@@ -76,6 +80,23 @@ public class ConnectionLogic implements Runnable {
 					update.addInstruction( UpdateInstruction.PlaceBoard);
 					update.putData( UpdateKey.Hex, ((HexPlacement)event).getArray());
 				}
+				else if( event instanceof CurrentPhase){
+					CurrentPhase phase = (CurrentPhase) event;
+					updateCurrentPlayer( phase.getPlayers());
+					update.addInstruction( UpdateInstruction.UpdatePlayers);
+					update.putData( UpdateKey.CurrentPlayer, player);
+					update.putData( UpdateKey.Players, phase.getPlayers());
+					if( phase.isSetupPhase()){
+						update.addInstruction( UpdateInstruction.SetupPhase);
+						update.putData( UpdateKey.Phase, phase.getPlayers());
+					}else if( phase.isRegularPhase()){
+						update.addInstruction( UpdateInstruction.RegularPhase);
+						update.putData( UpdateKey.Phase, phase.getPlayers());
+					}else if( phase.isCombatPhase()){
+						update.addInstruction( UpdateInstruction.CombatPhase);
+						update.putData( UpdateKey.Phase, phase.getPlayers());
+					}
+				}
 				/*else if( event instanceof Flip){
 					new BoardUpdate(((Flip)event).flipAll(), this).postInternalEvent(BOARD|player.getID());
 				}
@@ -84,23 +105,14 @@ public class ConnectionLogic implements Runnable {
 				}
 				else if( event instanceof RackPlacement){
 					new BoardUpdate(((RackPlacement)event).getArray(), this).postInternalEvent(BOARD|player.getID());
-				
-				else if( event instanceof CurrentPhase){
-					phase = (CurrentPhase) event;
-					if( phase.isSetupPhase()){
-						new BoardUpdate(phase.getPlayers(),phase.getSetup()).postInternalEvent(BOARD|player.getID());
-					}else if( phase.isRegularPhase()){
-						
-					}else if( phase.isCombatPhase()){
-						
-					}
-				}*/
+				}
 				else if(event instanceof HexOwnershipChanged){
-					//TODO handle
+					
 				}
 				else if(event instanceof HexStatesChanged){
-					//TODO handle
-				}
+					
+				}*/
+				
 				if( update.isModified()){
 					update.postInternalEvent( ID);
 				}
@@ -110,6 +122,15 @@ public class ConnectionLogic implements Runnable {
 		}
 		finished = true;
 		Logger.getStandardLogger().warn( "logic disconnected");
+	}
+	
+	private void updateCurrentPlayer( PlayerInfo[] players){
+		for( PlayerInfo player:players){
+			if( this.player.equals( player)){
+				this.player = player;
+				break;
+			}
+		}
 	}
 	
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{

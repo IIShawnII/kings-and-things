@@ -415,34 +415,44 @@ public class Board extends JPanel{
 	 * @param update - event wrapper containing update information
 	 */
 	public void updateBoard( UpdatePackage update){
-		switch( update.peekFirstInstruction()){
-			case UpdatePlayers:
-				currentPlayer = (PlayerInfo) update.getData( UpdateKey.CurrentPlayer);
-				players = (PlayerInfo[]) update.getData( UpdateKey.Players);
-				repaint();
-				phaseDone = true;
-				break;
-			case PlaceBoard:
-				animateHexPlacement( (HexState[]) update.getData( UpdateKey.Hex));
-				break;
-			default:
-		}
-		
-		/*if( update.flipAll()){
-			FlipAllHexes();
-		}else if( update.isPlayerOder()){
-			placeMarkers( update.getPlayerOrder());
-		}else if( update.isRack()){
-			animateRackPlacement();
-		}else if( update.isSetupPhase()){
-			manageSetupPhase( update.getSetup());
-		}else if( update.isRegularPhase()){
-			manageRegularPhase( update.getRegular());
-		}*/
-		while( !phaseDone){
-			try {
-				Thread.sleep( 100);
-			} catch ( InterruptedException e) {}
+		while( update.hasInstructions()){
+			switch( update.peekFirstInstruction()){
+				case UpdatePlayers:
+					currentPlayer = (PlayerInfo) update.getData( UpdateKey.CurrentPlayer);
+					players = (PlayerInfo[]) update.getData( UpdateKey.Players);
+					repaint();
+					phaseDone = true;
+					break;
+				case PlaceBoard:
+					animateHexPlacement( (HexState[]) update.getData( UpdateKey.Hex));
+					break;
+				case SetupPhase:
+					manageSetupPhase( (SetupPhase)update.getData( UpdateKey.Phase));
+					break;
+				case RegularPhase:
+					manageRegularPhase( (RegularPhase)update.getData( UpdateKey.Phase));
+					break;
+				default:
+					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
+			}
+			
+			/*if( update.flipAll()){
+				FlipAllHexes();
+			}else if( update.isPlayerOder()){
+				placeMarkers( update.getPlayerOrder());
+			}else if( update.isRack()){
+				animateRackPlacement();
+			}else if( update.isSetupPhase()){
+				manageSetupPhase( update.getSetup());
+			}else if( update.isRegularPhase()){
+				manageRegularPhase( update.getRegular());
+			}*/
+			while( !phaseDone){
+				try {
+					Thread.sleep( 100);
+				} catch ( InterruptedException e) {}
+			}
+			update.removeFirstInstruction();
 		}
 	}
 	
@@ -470,14 +480,16 @@ public class Board extends JPanel{
 	private void manageSetupPhase( SetupPhase phase){
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
+				jtfStatus.setText( "Roll dice to determine order");
 				break;
 			case EXCHANGE_SEA_HEXES:
+				jtfStatus.setText( "Exchange sea hexes, if any");
 				break;
 			case EXCHANGE_THINGS:
+				jtfStatus.setText( "Exchange things, if any");
 				break;
 			case PICK_FIRST_HEX:
 				jtfStatus.setText( "Pick your first Hex"); mouseInput.ignore = false;
-				//TODO must be implemented when dice roll is implemented
 				break;
 			case PICK_SECOND_HEX:
 				jtfStatus.setText( "Pick your second Hex"); mouseInput.ignore = false;
@@ -486,12 +498,16 @@ public class Board extends JPanel{
 				jtfStatus.setText( "Pick your third Hex"); mouseInput.ignore = false;
 				break;
 			case PLACE_EXCHANGED_THINGS:
+				jtfStatus.setText( "Place exchanged things on board, if any");
 				break;
 			case PLACE_FREE_THINGS:
+				jtfStatus.setText( "Place things on board, if any");
 				break;
 			case PLACE_FREE_TOWER:
+				jtfStatus.setText( "Place onc free tower on board");
 				break;
 			case SETUP_FINISHED:
+				jtfStatus.setText( "Setup Phase Complete");
 				break;
 			default:
 				break;
@@ -539,7 +555,6 @@ public class Board extends JPanel{
 
 		private Rectangle bound, boardBound;
 		private Lock newLock;
-		private int clickCount = 0;
 		private Tile currentTile;
 		private boolean moveStack = false;
 		private Point lastPoint;

@@ -31,31 +31,25 @@ public final class Constants {
 	public static final boolean LOAD_CUP = false;
 	public static final boolean LOAD_HEX = true;
 
-	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP, CurrentPlayer, Hex}
-	public enum UpdateInstruction {Connect, Disconnect, ReadyState, Start, UpdatePlayers,Category, End, Send, PlaceBoard}
-	public enum UpdateContent {Setup, Regular, Combat, PlayerInfo, PlayerOrder}
 	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
 	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
 	public enum Level { Error, Warning, Notice, Plain, END, LOADING_DIALOG}
 	public enum Ability { Charge, Fly, Range, Special, Magic, Armor, Neutralised}
-	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END, Creature, Event, Magic, Treasure, Buildable}
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
-	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea,
-			Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
+	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP, CurrentPlayer, Hex, Phase}
+	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END, Creature, Event, Magic, Treasure, Buildable}
+	public enum UpdateInstruction {Connect, Disconnect, ReadyState, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase}
 	public enum RandomEvent {Big_Juju, Dark_Plague, Defection, Good_Harvest, Mother_Lode, Teenie_Pox, Terrain_Disaster, Vandalism, Weather_Control, Willing_Workers}
-	
-	
-	//Note, phase progression is dependent on the order of the declarations in the following enum type
-	public enum SetupPhase {DETERMINE_PLAYER_ORDER, PICK_FIRST_HEX, EXCHANGE_SEA_HEXES, PICK_SECOND_HEX, PICK_THIRD_HEX, PLACE_FREE_TOWER, PLACE_FREE_THINGS, EXCHANGE_THINGS, PLACE_EXCHANGED_THINGS, SETUP_FINISHED}
+	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea, Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
 	
 	//Regular turn phases
 	public enum RegularPhase {RECRUITING_CHARACTERS, RECRUITING_THINGS, RANDOM_EVENTS, MOVEMENT, COMBAT, CONSTRUCTION, SPECIAL_POWERS}
-	
-	//Combat phases
-	public enum CombatPhase {DETERMINE_DEFENDERS, SELECT_TARGET_PLAYER, MAGIC_ATTACK, APPLY_MAGIC_HITS, RANGED_ATTACK, APPLY_RANGED_HITS, MELEE_ATTACK, APPLY_MELEE_HITS, ATTACKER_ONE_RETREAT, ATTACKER_TWO_RETREAT, ATTACKER_THREE_RETREAT, DEFENDER_RETREAT, DETERMINE_DAMAGE, PLACE_THINGS, NO_COMBAT}
-	
 	//Reasons for dice rolls
 	public enum RollReason {DETERMINE_PLAYER_ORDER, EXPLORE_HEX, ATTACK_WITH_CREATURE, CALCULATE_DAMAGE_TO_TILE, ENTERTAINMENT, RECRUIT_SPECIAL_CHARACTER}
+	//Note, phase progression is dependent on the order of the declarations in the following enum type
+	public enum SetupPhase {DETERMINE_PLAYER_ORDER, PICK_FIRST_HEX, EXCHANGE_SEA_HEXES, PICK_SECOND_HEX, PICK_THIRD_HEX, PLACE_FREE_TOWER, PLACE_FREE_THINGS, EXCHANGE_THINGS, PLACE_EXCHANGED_THINGS, SETUP_FINISHED}
+	//Combat phases
+	public enum CombatPhase {DETERMINE_DEFENDERS, SELECT_TARGET_PLAYER, MAGIC_ATTACK, APPLY_MAGIC_HITS, RANGED_ATTACK, APPLY_RANGED_HITS, MELEE_ATTACK, APPLY_MELEE_HITS, ATTACKER_ONE_RETREAT, ATTACKER_TWO_RETREAT, ATTACKER_THREE_RETREAT, DEFENDER_RETREAT, DETERMINE_DAMAGE, PLACE_THINGS, NO_COMBAT}
 	
 	//Resources
 	public static final Image IMAGE_DICE[];
@@ -67,9 +61,9 @@ public final class Constants {
 	public static final HashMap< Integer, TileProperties> HEX = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> CUP = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> GOLD = new HashMap<>();
-	public static final HashMap< Restriction, TileProperties> STATE = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> SPECIAL = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> BUILDING = new HashMap<>();
+	public static final HashMap< Restriction, TileProperties> STATE = new HashMap<>();
 	
 	//Colors
 	public static final Color RED = new Color( 255, 0, 0);

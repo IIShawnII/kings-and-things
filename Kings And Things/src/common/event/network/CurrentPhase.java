@@ -6,65 +6,40 @@ import common.Constants.SetupPhase;
 import common.event.AbstractNetwrokEvent;
 import common.game.PlayerInfo;
 
-public class CurrentPhase extends AbstractNetwrokEvent {
+public class CurrentPhase<T extends Enum<?>> extends AbstractNetwrokEvent {
 
-	private static final long serialVersionUID = 8886517362195787165L;
+	private static final long serialVersionUID = -8772101566749846648L;
 	
-	private SetupPhase setup = null;
-	private RegularPhase regular = null;
-	private CombatPhase combat = null;
-	private PlayerInfo[] infos;
+	private T phase = null;
+	private PlayerInfo[] players;
 	
-	private CurrentPhase( PlayerInfo[] infos, SetupPhase setup, RegularPhase regular, CombatPhase combat){
-		this.setup = setup;
-		this.regular = regular;
-		this.combat = combat;
-		this.infos = infos;
-	}
-	
-	public CurrentPhase( PlayerInfo[] infos, SetupPhase phase){
-		this( infos, phase, null, CombatPhase.NO_COMBAT);
-	}
-	
-	public CurrentPhase( PlayerInfo[] infos, RegularPhase phase){
-		this( infos, SetupPhase.SETUP_FINISHED, phase, CombatPhase.NO_COMBAT);
-	}
-	
-	public CurrentPhase( PlayerInfo[] infos, CombatPhase phase){
-		this( infos, SetupPhase.SETUP_FINISHED, null, phase);
+	public CurrentPhase( PlayerInfo[] players, T phase){
+		this.phase = phase;
+		this.players = players;
 	}
 
-	
-	public SetupPhase getSetup() {
-		return setup;
+	public T getPhase() {
+		return phase;
 	}
 	
 	public boolean isSetupPhase(){
-		return setup!=SetupPhase.SETUP_FINISHED;
-	}
-
-	public RegularPhase getRegular() {
-		return regular;
+		return SetupPhase.class==phase.getClass();
 	}
 	
 	public boolean isRegularPhase(){
-		return setup==SetupPhase.SETUP_FINISHED;
-	}
-
-	public CombatPhase getCombat() {
-		return combat;
+		return RegularPhase.class==phase.getClass();
 	}
 	
 	public boolean isCombatPhase(){
-		return regular==RegularPhase.COMBAT&&combat!=CombatPhase.NO_COMBAT;
+		return CombatPhase.class==phase.getClass();
 	}
 	
 	public PlayerInfo[] getPlayers(){
-		return infos;
+		return players;
 	}
 	
 	@Override
 	public String toString(){
-		return "Network/CurrentPhase: " + (isSetupPhase()?setup:(isCombatPhase()?combat:regular));
+		return "Network/CurrentPhase: " + phase;
 	}
 }
