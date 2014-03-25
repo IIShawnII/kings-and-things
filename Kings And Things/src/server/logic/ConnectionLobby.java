@@ -22,12 +22,14 @@ import server.event.internal.StartSetupPhaseCommand;
 import common.Logger;
 import common.Constants;
 import common.Constants.Level;
+import common.Constants.UpdateKey;
 import common.game.Player;
 import common.game.PlayerInfo;
 import common.game.LoadResources;
 import common.network.Connection;
 import common.event.EventDispatch;
 import common.event.ConsoleMessage;
+import common.event.UpdatePackage;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
 import common.event.network.StartGame;
@@ -71,7 +73,7 @@ public class ConnectionLobby implements Runnable {
 		boolean oldClient = false;
 		Socket socket = null;
 		Connection connection = null;
-		PlayerState playerState = null;
+		UpdatePackage playerState = null;
 		PlayerInfo info = null;
 		PlayerConnection pc = null;
 		Player player = null;
@@ -81,7 +83,7 @@ public class ConnectionLobby implements Runnable {
             	connection = new Connection();
             	socket = serverSocket.accept();
             	if( connection.connectTo( socket)){
-            		playerState = (PlayerState)connection.recieve();
+            		playerState = (UpdatePackage)connection.recieve();
             	}else{
             		new ConsoleMessage( "Connection to: " + socket + " failed", Level.Warning,this).postInternalEvent();
             		Logger.getStandardLogger().warn("Connection to: " + socket + " failed");
@@ -89,7 +91,7 @@ public class ConnectionLobby implements Runnable {
             		socket.close();
             		continue;
             	}
-            	info = playerState.getPlayer();
+            	info = (PlayerInfo)playerState.getData( UpdateKey.Player);
             	for( PlayerConnection playerConnection : connectedPlayers){
             		if( playerConnection.equals( info)){
             			oldClient = true;

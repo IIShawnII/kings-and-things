@@ -1,5 +1,6 @@
 package common.event;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -11,8 +12,10 @@ import common.Constants.UpdateInstruction;
  * be sent as local events or network events.
  * use putData and addInstruction to populate the package
  */
-public class UpdatePackage extends AbstractEvent {
+public class UpdatePackage extends AbstractEvent implements Serializable {
 
+	private static final long serialVersionUID = -1888776611771542522L;
+	
 	private LinkedList< UpdateInstruction> instructions;
 	private HashMap< UpdateKey, Object> data;
 	private String source;
@@ -29,6 +32,23 @@ public class UpdatePackage extends AbstractEvent {
 		addInstruction( instruction);
 	}
 	
+	/**
+	 * used for network only
+	 */
+	public UpdatePackage( UpdateInstruction instruction, String source){
+		this( source, null);
+		addInstruction( instruction);
+	}
+	
+	/**
+	 * used for network only
+	 */
+	public UpdatePackage( UpdateInstruction instruction, UpdateKey key, Object data, String source){
+		this( source, null);
+		addInstruction( instruction);
+		putData( key, data);
+	}
+	
 	public void putData( UpdateKey key, Object value){
 		data.put( key, value);
 	}
@@ -43,10 +63,6 @@ public class UpdatePackage extends AbstractEvent {
 	
 	public UpdateInstruction peekFirstInstruction(){
 		return instructions.peekFirst();
-	}
-	
-	public UpdateInstruction removeFirstInstruction(){
-		return instructions.removeFirst();
 	}
 
 	public Object getData( Object key){

@@ -7,7 +7,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.InetSocketAddress;
 
+import common.event.AbstractEvent;
 import common.event.AbstractNetwrokEvent;
+import common.event.UpdatePackage;
 
 /**
  * primary class for sending and receiving text from client or server
@@ -113,8 +115,8 @@ public class Connection implements Closeable{
 	}
 	
 	/**
-	 * send a text message to destination
-	 * @param message - information to be sent
+	 * send an object to destination
+	 * @param event - information to be sent as AbstractNetwrokEvent
 	 * @return true if information has been sent, else false
 	 */
 	public void send( AbstractNetwrokEvent event) throws IOException{
@@ -127,13 +129,27 @@ public class Connection implements Closeable{
 	}
 	
 	/**
-	 * Receive response from destination in form of a text
-	 * @return a string if message is received, otherwise null
+	 * send an object to destination
+	 * @param event - information to be sent as UpdatePackage
+	 * @return true if information has been sent, else false
 	 */
-	public AbstractNetwrokEvent recieve() throws IOException, ClassNotFoundException{
+	public void send( UpdatePackage event) throws IOException{
 		if( isConnected){
-			AbstractNetwrokEvent event = null;
-			event = (AbstractNetwrokEvent) input.readObject();
+			output.reset();
+			output.writeObject( event);
+		}else{
+			throw new IOException( "No connection is avalibale");
+		}
+	}
+	
+	/**
+	 * Receive response from destination in form of an Object
+	 * @return a UpdatePackage if message is received, otherwise null
+	 */
+	public AbstractEvent recieve() throws IOException, ClassNotFoundException{
+		if( isConnected){
+			AbstractEvent event = null;
+			event = (AbstractEvent) input.readObject();
 			if( event==null){
 				isConnected = false;
 			}

@@ -50,9 +50,10 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 					handlePrivate( update);
 				}
 			}
-		}catch(ClassCastException ex){
+		}catch( ClassCastException ex){
 			//temporary error that will be resolved by
 			//full implementation of UpatePakcage
+			Logger.getErrorLogger().warn( ex.getMessage() + ", Owner: " + OWNER, ex);
 		}catch( Exception ex){
 			Logger.getErrorLogger().fatal( ex.getMessage() + ", Owner: " + OWNER, ex);
 		}

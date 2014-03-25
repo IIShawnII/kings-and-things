@@ -1,7 +1,6 @@
 package server.logic.game.handlers;
 
 import java.awt.Point;
-
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -31,6 +30,7 @@ import common.event.network.CurrentPhase;
 import common.event.network.HexPlacement;
 import common.event.network.CommandRejected;
 import common.event.network.PlayerOrderList;
+import common.event.network.PlayersList;
 
 public class SetupPhaseCommandHandler extends CommandHandler
 {
@@ -50,8 +50,8 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		{
 			currentState.addNeededRoll(new Roll(2, null, RollReason.DETERMINE_PLAYER_ORDER, p.getID()));
 		}
-		//send player list and current phase to clients
-		new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), SetupPhase.DETERMINE_PLAYER_ORDER).postNetworkEvent();
+		
+		new PlayersList( players).postNetworkEvent();
 		
 		HexPlacement placement = new HexPlacement( Constants.MAX_HEXES);
 		currentState.getBoard().fillArray( placement.getArray());
@@ -60,6 +60,9 @@ public class SetupPhaseCommandHandler extends CommandHandler
 		new GameStarted(demoMode, currentState).postInternalEvent();
 		//new Flip().postNetworkEvent();
 		//new SetupPhaseComplete(demoMode, currentState, this).postInternalEvent();
+		
+		//send player list and current phase to clients
+		new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), SetupPhase.DETERMINE_PLAYER_ORDER).postNetworkEvent();
 	}
 
 	/**

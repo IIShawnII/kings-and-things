@@ -2,19 +2,23 @@ package server.logic;
 
 import java.io.IOException;
 
+import server.event.DiceRolled;
 import server.event.PlayerUpdated;
 import server.event.internal.GiveHexToPlayerCommand;
+import server.event.internal.RollDiceCommand;
 
 import com.google.common.eventbus.Subscribe;
 
 import common.Logger;
-import common.event.AbstractEvent;
-import common.event.AbstractNetwrokEvent;
-import common.event.network.HexOwnershipChanged;
-import common.event.network.PlayerState;
-import common.game.Player;
-import common.game.PlayerInfo;
 import common.network.Connection;
+import common.Constants.RollReason;
+import common.Constants.UpdateKey;
+import common.game.ITileProperties;
+import common.game.Player;
+import common.game.HexState;
+import common.game.PlayerInfo;
+import common.event.UpdatePackage;
+import common.event.AbstractNetwrokEvent;
 
 public class PlayerConnection implements Runnable{
 	
@@ -81,24 +85,32 @@ public class PlayerConnection implements Runnable{
 
 	@Override
 	public void run(){
-		AbstractEvent notification = null;
+		UpdatePackage event = null;
 		try {
-			while ((notification = connection.recieve())!=null){
-				Logger.getStandardLogger().info( "(" + player + ")Received: " +notification);
-				if( notification instanceof PlayerState){
-					player.setIsPlaying( ((PlayerState)notification).getPlayer().isReady());
-				}else if ( notification instanceof HexOwnershipChanged){
-					HexOwnershipChanged event = (HexOwnershipChanged)notification;
-					new GiveHexToPlayerCommand( event.getChangedHex().getHex()).postInternalEvent( player.getID());
+			while ((event = (UpdatePackage)connection.recieve())!=null){
+				Logger.getStandardLogger().info( "(" + player + ")Received: " +event);
+				switch( event.peekFirstInstruction()){
+					case State: 
+						player.setIsPlaying( ((PlayerInfo)event.getData( UpdateKey.Player)).isReady());
+						new PlayerUpdated( player).postInternalEvent( player.getID());
+						break;
+					case HexOwnership: 
+						new GiveHexToPlayerCommand( ((HexState)event.getData( UpdateKey.HexState)).getHex()).postInternalEvent( player.getID());
+						break;
+					case NeedRoll: 
+						new RollDiceCommand( (RollReason)event.getData( UpdateKey.RollReason), (ITileProperties)event.getData( UpdateKey.Tile));
+						//new DiceRolled().postInternalEvent( player.getID());
+						break;
+					default:
+						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
 				}
-				new PlayerUpdated( player).postInternalEvent();
 			}
 		} catch ( ClassNotFoundException | IOException e) {
 			Logger.getStandardLogger().warn( e);
 		}
 		player.setIsPlaying(false);
 		player.setConnected( false);
-		new PlayerUpdated( player).postInternalEvent();
+		new PlayerUpdated( player).postInternalEvent( player.getID());
 		Logger.getStandardLogger().warn( player + " lost connection");
 	}
 	

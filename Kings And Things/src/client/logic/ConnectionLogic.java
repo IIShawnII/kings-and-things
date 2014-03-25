@@ -5,19 +5,16 @@ import java.io.IOException;
 import common.Logger;
 import common.game.PlayerInfo;
 import common.network.Connection;
-
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
-
+import common.event.AbstractEvent;
 import common.event.UpdatePackage;
-import common.event.AbstractNetwrokEvent;
 import common.event.AbstractUpdateReceiver;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
 import common.event.network.CurrentPhase;
 import common.event.network.HexPlacement;
-
 import static common.Constants.LOGIC;
 import static common.Constants.BOARD;
 import static common.Constants.PUBLIC;
@@ -37,7 +34,7 @@ public class ConnectionLogic implements Runnable {
 
 	@Override
 	public void run() {
-		AbstractNetwrokEvent event = null;
+		AbstractEvent event = null;
 		Logger.getStandardLogger().info( "Starting");
 		while( !finished && !connection.isConnected()){
 			try {
@@ -58,7 +55,7 @@ public class ConnectionLogic implements Runnable {
 					PlayerInfo[] players = ((PlayersList)event).getPlayers();
 					updateCurrentPlayer( players);
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
-					update.putData( UpdateKey.CurrentPlayer, player);
+					update.putData( UpdateKey.Player, player);
 					update.putData( UpdateKey.Players, players);
 					if( !gameStarted){
 						ID = PUBLIC;
@@ -81,20 +78,20 @@ public class ConnectionLogic implements Runnable {
 					update.putData( UpdateKey.Hex, ((HexPlacement)event).getArray());
 				}
 				else if( event instanceof CurrentPhase){
-					CurrentPhase phase = (CurrentPhase) event;
+					CurrentPhase<?> phase = (CurrentPhase<?>) event;
 					updateCurrentPlayer( phase.getPlayers());
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
-					update.putData( UpdateKey.CurrentPlayer, player);
+					update.putData( UpdateKey.Player, player);
 					update.putData( UpdateKey.Players, phase.getPlayers());
 					if( phase.isSetupPhase()){
 						update.addInstruction( UpdateInstruction.SetupPhase);
-						update.putData( UpdateKey.Phase, phase.getPlayers());
+						update.putData( UpdateKey.Phase, phase.getPhase());
 					}else if( phase.isRegularPhase()){
 						update.addInstruction( UpdateInstruction.RegularPhase);
-						update.putData( UpdateKey.Phase, phase.getPlayers());
+						update.putData( UpdateKey.Phase, phase.getPhase());
 					}else if( phase.isCombatPhase()){
 						update.addInstruction( UpdateInstruction.CombatPhase);
-						update.putData( UpdateKey.Phase, phase.getPlayers());
+						update.putData( UpdateKey.Phase, phase.getPhase());
 					}
 				}
 				/*else if( event instanceof Flip){
@@ -203,11 +200,11 @@ public class ConnectionLogic implements Runnable {
 				}
 				message = "Disconnect";
 				break;
-			case ReadyState:
-				netaction = UpdateInstruction.ReadyState;
+			case State:
+				netaction = UpdateInstruction.State;
 				player.setReady( !player.isReady());
 				message = !player.isReady()? "Ready":"UnReady";
-				sendToServer( new PlayerState( player));
+				sendToServer( new UpdatePackage( UpdateInstruction.State, UpdateKey.Player, player, "Logic "+player.getID()));
 				break;
 			default:
 				throw new IllegalArgumentException( "No handle for instruction: " + instruction);
@@ -230,10 +227,10 @@ public class ConnectionLogic implements Runnable {
 			}
 			if( player!=null){
 				Logger.getStandardLogger().info( "Send Old Player");
-				sendToServer( new PlayerState( player));
+				sendToServer( new UpdatePackage( UpdateInstruction.State, UpdateKey.Player, player, "Logic "+player.getID()));
 			}else{
 				Logger.getStandardLogger().info( "Send New Player");
-				sendToServer( new PlayerState( name, PLAYER_READY));
+				sendToServer( new UpdatePackage( UpdateInstruction.State, UpdateKey.Player, new PlayerInfo( name, PUBLIC, PLAYER_READY), "Logic -1"));
 			}
 			return UpdateInstruction.Connect;
 		}
@@ -245,24 +242,24 @@ public class ConnectionLogic implements Runnable {
 		new Thread( logic, "Client Logic").start();
 	}
 	
-	private class UpdateTransmitter extends AbstractUpdateReceiver<AbstractNetwrokEvent>{
+	private class UpdateTransmitter extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateTransmitter() {
 			super( NETWORK, LOGIC, ConnectionLogic.this);
 		}
 
 		@Override
-		protected void handlePrivate( AbstractNetwrokEvent update) {
+		protected void handlePrivate( UpdatePackage update) {
 			sendToServer( update);
 		}
 
 		@Override
-		protected boolean verifyPrivate( AbstractNetwrokEvent update) {
+		protected boolean verifyPrivate( UpdatePackage update) {
 			return update.isValidID(ID) || update.isValidID(player);
 		}
 	}
 
-	public void sendToServer( AbstractNetwrokEvent event){
+	public void sendToServer( UpdatePackage event){
 		Logger.getStandardLogger().info( "Sent: " + event);
 		try {
 			connection.send( event);

@@ -284,7 +284,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 				}
 				update.postInternalEvent(LOGIC);
 			}else if( isConnected && source==jbReady){
-				update.addInstruction( UpdateInstruction.ReadyState);
+				update.addInstruction( UpdateInstruction.State);
 				update.postInternalEvent(LOGIC);
 			}
 		}
@@ -339,7 +339,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 				listModel = null;
 				close();
 				break;
-			case ReadyState:
+			case State:
 				jbReady.setText( (String)update.getData( UpdateKey.Message));
 				break;
 			case UpdatePlayers:

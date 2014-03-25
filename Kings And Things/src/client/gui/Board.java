@@ -27,12 +27,15 @@ import client.gui.tiles.Tile;
 import client.gui.util.LockManager;
 import client.gui.util.LockManager.Lock;
 import common.Constants.Category;
+import common.Constants.RollReason;
+import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
 import common.Constants.SetupPhase;
 import common.Constants.Restriction;
 import common.Constants.RegularPhase;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
+import common.event.network.DieRoll;
 import common.event.network.HexOwnershipChanged;
 import common.game.HexState;
 import common.game.PlayerInfo;
@@ -415,10 +418,10 @@ public class Board extends JPanel{
 	 * @param update - event wrapper containing update information
 	 */
 	public void updateBoard( UpdatePackage update){
-		while( update.hasInstructions()){
-			switch( update.peekFirstInstruction()){
+		for( UpdateInstruction instruction : update.getInstructions()){
+			switch( instruction){
 				case UpdatePlayers:
-					currentPlayer = (PlayerInfo) update.getData( UpdateKey.CurrentPlayer);
+					currentPlayer = (PlayerInfo) update.getData( UpdateKey.Player);
 					players = (PlayerInfo[]) update.getData( UpdateKey.Players);
 					repaint();
 					phaseDone = true;
@@ -435,24 +438,11 @@ public class Board extends JPanel{
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
 			}
-			
-			/*if( update.flipAll()){
-				FlipAllHexes();
-			}else if( update.isPlayerOder()){
-				placeMarkers( update.getPlayerOrder());
-			}else if( update.isRack()){
-				animateRackPlacement();
-			}else if( update.isSetupPhase()){
-				manageSetupPhase( update.getSetup());
-			}else if( update.isRegularPhase()){
-				manageRegularPhase( update.getRegular());
-			}*/
 			while( !phaseDone){
 				try {
 					Thread.sleep( 100);
 				} catch ( InterruptedException e) {}
 			}
-			update.removeFirstInstruction();
 		}
 	}
 	
@@ -480,6 +470,7 @@ public class Board extends JPanel{
 	private void manageSetupPhase( SetupPhase phase){
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
+				new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.RollReason, RollReason.DETERMINE_PLAYER_ORDER,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
 				jtfStatus.setText( "Roll dice to determine order");
 				break;
 			case EXCHANGE_SEA_HEXES:
