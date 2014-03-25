@@ -1,5 +1,6 @@
 package common.game;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,8 +8,10 @@ import java.util.List;
 
 import common.Constants.RollReason;
 
-public class Roll
-{
+public class Roll implements Serializable{
+	
+	private static final long serialVersionUID = 266233708882040988L;
+	
 	private final ArrayList<Integer> baseRolls;
 	private final HashMap<Integer,Integer> rollModifications;
 	private final ITileProperties rollTarget;

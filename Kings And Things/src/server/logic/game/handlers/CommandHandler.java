@@ -395,7 +395,7 @@ public abstract class CommandHandler
 			}
 		}
 		//notifies players of die roll
-		new DieRoll(rollToAddTo).postNetworkEvent(playerNumber);
+		new DieRoll(rollToAddTo).postNetworkEvent( playerNumber);
 		
 		//if we are no longer waiting for more rolls, then we can apply the effects now
 		if(!currentState.isWaitingForRolls())

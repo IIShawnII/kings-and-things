@@ -98,8 +98,7 @@ public class PlayerConnection implements Runnable{
 						new GiveHexToPlayerCommand( ((HexState)event.getData( UpdateKey.HexState)).getHex()).postInternalEvent( player.getID());
 						break;
 					case NeedRoll: 
-						new RollDiceCommand( (RollReason)event.getData( UpdateKey.RollReason), (ITileProperties)event.getData( UpdateKey.Tile));
-						//new DiceRolled().postInternalEvent( player.getID());
+						new RollDiceCommand( (RollReason)event.getData( UpdateKey.RollReason), (ITileProperties)event.getData( UpdateKey.Tile)).postInternalEvent( player.getID());
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
@@ -122,7 +121,7 @@ public class PlayerConnection implements Runnable{
 		try {
 			connection.send( event);
 		} catch ( IOException e) {
-			Logger.getStandardLogger().warn( e);
+			Logger.getErrorLogger().warn( "Error - ", e);
 		}
 		Logger.getStandardLogger().info( "(" + player + ")Sent: " +event);
 	}
