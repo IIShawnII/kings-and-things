@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import server.logic.exceptions.NoMoreTilesException;
@@ -98,6 +99,60 @@ public class GameState
 		{
 			Logger.getErrorLogger().error("Unable to start game due to: ", e);
 		}
+	}
+	
+	/**
+	 * Standard copy constructor
+	 * @param other State to clone
+	 */
+	public GameState(GameState other)
+	{
+		cup = other.cup.clone();
+		bank = other.bank.clone();
+		boardGenerator = other.boardGenerator.clone();
+		bankHeroes = other.bankHeroes.clone();
+		board = other.board.clone();
+		players = new HashSet<>(other.players.size());
+		for(Player p : other.players)
+		{
+			players.add(p.clone());
+		}
+		playerOrder = new ArrayList<>(other.playerOrder);
+		currentSetupPhase = other.currentSetupPhase;
+		currentRegularPhase = other.currentRegularPhase;
+		activeTurnPlayerNumber = other.activeTurnPlayerNumber;
+		currentCombatPhase = other.currentCombatPhase;
+		defenderPlayerNumber = other.defenderPlayerNumber;
+		combatLocation = new Point(other.combatLocation.x,other.combatLocation.y);
+		rolls = new ArrayList<>(other.rolls.size());
+		for(Roll r : other.rolls)
+		{
+			rolls.add(r.clone());
+		}
+		rollModifications = new ArrayList<>(other.rollModifications.size());
+		for(RollModification rm : other.rollModifications)
+		{
+			rollModifications.add(rm.clone());
+		}
+		hitsToApply = new HashMap<>(other.hitsToApply);
+		hexesContainingBuiltObjects = new HashSet<>(other.hexesContainingBuiltObjects.size());
+		for(HexState hs : other.hexesContainingBuiltObjects)
+		{
+			hexesContainingBuiltObjects.add(hs.clone());
+		}
+		recordedRollForSpecialCharacter = other.recordedRollForSpecialCharacter.clone();
+		hexesThatNeedThingsRemoved = new HashMap<>(other.hexesThatNeedThingsRemoved.size());
+		for(Entry<HexState,Integer> e : other.hexesThatNeedThingsRemoved.entrySet())
+		{
+			hexesThatNeedThingsRemoved.put(e.getKey().clone(), e.getValue());
+		}
+		playerTargets = new HashMap<>(other.playerTargets);
+	}
+	
+	@Override
+	public GameState clone()
+	{
+		return new GameState(this);
 	}
 	
 	/**

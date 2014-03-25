@@ -28,6 +28,24 @@ public class PlayerInfo implements Serializable {
 		isActive = false;
 	}
 	
+	public PlayerInfo(PlayerInfo other)
+	{
+		ID = other.ID;
+		gold = other.gold;
+		name = other.name;
+		cardsOnRack = other.cardsOnRack;
+		isReady = other.isReady;
+		isConnected = other.isConnected;
+		isActive = other.isActive;
+		start = new Point(other.start.x,other.start.y);
+	}
+	
+	@Override
+	public PlayerInfo clone()
+	{
+		return new PlayerInfo(this);
+	}
+	
 	public void setCardonRack( int count){
 		cardsOnRack = count;
 	}

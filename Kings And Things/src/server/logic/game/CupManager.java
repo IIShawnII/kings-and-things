@@ -28,6 +28,19 @@ public class CupManager extends AbstractTileManager
 		this.isDemoMode = isDemoMode;
 		numDraws = 0;
 	}
+	
+	public CupManager(CupManager other)
+	{
+		super(Constants.deepCloneCollection(other.tiles,new ArrayList<ITileProperties>()),"cup");
+		isDemoMode = other.isDemoMode;
+		numDraws = other.numDraws;
+	}
+	
+	@Override
+	public CupManager clone()
+	{
+		return new CupManager(this);
+	}
 
 	/**
 	 * Call this method to draw a tile from the cup.

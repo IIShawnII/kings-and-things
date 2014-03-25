@@ -1,5 +1,6 @@
 package server.logic.game;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -15,6 +16,17 @@ public class SpecialCharacterManager extends AbstractTileManager
 	public SpecialCharacterManager(boolean demoMode)
 	{
 		super(getSpecialCharacterSetFromCollection(Constants.SPECIAL.values(), demoMode), "special character");
+	}
+	
+	public SpecialCharacterManager(SpecialCharacterManager other)
+	{
+		super(Constants.deepCloneCollection(other.tiles,new ArrayList<ITileProperties>()),"special character");
+	}
+	
+	@Override
+	public SpecialCharacterManager clone()
+	{
+		return new SpecialCharacterManager(this);
 	}
 	
 	public TwoSidedTileProperties drawTileByName(String heroName) throws NoMoreTilesException

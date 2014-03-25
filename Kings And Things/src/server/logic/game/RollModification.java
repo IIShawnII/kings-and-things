@@ -14,6 +14,19 @@ public class RollModification
 		this.amountToAdd = amountToAdd;
 		this.rollIndexToModify = rollIndexToModify;
 	}
+	
+	public RollModification(RollModification other)
+	{
+		rollToModify = other.rollToModify.clone();
+		amountToAdd = other.amountToAdd;
+		rollIndexToModify = other.rollIndexToModify;
+	}
+	
+	@Override
+	public RollModification clone()
+	{
+		return new RollModification(this);
+	}
 
 	public Roll getRollToModify()
 	{

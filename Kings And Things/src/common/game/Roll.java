@@ -26,6 +26,22 @@ public class Roll
 		playerNumber = playerRolling;
 	}
 	
+	public Roll(Roll other)
+	{
+		baseRolls = new ArrayList<Integer>(other.baseRolls);
+		rollModifications = new HashMap<>(other.rollModifications);
+		rollTarget = other.rollTarget.clone();
+		diceCount = other.diceCount;
+		rollReason = other.rollReason;
+		playerNumber = other.playerNumber;
+	}
+	
+	@Override
+	public Roll clone()
+	{
+		return new Roll(this);
+	}
+	
 	public int getDiceCount()
 	{
 		return diceCount;

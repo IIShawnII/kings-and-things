@@ -8,12 +8,15 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.imageio.ImageIO;
 
 import com.google.common.collect.ImmutableBiMap;
+
+import common.game.ITileProperties;
 import common.game.TileProperties;
 
 public final class Constants {
@@ -213,5 +216,15 @@ public final class Constants {
 			startingHexes.add(new Point(4,6));
 		}
 		return startingHexes;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends ITileProperties, C extends Collection<T>, R extends Collection<T>> R deepCloneCollection(C tiles, R out)
+	{
+		for(T tp : tiles)
+		{
+			out.add((T)tp.clone());
+		}
+		return out;
 	}
 }

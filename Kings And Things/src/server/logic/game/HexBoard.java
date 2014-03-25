@@ -146,6 +146,23 @@ public class HexBoard
 		boardList = Collections.unmodifiableList(tempBoardList);
 	}
 	
+	public HexBoard(HexBoard other)
+	{
+		ImmutableBiMap.Builder<Point,HexState> builder = new ImmutableBiMap.Builder<Point, HexState>();
+		for(Entry<Point,HexState> e : other.board.entrySet())
+		{
+			builder.put(new Point(e.getKey().x,e.getKey().y), e.getValue().clone());
+		}
+		board = builder.build();
+		boardList = Collections.unmodifiableList(other.boardList);
+	}
+	
+	@Override
+	public HexBoard clone()
+	{
+		return new HexBoard(this);
+	}
+	
 	/**
 	 * Checks whether or not any hex exists at the specified row and column,
 	 * with top left being (0,0)

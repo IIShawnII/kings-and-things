@@ -73,6 +73,30 @@ public class TileProperties implements ITileProperties{
 		id = counter++;
 	}
 	
+	private TileProperties(TileProperties other)
+	{
+		number = other.number;
+		value = other.value;
+		baseValue = other.baseValue;
+		moveSpeed = other.moveSpeed;
+		name = other.name;
+		hasFlip = other.hasFlip;
+		specialFlip = other.specialFlip;
+		isFaceUp = other.isFaceUp;
+		abilities = new ArrayList<>(other.abilities);
+		restrictions = new ArrayList<>(other.restrictions);
+		tileType = other.tileType;
+		biome = other.biome;
+		id = other.id;
+		fake = other.fake;
+	}
+	
+	@Override
+	public TileProperties clone()
+	{
+		return new TileProperties(this);
+	}
+	
 	@Override
 	public boolean isFake(){
 		return fake;

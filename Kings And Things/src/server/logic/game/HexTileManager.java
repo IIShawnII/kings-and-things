@@ -1,9 +1,9 @@
 package server.logic.game;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import server.logic.exceptions.NoMoreTilesException;
-
 import common.Constants;
 import common.Constants.Biome;
 import common.game.ITileProperties;
@@ -27,6 +27,19 @@ public class HexTileManager extends AbstractTileManager
 		super(Constants.HEX.values(), "hex");
 		this.isDemoMode = isDemoMode;
 		numDraws = 0;
+	}
+	
+	public HexTileManager(HexTileManager other)
+	{
+		super(Constants.deepCloneCollection(other.tiles,new ArrayList<ITileProperties>()),"hex");
+		isDemoMode = other.isDemoMode;
+		numDraws = other.numDraws;
+	}
+	
+	@Override
+	public HexTileManager clone()
+	{
+		return new HexTileManager(this);
 	}
 	
 	/**

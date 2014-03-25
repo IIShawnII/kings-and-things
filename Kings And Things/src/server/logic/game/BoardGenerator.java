@@ -44,6 +44,19 @@ public class BoardGenerator
 		temporarilyRemovedHexes = new HashSet<ITileProperties>();
 	}
 	
+	public BoardGenerator(BoardGenerator other)
+	{
+		numPlayers = other.numPlayers;
+		hexManager = other.hexManager.clone();
+		temporarilyRemovedHexes = Constants.deepCloneCollection(other.temporarilyRemovedHexes,new HashSet<ITileProperties>());
+	}
+	
+	@Override
+	public BoardGenerator clone()
+	{
+		return new BoardGenerator(this);
+	}
+	
 	/**
 	 * Call this method to generate a new board to play on. All hexes
 	 * will be face down.

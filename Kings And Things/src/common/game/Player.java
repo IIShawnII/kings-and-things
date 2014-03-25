@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import common.Constants;
+
 /**
  * This class represents a player in the game
  */
@@ -35,6 +37,21 @@ public class Player implements Serializable{
 		tray = new HashSet<ITileProperties>();
 		hand = new HashSet<ITileProperties>();
 		info.setCardonRack(0);
+	}
+	
+	public Player(Player other)
+	{
+		info = other.info.clone();
+		hand = Constants.deepCloneCollection(other.hand, new HashSet<ITileProperties>());
+		tray = Constants.deepCloneCollection(other.tray, new HashSet<ITileProperties>());
+		ownedHexes = Constants.deepCloneCollection(other.ownedHexes, new HashSet<ITileProperties>());
+		ownedThingsOnBoard = Constants.deepCloneCollection(other.ownedThingsOnBoard, new HashSet<ITileProperties>());
+	}
+	
+	@Override
+	public Player clone()
+	{
+		return new Player(this);
 	}
 
 	public void setIsPlaying( boolean ready) {

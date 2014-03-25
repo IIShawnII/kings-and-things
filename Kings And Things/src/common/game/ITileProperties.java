@@ -39,6 +39,7 @@ public interface ITileProperties extends Serializable
 	boolean isSpecialIncomeCounter();
 	Restriction getRestriction( int index);
 	boolean hasRestriction();
+	ITileProperties clone();
 	//used only on the client side
 	boolean isFake();
 }

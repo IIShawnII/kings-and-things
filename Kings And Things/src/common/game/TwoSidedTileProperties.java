@@ -21,6 +21,20 @@ public class TwoSidedTileProperties implements ITileProperties {
 		isFaceUp = true;
 		hashCode = calculateHashCode();
 	}
+	
+	public TwoSidedTileProperties(TwoSidedTileProperties other)
+	{
+		isFaceUp = other.isFaceUp;
+		faceUp = other.faceUp.clone();
+		faceDown = other.faceDown.clone();
+		hashCode = other.hashCode;
+	}
+	
+	@Override
+	public TwoSidedTileProperties clone()
+	{
+		return new TwoSidedTileProperties(this);
+	}
 
 	@Override
 	public Category getCategory() {

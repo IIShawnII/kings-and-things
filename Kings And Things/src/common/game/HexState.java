@@ -50,6 +50,24 @@ public class HexState implements Serializable{
 		setMarker( state.marker);
 	}
 	
+	private HexState(HexState other, boolean deepCopy)
+	{
+		markerImage = other.markerImage;
+		marker = other.marker.clone();
+		hex = other.hex.clone();
+		thingsInHex = Constants.deepCloneCollection(other.thingsInHex, new HashSet<ITileProperties>());
+		isInBattle = other.isInBattle;
+		hashCode = other.hashCode;
+		//only used by Client GUI for display purpose
+		isFake = other.isFake;
+	}
+	
+	@Override
+	public HexState clone()
+	{
+		return new HexState(this,true);
+	}
+	
 	/**
 	 * Create a new hex state with nothing in the hex
 	 * @param hex The hex of this hexState
