@@ -18,25 +18,33 @@ public class Roll implements Serializable{
 	private final int diceCount;
 	private final RollReason rollReason;
 	private final int playerNumber;
+	private final int targetValue;
+	
+	public Roll(int diceCount, ITileProperties tileToRollFor, RollReason reason, int playerRolling, int targetValue)
+	{
+		this.rollReason = reason;
+		this.diceCount = diceCount;
+		this.targetValue = targetValue;
+		this.rollTarget = tileToRollFor;
+		this.playerNumber = playerRolling;
+		rollModifications = new HashMap<>();
+		baseRolls = new ArrayList<Integer>();
+	}
 	
 	public Roll(int diceCount, ITileProperties tileToRollFor, RollReason reason, int playerRolling)
 	{
-		this.diceCount = diceCount;
-		this.rollTarget = tileToRollFor;
-		rollReason = reason;
-		baseRolls = new ArrayList<Integer>();
-		rollModifications = new HashMap<>();
-		playerNumber = playerRolling;
+		this( diceCount, tileToRollFor, reason, playerRolling, 0);
 	}
 	
 	public Roll(Roll other)
 	{
-		baseRolls = new ArrayList<Integer>(other.baseRolls);
-		rollModifications = new HashMap<>(other.rollModifications);
-		rollTarget = other.rollTarget.clone();
 		diceCount = other.diceCount;
 		rollReason = other.rollReason;
+		targetValue = other.targetValue;
 		playerNumber = other.playerNumber;
+		rollTarget = other.rollTarget.clone();
+		baseRolls = new ArrayList<Integer>(other.baseRolls);
+		rollModifications = new HashMap<>(other.rollModifications);
 	}
 	
 	@Override
@@ -126,5 +134,9 @@ public class Roll implements Serializable{
 	public static boolean rollSatisfiesParameters(Roll r,RollReason reasonForRoll, int playerNumber, ITileProperties tileToRollFor)
 	{
 		return r.getRollingPlayerID() == playerNumber && r.getRollReason()==reasonForRoll && (r.getRollTarget()==null? tileToRollFor==null : r.getRollTarget().equals(tileToRollFor));
+	}
+
+	public int getTargetValue() {
+		return targetValue;
 	}
 }

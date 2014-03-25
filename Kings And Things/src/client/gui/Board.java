@@ -39,6 +39,7 @@ import common.event.network.DieRoll;
 import common.event.network.HexOwnershipChanged;
 import common.game.HexState;
 import common.game.PlayerInfo;
+import common.game.Roll;
 import common.game.TileProperties;
 import common.game.ITileProperties;
 import static common.Constants.STATE;
@@ -470,7 +471,9 @@ public class Board extends JPanel{
 	private void manageSetupPhase( SetupPhase phase){
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
-				new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.RollReason, RollReason.DETERMINE_PLAYER_ORDER,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
+				//TODO add support for custom roll
+				Roll roll = new Roll( 2, null, RollReason.DETERMINE_PLAYER_ORDER, currentPlayer.getID(), 2);
+				new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
 				jtfStatus.setText( "Roll dice to determine order");
 				break;
 			case EXCHANGE_SEA_HEXES:

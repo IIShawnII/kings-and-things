@@ -39,7 +39,7 @@ public final class Constants {
 	public enum Level { Error, Warning, Notice, Plain, END, LOADING_DIALOG}
 	public enum Ability { Charge, Fly, Range, Special, Magic, Armor, Neutralised}
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
-	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP, Player, Hex, Phase, HexState, RollReason, Tile}
+	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP, Player, Hex, Phase, HexState, Roll, Tile}
 	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END, Creature, Event, Magic, Treasure, Buildable}
 	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, NeedRoll, HexOwnership}
 	public enum RandomEvent {Big_Juju, Dark_Plague, Defection, Good_Harvest, Mother_Lode, Teenie_Pox, Terrain_Disaster, Vandalism, Weather_Control, Willing_Workers}

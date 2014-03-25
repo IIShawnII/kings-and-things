@@ -3,12 +3,17 @@ package server.event.internal;
 import common.Constants.RollReason;
 import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
+import common.game.Roll;
 
 public class RollDiceCommand extends AbstractInternalEvent{
 	
 	private final RollReason reason;
 	private final ITileProperties tile;
 	private final int rollValue;
+	
+	public RollDiceCommand( Roll roll){
+		this( roll.getRollReason(), roll.getRollTarget(), roll.getTargetValue());
+	}
 	
 	public RollDiceCommand(RollReason reasonForRoll, ITileProperties tile){
 		this(reasonForRoll,tile,3);
