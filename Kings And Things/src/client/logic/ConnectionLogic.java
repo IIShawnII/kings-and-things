@@ -10,6 +10,7 @@ import common.Constants.UpdateInstruction;
 import common.event.AbstractEvent;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
+import common.event.network.DieRoll;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
@@ -93,6 +94,10 @@ public class ConnectionLogic implements Runnable {
 						update.addInstruction( UpdateInstruction.CombatPhase);
 						update.putData( UpdateKey.Phase, phase.getPhase());
 					}
+				}
+				else if( event instanceof DieRoll){
+					update.addInstruction( UpdateInstruction.DieValue);
+					update.putData( UpdateKey.Roll, ((DieRoll)event).getDieRoll());
 				}
 				/*else if( event instanceof Flip){
 					new BoardUpdate(((Flip)event).flipAll(), this).postInternalEvent(BOARD|player.getID());

@@ -35,7 +35,6 @@ import common.Constants.Restriction;
 import common.Constants.RegularPhase;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
-import common.event.network.DieRoll;
 import common.event.network.HexOwnershipChanged;
 import common.game.HexState;
 import common.game.PlayerInfo;
@@ -60,7 +59,6 @@ import static common.Constants.ANIMATION_DELAY;
 import static common.Constants.BOARD_POSITIONS;
 import static common.Constants.IMAGE_BACKGROUND;
 import static common.Constants.BOARD_TOP_PADDING;
-import static common.Constants.BYPASS_MOUSE_CLICK;
 import static common.Constants.MAX_HEXES_ON_BOARD;
 import static common.Constants.BOARD_WIDTH_SEGMENT;
 import static common.Constants.BOARD_RIGHT_PADDING;
@@ -165,6 +163,7 @@ public class Board extends JPanel{
 		dice = new DiceRoller();
 		dice.setBounds( HEX_BOARD_SIZE.width+DICE_SIZE/2, getHeight()-DICE_SIZE-10, DICE_SIZE, DICE_SIZE);
 		dice.init();
+		dice.addMouseListener( mouseInput);
 		add( dice);
 		
 		locks = new LockManager( playerCount);
@@ -436,6 +435,10 @@ public class Board extends JPanel{
 				case RegularPhase:
 					manageRegularPhase( (RegularPhase)update.getData( UpdateKey.Phase));
 					break;
+				case DieValue:
+					Roll roll = (Roll)update.getData( UpdateKey.Roll);
+					dice.setResult( roll.getDiceCount(), roll.getBaseRolls());
+					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
 			}
@@ -562,7 +565,7 @@ public class Board extends JPanel{
 		 */
 		@Override
 	    public void mouseDragged(MouseEvent e){
-			if( BYPASS_MOUSE_CLICK || ignore){
+			if( ignore){
 				return;
 			}
 			if( (moveStack || phaseDone) && currentTile!=null){
@@ -597,7 +600,7 @@ public class Board extends JPanel{
 		
 		@Override
 		public void mouseReleased( MouseEvent e){
-			if( BYPASS_MOUSE_CLICK || ignore){
+			if( ignore){
 				return;
 			}
 			if( newLock!=null&&currentTile!=null&& newLock.canHold( currentTile)){
@@ -618,7 +621,7 @@ public class Board extends JPanel{
 		 */
 		@Override
 		public void mousePressed( MouseEvent e){
-			if( BYPASS_MOUSE_CLICK || ignore){
+			if( ignore){
 				return;
 			}
 			Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
@@ -649,38 +652,33 @@ public class Board extends JPanel{
 				}
 			}
 		}
+		
+		@Override
+		public void mouseExited(MouseEvent e){
+			dice.shrink();
+		}
 
 		/**
 		 * for testing purposes
 		 */
 		@Override
 		public void mouseClicked( MouseEvent e){
-			if( BYPASS_MOUSE_CLICK || ignore){
+			if( ignore){
 				return;
 			}
-			/*if( phaseDone && SwingUtilities.isRightMouseButton( e)){
-				Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
-				if( deepestComponent!=null){
-					((Tile)deepestComponent).flip();
+			if( SwingUtilities.isLeftMouseButton(e)){
+				if(e.getSource()==dice){
+					if( dice.canRoll()){
+						dice.roll();
+					}else{
+						dice.expand();
+					}
 				}
-			}else if( phaseDone && SwingUtilities.isMiddleMouseButton( e)){
-				FlipAllHexes();
-            }else if( SwingUtilities.isLeftMouseButton( e)){
-            	switch( clickCount){
-            		case 0: 
-            			animateHexPlacement( null);
-        	            clickCount++;
-        	            break;
-            		case 1:
-            			animateRackPlacement();
-        	            clickCount++;
-        	            break;
-            		case 2:
-            			placeMarkers( null);
-        	            clickCount++;
-        				break;
-            	}
-		    }*/
+			}else if( SwingUtilities.isRightMouseButton( e)){
+				//TODO mouse right click support
+			}else if( SwingUtilities.isMiddleMouseButton( e)){
+				//TODO mouse middle click support
+			}
 		}
 	}
 	

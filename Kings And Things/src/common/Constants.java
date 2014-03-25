@@ -23,7 +23,6 @@ public final class Constants {
 	
 	//Primary for bypassing rules for 4 player, so it can be tested for one players
 	public static final boolean BYPASS_MIN_PLAYER = false;
-	public static final boolean BYPASS_MOUSE_CLICK = false;
 	public static final boolean BYPASS_LOAD_IMAGES = true;
 	public static final boolean BYPASS_LOBBY = false;
 	public static final boolean DRAW_LOCKS = false;
@@ -41,7 +40,7 @@ public final class Constants {
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
 	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP, Player, Hex, Phase, HexState, Roll, Tile}
 	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END, Creature, Event, Magic, Treasure, Buildable}
-	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, NeedRoll, HexOwnership}
+	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, NeedRoll, HexOwnership, DieValue}
 	public enum RandomEvent {Big_Juju, Dark_Plague, Defection, Good_Harvest, Mother_Lode, Teenie_Pox, Terrain_Disaster, Vandalism, Weather_Control, Willing_Workers}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea, Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
 	
