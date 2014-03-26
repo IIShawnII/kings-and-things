@@ -41,7 +41,6 @@ public class GameState
 	private int defenderPlayerNumber;
 	private Point combatLocation;
 	private final ArrayList<Roll> rolls;
-	private final HashSet<Integer> confirmedRolls;
 	private final ArrayList<RollModification> rollModifications;
 	private final HashMap<Integer,Integer> hitsToApply;
 	private final HashSet<HexState> hexesContainingBuiltObjects;
@@ -73,7 +72,6 @@ public class GameState
 		this.defenderPlayerNumber = defenderPlayerNumber;
 		this.combatLocation = combatLocation;
 		rolls = new ArrayList<>();
-		confirmedRolls = new HashSet<>();
 		rollModifications = new ArrayList<RollModification>();
 		
 		hitsToApply = new HashMap<>();
@@ -130,11 +128,6 @@ public class GameState
 		for(Roll r : other.rolls)
 		{
 			rolls.add(r.clone());
-		}
-		confirmedRolls = new HashSet<>( other.confirmedRolls.size());
-		for( Integer ID : other.confirmedRolls)
-		{
-			confirmedRolls.add( new Integer( ID));
 		}
 		rollModifications = new ArrayList<>(other.rollModifications.size());
 		for(RollModification rm : other.rollModifications)
@@ -848,18 +841,5 @@ public class GameState
 		}
 		
 		return null;
-	}
-
-	public void addDoneRolling( int id) {
-		confirmedRolls.add( id);
-	}
-	
-	public boolean allRolled(){
-		for( Player player : players){
-			if( !confirmedRolls.contains( player.getID())){
-				return false;
-			}
-		}
-		return true;
 	}
 }

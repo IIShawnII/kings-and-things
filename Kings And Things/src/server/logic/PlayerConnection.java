@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import server.event.PlayerUpdated;
 import server.event.internal.GiveHexToPlayerCommand;
-import server.event.internal.DoneRollingCommand;
 import server.event.internal.RollDiceCommand;
 
 import com.google.common.eventbus.Subscribe;
@@ -98,9 +97,6 @@ public class PlayerConnection implements Runnable{
 						break;
 					case NeedRoll: 
 						new RollDiceCommand( (Roll)event.getData( UpdateKey.Roll)).postInternalEvent( player.getID());
-						break;
-					case DoneRolling:
-						new DoneRollingCommand().postInternalEvent( player.getID());
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
