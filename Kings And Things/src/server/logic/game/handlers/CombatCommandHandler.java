@@ -1,7 +1,5 @@
 package server.logic.game.handlers;
 
-import static common.Constants.ALL_PLAYERS_ID;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,12 +23,10 @@ import common.Constants.Ability;
 import common.Constants.BuildableBuilding;
 import common.Constants.Building;
 import common.Constants.CombatPhase;
-import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Logger;
 import common.event.network.CombatHits;
 import common.event.network.CommandRejected;
-import common.event.network.CurrentPhase;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
@@ -528,7 +524,6 @@ public class CombatCommandHandler extends CommandHandler
 			{
 				advanceToNextCombatPhase();
 			}
-			new CurrentPhase<RegularPhase>( getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentRegularPhase()).postNetworkEvent( ALL_PLAYERS_ID);
 		}
 		if(determinedDamage)
 		{
@@ -540,7 +535,6 @@ public class CombatCommandHandler extends CommandHandler
 				}
 			}
 			getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(getCurrentState().getCurrentCombatPhase().ordinal() + 1));
-			new CurrentPhase<RegularPhase>( getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentRegularPhase()).postNetworkEvent( ALL_PLAYERS_ID);
 		}
 		for(Roll r : handledRolls)
 		{
