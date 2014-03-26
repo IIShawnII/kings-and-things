@@ -73,9 +73,4 @@ public class Node
 	{
 		return numPlayouts==0? Double.MAX_VALUE : (numWinsPerPlayer.get(playerToMove)/numPlayouts) + (C * Math.sqrt( Math.log(parent.getNumPlayouts()) / numPlayouts));
 	}
-	
-	public double calculateAverageWinRateFor(int playerNumber)
-	{
-		return numWinsPerPlayer.get(playerNumber) / numPlayouts;
-	}
 }

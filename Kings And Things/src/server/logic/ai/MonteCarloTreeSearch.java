@@ -69,31 +69,19 @@ public class MonteCarloTreeSearch extends Thread
 	
 	public Action getBestMoveForPlayer(int playerNumber)
 	{
-		double highestAverageWinRate = Double.MIN_VALUE;
 		long highestNumPlayouts = Long.MIN_VALUE;
 		ArrayList<Action> possibleMoves = new ArrayList<>();
 		for(Entry<Action,Node> child : latestPosition.getChildren().entrySet())
 		{
-			double myAverageWinRate = child.getValue().calculateAverageWinRateFor(playerNumber);
 			long myNumPlayouts = child.getValue().getNumPlayouts();
-			if(myAverageWinRate == highestAverageWinRate)
+			if(myNumPlayouts == highestNumPlayouts)
 			{
-				if(myNumPlayouts == highestNumPlayouts)
-				{
-					possibleMoves.add(child.getKey());
-				}
-				else if(myNumPlayouts > highestNumPlayouts)
-				{
-					possibleMoves = new ArrayList<>();
-					possibleMoves.add(child.getKey());
-					highestNumPlayouts = myNumPlayouts;
-				}
+				possibleMoves.add(child.getKey());
 			}
-			else if(myAverageWinRate > highestAverageWinRate)
+			else if(myNumPlayouts > highestNumPlayouts)
 			{
 				possibleMoves = new ArrayList<>();
 				possibleMoves.add(child.getKey());
-				highestAverageWinRate = myAverageWinRate;
 				highestNumPlayouts = myNumPlayouts;
 			}
 		}

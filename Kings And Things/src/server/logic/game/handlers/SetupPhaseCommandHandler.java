@@ -35,8 +35,6 @@ import static common.Constants.ALL_PLAYERS_ID;
 
 public class SetupPhaseCommandHandler extends CommandHandler{
 	
-	private GameState currentState;
-	
 	/**
 	 * Use this method to start a new game
 	 * @param demoMode Set to true to stack the deck to match with the demo script
@@ -48,7 +46,7 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 	public void startNewGame(boolean demoMode, Set<Player> players) throws NoMoreTilesException{
 		SetupPhaseValidator.validateStartNewGame(demoMode, players);
 
-		currentState = new GameState(demoMode,players,new ArrayList<Integer>(),SetupPhase.DETERMINE_PLAYER_ORDER, RegularPhase.RECRUITING_CHARACTERS,0,0, CombatPhase.NO_COMBAT, -1, null);
+		GameState currentState = new GameState(demoMode,players,new ArrayList<Integer>(),SetupPhase.DETERMINE_PLAYER_ORDER, RegularPhase.RECRUITING_CHARACTERS,0,0, CombatPhase.NO_COMBAT, -1, null);
 		for(Player p : currentState.getPlayers())
 		{
 			currentState.addNeededRoll(new Roll(2, null, RollReason.DETERMINE_PLAYER_ORDER, p.getID()));
@@ -192,7 +190,7 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 				getCurrentState().setActivePhasePlayer(getCurrentState().getPlayerOrder().get(0));
 				getCurrentState().setActiveTurnPlayer(getCurrentState().getPlayerOrder().get(0));
 				getCurrentState().setCurrentSetupPhase(SetupPhase.PICK_FIRST_HEX);
-				new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNetworkEvent( ALL_PLAYERS_ID);
+				new CurrentPhase<SetupPhase>( getCurrentState().getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNetworkEvent( ALL_PLAYERS_ID);
 			}
 			else
 			{
