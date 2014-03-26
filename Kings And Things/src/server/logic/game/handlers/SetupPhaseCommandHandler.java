@@ -190,7 +190,6 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 				getCurrentState().setActivePhasePlayer(getCurrentState().getPlayerOrder().get(0));
 				getCurrentState().setActiveTurnPlayer(getCurrentState().getPlayerOrder().get(0));
 				getCurrentState().setCurrentSetupPhase(SetupPhase.PICK_FIRST_HEX);
-				new CurrentPhase<SetupPhase>( getCurrentState().getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNetworkEvent( ALL_PLAYERS_ID);
 			}
 			else
 			{

@@ -17,6 +17,13 @@ public class PlayerState extends AbstractNetwrokEvent{
 		this.player = player;
 	}
 	
+	//special constructor used only in Connection lobby.
+	//to bypass event bus, and pass isValidID must pass ID here
+	public PlayerState( PlayerInfo player, final int ID){
+		this.player = player;
+		setID( ID);
+	}
+	
 	public PlayerState( String name, final int ID, boolean ready){
 		this( new PlayerInfo( name, ID, ready));
 	}

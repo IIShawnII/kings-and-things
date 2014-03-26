@@ -131,7 +131,7 @@ public class ConnectionLogic implements Runnable {
 	
 	private void updateCurrentPlayer( PlayerInfo[] players){
 		for( PlayerInfo player:players){
-			if( this.player.equals( player)){
+			if( player!=null && this.player.equals( player)){
 				this.player = player;
 				break;
 			}

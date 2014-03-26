@@ -110,7 +110,7 @@ public class ConnectionLobby implements Runnable {
 	            	EventDispatch.registerOnNetwrokEvents( pc);
 	            	startTask( pc, pc.getName());
 	            	//send PlayerInfo object to connected player
-	            	pc.sendNotificationToClient( new PlayerState( info));
+	            	pc.sendNotificationToClient( new PlayerState( info, playerID));
 	            	connectedPlayers.add( pc);
 	            	count++;
 	            	playerID*=PLAYER_ID_MULTIPLIER;

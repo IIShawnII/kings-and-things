@@ -118,7 +118,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 		constraints.weightx = .4;
 		jpMain.add( jtfPort, constraints);
 		
-		jtfName = new JTextField("-demo 1 2 3 4");
+		jtfName = new JTextField("-demo Xaphan Leviathan Abaddon Lilith");
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		constraints.gridx = 1;
 		constraints.gridy = 0;

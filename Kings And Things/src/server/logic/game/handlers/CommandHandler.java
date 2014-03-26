@@ -1,38 +1,42 @@
 package server.logic.game.handlers;
 
-import java.util.ArrayList;
-import java.util.List;
+import static common.Constants.ALL_PLAYERS_ID;
+
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 import server.event.DiceRolled;
-import server.event.PlayerRemovedThingsFromHex;
-import server.event.PlayerWaivedRetreat;
 import server.event.GameStarted;
-import server.event.internal.EndPlayerTurnCommand;
-import server.event.internal.RemoveThingsFromHexCommand;
-import server.event.internal.RollDiceCommand;
+import server.event.PlayerWaivedRetreat;
+import server.event.PlayerRemovedThingsFromHex;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
 import server.logic.game.RollModification;
 import server.logic.game.validators.CommandValidator;
+import server.event.internal.RollDiceCommand;
+import server.event.internal.DoneRollingCommand;
+import server.event.internal.EndPlayerTurnCommand;
+import server.event.internal.RemoveThingsFromHexCommand;
 
 import com.google.common.eventbus.Subscribe;
 
-import common.Constants.CombatPhase;
-import common.Constants.RegularPhase;
-import common.Constants.RollReason;
-import common.Constants.SetupPhase;
 import common.Logger;
-import common.event.EventDispatch;
-import common.event.network.CommandRejected;
-import common.event.network.DieRoll;
-import common.event.network.HexOwnershipChanged;
-import common.event.network.PlayerState;
-import common.event.network.RackPlacement;
+import common.game.Roll;
+import common.game.Player;
 import common.game.HexState;
 import common.game.ITileProperties;
-import common.game.Player;
-import common.game.Roll;
+import common.Constants.RollReason;
+import common.Constants.SetupPhase;
+import common.Constants.CombatPhase;
+import common.Constants.RegularPhase;
+import common.event.EventDispatch;
+import common.event.network.CurrentPhase;
+import common.event.network.DieRoll;
+import common.event.network.PlayerState;
+import common.event.network.RackPlacement;
+import common.event.network.CommandRejected;
+import common.event.network.HexOwnershipChanged;
 
 public abstract class CommandHandler
 {
@@ -407,6 +411,35 @@ public abstract class CommandHandler
 	private int rollDie(int rollValue)
 	{
 		return isDemoMode? rollValue : (int) Math.round((Math.random() * 5) + 1);
+	}
+	
+	@Subscribe
+	public void receiveDoneRolling( DoneRollingCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				currentState.addDoneRolling( command.getID());
+				if( currentState.allRolled()){
+					if( currentState.getCurrentSetupPhase()!=SetupPhase.SETUP_FINISHED){
+						new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), currentState.getCurrentSetupPhase()).postNetworkEvent( ALL_PLAYERS_ID);
+					}else{
+						if( currentState.getCurrentRegularPhase()==RegularPhase.COMBAT){
+							new CurrentPhase<CombatPhase>( currentState.getPlayerInfoArray(), currentState.getCurrentCombatPhase()).postNetworkEvent( ALL_PLAYERS_ID);
+						}else{
+							new CurrentPhase<RegularPhase>( currentState.getPlayerInfoArray(), currentState.getCurrentRegularPhase()).postNetworkEvent( ALL_PLAYERS_ID);
+						}
+					}
+					
+				}
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process DoneRollingCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			}
+		}
 	}
 
 	@Subscribe
