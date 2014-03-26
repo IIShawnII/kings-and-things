@@ -82,7 +82,7 @@ public final class Constants {
 	public static final Color COLOR_WARNNING = DARK_YELLOW;
 	
 	//keys for events
-	public static final int PUBLIC = -1;
+	public static final int PUBLIC = Integer.MIN_VALUE;
 	public static final int BOARD = 0;					//00000000
 	public static final int LOGIC = 1;					//00000001
 	public static final int PROGRESS = 2;				//00000010
@@ -90,6 +90,7 @@ public final class Constants {
 	public static final int GUI = 8;					//00001000
 	public static final int PLAYER_ID_MULTIPLIER = 2;	//00010010
 	public static final int PLAYER_START_ID = 16;		//00010000
+	public static final int ALL_PLAYERS_ID = 240;		//11110000
 	
 	//Maximums
 	public static final int MAX_ROLLS = 10;

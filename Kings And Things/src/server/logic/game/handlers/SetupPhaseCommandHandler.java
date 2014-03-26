@@ -29,11 +29,14 @@ import common.Constants.SetupPhase;
 import common.event.network.CurrentPhase;
 import common.event.network.HexPlacement;
 import common.event.network.CommandRejected;
-import common.event.network.PlayerOrderList;
 import common.event.network.PlayersList;
 
-public class SetupPhaseCommandHandler extends CommandHandler
-{
+import static common.Constants.ALL_PLAYERS_ID;
+
+public class SetupPhaseCommandHandler extends CommandHandler{
+	
+	private GameState currentState;
+	
 	/**
 	 * Use this method to start a new game
 	 * @param demoMode Set to true to stack the deck to match with the demo script
@@ -45,24 +48,24 @@ public class SetupPhaseCommandHandler extends CommandHandler
 	public void startNewGame(boolean demoMode, Set<Player> players) throws NoMoreTilesException{
 		SetupPhaseValidator.validateStartNewGame(demoMode, players);
 
-		GameState currentState = new GameState(demoMode,players,new ArrayList<Integer>(),SetupPhase.DETERMINE_PLAYER_ORDER, RegularPhase.RECRUITING_CHARACTERS,0,0, CombatPhase.NO_COMBAT, -1, null);
+		currentState = new GameState(demoMode,players,new ArrayList<Integer>(),SetupPhase.DETERMINE_PLAYER_ORDER, RegularPhase.RECRUITING_CHARACTERS,0,0, CombatPhase.NO_COMBAT, -1, null);
 		for(Player p : currentState.getPlayers())
 		{
 			currentState.addNeededRoll(new Roll(2, null, RollReason.DETERMINE_PLAYER_ORDER, p.getID()));
 		}
 		
-		new PlayersList( players).postNetworkEvent();
+		new PlayersList( players).postNetworkEvent( ALL_PLAYERS_ID);
 		
 		HexPlacement placement = new HexPlacement( Constants.MAX_HEXES);
 		currentState.getBoard().fillArray( placement.getArray());
-		placement.postNetworkEvent();
+		placement.postNetworkEvent( ALL_PLAYERS_ID);
 		
 		new GameStarted(demoMode, currentState).postInternalEvent();
 		//new Flip().postNetworkEvent();
 		//new SetupPhaseComplete(demoMode, currentState, this).postInternalEvent();
 		
 		//send player list and current phase to clients
-		new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), SetupPhase.DETERMINE_PLAYER_ORDER).postNetworkEvent();
+		new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), SetupPhase.DETERMINE_PLAYER_ORDER).postNetworkEvent( ALL_PLAYERS_ID);
 	}
 
 	/**
@@ -186,10 +189,10 @@ public class SetupPhaseCommandHandler extends CommandHandler
 					playerOrder.add(highestRoll.getRollingPlayerID());
 				}
 				getCurrentState().setPlayerOrder(playerOrder);
-				new PlayerOrderList( playerOrder).postNetworkEvent();
 				getCurrentState().setActivePhasePlayer(getCurrentState().getPlayerOrder().get(0));
 				getCurrentState().setActiveTurnPlayer(getCurrentState().getPlayerOrder().get(0));
 				getCurrentState().setCurrentSetupPhase(SetupPhase.PICK_FIRST_HEX);
+				new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), SetupPhase.PICK_FIRST_HEX).postNetworkEvent( ALL_PLAYERS_ID);
 			}
 			else
 			{

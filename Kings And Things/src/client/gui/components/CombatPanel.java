@@ -25,6 +25,8 @@ import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
 
+import static common.Constants.PUBLIC;
+
 public class CombatPanel extends JPanel
 {
 	private static final long serialVersionUID = -8151724738245642539L;
@@ -181,7 +183,7 @@ public class CombatPanel extends JPanel
 	private class DieRollReceiver extends AbstractUpdateReceiver<DieRoll>{
 
 		protected DieRollReceiver() {
-			super( INTERNAL, -1, CombatPanel.this);
+			super( INTERNAL, PUBLIC, CombatPanel.this);
 		}
 
 		@Override
@@ -206,7 +208,7 @@ public class CombatPanel extends JPanel
 	private class HitsReceiver extends AbstractUpdateReceiver<CombatHits>{
 
 		protected HitsReceiver() {
-			super( INTERNAL, -1, CombatPanel.this);
+			super( INTERNAL, PUBLIC, CombatPanel.this);
 		}
 
 		@Override
@@ -229,7 +231,7 @@ public class CombatPanel extends JPanel
 	private class HexChangedReceiver extends AbstractUpdateReceiver<HexStatesChanged>{
 
 		protected HexChangedReceiver() {
-			super( INTERNAL, -1, CombatPanel.this);
+			super( INTERNAL, PUBLIC, CombatPanel.this);
 		}
 
 		@Override

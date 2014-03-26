@@ -24,6 +24,7 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 	 * register on either network or internal event bus
 	 * @param BUS - AbstractUpdateReceiver.NETWORK(0) or AbstractUpdateReceiver.INTERNAL(1)
 	 * @param ID - specific unique ID from Constants to represent this receiver (ex. GUI, LOGIC, BOARD, PROGRESS, LOAD_RESOURCE)
+	 * 				if ID is public MUST use common.Constants.PUBLIC, -1 will provide incorrect result.
 	 * @param OWNER - this must be the most outer class that holds AbstractUpdateReceiver
 	 */
 	protected AbstractUpdateReceiver( final int BUS, final int ID, final Object OWNER){

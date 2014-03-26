@@ -107,7 +107,7 @@ public class PlayerInfo implements Serializable {
 	
 	@Override
 	public String toString(){
-		return name + ", ID: " + ID + ", Ready: " + isReady + ", Connected: " + isConnected + ", Gold: " + gold;
+		return name + ", ID: " + ID + ", Ready: " + isReady + ", Connected: " + isConnected + ", Active: " + isActive + ", Gold: " + gold;
 	}
 
 	@Override

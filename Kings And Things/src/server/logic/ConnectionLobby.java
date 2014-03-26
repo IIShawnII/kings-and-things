@@ -1,10 +1,11 @@
 package server.logic;
 
-import static common.Constants.PLAYER_START_ID;
-import static common.Constants.PLAYER_ID_MULTIPLIER;
 import static common.Constants.MAX_PLAYERS;
 import static common.Constants.SERVER_PORT;
 import static common.Constants.SERVER_TIMEOUT;
+import static common.Constants.ALL_PLAYERS_ID;
+import static common.Constants.PLAYER_START_ID;
+import static common.Constants.PLAYER_ID_MULTIPLIER;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -152,14 +153,14 @@ public class ConnectionLobby implements Runnable {
 			}
 		}
 		if( connections.getPlayers().length>0){
-			connections.postNetworkEvent();
+			connections.postNetworkEvent( ALL_PLAYERS_ID);
 		}
 		if( !anyUnReady && ((connectedPlayers.size()==MAX_PLAYERS)||Constants.BYPASS_MIN_PLAYER)){
 			HashSet< Player> set = new HashSet<>();
 			for( PlayerConnection pc : connectedPlayers){
 				set.add( pc.getPlayer());
 			}
-			new StartGame( Constants.BYPASS_MIN_PLAYER? MAX_PLAYERS:set.size()).postNetworkEvent();
+			new StartGame( Constants.BYPASS_MIN_PLAYER? MAX_PLAYERS:set.size()).postNetworkEvent( ALL_PLAYERS_ID);
 			new StartSetupPhaseCommand( demoMode, set).postInternalEvent();
 		}
 	}

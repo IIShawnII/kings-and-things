@@ -29,6 +29,7 @@ import common.Constants.Category;
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
 import static common.Constants.LOGIC;
+import static common.Constants.PUBLIC;
 import static common.Constants.PROGRESS;
 import static common.Constants.SERVER_IP;
 import static common.Constants.SERVER_PORT;
@@ -298,7 +299,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
-			super( INTERNAL, -1, LoadingDialog.this);
+			super( INTERNAL, PUBLIC, LoadingDialog.this);
 		}
 
 		@Override

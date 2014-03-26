@@ -100,6 +100,6 @@ public class UpdatePackage extends AbstractEvent implements Serializable {
 	
 	@Override
 	public String toString(){
-		return "Network/UpdatePackage:\t\nSource: " + source + "\n\tInstructions: " + instructions + "\n\tData: " + data.keySet();
+		return "Network/UpdatePackage:\n\tSource: " + source + "\n\tInstructions: " + instructions + "\n\tData: " + data.keySet();
 	}
 }
