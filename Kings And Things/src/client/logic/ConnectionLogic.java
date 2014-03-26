@@ -99,6 +99,9 @@ public class ConnectionLogic implements Runnable {
 					update.addInstruction( UpdateInstruction.DieValue);
 					update.putData( UpdateKey.Roll, ((DieRoll)event).getDieRoll());
 				}
+				else {
+					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);
+				}
 				/*else if( event instanceof Flip){
 					new BoardUpdate(((Flip)event).flipAll(), this).postInternalEvent(BOARD|player.getID());
 				}

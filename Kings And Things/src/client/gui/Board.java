@@ -437,7 +437,7 @@ public class Board extends JPanel{
 					break;
 				case DieValue:
 					Roll roll = (Roll)update.getData( UpdateKey.Roll);
-					dice.setResult( roll.getDiceCount(), roll.getBaseRolls());
+					dice.setResult( roll.getBaseRolls());
 					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
@@ -475,7 +475,9 @@ public class Board extends JPanel{
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
 				//TODO add support for custom roll
+				dice.setDiceCount( 2);
 				Roll roll = new Roll( 2, null, RollReason.DETERMINE_PLAYER_ORDER, currentPlayer.getID(), 2);
+				new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
 				new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
 				jtfStatus.setText( "Roll dice to determine order");
 				break;

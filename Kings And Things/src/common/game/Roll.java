@@ -139,4 +139,9 @@ public class Roll implements Serializable{
 	public int getTargetValue() {
 		return targetValue;
 	}
+	
+	@Override
+	public String toString(){
+		return "Reason: " + rollReason + ", Value: " + baseRolls + ", Size: " + baseRolls.size();
+	}
 }
