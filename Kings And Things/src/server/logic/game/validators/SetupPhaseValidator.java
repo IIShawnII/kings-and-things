@@ -46,6 +46,10 @@ public abstract class SetupPhaseValidator
 	{
 		CommandValidator.validateIsPlayerActive(playerNumber, currentState);
 		CommandValidator.validateNoPendingRolls(currentState);
+		if(currentState.getPlayerByPlayerNumber(playerNumber).ownsHex(hex))
+		{
+			throw new IllegalArgumentException("You already own that hex.");
+		}
 		switch(currentState.getCurrentSetupPhase())
 		{
 			case PICK_FIRST_HEX:

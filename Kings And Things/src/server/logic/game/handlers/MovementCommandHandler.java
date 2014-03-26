@@ -48,7 +48,7 @@ public class MovementCommandHandler extends CommandHandler
 	}
 
 	@Subscribe
-	public void moveThingsCommand(MoveThingsCommand command)
+	public void recieveMoveThingsCommand(MoveThingsCommand command)
 	{
 		if(command.isUnhandled())
 		{

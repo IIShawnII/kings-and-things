@@ -1,25 +1,21 @@
 package server.logic.ai;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Map.Entry;
+import java.util.concurrent.ThreadLocalRandom;
 
-import server.event.GameStarted;
-import server.event.internal.ApplyHitsCommand;
 import server.logic.game.GameState;
-import server.logic.game.handlers.CombatCommandHandler;
-import common.Constants.CombatPhase;
-import common.game.ITileProperties;
+
 import common.game.Player;
 
 public class MonteCarloTreeSearch extends Thread
 {
-	private final int playerNumber;
 	private Node root;
 	private volatile Node latestPosition;
 	private final boolean isDemoMode;
 	
-	public MonteCarloTreeSearch(boolean demoMode, int playerNumber, GameState game)
+	public MonteCarloTreeSearch(boolean demoMode, GameState game)
 	{
-		this.playerNumber = playerNumber;
 		root = new Node(game,null);
 		latestPosition = root;
 		isDemoMode = demoMode;
@@ -30,54 +26,87 @@ public class MonteCarloTreeSearch extends Thread
 	{
 		while(!Thread.currentThread().isInterrupted())
 		{
-			if(latestPosition.getChildren().size() == 0)
+			Node nextNode = latestPosition;
+			while(nextNode.getState().getWinningPlayer() == null)
 			{
-				//TODO fully expand node
-				
+				if(nextNode.getChildren().size() == 0)
+				{
+					expandNode(nextNode);
+					if(nextNode.getChildren().size() == 0)
+					{
+						break;
+					}
+				}
+				ArrayList<Node> childrenToChooseFrom = new ArrayList<>();
+				double highestUCTValue = Double.MIN_VALUE;
+				for(Entry<Action,Node> child : nextNode.getChildren().entrySet())
+				{
+					double myUCTValue = child.getValue().calculateUpperConfidenceBound(child.getKey().getCommand().getID());
+					if(myUCTValue == highestUCTValue)
+					{
+						childrenToChooseFrom.add(child.getValue());
+					}
+					else if(myUCTValue > highestUCTValue)
+					{
+						childrenToChooseFrom = new ArrayList<>();
+						childrenToChooseFrom.add(child.getValue());
+						highestUCTValue = myUCTValue;
+					}
+				}
+				int nextChildIndex = ThreadLocalRandom.current().nextInt(childrenToChooseFrom.size());
+				nextNode = childrenToChooseFrom.get(nextChildIndex);
 			}
-			else
-			{
-				//TODO select best child (UCT value)
-			}
+			
+			Player winningPlayer = nextNode.getState().getWinningPlayer();
+			nextNode.recordWinFor(winningPlayer==null? -1 : winningPlayer.getID());
 		}
 	}
 	
-	private HashMap<Action,GameState> successorFunction(GameState state)
+	public void updateCurrentGameState(GameState currentState)
 	{
-		HashMap<Action,GameState> possibleMoves = new HashMap<Action,GameState>();
-		
-		if(state.getCombatHex() != null)
+		latestPosition = new Node(currentState,null);
+	}
+	
+	public Action getBestMoveForPlayer(int playerNumber)
+	{
+		double highestAverageWinRate = Double.MIN_VALUE;
+		long highestNumPlayouts = Long.MIN_VALUE;
+		ArrayList<Action> possibleMoves = new ArrayList<>();
+		for(Entry<Action,Node> child : latestPosition.getChildren().entrySet())
 		{
-			for(Player p : state.getPlayersStillFightingInCombatHex())
+			double myAverageWinRate = child.getValue().calculateAverageWinRateFor(playerNumber);
+			long myNumPlayouts = child.getValue().getNumPlayouts();
+			if(myAverageWinRate == highestAverageWinRate)
 			{
-				int hitsToApply = state.getHitsOnPlayer(p.getID());
-				if(hitsToApply>0 && (state.getCurrentCombatPhase() == CombatPhase.APPLY_MAGIC_HITS || state.getCurrentCombatPhase() == CombatPhase.APPLY_MELEE_HITS
-						|| state.getCurrentCombatPhase() == CombatPhase.APPLY_RANGED_HITS))
+				if(myNumPlayouts == highestNumPlayouts)
 				{
-					for(ITileProperties tp : state.getCombatHex().getFightingThingsInHex())
-					{
-						if(p.ownsThingOnBoard(tp))
-						{
-							try
-							{
-								GameState clonedState = state.clone();
-								ApplyHitsCommand command = new ApplyHitsCommand(1, tp);
-								command.setID(p.getID());
-								CombatCommandHandler handler = new CombatCommandHandler();
-								handler.receiveGameStartedEvent(new GameStarted(isDemoMode,clonedState));
-								handler.receiveApplyHitsCommand(command);
-								possibleMoves.put(new Action(command), clonedState);
-							}
-							catch(Throwable t)
-							{
-								//invalid move
-							}
-						}
-					}
+					possibleMoves.add(child.getKey());
+				}
+				else if(myNumPlayouts > highestNumPlayouts)
+				{
+					possibleMoves = new ArrayList<>();
+					possibleMoves.add(child.getKey());
+					highestNumPlayouts = myNumPlayouts;
 				}
 			}
+			else if(myAverageWinRate > highestAverageWinRate)
+			{
+				possibleMoves = new ArrayList<>();
+				possibleMoves.add(child.getKey());
+				highestAverageWinRate = myAverageWinRate;
+				highestNumPlayouts = myNumPlayouts;
+			}
 		}
-		//TODO generate rest of actions
-		return possibleMoves;
+		
+		return possibleMoves.get(ThreadLocalRandom.current().nextInt(possibleMoves.size()));
+	}
+	
+	private void expandNode(Node n)
+	{
+		for(Entry<Action,GameState> e : PossibleMoveGenerator.getAllPossibleActionsFromState(isDemoMode, n.getState()).entrySet())
+		{
+			Node child = new Node(e.getValue(),n);
+			n.addChild(e.getKey(), child);
+		}
 	}
 }

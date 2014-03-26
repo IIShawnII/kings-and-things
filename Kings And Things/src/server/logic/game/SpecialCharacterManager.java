@@ -2,7 +2,9 @@ package server.logic.game;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import server.logic.exceptions.NoMoreTilesException;
@@ -57,6 +59,11 @@ public class SpecialCharacterManager extends AbstractTileManager
 			}
 		}
 		return false;
+	}
+	
+	public List<ITileProperties> getAvailableHeroes()
+	{
+		return Collections.unmodifiableList(tiles);
 	}
 
 	private static Set<TwoSidedTileProperties> getSpecialCharacterSetFromCollection(Collection<? extends TileProperties> tiles, boolean demoMode)
