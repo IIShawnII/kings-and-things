@@ -157,6 +157,10 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 				{
 					tiedRolls.add(nextRoll);
 					tiedRolls.add(compareRoll);
+					getCurrentState().removeDoneRollTie( nextRoll.getRollingPlayerID());
+					getCurrentState().removeDoneRollTie( compareRoll.getRollingPlayerID());
+					new CommandRejected( getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(), getCurrentState().getPlayerByPlayerNumber( nextRoll.getRollingPlayerID()).getPlayerInfo(), "Tie").postNetworkEvent( nextRoll.getRollingPlayerID());
+					new CommandRejected( getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(), getCurrentState().getPlayerByPlayerNumber( compareRoll.getRollingPlayerID()).getPlayerInfo(), "Tie").postNetworkEvent( compareRoll.getRollingPlayerID());
 				}
 			}
 		}

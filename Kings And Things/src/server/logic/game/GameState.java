@@ -853,6 +853,10 @@ public class GameState
 	public void addDoneRolling( int id) {
 		confirmedRolls.add( id);
 	}
+
+	public void removeDoneRollTie( int id) {
+		confirmedRolls.remove( id);
+	}
 	
 	public boolean allRolled(){
 		for( Player player : players){
