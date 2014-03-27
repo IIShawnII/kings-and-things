@@ -400,12 +400,6 @@ public abstract class CommandHandler
 		}
 		//notifies players of die roll
 		new DieRoll(rollToAddTo).postNetworkEvent( playerNumber);
-		
-		//if we are no longer waiting for more rolls, then we can apply the effects now
-		if(!currentState.isWaitingForRolls())
-		{
-			new DiceRolled().postInternalEvent();
-		}
 	}
 
 	private int rollDie(int rollValue)
@@ -421,9 +415,9 @@ public abstract class CommandHandler
 			try
 			{
 				currentState.addDoneRolling( command.getID());
-				if( currentState.allRolled()){
+				if( currentState.allRolled() && !currentState.isWaitingForRolls()){
 					if( currentState.getCurrentSetupPhase()!=SetupPhase.SETUP_FINISHED){
-						new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), currentState.getCurrentSetupPhase()).postNetworkEvent( ALL_PLAYERS_ID);
+						new DiceRolled().postInternalEvent();
 					}else{
 						if( currentState.getCurrentRegularPhase()==RegularPhase.COMBAT){
 							new CurrentPhase<CombatPhase>( currentState.getPlayerInfoArray(), currentState.getCurrentCombatPhase()).postNetworkEvent( ALL_PLAYERS_ID);
