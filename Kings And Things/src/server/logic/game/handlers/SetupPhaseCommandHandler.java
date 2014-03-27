@@ -26,11 +26,11 @@ import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
+import common.Constants.UpdateInstruction;
 import common.event.network.CurrentPhase;
 import common.event.network.HexPlacement;
 import common.event.network.CommandRejected;
 import common.event.network.PlayersList;
-
 import static common.Constants.ALL_PLAYERS_ID;
 
 public class SetupPhaseCommandHandler extends CommandHandler{
@@ -159,8 +159,8 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 					tiedRolls.add(compareRoll);
 					getCurrentState().removeDoneRollTie( nextRoll.getRollingPlayerID());
 					getCurrentState().removeDoneRollTie( compareRoll.getRollingPlayerID());
-					new CommandRejected( getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(), getCurrentState().getPlayerByPlayerNumber( nextRoll.getRollingPlayerID()).getPlayerInfo(), "Tie").postNetworkEvent( nextRoll.getRollingPlayerID());
-					new CommandRejected( getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(), getCurrentState().getPlayerByPlayerNumber( compareRoll.getRollingPlayerID()).getPlayerInfo(), "Tie").postNetworkEvent( compareRoll.getRollingPlayerID());
+					new CommandRejected( getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(), getCurrentState().getPlayerByPlayerNumber( nextRoll.getRollingPlayerID()).getPlayerInfo(), "Tie", UpdateInstruction.TieRoll).postNetworkEvent( nextRoll.getRollingPlayerID());
+					new CommandRejected( getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(), getCurrentState().getPlayerByPlayerNumber( compareRoll.getRollingPlayerID()).getPlayerInfo(), "Tie", UpdateInstruction.TieRoll).postNetworkEvent( compareRoll.getRollingPlayerID());
 				}
 			}
 		}
