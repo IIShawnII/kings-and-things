@@ -245,6 +245,20 @@ public class GameState
 		return recordedRollForSpecialCharacter != null;
 	}
 	
+	//checks if tile is owned by player
+	public Player getOwningPlayer(ITileProperties tile) {
+		for (Player p : players) {
+			if (p.ownsThingOnBoard(tile)) {
+				return p;
+			}
+		}
+		return null;
+	}
+	
+	public boolean isOwnedByPlayer(ITileProperties tile) {
+		return getOwningPlayer(tile) != null;
+	}
+	
 	public Roll getRecordedRollForSpecialCharacter()
 	{
 		return recordedRollForSpecialCharacter;
@@ -866,4 +880,5 @@ public class GameState
 		}
 		return true;
 	}
+	
 }

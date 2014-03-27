@@ -1,22 +1,26 @@
 package server.logic.game.handlers;
 
+import server.event.DiceRolled;
 import server.event.internal.ApplyRandomEventsCommand;
+import server.logic.exceptions.NoMoreTilesException;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants.RandomEvent;
+import common.Constants.RollReason;
 import common.Logger;
 import common.event.network.CommandRejected;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
+import common.game.Roll;
 
 public class ApplyRandomEventsCommandHandler extends CommandHandler {
 	
-	public void applyRandomEventEffect (ITileProperties randomEventTile, ITileProperties targetOfEvent) {
+	public void applyRandomEventEffect (ITileProperties randomEventTile, ITileProperties targetOfEvent, int playerID) {
 		
 		String randomEventName = randomEventTile.getName();
 		RandomEvent evt = RandomEvent.valueOf(randomEventName);
+		Player playerApplyingRandomEvent = getCurrentState().getPlayerByPlayerNumber(playerID);
 		
 		switch (evt) {
 			case Big_Juju:
@@ -35,9 +39,9 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				int sumOfCombatValue = 0;
 				//
 				for (HexState hex: this.getCurrentState().getBoard().getHexesAsList()) {
-					for (Player p: this.getCurrentState().getPlayers()) {
-						if (p.ownsHex(hex.getHex())) {
-							for (ITileProperties thingInHex: hex.getThingsInHexOwnedByPlayer(p)) 
+					for (Player playerAffectedByBigJuju: this.getCurrentState().getPlayers()) {
+						if (playerAffectedByBigJuju.ownsHex(hex.getHex())) {
+							for (ITileProperties thingInHex: hex.getThingsInHexOwnedByPlayer(playerAffectedByBigJuju)) 
 							{
 								if (thingInHex.isBuilding()) {
 									sumOfCombatValue += thingInHex.getValue();
@@ -53,6 +57,16 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				/**
 				 * Roll to obtain a special character from an unused pool or another player 
 				 */
+				if (getCurrentState().isOwnedByPlayer(targetOfEvent)) {
+					Player owningPlayer = getCurrentState().getOwningPlayer(targetOfEvent);
+					// Player that applies event rolls
+					getCurrentState().addNeededRoll(new Roll(2, targetOfEvent, RollReason.DEFECTION_USER, playerApplyingRandomEvent.getID()));
+					// Player that owns special character rolls
+					getCurrentState().addNeededRoll(new Roll(2, targetOfEvent, RollReason.DEFECTION_DEFENDER, owningPlayer.getID()));
+					
+				} else {
+					/*TODO Check which player is the defender*/
+				}
 				/*
 				 * if (player owns special character) {
 				 *		player and owner of special character roll twice
@@ -69,6 +83,7 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				 * Player collects gold except from special income counters
 				 */
 				//Apply gold collection only for the player applying Good_Harvest
+				playerApplyingRandomEvent.addGold(playerApplyingRandomEvent.getSpecialEventIncome());
 				break;
 			case Mother_Lode:
 				/**
@@ -156,11 +171,56 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 		}
 	}
 	
+	// 
+	private void applyRoll() throws NoMoreTilesException {
+		Roll defectionUser = null;
+		Roll defectionDefender = null;
+		
+		for (Roll r : getCurrentState().getFinishedRolls()) {
+			if (r.getRollReason() == RollReason.DEFECTION_USER) {
+				defectionUser = r;
+			}
+					
+			if (r.getRollReason() == RollReason.DEFECTION_DEFENDER) {
+				defectionDefender = r;
+			}
+		}
+		
+		if (defectionUser != null && defectionDefender != null) {
+			if (defectionUser.getFinalTotal() > defectionDefender.getFinalTotal()) {
+				// Removes special character from defending player or bank
+				if (getCurrentState().isOwnedByPlayer(defectionUser.getRollTarget())) {
+					// Removes special character from defending player
+					getCurrentState().getPlayerByPlayerNumber(defectionDefender.getRollingPlayerID()).removeOwnedThingOnBoard(defectionDefender.getRollTarget());
+				} else {
+					// Removes special character from bank
+					getCurrentState().getBankHeroes().drawTileByName(defectionUser.getRollTarget().getName());
+				}
+				
+				// Adds special character to player's hand
+				getCurrentState().getPlayerByPlayerNumber(defectionUser.getRollingPlayerID()).addCardToHand(defectionUser.getRollTarget());
+			}
+			// Removes handled rolls for player applying DEFECTION
+			getCurrentState().removeRoll(defectionUser);
+			// Removes handled rolls for player being affected DEFECTION
+			getCurrentState().removeRoll(defectionDefender);
+		}
+	}
+	
+	@Subscribe
+	public void dieRolled (DiceRolled roll) {
+		try {
+			applyRoll();
+		} catch (Throwable t) {
+			Logger.getErrorLogger().error("Unable to apply random event due to: ",t);
+			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+		}
+	}
 	
 	@Subscribe
 	public void receiveApplyEventsCommand (ApplyRandomEventsCommand randomEvent) {
 		try {
-			applyRandomEventEffect(randomEvent.getEventOfPlayer(), randomEvent.getTargetOfEvent());
+			applyRandomEventEffect(randomEvent.getEventOfPlayer(), randomEvent.getTargetOfEvent(), randomEvent.getID());
 		} catch (Throwable t) {
 			Logger.getErrorLogger().error("Unable to apply random event due to: ",t);
 			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());

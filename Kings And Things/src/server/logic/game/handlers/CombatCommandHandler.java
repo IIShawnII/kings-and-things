@@ -13,6 +13,7 @@ import server.event.internal.ApplyHitsCommand;
 import server.event.internal.ResolveCombatCommand;
 import server.event.internal.RetreatCommand;
 import server.event.internal.TargetPlayerCommand;
+import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.validators.CombatPhaseValidator;
 
@@ -420,7 +421,7 @@ public class CombatCommandHandler extends CommandHandler
 		getCurrentState().setPlayersTarget(p2.getID(), p1.getID());
 	}
 
-	private void applyRollEffects()
+	private void applyRollEffects() throws NoMoreTilesException
 	{
 		ArrayList<Roll> handledRolls = new ArrayList<Roll>();
 		boolean attackedWithCreature = false;
@@ -501,15 +502,64 @@ public class CombatCommandHandler extends CommandHandler
 				case EXPLORE_HEX:
 				{
 					handledRolls.add(r);
-					if(isDemoMode())
-					{
+					int roll_value = r.getFinalRolls().get(0);
+					
+					if(roll_value == 1 || roll_value == 6) {
 						//give hex to player
 						makeHexOwnedByPlayer(r.getRollTarget(), r.getRollingPlayerID());
 						getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
-					}
-					else
-					{
-						//TODO implement regular exploration
+					} else {
+						List<ITileProperties> listOfDefenders = new ArrayList<>(roll_value);
+						List<ITileProperties> listOfSpecialIncomeCounters = new ArrayList<>();
+						ITileProperties nextTile;
+						for (int i = 0; i < roll_value; i++) {
+							nextTile = getCurrentState().getCup().drawTile();
+							if (nextTile.isSpecialIncomeCounter()) {
+								if (!nextTile.isBuilding() || nextTile.getBiomeRestriction() != getCurrentState().getCombatHex().getHex().getBiomeRestriction()) {
+									// returns special income counter to the cup
+									getCurrentState().getCup().reInsertTile(nextTile);
+								} else {
+									// adds special income counter to a list of special income counters 
+									// that are cities, villages, or keyed to hex terrain
+									listOfSpecialIncomeCounters.add(nextTile);
+								}
+							} else if (nextTile.isEvent()) {
+								// returns random event to the cup immediately
+								getCurrentState().getCup().reInsertTile(nextTile);
+							} else {
+								listOfDefenders.add(nextTile);
+							}
+						}
+						ITileProperties lowestIncomeValue;
+						for (int j = 0; j < listOfSpecialIncomeCounters.size(); j++) {
+							/*TODO Check which special income counters to remove*/
+						}
+						
+						boolean defendingCreaturesExist = false;
+						
+						for (ITileProperties thing : listOfDefenders) {
+							if (thing.isCreature()) {
+								defendingCreaturesExist = true;
+							}
+							getCurrentState().getCombatHex().addThingToHex(thing);
+						}
+						
+						// code for existing defending creatures, cities, or villages
+						if (defendingCreaturesExist) {
+							int rollingPlayerIndex = -1;
+							for (int i = 0; i < getCurrentState().getPlayers().size(); i++) {
+								if (getCurrentState().getPlayerOrder().get(i) == r.getRollingPlayerID()) {
+									rollingPlayerIndex = i;
+									break;
+								}
+							}
+							//sets defending player to the person that moves before the explorer
+							if (rollingPlayerIndex == 0) {
+								getCurrentState().setDefendingPlayerNumber(getCurrentState().getPlayerOrder().get(getCurrentState().getPlayerOrder().size()-1));
+							} else {
+								getCurrentState().setDefendingPlayerNumber(getCurrentState().getPlayerOrder().get(rollingPlayerIndex-1));
+							}
+						}
 					}
 					break;
 				}

@@ -423,7 +423,7 @@ public class Player implements Serializable{
 	}
 
 	// determines player's income
-	private int getIncome( boolean event)
+	private int getIncome(boolean event)
 	{
 		//   1 gold per land hex
 		//+  gold per combat value of each fort
