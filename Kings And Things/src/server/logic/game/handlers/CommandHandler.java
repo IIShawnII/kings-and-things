@@ -431,7 +431,6 @@ public abstract class CommandHandler
 							new CurrentPhase<RegularPhase>( currentState.getPlayerInfoArray(), currentState.getCurrentRegularPhase()).postNetworkEvent( ALL_PLAYERS_ID);
 						}
 					}
-					
 				}
 			}
 			catch(Throwable t)

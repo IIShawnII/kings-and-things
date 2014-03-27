@@ -26,9 +26,9 @@ public final class Constants {
 	public static final boolean BYPASS_LOAD_IMAGES = true;
 	public static final boolean BYPASS_LOBBY = false;
 	public static final boolean DRAW_LOCKS = false;
-	public static final boolean LOAD_BUILDING = false;
+	public static final boolean LOAD_BUILDING = true;
 	public static final boolean LOAD_SPECIAL = false;
-	public static final boolean LOAD_GOLD = false;
+	public static final boolean LOAD_GOLD = true;
 	public static final boolean LOAD_STATE = true;
 	public static final boolean LOAD_CUP = false;
 	public static final boolean LOAD_HEX = true;
@@ -88,8 +88,12 @@ public final class Constants {
 	public static final int PROGRESS = 2;				//00000010
 	public static final int LOAD_RESOURCE = 4;			//00000100
 	public static final int GUI = 8;					//00001000
-	public static final int PLAYER_ID_MULTIPLIER = 2;	//00010010
+	public static final int PLAYER_ID_MULTIPLIER = 2;	//00000010
 	public static final int PLAYER_START_ID = 16;		//00010000
+	public static final int PLAYER_1_ID = 16;			//00010000
+	public static final int PLAYER_2_ID = 32;			//00100000
+	public static final int PLAYER_3_ID = 64;			//01000000
+	public static final int PLAYER_4_ID = 128;			//10000000
 	public static final int ALL_PLAYERS_ID = 240;		//11110000
 	
 	//Maximums

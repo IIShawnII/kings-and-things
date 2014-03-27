@@ -21,33 +21,38 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
-import client.gui.die.DiceRoller;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
+import client.gui.die.DiceRoller;
 import client.gui.util.LockManager;
 import client.gui.util.LockManager.Lock;
+import common.game.Roll;
+import common.game.HexState;
+import common.game.PlayerInfo;
+import common.game.TileProperties;
+import common.game.ITileProperties;
 import common.Constants.Category;
-import common.Constants.RollReason;
-import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
+import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.Constants.Restriction;
 import common.Constants.RegularPhase;
+import common.Constants.UpdateInstruction;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
 import common.event.network.HexOwnershipChanged;
-import common.game.HexState;
-import common.game.PlayerInfo;
-import common.game.Roll;
-import common.game.TileProperties;
-import common.game.ITileProperties;
 import static common.Constants.STATE;
 import static common.Constants.BOARD;
+import static common.Constants.PUBLIC;
 import static common.Constants.HEX_SIZE;
 import static common.Constants.DICE_SIZE;
 import static common.Constants.TILE_SIZE;
 import static common.Constants.DRAW_LOCKS;
 import static common.Constants.BOARD_SIZE;
+import static common.Constants.PLAYER_1_ID;
+import static common.Constants.PLAYER_2_ID;
+import static common.Constants.PLAYER_3_ID;
+import static common.Constants.PLAYER_4_ID;
 import static common.Constants.HEX_OUTLINE;
 import static common.Constants.TILE_OUTLINE;
 import static common.Constants.MOVE_DISTANCE;
@@ -129,6 +134,7 @@ public class Board extends JPanel{
 	
 	private volatile boolean phaseDone = false;
 	private volatile boolean isActive = false;
+	private volatile boolean useDice = false;
 
 	private DiceRoller dice;
 	private LockManager locks;
@@ -180,7 +186,7 @@ public class Board extends JPanel{
 		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Gold)), bound, true);
 		bound.translate( TILE_X_SHIFT, 0);
-		
+		addTile( new Tile( new TileProperties( Category.State)), bound, true);
 		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Special)), bound, true);
 		bound.translate( TILE_X_SHIFT, 0);
@@ -190,6 +196,7 @@ public class Board extends JPanel{
 	
 	public void setCurrentPlayer( PlayerInfo player){
 		currentPlayer = player;
+		playerMarker = getPlayerMarker( currentPlayer.getID());
 	}
 	
 	public boolean matchPlayer( final int ID){
@@ -203,7 +210,7 @@ public class Board extends JPanel{
 	 * @param lock - if true this tile is fake and cannot be animated, and uses a Permanent Lock
 	 * @return fully created tile that was added to board
 	 */
-	public Tile addTile( Tile tile, Rectangle bound, boolean lock){
+	private Tile addTile( Tile tile, Rectangle bound, boolean lock){
 		tile.init();
 		tile.setBounds( bound);
 		if( lock){
@@ -366,33 +373,12 @@ public class Board extends JPanel{
 
 	/**
 	 * place markers on the board, if no order is provided a demo setup will be placed
-	 * @param order - list of players id in order 
 	 */
-	private void placeMarkers(int[] order){
-		if( order!=null){
-			for( int i=0; i<order.length; i++){
-				if( currentPlayer.getID()==order[i]){
-					playerMarker = getPlayerMarker( i);
-					break;
-				}
-			}
-		}else{
-			playerMarker = getPlayerMarker( -1);
-			order = new int[4];
-		}
+	private void placeMarkers(){
 		Point point = locks.getPermanentLock( Category.State).getCenter();
 		Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
-		Tile tile = addTile( new Tile( playerMarker), bound, true);
-		tile.flip();
-		Tile[] tiles = new Tile[order.length];
-		for( int i=0; i<BOARD_POSITIONS.length && i<tiles.length; i++){
-			tiles[i] = addTile( new Tile( getPlayerMarker( i)), bound, false);
-			tiles[i].flip();
-			tiles[i].setDestination( locks.convertToCenterCoordinate( BOARD_POSITIONS[i][0], BOARD_POSITIONS[i][1]));
-			new HexOwnershipChanged( tiles[i].getLock().getHex().getState());
-		}
-		MoveAnimation animation = new MoveAnimation( tiles);
-		animation.start();
+		addTile( new Tile( playerMarker), bound, true).flip();
+		addTile( new Tile( playerMarker), bound, true).flip();
 	}
 	
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
@@ -421,7 +407,7 @@ public class Board extends JPanel{
 		for( UpdateInstruction instruction : update.getInstructions()){
 			switch( instruction){
 				case UpdatePlayers:
-					currentPlayer = (PlayerInfo) update.getData( UpdateKey.Player);
+					setCurrentPlayer( (PlayerInfo)update.getData( UpdateKey.Player));
 					players = (PlayerInfo[]) update.getData( UpdateKey.Players);
 					repaint();
 					phaseDone = true;
@@ -475,6 +461,7 @@ public class Board extends JPanel{
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
 				//TODO add support for custom roll
+				useDice = true;
 				dice.setDiceCount( 2);
 				Roll roll = new Roll( 2, null, RollReason.DETERMINE_PLAYER_ORDER, currentPlayer.getID(), 2);
 				new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
@@ -488,6 +475,7 @@ public class Board extends JPanel{
 				jtfStatus.setText( "Exchange things, if any");
 				break;
 			case PICK_FIRST_HEX:
+				placeMarkers();
 				jtfStatus.setText( "Pick your first Hex"); mouseInput.ignore = false;
 				break;
 			case PICK_SECOND_HEX:
@@ -515,21 +503,21 @@ public class Board extends JPanel{
 	}
 	
 	/**
-	 * get a specific marker according to the player order,
-	 * currently in order 1 to 4, colors go as Yellow, Gray, Green and Red
-	 * order -1 is special for getting the battle tile.
-	 * @param order - player order number
-	 * @return ITileProperties corresponding to the order
+	 * get a specific marker according to the player ID,
+	 * currently in order  of player 1 to 4, colors go as Red, Yellow, Green, Gray.
+	 * ID PUBLIC is special for getting the battle tile.
+	 * @param ID - player ID number
+	 * @return ITileProperties corresponding to the ID
 	 */
-	private ITileProperties getPlayerMarker( int order){
-		switch( order){
-			case -1: return STATE.get( Restriction.Battle);
-			case 0: return STATE.get( Restriction.Yellow);
-			case 1: return STATE.get( Restriction.Gray);
-			case 2: return STATE.get( Restriction.Green);
-			case 3: return STATE.get( Restriction.Red);
+	private ITileProperties getPlayerMarker( final int ID){
+		switch( ID){
+			case PUBLIC: return STATE.get( Restriction.Battle);
+			case PLAYER_1_ID: return STATE.get( Restriction.Red);
+			case PLAYER_2_ID: return STATE.get( Restriction.Yellow);
+			case PLAYER_3_ID: return STATE.get( Restriction.Green);
+			case PLAYER_4_ID: return STATE.get( Restriction.Gray);
 			default:
-				throw new IllegalArgumentException("ERROR - invalid player name for marker");
+				throw new IllegalArgumentException("ERROR - invalid ID for marker");
 		}
 	}
 
@@ -660,18 +648,27 @@ public class Board extends JPanel{
 			dice.shrink();
 		}
 
-		/**
-		 * for testing purposes
-		 */
 		@Override
 		public void mouseClicked( MouseEvent e){
 			if( ignore){
 				return;
 			}
 			if( SwingUtilities.isLeftMouseButton(e)){
-				if(e.getSource()==dice){
-					if( dice.canRoll()){
+				if( e.getSource()==dice){
+					if( useDice && dice.canRoll()){
+						useDice = false;
 						dice.roll();
+						new Thread( new Runnable() {
+							@Override
+							public void run() {
+								while( dice.isRolling()){
+									try {
+										Thread.sleep( 10);
+									} catch ( InterruptedException e) {}
+								}
+								new UpdatePackage( UpdateInstruction.DoneRolling, "Board.DoneRoll").postNetworkEvent( currentPlayer.getID());
+							}
+						}, "Dice Wait").start();
 					}else{
 						dice.expand();
 					}
