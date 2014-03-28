@@ -10,6 +10,7 @@ import common.Constants.UpdateInstruction;
 import common.event.AbstractEvent;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
+import common.event.network.CommandRejected;
 import common.event.network.DieRoll;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
@@ -98,6 +99,16 @@ public class ConnectionLogic implements Runnable {
 				else if( event instanceof DieRoll){
 					update.addInstruction( UpdateInstruction.DieValue);
 					update.putData( UpdateKey.Roll, ((DieRoll)event).getDieRoll());
+				}
+				else if( event instanceof CommandRejected){
+					UpdateInstruction instruction = ((CommandRejected)event).getInstruction(); 
+					switch( instruction){
+						case TieRoll:
+							update.addInstruction( instruction);
+							break;
+						default:
+							throw new IllegalStateException("Logic.Receive " + (player!=null?player.getID():"-1") + ": No Support for: " + instruction);
+					}
 				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);

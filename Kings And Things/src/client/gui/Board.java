@@ -143,6 +143,7 @@ public class Board extends JPanel{
 	private ITileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
 	private Font font = new Font("default", Font.BOLD, 30);
+	private RollReason lastRollReason;
 	
 	/**
 	 * basic super constructor warper for JPanel
@@ -421,6 +422,9 @@ public class Board extends JPanel{
 				case RegularPhase:
 					manageRegularPhase( (RegularPhase)update.getData( UpdateKey.Phase));
 					break;
+				case TieRoll:
+					prepareForRollDice(2, lastRollReason, "Tie Roll, Roll again", 2);
+					break;
 				case DieValue:
 					Roll roll = (Roll)update.getData( UpdateKey.Roll);
 					dice.setResult( roll.getBaseRolls());
@@ -434,6 +438,16 @@ public class Board extends JPanel{
 				} catch ( InterruptedException e) {}
 			}
 		}
+	}
+	
+	private void prepareForRollDice( int count, RollReason reason, String message, int value){
+		useDice = true;
+		dice.setDiceCount( count);
+		jtfStatus.setText( message);
+		lastRollReason = reason;
+		Roll roll = new Roll( count, null, reason, currentPlayer.getID(), value);
+		new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
+		new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
 	}
 	
 	private void manageRegularPhase( RegularPhase phase) {
@@ -461,12 +475,7 @@ public class Board extends JPanel{
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
 				//TODO add support for custom roll
-				useDice = true;
-				dice.setDiceCount( 2);
-				Roll roll = new Roll( 2, null, RollReason.DETERMINE_PLAYER_ORDER, currentPlayer.getID(), 2);
-				new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
-				new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
-				jtfStatus.setText( "Roll dice to determine order");
+				prepareForRollDice(2, RollReason.DETERMINE_PLAYER_ORDER, "Roll dice to determine order", 2);
 				break;
 			case EXCHANGE_SEA_HEXES:
 				jtfStatus.setText( "Exchange sea hexes, if any");
