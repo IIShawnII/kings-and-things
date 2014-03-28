@@ -3,11 +3,13 @@ package common.event.network;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.Constants.UpdateInstruction;
-import common.event.AbstractInternalEvent;
+import common.event.AbstractNetwrokEvent;
 import common.game.PlayerInfo;
 
-public class CommandRejected extends AbstractInternalEvent
+public class CommandRejected extends AbstractNetwrokEvent
 {
+	private static final long serialVersionUID = 4882338853179679316L;
+	
 	private final RegularPhase currentRegularPhase;
 	private final PlayerInfo currentActivePlayer;
 	private final UpdateInstruction instruction;

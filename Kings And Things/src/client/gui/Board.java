@@ -40,7 +40,6 @@ import common.Constants.RegularPhase;
 import common.Constants.UpdateInstruction;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
-import common.event.network.HexOwnershipChanged;
 import static common.Constants.STATE;
 import static common.Constants.BOARD;
 import static common.Constants.PUBLIC;
@@ -61,7 +60,6 @@ import static common.Constants.HEX_BOARD_SIZE;
 import static common.Constants.BOARD_LOAD_ROW;
 import static common.Constants.BOARD_LOAD_COL;
 import static common.Constants.ANIMATION_DELAY;
-import static common.Constants.BOARD_POSITIONS;
 import static common.Constants.IMAGE_BACKGROUND;
 import static common.Constants.BOARD_TOP_PADDING;
 import static common.Constants.MAX_HEXES_ON_BOARD;
@@ -675,6 +673,7 @@ public class Board extends JPanel{
 										Thread.sleep( 10);
 									} catch ( InterruptedException e) {}
 								}
+								jtfStatus.setText( "Done Rolling: " + dice.getResults());
 								new UpdatePackage( UpdateInstruction.DoneRolling, "Board.DoneRoll").postNetworkEvent( currentPlayer.getID());
 							}
 						}, "Dice Wait").start();

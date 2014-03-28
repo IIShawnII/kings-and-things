@@ -2,13 +2,15 @@ package client.gui.die;
 
 import javax.swing.JPanel;
 
+import com.google.common.primitives.Ints;
+
 import client.gui.util.SizeChangeAnimation;
 
+import java.util.List;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.util.List;
 
 import static common.Constants.DICE_SIZE;
 import static common.Constants.IMAGE_DICE;
@@ -37,6 +39,10 @@ public class DiceRoller extends JPanel implements Parent{
 		return this;
 	}
 	
+	public List<Integer> getResults(){
+		return Ints.asList( results);
+	}
+	
 	public void setResult( List< Integer> results){
 		if( results.size()==dieCount){
 			for( int i=0; i<dieCount; i++){
@@ -49,7 +55,7 @@ public class DiceRoller extends JPanel implements Parent{
 	}
 	
 	public void expand(){
-		change.expandTo( DICE_SIZE*5, (int)(DICE_SIZE*1.2));
+		change.expandTo( DICE_SIZE*3, (int)(DICE_SIZE*1.2));
 	}
 	
 	public void shrink(){
