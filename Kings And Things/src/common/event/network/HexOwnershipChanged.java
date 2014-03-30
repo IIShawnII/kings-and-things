@@ -15,4 +15,9 @@ public class HexOwnershipChanged extends AbstractNetwrokEvent {
 	public HexState getChangedHex(){
 		return hex;
 	}
+	
+	@Override
+	public String toString(){
+		return "Network/HexOwner: hex: " + hex;
+	}
 }

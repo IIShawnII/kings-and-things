@@ -24,11 +24,12 @@ public class HexState implements Serializable{
 	
 	private static final long serialVersionUID = -1871329628938580400L;
 
-	private Image markerImage;
+	private transient Image markerImage;
 	private ITileProperties marker;
 	private ITileProperties hex;
 	private final HashSet<ITileProperties> thingsInHex;
 	private boolean isInBattle = false;
+	private final Point location;
 	
 	private final int hashCode;
 	
@@ -36,6 +37,7 @@ public class HexState implements Serializable{
 	private boolean isFake;
 	
 	public HexState(){
+		location = new Point();
 		isFake = true;
 		thingsInHex = new HashSet<ITileProperties>();
 		hex = new TileProperties( Category.Hex);
@@ -52,6 +54,7 @@ public class HexState implements Serializable{
 	
 	private HexState(HexState other, boolean deepCopy)
 	{
+		location = new Point( other.location);
 		markerImage = other.markerImage;
 		marker = other.marker.clone();
 		hex = other.hex.clone();
@@ -87,6 +90,7 @@ public class HexState implements Serializable{
 	 */
 	public HexState(ITileProperties hex, Collection<ITileProperties> thingsInHex)
 	{
+		location = new Point();
 		isFake = false;
 		validateTileNotNull(hex);
 		validateIsHexTile(hex);
@@ -102,6 +106,15 @@ public class HexState implements Serializable{
 			addThingToHex(tp);
 		}
 		hashCode = calculateHashCode();
+	}
+	
+	public Point getLocation(){
+		return new Point( location);
+	}
+	
+	public HexState setLocation( int x, int y){
+		location.setLocation( x, y);
+		return this;
 	}
 	
 	public void addHex( HexState state){
@@ -140,6 +153,9 @@ public class HexState implements Serializable{
 	}
 	
 	public void paint( Graphics g, Point point){
+		if(marker!=null && markerImage==null){
+			markerImage = Constants.IMAGES.get( marker.hashCode());
+		}
 		if( hasMarker() && isInBattle()){
 			g.drawImage( markerImage, point.x+5, point.y+5, Constants.TILE_SIZE_BOARD.width, Constants.TILE_SIZE_BOARD.height, null);
 			g.drawImage( BATLLE_IMAGE, point.x-5, point.y-5, Constants.TILE_SIZE_BOARD.width, Constants.TILE_SIZE_BOARD.height, null);
@@ -212,24 +228,39 @@ public class HexState implements Serializable{
 	 * @throws IllegalArgumentException if tile is null,
 	 * or can not be added due to game rules
 	 */
-	public boolean addThingToHex(ITileProperties tile){
-		//Restriction.Special is just a place holder to force default in switch
-		Restriction res = tile.hasRestriction()? tile.getRestriction( 0):Restriction.Special; 
-		switch( res){
+	public boolean addThingToHex( ITileProperties tile){
+		switch( tile.getRestriction(0)){
+			case Building:
+				validateCanAddThingToHex(tile, true);
+				break;
+			default:
+				validateCanAddThingToHex(tile, false);
+		}
+		return thingsInHex.add(tile);
+	}
+	
+
+	
+	/**
+	 * Add something to this hexState ONLY for use in GUI side
+	 * @param tile The thing to add
+	 * @return current HexSate
+	 */
+	public HexState addThingToHexGUI( ITileProperties tile){
+		switch( tile.getRestriction(0)){
 			case Battle:
 				setInBattle( true);
-				return true;
+				break;
 			case Yellow:
 			case Gray:
 			case Green:
 			case Red:
 				setMarker( tile);
-				return true;
+				break;
 			default:
-				//TODO comment out for testing
-				//validateCanAddThingToHex(tile);
-				return thingsInHex.add(tile);
+				thingsInHex.add(tile);
 		}
+		return this;
 	}
 	
 	/**
@@ -407,6 +438,11 @@ public class HexState implements Serializable{
 	public int hashCode()
 	{
 		return hashCode;
+	}
+	
+	@Override
+	public String toString(){
+		return location.toString();
 	}
 	
 	private int calculateHashCode()

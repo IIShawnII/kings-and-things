@@ -2,6 +2,7 @@ package server.logic.game.handlers;
 
 import static common.Constants.ALL_PLAYERS_ID;
 
+import java.util.Random;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import common.game.Roll;
 import common.game.Player;
 import common.game.HexState;
 import common.game.ITileProperties;
+import common.Constants;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.Constants.CombatPhase;
@@ -40,6 +42,8 @@ import common.event.network.HexOwnershipChanged;
 
 public abstract class CommandHandler
 {
+	private static final Random rand = new Random(); 
+	
 	//sub classes can not and should not change these fields,
 	//they are to be set only after handling a start game command
 	private GameState currentState;
@@ -135,7 +139,8 @@ public abstract class CommandHandler
 		currentState.getPlayerByPlayerNumber(playerNumber).addOwnedHex(hex);
 
 		HexState hs = getCurrentState().getBoard().getHexStateForHex(hex);
-		new HexOwnershipChanged(hs).postNetworkEvent( playerNumber);
+		hs.setMarker( Constants.getPlayerMarker( playerNumber));
+		new HexOwnershipChanged(hs).postNetworkEvent( ALL_PLAYERS_ID);
 	}
 	
 	protected void removePlayerThingFromBoard(int playerNumber, ITileProperties hex, ITileProperties thing)
@@ -187,7 +192,11 @@ public abstract class CommandHandler
 		currentState.setDefendingPlayerNumber(-1);
 		currentState.clearAllPlayerTargets();
 		
-		new PlayerState(currentState.getActivePhasePlayer().getPlayerInfo()).postNetworkEvent();
+		if( nextSetupPhase != SetupPhase.SETUP_FINISHED){
+			new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), nextSetupPhase).postNetworkEvent( ALL_PLAYERS_ID);
+		}else{
+			new CurrentPhase<RegularPhase>( currentState.getPlayerInfoArray(), nextRegularPhase).postNetworkEvent( ALL_PLAYERS_ID);
+		}
 	}
 	
 	protected void advanceActiveTurnPlayer(){
@@ -404,7 +413,9 @@ public abstract class CommandHandler
 
 	private int rollDie(int rollValue)
 	{
-		return isDemoMode? rollValue : (int) Math.round((Math.random() * 5) + 1);
+		//generate a number between 10 to 69 and divide by 10
+		//previous method produced way to many ties
+		return isDemoMode? rollValue : (rand.nextInt( 60)+10)/10;
 	}
 	
 	@Subscribe

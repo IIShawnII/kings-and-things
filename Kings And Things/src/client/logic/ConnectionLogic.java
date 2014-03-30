@@ -12,11 +12,13 @@ import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
 import common.event.network.CommandRejected;
 import common.event.network.DieRoll;
+import common.event.network.HexOwnershipChanged;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
 import common.event.network.CurrentPhase;
 import common.event.network.HexPlacement;
+import static common.Constants.GUI;
 import static common.Constants.LOGIC;
 import static common.Constants.BOARD;
 import static common.Constants.PUBLIC;
@@ -26,7 +28,7 @@ public class ConnectionLogic implements Runnable {
 
 	private Connection connection;
 	private PlayerInfo player = null;
-	private boolean finished = false, gameStarted= false;
+	private boolean finished = false, gameStarted = false;
 	
 	public ConnectionLogic() {
 		this.connection = new Connection();
@@ -61,6 +63,8 @@ public class ConnectionLogic implements Runnable {
 					update.putData( UpdateKey.Players, players);
 					if( !gameStarted){
 						ID = PUBLIC;
+					}else{
+						ID |= GUI;
 					}
 				} 
 				else if( event instanceof StartGame){
@@ -85,6 +89,7 @@ public class ConnectionLogic implements Runnable {
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
 					update.putData( UpdateKey.Player, player);
 					update.putData( UpdateKey.Players, phase.getPlayers());
+					ID |= GUI;
 					if( phase.isSetupPhase()){
 						update.addInstruction( UpdateInstruction.SetupPhase);
 						update.putData( UpdateKey.Phase, phase.getPhase());
@@ -102,6 +107,9 @@ public class ConnectionLogic implements Runnable {
 				}
 				else if( event instanceof CommandRejected){
 					UpdateInstruction instruction = ((CommandRejected)event).getInstruction(); 
+					if(instruction==null){
+						return;
+					}
 					switch( instruction){
 						case TieRoll:
 							update.addInstruction( instruction);
@@ -109,6 +117,10 @@ public class ConnectionLogic implements Runnable {
 						default:
 							throw new IllegalStateException("Logic.Receive " + (player!=null?player.getID():"-1") + ": No Support for: " + instruction);
 					}
+				}
+				else if(event instanceof HexOwnershipChanged){
+					update.addInstruction( UpdateInstruction.HexOwnership);
+					update.putData( UpdateKey.HexState, ((HexOwnershipChanged)event).getChangedHex());
 				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);
@@ -121,9 +133,6 @@ public class ConnectionLogic implements Runnable {
 				}
 				else if( event instanceof RackPlacement){
 					new BoardUpdate(((RackPlacement)event).getArray(), this).postInternalEvent(BOARD|player.getID());
-				}
-				else if(event instanceof HexOwnershipChanged){
-					
 				}
 				else if(event instanceof HexStatesChanged){
 					

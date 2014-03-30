@@ -113,6 +113,10 @@ public class LockManager {
 		return getLock( new Point(x,y), tile.isTile(), tile.getProperties().getCategory());
 	}
 	
+	public Lock getLockForHex( Point point){
+		return hexBoardLocks[ point.x][point.y];
+	}
+	
 	private Lock lookThroughLocks( Lock[][] locks, Point point, boolean isTile){
 		for( int i=0; i<locks.length;i++){
 			for( int j=0; j<locks[i].length;j++){

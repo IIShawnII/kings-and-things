@@ -31,7 +31,7 @@ public class BoardGenerator
 	 */
 	public BoardGenerator(int numPlayers, HexTileManager hexManager)
 	{
-		if(!Constants.BYPASS_MIN_PLAYER && (numPlayers < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < numPlayers))
+		if(numPlayers < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < numPlayers)
 		{
 			throw new IllegalArgumentException("Can not generate board with: " + numPlayers + " players");
 		}
@@ -68,7 +68,7 @@ public class BoardGenerator
 	 */
 	public HexBoard createNewBoard() throws NoMoreTilesException
 	{
-		if(numPlayers == Constants.MAX_PLAYERS || Constants.BYPASS_MIN_PLAYER)
+		if(numPlayers == Constants.MAX_PLAYERS)
 		{
 			tempRemoveHexesOfType(Biome.Sea, 4);
 		}
@@ -83,7 +83,7 @@ public class BoardGenerator
 		
 		ArrayList<ITileProperties> hexes = new ArrayList<ITileProperties>();
 		
-		int boardSize = (numPlayers==Constants.MAX_PLAYERS||Constants.BYPASS_MIN_PLAYER)? Constants.MAX_HEXES_ON_BOARD : Constants.MIN_HEXES_ON_BOARD;
+		int boardSize = numPlayers==Constants.MAX_PLAYERS? Constants.MAX_HEXES_ON_BOARD : Constants.MIN_HEXES_ON_BOARD;
 		for(int i=0; i<boardSize; i++)
 		{
 			ITileProperties hex = hexManager.drawTile();

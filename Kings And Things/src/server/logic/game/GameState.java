@@ -1,6 +1,7 @@
 package server.logic.game;
 
 import java.awt.Point;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,8 +26,11 @@ import common.game.Roll;
 /**
  * GameState can be described by the board and player info
  */
-public class GameState
+public class GameState implements Serializable
 {
+	private static final long serialVersionUID = 5359708831592253851L;
+	
+	//TDOD assign transient, to fields no needed on GUI side
 	private CupManager cup;
 	private HexTileManager bank;
 	private BoardGenerator boardGenerator;

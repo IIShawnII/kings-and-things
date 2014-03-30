@@ -59,7 +59,7 @@ public class HexBoard
 		
 		//place middle hex first
 		HexState nextHex = new HexState(tiles.remove(0));
-		tempBoard.put(new Point(numRings-1,2*(numRings-1)), nextHex);
+		tempBoard.put(new Point(numRings-1,2*(numRings-1)), nextHex.setLocation( numRings-1,2*(numRings-1)));
 		tempBoardList.add(nextHex);
 		
 		//every other hex is placed relative to the last placed hex
@@ -73,7 +73,7 @@ public class HexBoard
 			}
 			//start by placing one piece above the last placed piece of the last ring
 			nextHex = new HexState(tiles.remove(0));
-			tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-2), nextHex);
+			tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-2), nextHex.setLocation( lastRingPiece.x,lastRingPiece.y-2));
 			tempBoardList.add(nextHex);
 			lastRingPiece.y-=2;
 			
@@ -82,7 +82,7 @@ public class HexBoard
 			for(int j=0; j<numAwayFromTop; j++)
 			{
 				nextHex = new HexState(tiles.remove(0));
-				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y-1), nextHex);
+				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y-1), nextHex.setLocation( lastRingPiece.x+1,lastRingPiece.y-1));
 				tempBoardList.add(nextHex);
 				lastRingPiece.x++;
 				lastRingPiece.y--;
@@ -95,7 +95,7 @@ public class HexBoard
 			for(int j=0; j<rowLength; j++)
 			{
 				nextHex = new HexState(tiles.remove(0));
-				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y+1), nextHex);
+				tempBoard.put(new Point(lastRingPiece.x+1,lastRingPiece.y+1), nextHex.setLocation( lastRingPiece.x+1,lastRingPiece.y+1));
 				tempBoardList.add(nextHex);
 				lastRingPiece.x++;
 				lastRingPiece.y++;
@@ -105,7 +105,7 @@ public class HexBoard
 			for(int j=0; j<rowLength; j++)
 			{
 				nextHex = new HexState(tiles.remove(0));
-				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y+2), nextHex);
+				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y+2), nextHex.setLocation( lastRingPiece.x,lastRingPiece.y+2));
 				tempBoardList.add(nextHex);
 				lastRingPiece.y+=2;
 			}
@@ -114,7 +114,7 @@ public class HexBoard
 			for(int j=0; j<rowLength; j++)
 			{
 				nextHex = new HexState(tiles.remove(0));
-				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y+1), nextHex);
+				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y+1), nextHex.setLocation( lastRingPiece.x-1,lastRingPiece.y+1));
 				tempBoardList.add(nextHex);
 				lastRingPiece.x--;
 				lastRingPiece.y++;
@@ -124,7 +124,7 @@ public class HexBoard
 			for(int j=0; j<rowLength; j++)
 			{
 				nextHex = new HexState(tiles.remove(0));
-				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y-1), nextHex);
+				tempBoard.put(new Point(lastRingPiece.x-1,lastRingPiece.y-1), nextHex.setLocation( lastRingPiece.x-1,lastRingPiece.y-1));
 				tempBoardList.add(nextHex);
 				lastRingPiece.x--;
 				lastRingPiece.y--;
@@ -134,7 +134,7 @@ public class HexBoard
 			for(int j=0; j<rowLength; j++)
 			{
 				nextHex = new HexState(tiles.remove(0));
-				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-2), nextHex);
+				tempBoard.put(new Point(lastRingPiece.x,lastRingPiece.y-2), nextHex.setLocation( lastRingPiece.x,lastRingPiece.y-2));
 				tempBoardList.add(nextHex);
 				lastRingPiece.y-=2;
 			}
@@ -151,7 +151,7 @@ public class HexBoard
 		ImmutableBiMap.Builder<Point,HexState> builder = new ImmutableBiMap.Builder<Point, HexState>();
 		for(Entry<Point,HexState> e : other.board.entrySet())
 		{
-			builder.put(new Point(e.getKey().x,e.getKey().y), e.getValue().clone());
+			builder.put(new Point(e.getKey().x,e.getKey().y), e.getValue().clone().setLocation( e.getKey().x,e.getKey().y));
 		}
 		board = builder.build();
 		boardList = Collections.unmodifiableList(other.boardList);

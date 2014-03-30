@@ -10,16 +10,11 @@ import java.nio.file.FileVisitor;
 import java.nio.file.FileVisitResult;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import static common.Constants.BYPASS_LOAD_IMAGES;
 import static common.Constants.RESOURCE_PATH;
-import static common.Constants.LOAD_BUILDING;
 import static common.Constants.LOAD_RESOURCE;
 import static common.Constants.LOAD_SPECIAL;
-import static common.Constants.LOAD_STATE;
-import static common.Constants.LOAD_GOLD;
 import static common.Constants.PROGRESS;
 import static common.Constants.LOAD_CUP;
-import static common.Constants.LOAD_HEX;
 import static common.Constants.BUILDING;
 import static common.Constants.SPECIAL;
 import static common.Constants.IMAGES;
@@ -105,14 +100,14 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 						for(int i=0; i<6; i++){
 							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 							CUP.put( tileCopy.hashCode(), tileCopy);
-							addImage(tileCopy.hashCode(), file, LOAD_BUILDING);
+							addImage(tileCopy.hashCode(), file);
 						}
 					}else{
 						tile.setInfinite();
 						tile.setSpecialFlip();
 						tile.setCategory( Category.Buildable);
 						BUILDING.put( tile.hashCode(), tile);
-						addImage(tile.hashCode(), file, LOAD_BUILDING);
+						addImage(tile.hashCode(), file);
 					}
 					break;
 				case Cup:
@@ -143,7 +138,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setInfinite();
 					tile.setCategory( currentCategory);
 					GOLD.put( tile.hashCode(), tile);
-					addImage(tile.hashCode(), file, LOAD_GOLD);
+					addImage(tile.hashCode(), file);
 					break;
 				case Hex:
 					switch(tile.getName()){
@@ -160,7 +155,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					for( int i=0; i<copyTile; i++){
 						TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
 						HEX.put( tileCopy.hashCode(), tileCopy);
-						addImage(tileCopy.hashCode(), file, LOAD_HEX);
+						addImage(tileCopy.hashCode(), file);
 					}
 					break;
 				case Special:
@@ -175,7 +170,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setInfinite();
 					tile.setCategory( currentCategory);
 					STATE.put( tile.getRestriction( 0), tile);
-					addImage(tile.hashCode(), file, LOAD_STATE);
+					addImage(tile.hashCode(), file);
 					break;
 					
 				case Resources:
@@ -189,9 +184,13 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		return result;
 	}
 	
+	private void addImage( final int hashCode, Path file) throws IOException{
+		addImage( hashCode, file, true);
+	}
+	
 	private void addImage( final int hashCode, Path file, boolean condition) throws IOException{
 		if( isClient){
-			if( !BYPASS_LOAD_IMAGES || condition){
+			if( condition){
 				IMAGES.put( hashCode, ImageIO.read( file.toFile()));
 			}
 		}

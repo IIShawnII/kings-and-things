@@ -26,7 +26,7 @@ public abstract class SetupPhaseValidator
 	public static void validateStartNewGame(boolean demoMode, Set<Player> players)
 	{
 		CommandValidator.validateCollection(players,"players");
-		if( !Constants.BYPASS_MIN_PLAYER && (players.size() < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < players.size()))
+		if( players.size() < Constants.MIN_PLAYERS || Constants.MAX_PLAYERS < players.size())
 		{
 			throw new IllegalArgumentException("Can only start a game with 2 to 4 players");
 		}

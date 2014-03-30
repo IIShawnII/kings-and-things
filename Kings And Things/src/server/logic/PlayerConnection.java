@@ -84,6 +84,7 @@ public class PlayerConnection implements Runnable{
 
 	@Override
 	public void run(){
+		final int ID = player.getID();
 		UpdatePackage event = null;
 		try {
 			while ((event = (UpdatePackage)connection.recieve())!=null){
@@ -91,16 +92,16 @@ public class PlayerConnection implements Runnable{
 				switch( event.peekFirstInstruction()){
 					case State: 
 						player.setIsPlaying( ((PlayerInfo)event.getData( UpdateKey.Player)).isReady());
-						new PlayerUpdated( player).postInternalEvent( player.getID());
+						new PlayerUpdated( player).postInternalEvent( ID);
 						break;
 					case HexOwnership: 
-						new GiveHexToPlayerCommand( ((HexState)event.getData( UpdateKey.HexState)).getHex()).postInternalEvent( player.getID());
+						new GiveHexToPlayerCommand( ((HexState)event.getData( UpdateKey.HexState)).getHex()).postInternalEvent( ID);
 						break;
 					case NeedRoll: 
-						new RollDiceCommand( (Roll)event.getData( UpdateKey.Roll)).postInternalEvent( player.getID());
+						new RollDiceCommand( (Roll)event.getData( UpdateKey.Roll)).postInternalEvent( ID);
 						break;
 					case DoneRolling:
-						new DoneRollingCommand().postInternalEvent( player.getID());
+						new DoneRollingCommand().postInternalEvent( ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
@@ -111,7 +112,7 @@ public class PlayerConnection implements Runnable{
 		}
 		player.setIsPlaying(false);
 		player.setConnected( false);
-		new PlayerUpdated( player).postInternalEvent( player.getID());
+		new PlayerUpdated( player).postInternalEvent( ID);
 		Logger.getStandardLogger().warn( player + " lost connection");
 	}
 	

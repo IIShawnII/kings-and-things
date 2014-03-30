@@ -21,7 +21,6 @@ import server.event.EndServer;
 import server.event.PlayerUpdated;
 import server.event.internal.StartSetupPhaseCommand;
 import common.Logger;
-import common.Constants;
 import common.Constants.Level;
 import common.Constants.UpdateKey;
 import common.game.Player;
@@ -155,12 +154,12 @@ public class ConnectionLobby implements Runnable {
 		if( connections.getPlayers().length>0){
 			connections.postNetworkEvent( ALL_PLAYERS_ID);
 		}
-		if( !anyUnReady && ((connectedPlayers.size()==MAX_PLAYERS)||Constants.BYPASS_MIN_PLAYER)){
+		if( !anyUnReady && connectedPlayers.size()==MAX_PLAYERS){
 			HashSet< Player> set = new HashSet<>();
 			for( PlayerConnection pc : connectedPlayers){
 				set.add( pc.getPlayer());
 			}
-			new StartGame( Constants.BYPASS_MIN_PLAYER? MAX_PLAYERS:set.size()).postNetworkEvent( ALL_PLAYERS_ID);
+			new StartGame( set.size()).postNetworkEvent( ALL_PLAYERS_ID);
 			new StartSetupPhaseCommand( demoMode, set).postInternalEvent();
 		}
 	}

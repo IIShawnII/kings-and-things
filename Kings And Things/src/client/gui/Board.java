@@ -31,27 +31,21 @@ import common.game.HexState;
 import common.game.PlayerInfo;
 import common.game.TileProperties;
 import common.game.ITileProperties;
+import common.Constants;
 import common.Constants.Category;
 import common.Constants.UpdateKey;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
-import common.Constants.Restriction;
 import common.Constants.RegularPhase;
 import common.Constants.UpdateInstruction;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
-import static common.Constants.STATE;
 import static common.Constants.BOARD;
-import static common.Constants.PUBLIC;
 import static common.Constants.HEX_SIZE;
 import static common.Constants.DICE_SIZE;
 import static common.Constants.TILE_SIZE;
 import static common.Constants.DRAW_LOCKS;
 import static common.Constants.BOARD_SIZE;
-import static common.Constants.PLAYER_1_ID;
-import static common.Constants.PLAYER_2_ID;
-import static common.Constants.PLAYER_3_ID;
-import static common.Constants.PLAYER_4_ID;
 import static common.Constants.HEX_OUTLINE;
 import static common.Constants.TILE_OUTLINE;
 import static common.Constants.MOVE_DISTANCE;
@@ -195,7 +189,7 @@ public class Board extends JPanel{
 	
 	public void setCurrentPlayer( PlayerInfo player){
 		currentPlayer = player;
-		playerMarker = getPlayerMarker( currentPlayer.getID());
+		playerMarker = Constants.getPlayerMarker( currentPlayer.getID());
 	}
 	
 	public boolean matchPlayer( final int ID){
@@ -317,7 +311,7 @@ public class Board extends JPanel{
 			end = tile.getDestination();
 			tile.setLocation( end.x-size.width/2, end.y-size.height/2);
 			tile.setLockArea( locks.getLock( tile));
-			placeTileOnHex( tile, null, true);
+			placeTileOnHex( tile);
 		}
 	}
 	
@@ -427,6 +421,10 @@ public class Board extends JPanel{
 					Roll roll = (Roll)update.getData( UpdateKey.Roll);
 					dice.setResult( roll.getBaseRolls());
 					break;
+				case HexOwnership:
+					HexState hex = (HexState)update.getData( UpdateKey.HexState);
+					locks.getLockForHex( hex.getLocation()).getHex().setState( hex);
+					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
 			}
@@ -508,38 +506,19 @@ public class Board extends JPanel{
 		}
 		
 	}
-	
-	/**
-	 * get a specific marker according to the player ID,
-	 * currently in order  of player 1 to 4, colors go as Red, Yellow, Green, Gray.
-	 * ID PUBLIC is special for getting the battle tile.
-	 * @param ID - player ID number
-	 * @return ITileProperties corresponding to the ID
-	 */
-	private ITileProperties getPlayerMarker( final int ID){
-		switch( ID){
-			case PUBLIC: return STATE.get( Restriction.Battle);
-			case PLAYER_1_ID: return STATE.get( Restriction.Red);
-			case PLAYER_2_ID: return STATE.get( Restriction.Yellow);
-			case PLAYER_3_ID: return STATE.get( Restriction.Green);
-			case PLAYER_4_ID: return STATE.get( Restriction.Gray);
-			default:
-				throw new IllegalArgumentException("ERROR - invalid ID for marker");
-		}
-	}
 
 	/**
 	 * place any tile on hex, however only battle and markers will be drawn
 	 * current Tile will be removed and added as TileProperties to the Hex
 	 * @param tile - thing to be placed
 	 */
-	private boolean placeTileOnHex( Tile tile, HexState state, boolean ignoreMarker) {
-		if( tile.isTile() && tile.hasLock() && tile.getLock().canHold( tile) && (ignoreMarker || (tile.getLock().getHex().getState().hasMarker()))){
+	private HexState placeTileOnHex( Tile tile) {
+		if( tile.isTile() && tile.hasLock() && tile.getLock().canHold( tile) ){
 			remove(tile);
 			revalidate();
-			return tile.getLock().getHex().getState().addThingToHex( tile.getProperties());
+			return tile.getLock().getHex().getState().addThingToHexGUI( tile.getProperties());
 		}
-		return false;
+		return null;
 	}
 	
 	/**
@@ -601,8 +580,9 @@ public class Board extends JPanel{
 				return;
 			}
 			if( newLock!=null&&currentTile!=null&& newLock.canHold( currentTile)){
-				if( placeTileOnHex( currentTile, movingState, true)){
-					
+				HexState hex = placeTileOnHex( currentTile);
+				if( hex!=null){
+					new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
 				}
 			}
 			moveStack = false;
@@ -753,7 +733,7 @@ public class Board extends JPanel{
 				xTemp=-1;
 				tile.setLocation( end.x-size.width/2, end.y-size.height/2);
 				tile.setLockArea( locks.getLock( tile));
-				placeTileOnHex( tile, null, true);
+				placeTileOnHex( tile);
 			}
 			repaint();
 		}

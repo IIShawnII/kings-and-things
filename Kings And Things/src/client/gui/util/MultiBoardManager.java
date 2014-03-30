@@ -1,4 +1,4 @@
-package client.gui.components;
+package client.gui.util;
 
 import static common.Constants.BOARD_SIZE;
 
@@ -43,6 +43,10 @@ public class MultiBoardManager {
 		}
 		this.container = container;
 		this.constraints = constraints;
+	}
+	
+	public void show( final PlayerInfo player){
+		show( player.getID());
 	}
 	
 	public void show( final int ID){

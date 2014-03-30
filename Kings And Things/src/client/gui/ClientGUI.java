@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JMenuBar;
@@ -16,7 +17,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 
-import client.gui.components.MultiBoardManager;
+import client.gui.util.MultiBoardManager;
 import common.game.PlayerInfo;
 import common.game.LoadResources;
 import common.event.UpdatePackage;
@@ -25,7 +26,6 @@ import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
 import static common.Constants.GUI;
 import static common.Constants.BOARD_SIZE;
-import static common.Constants.BYPASS_LOBBY;
 
 /**
  * client GUI to hold all and display all game related information
@@ -33,7 +33,9 @@ import static common.Constants.BYPASS_LOBBY;
 @SuppressWarnings("serial")
 public class ClientGUI extends JFrame implements Runnable, ActionListener{
 
+	private JCheckBox jcbActive;
 	private PlayerInfo[] players;
+	private JButton jbNext, jbPrev;
 	private MultiBoardManager boards;
 	private JComboBox< PlayerInfo> jcbPlayers;
 	
@@ -54,14 +56,12 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE);
 		addWindowListener( new WindowListener());
 		LoadingDialog dialog = null;
-		if( !BYPASS_LOBBY){
-	        setLocationRelativeTo(null);
-	        setUndecorated(true);
-	        setVisible(true);
-	        dialog = new LoadingDialog( new LoadResources( true), "Lobby", true, true, getGraphicsConfiguration());
-			dialog.run();
-        	dispose();
-		}
+        setLocationRelativeTo(null);
+        setUndecorated(true);
+        setVisible(true);
+        dialog = new LoadingDialog( new LoadResources( true), "Lobby", true, true, getGraphicsConfiguration());
+		dialog.run();
+    	dispose();
 		if(dialog==null || !dialog.isForceClosed()){
 	        setUndecorated(false);
 	        setJMenuBar( createMenu());
@@ -115,17 +115,26 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.anchor = GridBagConstraints.FIRST_LINE_START;
+		constraints.weightx = 1;
 		
 		jcbPlayers = new JComboBox<>();
 		jcbPlayers.addActionListener( this);
 		constraints.gridx = 0;
-		constraints.weightx = 1;
 		jmb.add( jcbPlayers, constraints);
 		
-		JCheckBox jcbActive = new JCheckBox( "Active", true);
+		jcbActive = new JCheckBox( "Active", true);
 		constraints.gridx = 1;
-		constraints.weightx = 1;
 		jmb.add( jcbActive, constraints);
+		
+		jbPrev = new JButton("<<");
+		jbPrev.addActionListener( this);
+		constraints.gridx = 2;
+		jmb.add( jbPrev, constraints);
+		
+		jbNext = new JButton(">>");
+		jbNext.addActionListener( this);
+		constraints.gridx = 3;
+		jmb.add( jbNext, constraints);
 		
 		return jmb;
 	}
@@ -137,7 +146,30 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 
 	@Override
 	public void actionPerformed( ActionEvent e) {
-		boards.show( ((PlayerInfo)jcbPlayers.getSelectedItem()).getID());
+		Object source = e.getSource();
+		PlayerInfo player = null;
+		int index = -1;
+		int MAX_INDEX = jcbPlayers.getItemCount();
+		if( source==jbPrev){
+			index = jcbPlayers.getSelectedIndex()-1;
+			if( index<=-1){
+				index = MAX_INDEX-1;
+			}
+		}else if( source==jbNext){
+			index = jcbPlayers.getSelectedIndex()+1;
+			if( index>=MAX_INDEX){
+				index = 0;
+			}
+		}
+		if( index!=-1){
+			player = (PlayerInfo)jcbPlayers.getItemAt( index);
+			jcbPlayers.setSelectedIndex( index);
+		}else{
+			player = (PlayerInfo)jcbPlayers.getSelectedItem();
+		}
+		if( player!=null){
+			boards.show( player);
+		}
 	}
 	
 	private class WindowListener extends WindowAdapter{
@@ -158,12 +190,29 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 		protected void handlePublic( UpdatePackage update) {
 			changeBoad( update);
 		}
+
+		@Override
+		protected void handlePrivate( UpdatePackage update) {
+			changeBoad( update);
+		}
+		
+		@Override
+		protected boolean verifyPrivate( UpdatePackage update){
+			return update.isValidID( ID);
+		}
 	}
 	
 	private void changeBoad( UpdatePackage update){
 		switch( update.peekFirstInstruction()){
 			case UpdatePlayers:
 				players = (PlayerInfo[])update.getData( UpdateKey.Players);
+				if( boards!=null && jcbActive.isSelected()){
+					for( PlayerInfo player :players){
+						if( player.isActive()){
+							boards.show( player);
+						}
+					}
+				}
 				break;
 			default:
 		}

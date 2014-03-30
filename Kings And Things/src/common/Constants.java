@@ -1,5 +1,12 @@
 package common;
 
+import static common.Constants.PLAYER_1_ID;
+import static common.Constants.PLAYER_2_ID;
+import static common.Constants.PLAYER_3_ID;
+import static common.Constants.PLAYER_4_ID;
+import static common.Constants.PUBLIC;
+import static common.Constants.STATE;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -21,17 +28,10 @@ import common.game.TileProperties;
 
 public final class Constants {
 	
-	//Primary for bypassing rules for 4 player, so it can be tested for one players
-	public static final boolean BYPASS_MIN_PLAYER = false;
-	public static final boolean BYPASS_LOAD_IMAGES = true;
-	public static final boolean BYPASS_LOBBY = false;
+	//Primary for bypassing load of images for faster start
 	public static final boolean DRAW_LOCKS = false;
-	public static final boolean LOAD_BUILDING = true;
 	public static final boolean LOAD_SPECIAL = false;
-	public static final boolean LOAD_GOLD = true;
-	public static final boolean LOAD_STATE = true;
 	public static final boolean LOAD_CUP = false;
-	public static final boolean LOAD_HEX = true;
 
 	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
 	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
@@ -230,5 +230,26 @@ public final class Constants {
 			out.add((T)tp.clone());
 		}
 		return out;
+	}
+	
+
+	
+	/**
+	 * get a specific marker according to the player ID,
+	 * currently in order  of player 1 to 4, colors go as Red, Yellow, Green, Gray.
+	 * ID PUBLIC is special for getting the battle tile.
+	 * @param ID - player ID number
+	 * @return ITileProperties corresponding to the ID
+	 */
+	public final static ITileProperties getPlayerMarker( final int ID){
+		switch( ID){
+			case PUBLIC: return STATE.get( Restriction.Battle);
+			case PLAYER_1_ID: return STATE.get( Restriction.Red);
+			case PLAYER_2_ID: return STATE.get( Restriction.Yellow);
+			case PLAYER_3_ID: return STATE.get( Restriction.Green);
+			case PLAYER_4_ID: return STATE.get( Restriction.Gray);
+			default:
+				throw new IllegalArgumentException("ERROR - invalid ID for marker");
+		}
 	}
 }
