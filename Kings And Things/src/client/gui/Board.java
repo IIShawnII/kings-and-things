@@ -443,7 +443,6 @@ public class Board extends JPanel{
 		lastRollReason = reason;
 		Roll roll = new Roll( count, null, reason, currentPlayer.getID(), value);
 		new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
-		new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
 	}
 	
 	private void manageRegularPhase( RegularPhase phase) {
