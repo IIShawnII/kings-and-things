@@ -228,13 +228,15 @@ public class HexState implements Serializable{
 	 * @throws IllegalArgumentException if tile is null,
 	 * or can not be added due to game rules
 	 */
-	public boolean addThingToHex( ITileProperties tile){
-		switch( tile.getRestriction(0)){
-			case Building:
-				validateCanAddThingToHex(tile, true);
-				break;
-			default:
-				validateCanAddThingToHex(tile, false);
+	public boolean addThingToHex( ITileProperties tile)
+	{
+		if(tile.isBuilding())
+		{
+			validateCanAddThingToHex(tile, true);
+		}
+		else
+		{
+			validateCanAddThingToHex(tile, false);
 		}
 		return thingsInHex.add(tile);
 	}

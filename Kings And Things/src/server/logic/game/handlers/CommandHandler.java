@@ -424,8 +424,9 @@ public abstract class CommandHandler
 			{
 				currentState.addDoneRolling( command.getID());
 				if( currentState.allRolled() && !currentState.isWaitingForRolls()){
+
+					new DiceRolled().postInternalEvent();
 					if( currentState.getCurrentSetupPhase()!=SetupPhase.SETUP_FINISHED){
-						new DiceRolled().postInternalEvent();
 					}else{
 						if( currentState.getCurrentRegularPhase()==RegularPhase.COMBAT){
 							new CurrentPhase<CombatPhase>( currentState.getPlayerInfoArray(), currentState.getCurrentCombatPhase()).postNetworkEvent( ALL_PLAYERS_ID);
