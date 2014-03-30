@@ -425,6 +425,9 @@ public class Board extends JPanel{
 					HexState hex = (HexState)update.getData( UpdateKey.HexState);
 					locks.getLockForHex( hex.getLocation()).getHex().setState( hex);
 					break;
+				case FlipAll:
+					FlipAllHexes();
+					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
 			}
@@ -476,6 +479,7 @@ public class Board extends JPanel{
 				jtfStatus.setText( "Exchange sea hexes, if any");
 				break;
 			case EXCHANGE_THINGS:
+				mouseInput.moveHex = true;
 				jtfStatus.setText( "Exchange things, if any");
 				break;
 			case PICK_FIRST_HEX:
@@ -528,10 +532,11 @@ public class Board extends JPanel{
 		private Rectangle bound, boardBound;
 		private Lock newLock;
 		private Tile currentTile;
-		private boolean moveStack = false;
 		private Point lastPoint;
 		private HexState movingState;
 		private boolean ignore = false;
+		private boolean moveHex = false;
+		private boolean moveStack = false;
 		
 		/**
 		 * checks to see if movement is still inside the board,
@@ -543,7 +548,7 @@ public class Board extends JPanel{
 			if( ignore){
 				return;
 			}
-			if( (moveStack || phaseDone) && currentTile!=null){
+			if( phaseDone && (moveStack || moveHex) && currentTile!=null){
 				boardBound = getBounds();
 				bound = currentTile.getBounds();
 				lastPoint = bound.getLocation();
@@ -600,28 +605,35 @@ public class Board extends JPanel{
 			if( ignore){
 				return;
 			}
+			//get the deepest component in the given point
 			Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
 			if( phaseDone && deepestComponent!=null){
 				if( deepestComponent instanceof Tile){
 					currentTile = (Tile) deepestComponent;
+					//bring the component to the top, to prevent overlapping
 					remove( currentTile);
 					add( currentTile, 0);
 					revalidate();
+					//check to see if it is hex
 					if( !currentTile.isTile() && currentTile.hasLock()){
-						newLock = currentTile.getLock();
-						movingState = newLock.getHex().getState();
-						if( movingState.hasMarker()){
-							if( movingState.hasThings()){
-								lastPoint = newLock.getCenter();
-								Rectangle bound = new Rectangle( TILE_SIZE);
-								bound.setLocation( lastPoint.x-(TILE_SIZE.width/2), lastPoint.y-(TILE_SIZE.height/2));
-								currentTile = addTile( new Tile( playerMarker), bound, false);
-								currentTile.setLockArea( newLock);
-								currentTile.flip();
-								revalidate();
-								moveStack = true;
-							} else {
-								currentTile = null;
+						if( moveHex){
+							
+						}else if( moveStack){
+							newLock = currentTile.getLock();
+							movingState = newLock.getHex().getState();
+							if( movingState.hasMarker()){
+								if( movingState.hasThings()){
+									lastPoint = newLock.getCenter();
+									Rectangle bound = new Rectangle( TILE_SIZE);
+									bound.setLocation( lastPoint.x-(TILE_SIZE.width/2), lastPoint.y-(TILE_SIZE.height/2));
+									currentTile = addTile( new Tile( playerMarker), bound, false);
+									currentTile.setLockArea( newLock);
+									currentTile.flip();
+									revalidate();
+									moveStack = true;
+								} else {
+									currentTile = null;
+								}
 							}
 						}
 					}

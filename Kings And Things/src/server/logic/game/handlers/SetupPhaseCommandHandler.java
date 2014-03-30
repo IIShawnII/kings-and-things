@@ -258,6 +258,7 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 				break;
 			}
 		}
+		//TODO fire new ExchangeSeasHex( /*new hex*/).postNetworkEvent( ALL_PLAYERS_ID);
 	}
 
 	@Subscribe

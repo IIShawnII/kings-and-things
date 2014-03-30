@@ -12,6 +12,7 @@ import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
 import common.event.network.CommandRejected;
 import common.event.network.DieRoll;
+import common.event.network.Flip;
 import common.event.network.HexOwnershipChanged;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
@@ -122,12 +123,13 @@ public class ConnectionLogic implements Runnable {
 					update.addInstruction( UpdateInstruction.HexOwnership);
 					update.putData( UpdateKey.HexState, ((HexOwnershipChanged)event).getChangedHex());
 				}
+				else if( event instanceof Flip){
+					update.addInstruction( UpdateInstruction.FlipAll);
+				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);
 				}
-				/*else if( event instanceof Flip){
-					new BoardUpdate(((Flip)event).flipAll(), this).postInternalEvent(BOARD|player.getID());
-				}
+				/*
 				else if( event instanceof PlayerOrderList){
 					new BoardUpdate(((PlayerOrderList)event).getList(), this).postInternalEvent(BOARD|player.getID());
 				}

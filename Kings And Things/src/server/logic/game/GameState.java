@@ -30,7 +30,7 @@ public class GameState implements Serializable
 {
 	private static final long serialVersionUID = 5359708831592253851L;
 	
-	//TDOD assign transient, to fields no needed on GUI side
+	//TODO assign transient, to fields no needed on GUI side
 	private CupManager cup;
 	private HexTileManager bank;
 	private BoardGenerator boardGenerator;

@@ -35,6 +35,7 @@ import common.Constants.RegularPhase;
 import common.event.EventDispatch;
 import common.event.network.CurrentPhase;
 import common.event.network.DieRoll;
+import common.event.network.Flip;
 import common.event.network.PlayerState;
 import common.event.network.RackPlacement;
 import common.event.network.CommandRejected;
@@ -275,11 +276,11 @@ public abstract class CommandHandler
 		{
 			case EXCHANGE_SEA_HEXES:
 			{
-				//we need to flip all board hexes face up
 				for(HexState hs : currentState.getBoard().getHexesAsList())
 				{
 					hs.getHex().flip();
 				}
+				new Flip().postNetworkEvent( ALL_PLAYERS_ID);
 				break;
 			}
 			case PLACE_FREE_TOWER:
