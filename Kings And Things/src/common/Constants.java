@@ -1,12 +1,5 @@
 package common;
 
-import static common.Constants.PLAYER_1_ID;
-import static common.Constants.PLAYER_2_ID;
-import static common.Constants.PLAYER_3_ID;
-import static common.Constants.PLAYER_4_ID;
-import static common.Constants.PUBLIC;
-import static common.Constants.STATE;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -22,7 +15,6 @@ import java.util.HashSet;
 import javax.imageio.ImageIO;
 
 import com.google.common.collect.ImmutableBiMap;
-
 import common.game.ITileProperties;
 import common.game.TileProperties;
 
