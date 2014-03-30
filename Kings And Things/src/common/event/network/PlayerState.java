@@ -1,5 +1,6 @@
 package common.event.network;
 
+import common.Constants;
 import common.event.AbstractNetwrokEvent;
 import common.game.PlayerInfo;
 
@@ -29,7 +30,7 @@ public class PlayerState extends AbstractNetwrokEvent{
 	}
 	
 	public PlayerState( String name, boolean ready){
-		this( name, -1, ready);
+		this( name, Constants.PUBLIC, ready);
 	}
 
 	public PlayerInfo getPlayer(){
