@@ -131,9 +131,9 @@ public class Roll implements Serializable{
 		return playerNumber;
 	}
 	
-	public static boolean rollSatisfiesParameters(Roll r,RollReason reasonForRoll, int playerNumber, ITileProperties tileToRollFor)
+	public static boolean rollSatisfiesParameters(Roll r,RollReason reasonForRoll, int playerNumber, ITileProperties tileToRollFor, int numRolls)
 	{
-		return r.getRollingPlayerID() == playerNumber && r.getRollReason()==reasonForRoll && (r.getRollTarget()==null? tileToRollFor==null : r.getRollTarget().equals(tileToRollFor));
+		return r.getRollingPlayerID() == playerNumber && r.getRollReason()==reasonForRoll && (r.getRollTarget()==null? tileToRollFor==null : r.getRollTarget().equals(tileToRollFor)) && (r.getDiceCount() - r.getBaseRolls().size())>=numRolls;
 	}
 
 	public int getTargetValue() {

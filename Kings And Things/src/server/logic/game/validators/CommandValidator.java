@@ -23,38 +23,36 @@ public abstract class CommandValidator
 {
 	/**
 	 * Call this to validate the roll dice command
-	 * @param reasonForRoll The reason this roll is being done
-	 * @param playerNumber The player who sent the command
-	 * @param tileToRollFor The tile being rolled for (might be creature, hex, tower etc)
+	 * @param roll The roll parameters
 	 * @param currentState The current state of the game
 	 * @throws IllegalArgumentException If the game is not currently waiting for any
 	 * rolls, and the reason for rolling is not RollReason.ENTERTAINMENT or RollReason.RECRUIT_SPECIAL_CHARACTER
 	 */
-	public static void validateCanRollDice(RollReason reasonForRoll, int playerNumber, ITileProperties tileToRollFor, GameState currentState)
+	public static void validateCanRollDice(Roll roll, GameState currentState)
 	{
 		boolean rollNeeded = false;
 		for(Roll r : currentState.getRecordedRolls())
 		{
-			if(Roll.rollSatisfiesParameters(r, reasonForRoll, playerNumber, tileToRollFor) && r.needsRoll())
+			if(Roll.rollSatisfiesParameters(r, roll.getRollReason(), roll.getRollingPlayerID(), roll.getRollTarget(), roll.getDiceCount()))
 			{
 				rollNeeded = true;
 			}
 		}
-		if(reasonForRoll == RollReason.RECRUIT_SPECIAL_CHARACTER)
+		if(roll.getRollReason() == RollReason.RECRUIT_SPECIAL_CHARACTER)
 		{
-			CommandValidator.validateIsPlayerActive(playerNumber, currentState);
+			CommandValidator.validateIsPlayerActive(roll.getRollingPlayerID(), currentState);
 			if(currentState.getCurrentRegularPhase() != RegularPhase.RECRUITING_CHARACTERS)
 			{
 				throw new IllegalArgumentException("Can only roll to recruit special characters during the recruit special characters phase.");
 			}
-			if(!tileToRollFor.isSpecialCharacter())
+			if(!roll.getRollTarget().isSpecialCharacter())
 			{
 				throw new IllegalArgumentException("Must specify a special character to roll for");
 			}
 		}
-		if(!rollNeeded && reasonForRoll != RollReason.ENTERTAINMENT && reasonForRoll != RollReason.RECRUIT_SPECIAL_CHARACTER)
+		if(!rollNeeded && roll.getRollReason() != RollReason.ENTERTAINMENT && roll.getRollReason() != RollReason.RECRUIT_SPECIAL_CHARACTER)
 		{
-			throw new IllegalArgumentException("Not currently waiting for " + reasonForRoll + " type roll from player " + playerNumber + " targeting tile: " + tileToRollFor);
+			throw new IllegalArgumentException("Not currently waiting for " + roll.getRollReason() + " type roll from player " + roll.getRollingPlayerID() + " targeting tile: " +  roll.getRollTarget());
 		}
 	}
 

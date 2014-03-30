@@ -85,18 +85,14 @@ public abstract class CommandHandler
 
 	/**
 	 * Call this to roll dice for a player
-	 * @param reasonForRoll The reason for this dice roll
-	 * @param playerNumber The player who sent the command
-	 * @param tile The target of the role, (could be hex, creature, building etc)
-	 * @param rollValue The desired outcome of the roll, this value is ignored unless
-	 * we are running in demo mode
+	 * @param roll The roll parameters
 	 * @throws IllegalArgumentException If the game is not currently waiting for any
 	 * rolls, and the reason for rolling is not RollReason.ENTERTAINMENT
 	 */
-	public void rollDice(RollReason reasonForRoll, int playerNumber, ITileProperties tile, int rollValue)
+	public void rollDice(Roll roll)
 	{
-		CommandValidator.validateCanRollDice(reasonForRoll, playerNumber, tile, currentState);
-		makeDiceRoll(reasonForRoll, playerNumber, tile, rollValue);
+		CommandValidator.validateCanRollDice(roll, currentState);
+		makeDiceRoll(roll);
 	}
 	
 	public void removeThingsFromBoard(int playerNumber, ITileProperties hex, Set<ITileProperties> thingsToRemove)
@@ -375,29 +371,32 @@ public abstract class CommandHandler
 		}
 	}
 
-	private void makeDiceRoll(RollReason reasonForRoll, int playerNumber, ITileProperties tile, int rollValue)
+	private void makeDiceRoll(Roll roll)
 	{
-		if(reasonForRoll == RollReason.ENTERTAINMENT)
+		if(roll.getRollReason() == RollReason.ENTERTAINMENT)
 		{
-			currentState.addNeededRoll(new Roll(1, null, RollReason.ENTERTAINMENT, playerNumber));
+			currentState.addNeededRoll(new Roll(1, null, RollReason.ENTERTAINMENT, roll.getRollingPlayerID()));
 		}
 		
 		Roll rollToAddTo = null;
 		for(Roll r : currentState.getRecordedRolls())
 		{
-			if(Roll.rollSatisfiesParameters(r, reasonForRoll, playerNumber, tile) && r.needsRoll())
+			if(Roll.rollSatisfiesParameters(r, roll.getRollReason(), roll.getRollingPlayerID(), roll.getRollTarget(), roll.getDiceCount()))
 			{
 				rollToAddTo = r;
 				break;
 			}
 		}
-		if(rollToAddTo == null && reasonForRoll == RollReason.RECRUIT_SPECIAL_CHARACTER)
+		if(rollToAddTo == null && roll.getRollReason() == RollReason.RECRUIT_SPECIAL_CHARACTER)
 		{
-			rollToAddTo = new Roll(2, tile, RollReason.RECRUIT_SPECIAL_CHARACTER, playerNumber);
+			rollToAddTo = new Roll(2, roll.getRollTarget(), RollReason.RECRUIT_SPECIAL_CHARACTER, roll.getRollingPlayerID());
 			currentState.addNeededRoll(rollToAddTo);
 		}
 
-		rollToAddTo.addBaseRoll(rollDie(rollValue));
+		for(int i=0; i<roll.getDiceCount(); i++)
+		{
+			rollToAddTo.addBaseRoll(rollDie(roll.getTargetValue()));
+		}
 		if(currentState.hasRollModificationFor(rollToAddTo))
 		{
 			List<RollModification> modifications = currentState.getRollModificationsFor(rollToAddTo);
@@ -408,14 +407,12 @@ public abstract class CommandHandler
 			}
 		}
 		//notifies players of die roll
-		new DieRoll(rollToAddTo).postNetworkEvent( playerNumber);
+		new DieRoll(rollToAddTo).postNetworkEvent( roll.getRollingPlayerID());
 	}
 
 	private int rollDie(int rollValue)
 	{
-		//generate a number between 10 to 69 and divide by 10
-		//previous method produced way to many ties
-		return isDemoMode? rollValue : (rand.nextInt( 60)+10)/10;
+		return isDemoMode? rollValue : rand.nextInt(6)+1;
 	}
 	
 	@Subscribe
@@ -494,7 +491,8 @@ public abstract class CommandHandler
 		{
 			try
 			{
-				rollDice(command.getReasonForRoll(), command.getID(), command.getTileToRollFor(), command.getRollValue());
+				Roll copy = new Roll(command.getRoll().getDiceCount(), command.getRoll().getRollTarget(), command.getRoll().getRollReason(), command.getID(), command.getRoll().getTargetValue());
+				rollDice(copy);
 			}
 			catch(Throwable t)
 			{

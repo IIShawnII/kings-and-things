@@ -24,7 +24,7 @@ import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
-
+import common.game.Roll;
 import static common.Constants.PUBLIC;
 
 public class CombatPanel extends JPanel
@@ -167,7 +167,7 @@ public class CombatPanel extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				new RollDiceCommand(RollReason.ATTACK_WITH_CREATURE,thing).postInternalEvent(p.getID());
+				new RollDiceCommand(new Roll(1,thing,RollReason.ATTACK_WITH_CREATURE,p.getID())).postInternalEvent(p.getID());
 			}});
 
 		panel.add(rollButton,constraints);

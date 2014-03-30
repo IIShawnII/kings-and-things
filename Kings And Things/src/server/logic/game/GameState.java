@@ -431,7 +431,7 @@ public class GameState implements Serializable
 	{
 		for(RollModification rm : rollModifications)
 		{
-			if(Roll.rollSatisfiesParameters(rm.getRollToModify(), r.getRollReason(), r.getRollingPlayerID(), r.getRollTarget()))
+			if(Roll.rollSatisfiesParameters(rm.getRollToModify(), r.getRollReason(), r.getRollingPlayerID(), r.getRollTarget(), r.getDiceCount()))
 			{
 				return true;
 			}
@@ -451,7 +451,7 @@ public class GameState implements Serializable
 		ArrayList<RollModification> modifications = new ArrayList<RollModification>();
 		for(RollModification rm : rollModifications)
 		{
-			if(Roll.rollSatisfiesParameters(rm.getRollToModify(), r.getRollReason(), r.getRollingPlayerID(), r.getRollTarget()))
+			if(Roll.rollSatisfiesParameters(rm.getRollToModify(), r.getRollReason(), r.getRollingPlayerID(), r.getRollTarget(), r.getDiceCount()))
 			{
 				modifications.add(rm);
 			}

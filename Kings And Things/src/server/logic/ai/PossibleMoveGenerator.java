@@ -30,7 +30,6 @@ import server.logic.game.handlers.MovementCommandHandler;
 import server.logic.game.handlers.RecruitSpecialCharacterCommandHandler;
 import server.logic.game.handlers.RecruitingThingsCommandHandler;
 import server.logic.game.handlers.SetupPhaseCommandHandler;
-
 import common.Constants;
 import common.Constants.BuildableBuilding;
 import common.Constants.CombatPhase;
@@ -40,6 +39,7 @@ import common.Constants.SetupPhase;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
+import common.game.Roll;
 
 public abstract class PossibleMoveGenerator
 {
@@ -127,7 +127,7 @@ public abstract class PossibleMoveGenerator
 						try
 						{
 							GameState clonedState = state.clone();
-							RollDiceCommand command = new RollDiceCommand(RollReason.ATTACK_WITH_CREATURE,tp);
+							RollDiceCommand command = new RollDiceCommand(new Roll(1, tp, RollReason.ATTACK_WITH_CREATURE, p.getID()));
 							command.setID(p.getID());
 							CombatCommandHandler handler = new CombatCommandHandler();
 							handler.receiveGameStartedEvent(new GameStarted(isDemoMode,clonedState));
@@ -147,7 +147,7 @@ public abstract class PossibleMoveGenerator
 						try
 						{
 							GameState clonedState = state.clone();
-							RollDiceCommand command = new RollDiceCommand(RollReason.CALCULATE_DAMAGE_TO_TILE,tp);
+							RollDiceCommand command = new RollDiceCommand(new Roll(1,tp,RollReason.CALCULATE_DAMAGE_TO_TILE,p.getID()));
 							command.setID(p.getID());
 							CombatCommandHandler handler = new CombatCommandHandler();
 							handler.receiveGameStartedEvent(new GameStarted(isDemoMode,clonedState));
@@ -165,7 +165,7 @@ public abstract class PossibleMoveGenerator
 					try
 					{
 						GameState clonedState = state.clone();
-						RollDiceCommand command = new RollDiceCommand(RollReason.EXPLORE_HEX,state.getCombatHex().getHex());
+						RollDiceCommand command = new RollDiceCommand(new Roll(1,state.getCombatHex().getHex(),RollReason.EXPLORE_HEX,p.getID()));
 						command.setID(p.getID());
 						CombatCommandHandler handler = new CombatCommandHandler();
 						handler.receiveGameStartedEvent(new GameStarted(isDemoMode,clonedState));
@@ -208,7 +208,7 @@ public abstract class PossibleMoveGenerator
 			try
 			{
 				GameState clonedState = state.clone();
-				RollDiceCommand command = new RollDiceCommand(RollReason.DETERMINE_PLAYER_ORDER,null);
+				RollDiceCommand command = new RollDiceCommand(new Roll(1,null,RollReason.DETERMINE_PLAYER_ORDER,p.getID()));
 				command.setID(p.getID());
 				CombatCommandHandler handler = new CombatCommandHandler();
 				handler.receiveGameStartedEvent(new GameStarted(isDemoMode,clonedState));
@@ -392,7 +392,7 @@ public abstract class PossibleMoveGenerator
 					}
 					try
 					{
-						RollDiceCommand command = new RollDiceCommand(RollReason.RECRUIT_SPECIAL_CHARACTER, hero);
+						RollDiceCommand command = new RollDiceCommand(new Roll(2,hero,RollReason.RECRUIT_SPECIAL_CHARACTER, p.getID()));
 						command.setID(p.getID());
 						GameState clonedState = state.clone();
 						SetupPhaseCommandHandler handler = new SetupPhaseCommandHandler();
