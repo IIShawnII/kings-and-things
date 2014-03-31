@@ -43,8 +43,6 @@ import common.event.network.HexOwnershipChanged;
 
 public abstract class CommandHandler
 {
-	private static final Random rand = new Random(); 
-	
 	//sub classes can not and should not change these fields,
 	//they are to be set only after handling a start game command
 	private GameState currentState;
@@ -394,10 +392,8 @@ public abstract class CommandHandler
 			currentState.addNeededRoll(rollToAddTo);
 		}
 
-		for(int i=0; i<roll.getDiceCount(); i++)
-		{
-			rollToAddTo.addBaseRoll(rollDie(roll.getTargetValue()));
-		}
+		int total = rollDie(roll.getTargetValue(), roll.getDiceCount(), roll.getDiceCount()*6);
+		rollToAddTo.addBaseRolls( Constants.convertToDice( total, roll.getDiceCount()));
 		if(currentState.hasRollModificationFor(rollToAddTo))
 		{
 			List<RollModification> modifications = currentState.getRollModificationsFor(rollToAddTo);
@@ -410,10 +406,10 @@ public abstract class CommandHandler
 		//notifies players of die roll
 		new DieRoll(rollToAddTo).postNetworkEvent( roll.getRollingPlayerID());
 	}
-
-	private int rollDie(int rollValue)
+	
+	private int rollDie( int rollValue, int min, int max)
 	{
-		return isDemoMode? rollValue : rand.nextInt(6)+1;
+		return isDemoMode? rollValue : Constants.random( min, max);
 	}
 	
 	@Subscribe

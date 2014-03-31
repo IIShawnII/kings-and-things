@@ -11,10 +11,13 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
 import com.google.common.collect.ImmutableBiMap;
+
 import common.game.ITileProperties;
 import common.game.TileProperties;
 
@@ -32,7 +35,7 @@ public final class Constants {
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
 	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP, Player, Hex, Phase, HexState, Roll, Tile}
 	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END, Creature, Event, Magic, Treasure, Buildable}
-	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll}
+	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged}
 	public enum RandomEvent {Big_Juju, Dark_Plague, Defection, Good_Harvest, Mother_Lode, Teenie_Pox, Terrain_Disaster, Vandalism, Weather_Control, Willing_Workers}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea, Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
 	
@@ -46,6 +49,7 @@ public final class Constants {
 	public enum CombatPhase {DETERMINE_DEFENDERS, SELECT_TARGET_PLAYER, MAGIC_ATTACK, APPLY_MAGIC_HITS, RANGED_ATTACK, APPLY_RANGED_HITS, MELEE_ATTACK, APPLY_MELEE_HITS, ATTACKER_ONE_RETREAT, ATTACKER_TWO_RETREAT, ATTACKER_THREE_RETREAT, DEFENDER_RETREAT, DETERMINE_DAMAGE, PLACE_THINGS, NO_COMBAT}
 	
 	//Resources
+	public static final Image IMAGE_SKIP;
 	public static final Image IMAGE_DICE[];
 	public static final Image IMAGE_GREEN;
 	public static final Image IMAGE_BACKGROUND;
@@ -92,6 +96,7 @@ public final class Constants {
 	public static final int MAX_ROLLS = 10;
 	public static final int MAX_HEXES = 48;
 	public static final int MAX_PLAYERS = 4;
+	public static final int MAX_DICE_FACE = 6;
 	public static final int MAX_RACK_SIZE = 10;
 	public static final int MAX_MOVE_SPEED = 4;
 	public static final int MAX_HEXES_ON_BOARD = 37;
@@ -99,6 +104,7 @@ public final class Constants {
 	
 	//Minimums
 	public static final int MIN_PLAYERS = 2;
+	public static final int MIN_DICE_FACE = 1;
 	public static final int MIN_HEXES_ON_BOARD = 19;
 	public static final Dimension MIN_CLIENT_SIZE = new Dimension( 1300,720);
 	
@@ -136,6 +142,7 @@ public final class Constants {
 	public static final Dimension BOARD_SIZE = new Dimension( HEX_BOARD_SIZE.width + BOARD_RIGHT_PADDING + PLAYERS_STATE_SIZE, HEX_BOARD_SIZE.height + BOARD_BOTTOM_PADDING);
 	
 	//Defaults
+	public static final Random rand = new Random();
 	public static final int ANIMATION_DELAY = 5;
 	public static final int INFINITE_TILE = -1;
 	public static final int SERVER_TIMEOUT = 5;
@@ -175,6 +182,7 @@ public final class Constants {
 		IMAGE_HEX_REVERSE = loadImage( "Resources\\Misc\\-n Hex_Reverse.png");
 		IMAGE_TILE_REVERSE = loadImage( "Resources\\Misc\\-n Tile_Reverse.png");
 		IMAGE_GREEN = loadImage( "Resources\\Misc\\-n Green_Surface.png");
+		IMAGE_SKIP = loadImage( "Resources\\Misc\\-n Skip.png");
 		IMAGE_DICE = new Image[7];
 		IMAGE_DICE[0] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 0.png");
 		IMAGE_DICE[1] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 1.png");
@@ -243,5 +251,38 @@ public final class Constants {
 			default:
 				throw new IllegalArgumentException("ERROR - invalid ID for marker");
 		}
+	}
+
+	public static List< Integer> convertToDice( int total, final int count){
+		if( count<=0 || total<=0){
+			throw new IllegalArgumentException( "ERROR - arguments must be positive and none-zero");
+		}
+		if( total < MIN_DICE_FACE*count || total > MAX_DICE_FACE*count){
+			throw new IllegalArgumentException( "Error - when count is " + count + ", total(" + total + ") must be between " + MIN_DICE_FACE*count + " and " + MAX_DICE_FACE*count);
+		}
+		TotalDiceTree tree = new TotalDiceTree();
+		tree.generate( total, count, MIN_DICE_FACE, MAX_DICE_FACE);
+		return tree.getRandomCombination();
+	}
+	
+	public static int roll(){
+		return random( MIN_DICE_FACE, MAX_DICE_FACE);
+	}
+	
+	/**
+	 * Generate a random integer between min(inclusive) and max(inclusive)
+	 * @param min - smallest possible number (inclusive)
+	 * @param max - largest possible number (inclusive)
+	 */
+	public static int random( int min, int max){
+		return rand.nextInt((max+1)-min)+min;
+	}
+	
+	/**
+	 * Generate a random integer between 0(inclusive) and max(inclusive)
+	 * @param max - largest possible number (inclusive)
+	 */
+	public static int random( int max){
+		return rand.nextInt((max+1));
 	}
 }

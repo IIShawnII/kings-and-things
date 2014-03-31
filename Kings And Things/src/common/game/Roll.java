@@ -68,11 +68,10 @@ public class Roll implements Serializable{
 		return Collections.unmodifiableList(baseRolls);
 	}
 	
-	public void addBaseRoll(int roll)
-	{
+	public void addBaseRolls( List< Integer> list){
 		if(needsRoll())
 		{
-			baseRolls.add(roll);
+			baseRolls.addAll( list);
 		}
 		else
 		{

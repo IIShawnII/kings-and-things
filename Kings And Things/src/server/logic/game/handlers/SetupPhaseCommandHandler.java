@@ -256,6 +256,7 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 			if(hs.getHex().equals(hex))
 			{
 				hs.setHex(replacement);
+				hs.setMarker( Constants.getPlayerMarker( playerNumber));
 				ExchangedSeaHex msg = new ExchangedSeaHex(hs);
 				msg.postNetworkEvent(ALL_PLAYERS_ID);
 				break;

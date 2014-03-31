@@ -22,6 +22,7 @@ public class DiceRoller extends JPanel implements Parent{
 	private Die[] dice;
 	private SizeChangeAnimation change;
 	private int dieCount, rollingCount, results[];
+	private boolean shrink = false;
 
 	public DiceRoller() {
 		super( true);
@@ -59,7 +60,11 @@ public class DiceRoller extends JPanel implements Parent{
 	}
 	
 	public void shrink(){
-		change.shrinkToOriginal();
+		if( !isRolling()){
+			change.shrinkToOriginal();
+		}else{
+			shrink = true;
+		}
 	}
 	
 	public void roll(){
@@ -80,6 +85,9 @@ public class DiceRoller extends JPanel implements Parent{
 	@Override
 	public void doneRolling() {
 		rollingCount--;
+		if( !isRolling() && shrink){
+			shrink();
+		}
 	}
 	
 	@Override

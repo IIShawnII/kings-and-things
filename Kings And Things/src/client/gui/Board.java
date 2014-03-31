@@ -1,5 +1,7 @@
 package client.gui;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.Timer;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -44,6 +46,7 @@ import static common.Constants.BOARD;
 import static common.Constants.HEX_SIZE;
 import static common.Constants.DICE_SIZE;
 import static common.Constants.TILE_SIZE;
+import static common.Constants.IMAGE_SKIP;
 import static common.Constants.DRAW_LOCKS;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.HEX_OUTLINE;
@@ -131,11 +134,12 @@ public class Board extends JPanel{
 	private DiceRoller dice;
 	private LockManager locks;
 	private JTextField jtfStatus;
-	private MouseInput mouseInput;
+	private Input input;
 	private ITileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
 	private Font font = new Font("default", Font.BOLD, 30);
 	private RollReason lastRollReason;
+	private JButton jbSkip;
 	
 	/**
 	 * basic super constructor warper for JPanel
@@ -147,6 +151,7 @@ public class Board extends JPanel{
 
 	public void setActive( boolean active) {
 		this.isActive = active;
+		input.ignoreAll( !active);
 	}
 	
 	/**
@@ -154,15 +159,15 @@ public class Board extends JPanel{
 	 * @param playerCount - number of players to be playing on this board
 	 */
 	public void init( int playerCount){
-		mouseInput = new MouseInput();
-		addMouseListener( mouseInput);
-		addMouseWheelListener( mouseInput);
-		addMouseMotionListener( mouseInput);
+		input = new Input();
+		addMouseListener( input);
+		addMouseWheelListener( input);
+		addMouseMotionListener( input);
 		
 		dice = new DiceRoller();
 		dice.setBounds( HEX_BOARD_SIZE.width+DICE_SIZE/2, getHeight()-DICE_SIZE-10, DICE_SIZE, DICE_SIZE);
 		dice.init();
-		dice.addMouseListener( mouseInput);
+		dice.addMouseListener( input);
 		add( dice);
 		
 		locks = new LockManager( playerCount);
@@ -173,6 +178,15 @@ public class Board extends JPanel{
 		jtfStatus.setBorder( null);
 		jtfStatus.setFont( font);
 		add(jtfStatus);
+		
+		jbSkip = new JButton( new ImageIcon( IMAGE_SKIP));
+		jbSkip.setContentAreaFilled(false);
+		jbSkip.setBorderPainted(false);
+		jbSkip.setOpaque( false);
+		jbSkip.addActionListener( input);
+		jbSkip.setToolTipText( "Skip this phase");
+		jbSkip.setBounds( HEX_BOARD_SIZE.width-DICE_SIZE, getHeight()-DICE_SIZE-10, DICE_SIZE, DICE_SIZE);
+		add(jbSkip);
 		/*Rectangle bound = new Rectangle( INITIAL_TILE_X_SHIFT, TILE_Y_SHIFT, TILE_SIZE.width, TILE_SIZE.height);
 		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Buildable)), bound, true);
@@ -397,6 +411,7 @@ public class Board extends JPanel{
 	 * @param update - event wrapper containing update information
 	 */
 	public void updateBoard( UpdatePackage update){
+		HexState hex = null;
 		for( UpdateInstruction instruction : update.getInstructions()){
 			switch( instruction){
 				case UpdatePlayers:
@@ -422,11 +437,15 @@ public class Board extends JPanel{
 					dice.setResult( roll.getBaseRolls());
 					break;
 				case HexOwnership:
-					HexState hex = (HexState)update.getData( UpdateKey.HexState);
+					hex = (HexState)update.getData( UpdateKey.HexState);
 					locks.getLockForHex( hex.getLocation()).getHex().setState( hex);
 					break;
 				case FlipAll:
 					FlipAllHexes();
+					break;
+				case SeaHexChanged:
+					hex = (HexState)update.getData( UpdateKey.HexState);
+					locks.getLockForHex( hex.getLocation()).getHex().setState( hex);
 					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
@@ -472,25 +491,29 @@ public class Board extends JPanel{
 	private void manageSetupPhase( SetupPhase phase){
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
+				input.setRollDice(true);
 				//TODO add support for custom roll
 				prepareForRollDice(2, RollReason.DETERMINE_PLAYER_ORDER, "Roll dice to determine order", 2);
 				break;
 			case EXCHANGE_SEA_HEXES:
+				input.setMoveHex( true);
 				jtfStatus.setText( "Exchange sea hexes, if any");
 				break;
 			case EXCHANGE_THINGS:
-				mouseInput.moveHex = true;
 				jtfStatus.setText( "Exchange things, if any");
 				break;
 			case PICK_FIRST_HEX:
+				input.setMoveBank( true);
 				placeMarkers();
-				jtfStatus.setText( "Pick your first Hex"); mouseInput.ignore = false;
+				jtfStatus.setText( "Pick your first Hex");
 				break;
 			case PICK_SECOND_HEX:
-				jtfStatus.setText( "Pick your second Hex"); mouseInput.ignore = false;
+				input.setMoveBank( true);
+				jtfStatus.setText( "Pick your second Hex");
 				break;
 			case PICK_THIRD_HEX:
-				jtfStatus.setText( "Pick your third Hex"); mouseInput.ignore = false;
+				input.setMoveBank( true);
+				jtfStatus.setText( "Pick your third Hex");
 				break;
 			case PLACE_EXCHANGED_THINGS:
 				jtfStatus.setText( "Place exchanged things on board, if any");
@@ -527,16 +550,46 @@ public class Board extends JPanel{
 	/**
 	 * input class for mouse, used for like assignment and current testing phases suck as placement
 	 */
-	private class MouseInput extends MouseAdapter{
+	private class Input extends MouseAdapter implements ActionListener{
 
 		private Rectangle bound, boardBound;
 		private Lock newLock;
 		private Tile currentTile;
 		private Point lastPoint;
 		private HexState movingState;
-		private boolean ignore = false;
+		private boolean ignore = true;
 		private boolean moveHex = false;
 		private boolean moveStack = false;
+		private boolean moveBank = false;
+		private boolean rollDice = false;
+		
+		public void ignoreAll( boolean ignore){
+			this.ignore = ignore;
+		}
+		
+		public void setControls( boolean stack, boolean hex, boolean bank, boolean roll){
+			ignore = false;
+			moveHex = hex;
+			moveStack = stack;
+			moveBank = bank;
+			rollDice = roll;
+		}
+		
+		public void setMoveStack( boolean stack){
+			setControls( stack, false, false, false);
+		}
+		
+		public void setMoveHex( boolean hex){
+			setControls( false, hex, false, false);
+		}
+		
+		public void setMoveBank( boolean bank){
+			setControls( false, false, bank, false);
+		}
+		
+		public void setRollDice( boolean roll){
+			setControls( false, false, false, roll);
+		}
 		
 		/**
 		 * checks to see if movement is still inside the board,
@@ -548,7 +601,7 @@ public class Board extends JPanel{
 			if( ignore){
 				return;
 			}
-			if( phaseDone && (moveStack || moveHex) && currentTile!=null){
+			if( phaseDone && (moveStack || moveHex || moveBank) && currentTile!=null){
 				boardBound = getBounds();
 				bound = currentTile.getBounds();
 				lastPoint = bound.getLocation();
@@ -589,7 +642,6 @@ public class Board extends JPanel{
 					new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
 				}
 			}
-			moveStack = false;
 			currentTile = null; 
 			lastPoint = null;
 			newLock = null;
@@ -648,7 +700,10 @@ public class Board extends JPanel{
 
 		@Override
 		public void mouseClicked( MouseEvent e){
-			if( ignore){
+			if( ignore ){
+				return;
+			}
+			if( !rollDice){
 				return;
 			}
 			if( SwingUtilities.isLeftMouseButton(e)){
@@ -677,6 +732,11 @@ public class Board extends JPanel{
 			}else if( SwingUtilities.isMiddleMouseButton( e)){
 				//TODO mouse middle click support
 			}
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent e) {
+			// TODO Auto-generated method stub
 		}
 	}
 	

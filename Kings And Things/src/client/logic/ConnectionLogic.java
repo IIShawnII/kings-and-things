@@ -12,6 +12,7 @@ import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
 import common.event.network.CommandRejected;
 import common.event.network.DieRoll;
+import common.event.network.ExchangedSeaHex;
 import common.event.network.Flip;
 import common.event.network.HexOwnershipChanged;
 import common.event.network.StartGame;
@@ -55,7 +56,7 @@ public class ConnectionLogic implements Runnable {
 			while( !finished && (event = connection.recieve())!=null){
 				update.clear();
 				ID = player==null ? PUBLIC: player.getID()|BOARD;
-				Logger.getStandardLogger().info( "Logic.Process.Receive "+(player!=null?player.getID()+" ":"") + event);
+				Logger.getStandardLogger().info( "Received "+(player!=null?player.getID():"-1") + ": " + event);
 				if( event instanceof PlayersList){
 					PlayerInfo[] players = ((PlayersList)event).getPlayers();
 					updateCurrentPlayer( players);
@@ -125,6 +126,10 @@ public class ConnectionLogic implements Runnable {
 				}
 				else if( event instanceof Flip){
 					update.addInstruction( UpdateInstruction.FlipAll);
+				}
+				else if( event instanceof ExchangedSeaHex){
+					update.addInstruction( UpdateInstruction.SeaHexChanged);
+					update.putData( UpdateKey.HexState, ((ExchangedSeaHex)event).getSate());
 				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);
@@ -290,7 +295,7 @@ public class ConnectionLogic implements Runnable {
 	}
 
 	public void sendToServer( UpdatePackage event){
-		Logger.getStandardLogger().info( "Sent: " + event);
+		Logger.getStandardLogger().info( "Sent" + (player!=null?player.getID():"-1") + ": " + event);
 		try {
 			connection.send( event);
 		} catch ( IOException e) {

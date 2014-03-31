@@ -1,9 +1,9 @@
 package client.gui.die;
 
-import java.util.Random;
-
 import javax.swing.Timer;
 import javax.swing.JPanel;
+
+import common.Constants;
 
 import java.awt.Graphics;
 import java.awt.Dimension;
@@ -17,7 +17,6 @@ import static common.Constants.MAX_ROLLS;
 @SuppressWarnings("serial")
 public class Die extends JPanel implements ActionListener{
 	
-	private static final Random rand = new Random();
 	//clockwise dice, possible faces for 1 and 6, 2 and 5 and finally 3 and 4
 	private static final int[][] FACES ={{2,3,4,5},{1,3,4,6},{1,2,5,6}}; 
 
@@ -62,7 +61,7 @@ public class Die extends JPanel implements ActionListener{
 			default:
 				throw new IllegalStateException( "ERROR - fave Value can only be 1-6, received: " + faceValue);
 		}
-		faceValue = FACES[index][rand.nextInt(4)];
+		faceValue = FACES[index][Constants.random( 3)];
 	}
 
 	@Override

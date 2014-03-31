@@ -64,6 +64,7 @@ public class MultiBoardManager {
 					currentBoard.setActive( false);
 				}
 				setNewBoard( ID, board);
+				break;
 			}
 		}
 	}

@@ -88,7 +88,7 @@ public class PlayerConnection implements Runnable{
 		UpdatePackage event = null;
 		try {
 			while ((event = (UpdatePackage)connection.recieve())!=null){
-				Logger.getStandardLogger().info( "(" + player + ")Received: " +event);
+				Logger.getStandardLogger().info( "Received "+(player!=null?player.getID():"-1") + ": " + event);
 				switch( event.peekFirstInstruction()){
 					case State: 
 						player.setIsPlaying( ((PlayerInfo)event.getData( UpdateKey.Player)).isReady());
@@ -126,7 +126,7 @@ public class PlayerConnection implements Runnable{
 		} catch ( IOException e) {
 			Logger.getErrorLogger().warn( "Error - ", e);
 		}
-		Logger.getStandardLogger().info( "(" + player + ")Sent: " +event);
+		Logger.getStandardLogger().info( "Sent" + (player!=null?player.getID():"-1") + ": " + event);
 	}
 
 	public PlayerInfo getPlayerInfo() {
