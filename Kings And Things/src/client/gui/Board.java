@@ -720,7 +720,7 @@ public class Board extends JPanel{
 									} catch ( InterruptedException e) {}
 								}
 								jtfStatus.setText( "Done Rolling: " + dice.getResults());
-								new UpdatePackage( UpdateInstruction.DoneRolling, "Board.DoneRoll").postNetworkEvent( currentPlayer.getID());
+								new UpdatePackage( UpdateInstruction.DoneRolling, "Board.Input").postNetworkEvent( currentPlayer.getID());
 							}
 						}, "Dice Wait").start();
 					}else{
@@ -736,7 +736,7 @@ public class Board extends JPanel{
 
 		@Override
 		public void actionPerformed( ActionEvent e) {
-			// TODO Auto-generated method stub
+			new UpdatePackage( UpdateInstruction.Skip, "Board.Input").postNetworkEvent( currentPlayer.getID());
 		}
 	}
 	

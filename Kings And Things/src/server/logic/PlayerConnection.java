@@ -3,6 +3,7 @@ package server.logic;
 import java.io.IOException;
 
 import server.event.PlayerUpdated;
+import server.event.internal.EndPlayerTurnCommand;
 import server.event.internal.GiveHexToPlayerCommand;
 import server.event.internal.DoneRollingCommand;
 import server.event.internal.RollDiceCommand;
@@ -102,6 +103,9 @@ public class PlayerConnection implements Runnable{
 						break;
 					case DoneRolling:
 						new DoneRollingCommand().postInternalEvent( ID);
+						break;
+					case Skip:
+						new EndPlayerTurnCommand().postInternalEvent( ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
