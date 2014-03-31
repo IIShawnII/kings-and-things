@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import server.logic.exceptions.NoMoreTilesException;
+
 import common.Constants;
 import common.Constants.Biome;
 import common.game.ITileProperties;
+import common.game.TileProperties;
 
 /**
  * this class encapsulates the logic of drawing hex tiles from the bank, and placing
@@ -14,6 +16,8 @@ import common.game.ITileProperties;
  */
 public class HexTileManager extends AbstractTileManager
 {
+	private static final long serialVersionUID = 5634681328075320700L;
+	
 	private final boolean isDemoMode;
 	private int numDraws;
 	
@@ -61,57 +65,57 @@ public class HexTileManager extends AbstractTileManager
 				//In demo mode we stack the deck to match the test script
 				switch(numDraws)
 				{
-					case 0:
-					case 8:
-					case 10:
-					case 27:
-					case 35:
+					case 3:
+					case 18:
+					case 23:
+					case 25:
+					case 29:
 						numDraws++;
 						return drawHexTileByType(Biome.Frozen_Waste);
-					case 1:
 					case 5:
-					case 14:
-					case 24:
-					case 26:
-					case 34:
+					case 10:
+					case 12:
+					case 31:
+					case 35:
 						numDraws++;
 						return drawHexTileByType(Biome.Forest);
-					case 2:
-					case 18:
-					case 21:
-					case 28:
-					case 32:
-						numDraws++;
-						return drawHexTileByType(Biome.Jungle);
-					case 3:
-					case 7:
-					case 16:
-					case 25:
-					case 31:
-						numDraws++;
-						return drawHexTileByType(Biome.Plains);
-					case 4:
-						numDraws++;
-						return drawHexTileByType(Biome.Sea);
-					case 6:
-					case 11:
 					case 13:
-					case 19:
 					case 22:
 						numDraws++;
-						return drawHexTileByType(Biome.Swamp);
-					case 9:
-					case 17:
+						return drawHexTileByType(Biome.Jungle);
+					case 2:
+					case 15:
 					case 20:
-					case 29:
+					case 24:
+					case 36:
+						numDraws++;
+						return drawHexTileByType(Biome.Plains);
+					case 1:
+					case 16:
+					case 21:
 					case 33:
 						numDraws++;
-						return drawHexTileByType(Biome.Mountain);
-					case 12:
-					case 15:
-					case 23:
+						return drawHexTileByType(Biome.Sea);
+					case 0:
+					case 8:
+					case 19:
+					case 26:
+					case 32:
+					case 34:
+						numDraws++;
+						return drawHexTileByType(Biome.Swamp);
+					case 6:
+					case 9:
+					case 14:
+					case 17:
 					case 30:
-					case 36:
+						numDraws++;
+						return drawHexTileByType(Biome.Mountain);
+					case 4:
+					case 7:
+					case 11:
+					case 27:
+					case 28:
 						numDraws++;
 						return drawHexTileByType(Biome.Desert);
 					default:
@@ -137,7 +141,14 @@ public class HexTileManager extends AbstractTileManager
 				ITileProperties hex = it.next();
 				if(hex.getName().equals(hexType.name()))
 				{
-					it.remove();
+					if(isDemoMode)
+					{
+						hex = new TileProperties((TileProperties)hex,hex.getNumber());
+					}
+					else
+					{
+						it.remove();
+					}
 					return hex;
 				}
 			}

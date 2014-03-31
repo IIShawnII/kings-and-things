@@ -1,10 +1,10 @@
 package server.logic.game;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import server.logic.exceptions.NoMoreTilesException;
-
 import common.game.ITileProperties;
 
 
@@ -12,8 +12,10 @@ import common.game.ITileProperties;
  * this class encapsulates the logic of drawing tiles from somewhere, and placing
  * previously drawn ones back.
  */
-public abstract class AbstractTileManager
+public abstract class AbstractTileManager implements Serializable
 {
+	private static final long serialVersionUID = 2365752916758745643L;
+	
 	protected final ArrayList<ITileProperties> tiles;
 	private final String tileType;
 

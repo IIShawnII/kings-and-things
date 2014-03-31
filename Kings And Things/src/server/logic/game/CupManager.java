@@ -14,6 +14,8 @@ import common.game.ITileProperties;
  */
 public class CupManager extends AbstractTileManager
 {
+	private static final long serialVersionUID = 1998393393444664606L;
+	
 	private final boolean isDemoMode;
 	private int numDraws;
 

@@ -1,6 +1,7 @@
 package server.logic.game;
 
 import java.awt.Point;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,8 +20,10 @@ import common.game.Player;
 /**
  * This class provides a convenient mechanism for representing the hex board inside out code.
  */
-public class HexBoard
+public class HexBoard implements Serializable
 {
+	private static final long serialVersionUID = 7884592388959316453L;
+	
 	private final ImmutableBiMap<Point,HexState> board;
 	private final List<HexState> boardList;
 	

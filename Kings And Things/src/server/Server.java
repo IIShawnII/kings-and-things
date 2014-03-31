@@ -24,6 +24,10 @@ public class Server {
 		}
 		
 		boolean isDemoMode = false;
+		boolean generateStateFile = false;
+		boolean loadStateFile = false;
+		String stateFileName = null;
+		
 		String serverGUITitle = "Kings And Things Server";
 		if( args!=null){
 			for(int i=0; i<args.length; i++){
@@ -33,6 +37,14 @@ public class Server {
 						break;
 					case "-demo":
 						isDemoMode = true;
+						break;
+					case "-gsf":
+						generateStateFile = true;
+						stateFileName = args[++i];
+						break;
+					case "-lsf":
+						loadStateFile = true;
+						stateFileName = args[++i];
 						break;
 					default:
 						break;
@@ -51,7 +63,7 @@ public class Server {
 		}
 
 		try {
-			ConnectionLobby lobby = new ConnectionLobby(isDemoMode);
+			ConnectionLobby lobby = new ConnectionLobby(isDemoMode, loadStateFile, generateStateFile, stateFileName);
 			EventDispatch.registerOnInternalEvents(lobby);
 			new Thread( lobby, "GAME LOGIC").start();
 		} catch ( Exception e) {

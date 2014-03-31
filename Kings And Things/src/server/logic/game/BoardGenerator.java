@@ -1,10 +1,10 @@
 package server.logic.game;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 
 import server.logic.exceptions.NoMoreTilesException;
-
 import common.Constants;
 import common.Constants.Biome;
 import common.game.ITileProperties;
@@ -14,8 +14,10 @@ import common.game.ITileProperties;
  * certain hexes before generating the board, also contains methods for putting
  * hexes back.
  */
-public class BoardGenerator
+public class BoardGenerator implements Serializable
 {
+	private static final long serialVersionUID = 3289384481395756865L;
+	
 	private final int numPlayers;
 	private final HexTileManager hexManager;
 	private final HashSet<ITileProperties> temporarilyRemovedHexes;

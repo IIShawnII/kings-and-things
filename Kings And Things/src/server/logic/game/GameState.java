@@ -1,5 +1,7 @@
 package server.logic.game;
 
+import static common.Constants.ALL_PLAYERS_ID;
+
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,6 +19,15 @@ import common.Constants.Building;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
+import common.event.network.CurrentPhase;
+import common.event.network.Flip;
+import common.event.network.HexOwnershipChanged;
+import common.event.network.HexPlacement;
+import common.event.network.HexStatesChanged;
+import common.event.network.PlayerOrderList;
+import common.event.network.PlayerState;
+import common.event.network.PlayersList;
+import common.event.network.RackPlacement;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -30,7 +41,6 @@ public class GameState implements Serializable
 {
 	private static final long serialVersionUID = 5359708831592253851L;
 	
-	//TODO assign transient, to fields no needed on GUI side
 	private CupManager cup;
 	private HexTileManager bank;
 	private BoardGenerator boardGenerator;
@@ -45,7 +55,7 @@ public class GameState implements Serializable
 	private int defenderPlayerNumber;
 	private Point combatLocation;
 	private final ArrayList<Roll> rolls;
-	private final HashSet<Integer> confirmedRolls;
+	private final transient HashSet<Integer> confirmedRolls;
 	private final ArrayList<RollModification> rollModifications;
 	private final HashMap<Integer,Integer> hitsToApply;
 	private final HashSet<HexState> hexesContainingBuiltObjects;
@@ -884,5 +894,51 @@ public class GameState implements Serializable
 		}
 		return true;
 	}
-	
+
+	public void notifyClientsOfState()
+	{
+		HexPlacement hp = new HexPlacement(board.getHexesAsList().size());
+		board.fillArray(hp.getArray());
+		hp.postNetworkEvent(ALL_PLAYERS_ID);
+		
+		new PlayerOrderList(playerOrder).postNetworkEvent(ALL_PLAYERS_ID);
+		new PlayersList(players).postNetworkEvent(ALL_PLAYERS_ID);
+		
+		if(currentSetupPhase.ordinal() > SetupPhase.PICK_FIRST_HEX.ordinal())
+		{
+			new Flip().postNetworkEvent(ALL_PLAYERS_ID);
+		}
+		
+		HexStatesChanged hsc = new HexStatesChanged(board.getHexesAsList().size());
+		board.fillArray(hsc.getArray());
+		hsc.postNetworkEvent(ALL_PLAYERS_ID);
+		
+		for(Player p : players)
+		{
+			new PlayerState(p.getPlayerInfo()).postNetworkEvent(ALL_PLAYERS_ID);
+			
+			for(ITileProperties hex : p.getOwnedHexes())
+			{
+				new HexOwnershipChanged(board.getHexStateForHex(hex)).postNetworkEvent(ALL_PLAYERS_ID);
+			}
+			RackPlacement rp = new RackPlacement(p.getTrayThings().size());
+			ITileProperties[] arry = rp.getArray();
+			int index = 0;
+			for(ITileProperties thing : p.getTrayThings())
+			{
+				arry[index++] = thing;
+			}
+			
+			rp.postNetworkEvent(ALL_PLAYERS_ID);
+		}
+		
+		if(currentSetupPhase == SetupPhase.SETUP_FINISHED)
+		{
+			new CurrentPhase<RegularPhase>( getPlayerInfoArray(), currentRegularPhase).postNetworkEvent( ALL_PLAYERS_ID);
+		}
+		else
+		{
+			new CurrentPhase<SetupPhase>( getPlayerInfoArray(), currentSetupPhase).postNetworkEvent( ALL_PLAYERS_ID);
+		}
+	}
 }

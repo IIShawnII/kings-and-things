@@ -182,7 +182,7 @@ public abstract class CommandHandler
 		currentState.setCurrentCombatPhase(CombatPhase.NO_COMBAT);
 		currentState.setCombatLocation(null);
 		currentState.recordRollForSpecialCharacter(null);
-		currentState.setDefendingPlayerNumber(-1);
+		currentState.setDefendingPlayerNumber(Constants.PUBLIC);
 		currentState.clearAllPlayerTargets();
 		
 		if( nextSetupPhase != SetupPhase.SETUP_FINISHED){

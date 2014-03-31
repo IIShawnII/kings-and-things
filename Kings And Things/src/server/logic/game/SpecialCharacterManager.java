@@ -15,6 +15,8 @@ import common.game.TwoSidedTileProperties;
 
 public class SpecialCharacterManager extends AbstractTileManager
 {
+	private static final long serialVersionUID = 6776586348635078426L;
+
 	public SpecialCharacterManager(boolean demoMode)
 	{
 		super(getSpecialCharacterSetFromCollection(Constants.SPECIAL.values(), demoMode), "special character");

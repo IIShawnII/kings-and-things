@@ -1,9 +1,13 @@
 package server.logic.game;
 
+import java.io.Serializable;
+
 import common.game.Roll;
 
-public class RollModification
+public class RollModification implements Serializable
 {
+	private static final long serialVersionUID = 1082522370317784392L;
+	
 	private final Roll rollToModify;
 	private final int amountToAdd;
 	private final int rollIndexToModify;
