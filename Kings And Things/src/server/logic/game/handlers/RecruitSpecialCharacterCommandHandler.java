@@ -35,12 +35,8 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 		{
 			newRoll.addRollModificationFor(0, modificationAmount);
 			
-			int totalRoll = 0;
+			int totalRoll = newRoll.getFinalTotal();
 			
-			for(int roll : newRoll.getFinalRolls())
-			{
-				totalRoll += roll;
-			}
 			if(totalRoll >= (2*newRoll.getRollTarget().getValue()))
 			{
 				getCurrentState().getPlayerByPlayerNumber(playerNumber).addCardToHand(newRoll.getRollTarget());

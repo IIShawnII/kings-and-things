@@ -1,11 +1,11 @@
 package server.logic.ai;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 
 import server.logic.game.GameState;
-
 import common.game.Player;
 
 public class MonteCarloTreeSearch extends Thread
@@ -13,12 +13,15 @@ public class MonteCarloTreeSearch extends Thread
 	private Node root;
 	private volatile Node latestPosition;
 	private final boolean isDemoMode;
+	private final HashSet<Node> seen;
 	
 	public MonteCarloTreeSearch(boolean demoMode, GameState game)
 	{
 		root = new Node(game,null);
 		latestPosition = root;
 		isDemoMode = demoMode;
+		seen = new HashSet<Node>();
+		seen.add(root);
 	}
 	
 	@Override

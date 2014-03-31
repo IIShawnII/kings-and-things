@@ -2,44 +2,42 @@ package server.logic.game.handlers;
 
 import static common.Constants.ALL_PLAYERS_ID;
 
-import java.util.Random;
-import java.util.Set;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import server.event.DiceRolled;
 import server.event.GameStarted;
-import server.event.PlayerWaivedRetreat;
 import server.event.PlayerRemovedThingsFromHex;
+import server.event.PlayerWaivedRetreat;
+import server.event.internal.DoneRollingCommand;
+import server.event.internal.EndPlayerTurnCommand;
+import server.event.internal.RemoveThingsFromHexCommand;
+import server.event.internal.RollDiceCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
 import server.logic.game.RollModification;
 import server.logic.game.validators.CommandValidator;
-import server.event.internal.RollDiceCommand;
-import server.event.internal.DoneRollingCommand;
-import server.event.internal.EndPlayerTurnCommand;
-import server.event.internal.RemoveThingsFromHexCommand;
 
 import com.google.common.eventbus.Subscribe;
-
-import common.Logger;
-import common.game.Roll;
-import common.game.Player;
-import common.game.HexState;
-import common.game.ITileProperties;
 import common.Constants;
-import common.Constants.RollReason;
-import common.Constants.SetupPhase;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
+import common.Constants.RollReason;
+import common.Constants.SetupPhase;
+import common.Logger;
 import common.event.EventDispatch;
+import common.event.network.CommandRejected;
 import common.event.network.CurrentPhase;
 import common.event.network.DieRoll;
 import common.event.network.Flip;
+import common.event.network.HexOwnershipChanged;
 import common.event.network.PlayerState;
 import common.event.network.RackPlacement;
-import common.event.network.CommandRejected;
-import common.event.network.HexOwnershipChanged;
+import common.game.HexState;
+import common.game.ITileProperties;
+import common.game.Player;
+import common.game.Roll;
 
 public abstract class CommandHandler
 {
