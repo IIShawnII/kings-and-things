@@ -21,6 +21,7 @@ import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.event.network.CurrentPhase;
 import common.event.network.Flip;
+import common.event.network.GameStateProgress;
 import common.event.network.HexOwnershipChanged;
 import common.event.network.HexPlacement;
 import common.event.network.HexStatesChanged;
@@ -897,7 +898,16 @@ public class GameState implements Serializable
 
 	public void notifyClientsOfState()
 	{
-		HexPlacement hp = new HexPlacement(board.getHexesAsList().size());
+		GameStateProgress state = new GameStateProgress();
+		state.setPhases( currentSetupPhase, currentRegularPhase, currentCombatPhase);
+		state.setFlipped( currentSetupPhase.ordinal() > SetupPhase.PICK_FIRST_HEX.ordinal());
+		board.fillArray( state.getHexes( board.getBoardSize()));
+		state.setPlayersAndRacks( players);
+		//TODO racks does not need to be sent to all players, needs to be fixed
+		//TODO add special things visible to client
+		//special.toArray( state.getSpecial( special.size()));
+		state.postNetworkEvent( ALL_PLAYERS_ID);
+		/*HexPlacement hp = new HexPlacement(board.getHexesAsList().size());
 		board.fillArray(hp.getArray());
 		hp.postNetworkEvent(ALL_PLAYERS_ID);
 		
@@ -939,6 +949,6 @@ public class GameState implements Serializable
 		else
 		{
 			new CurrentPhase<SetupPhase>( getPlayerInfoArray(), currentSetupPhase).postNetworkEvent( ALL_PLAYERS_ID);
-		}
+		}*/
 	}
 }

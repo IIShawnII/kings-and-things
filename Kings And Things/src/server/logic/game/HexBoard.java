@@ -387,6 +387,10 @@ public class HexBoard implements Serializable
 	{
 		return boardList;
 	}
+	
+	public int getBoardSize(){
+		return boardList.size();
+	}
 
 	public void fillArray( HexState[] array) {
 		int i=0;
