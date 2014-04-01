@@ -285,4 +285,15 @@ public final class Constants {
 	public static int random( int max){
 		return rand.nextInt((max+1));
 	}
+	
+	public static <T> T[] fillArray(Collection<T> coll, T[] arry)
+	{
+		int i= 0;
+		for(T t : coll)
+		{
+			arry[i++] = t;
+		}
+		
+		return arry;
+	}
 }

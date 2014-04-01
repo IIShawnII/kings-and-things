@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import server.logic.exceptions.NoMoreTilesException;
+import common.Constants;
 import common.Logger;
 import common.Constants.Building;
 import common.Constants.CombatPhase;
@@ -904,8 +905,7 @@ public class GameState implements Serializable
 		board.fillArray( state.getHexes( board.getBoardSize()));
 		state.setPlayersAndRacks( players);
 		//TODO racks does not need to be sent to all players, needs to be fixed
-		//TODO add special things visible to client
-		//special.toArray( state.getSpecial( special.size()));
+		Constants.fillArray(bankHeroes.getAvailableHeroes(), state.getSpecial(bankHeroes.getAvailableHeroes().size()));
 		state.postNetworkEvent( ALL_PLAYERS_ID);
 		/*HexPlacement hp = new HexPlacement(board.getHexesAsList().size());
 		board.fillArray(hp.getArray());
