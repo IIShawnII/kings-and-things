@@ -1,10 +1,16 @@
 package server.logic.game.handlers;
 
+import java.util.ArrayList;
+
 import server.event.DiceRolled;
 import server.event.internal.ApplyRandomEventsCommand;
+import server.event.internal.ConstructBuildingCommand;
 import server.logic.exceptions.NoMoreTilesException;
 
 import com.google.common.eventbus.Subscribe;
+
+import common.Constants.Biome;
+import common.Constants.BuildableBuilding;
 import common.Constants.RandomEvent;
 import common.Constants.RollReason;
 import common.Logger;
@@ -96,6 +102,24 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				 * 		mines are quadrupled
 				 * }
 				 */
+				// mines are quadrupled
+				boolean ownsDwarfKing = false;
+				ArrayList<ITileProperties> specialIncomeCounters = new ArrayList<>();
+				for (ITileProperties thing : playerApplyingRandomEvent.getOwnedThingsOnBoard()) {
+					if (thing.getName().equals("Dwarf_King")) {
+						ownsDwarfKing = true;
+					}
+					if (thing.isSpecialIncomeCounter()) {
+						specialIncomeCounters.add(thing);
+					}
+				}
+				for (ITileProperties specialIncomeCounter : specialIncomeCounters) {
+					if (specialIncomeCounter.getBiomeRestriction() == Biome.Mountain && ownsDwarfKing) {
+						playerApplyingRandomEvent.addGold(4*specialIncomeCounter.getValue());
+					} else {
+						playerApplyingRandomEvent.addGold(2*specialIncomeCounter.getValue());
+					}
+				}
 				break;
 			case Teenie_Pox:
 				/**
@@ -132,6 +156,7 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				 * 		Player rolls 2 die			 * 		
 				 * } while (player.rolls < 6 || player.rolls > 8)
 				 */
+				
 				break;
 			case Vandalism:
 				/**
@@ -155,18 +180,16 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				/**
 				 * Gain one additional fort level.
 				 */
-				/*
-				 * Player chooses hex he owns
-				 * if (no bulding in hex) {
-				 * 		build tower
-				 * }
-				 * else if (tower in hex) {
-				 * 		upgrade to keep
-				 * } 
-				 * else if (keep in hex) {
-				 * 		upgrade to castle
-				 * }
-				 */
+				HexState targetHex = getCurrentState().getBoard().getHexStateForHex(targetOfEvent);
+				 if (!targetHex.hasBuilding()) {
+				 	new ConstructBuildingCommand(BuildableBuilding.Tower, targetOfEvent).postInternalEvent(playerID);
+				 }
+				 else if (targetHex.getBuilding().getName().equals(BuildableBuilding.Tower.name())) {
+					new ConstructBuildingCommand(BuildableBuilding.Keep, targetOfEvent).postInternalEvent(playerID);
+				 } 
+				 else if (targetHex.getBuilding().getName().equals(BuildableBuilding.Keep.name())) {
+					 new ConstructBuildingCommand(BuildableBuilding.Castle, targetOfEvent).postInternalEvent(playerID);
+				 }
 				break;
 		}
 	}
