@@ -8,7 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -207,21 +206,11 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 	private void changeBoad( UpdatePackage update){
 		switch( update.peekFirstInstruction()){
 			case UpdatePlayers:
-				int index = 0;
-				DefaultComboBoxModel< PlayerInfo> model = null;
-				if( jcbPlayers!=null){
-					model = (DefaultComboBoxModel< PlayerInfo>) jcbPlayers.getModel();
-				}
 				players = (PlayerInfo[])update.getData( UpdateKey.Players);
 				if( boards!=null && jcbActive.isSelected()){
 					for( PlayerInfo player :players){
 						if( player.isActive()){
 							boards.show( player);
-						}
-						if( model!=null){
-							index = model.getIndexOf( player);
-							model.removeElementAt( index);
-							model.insertElementAt( player, index);
 						}
 					}
 				}

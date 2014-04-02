@@ -1,40 +1,33 @@
 package server.logic.game;
 
-import static common.Constants.ALL_PLAYERS_ID;
+import java.io.Serializable;
 
 import java.awt.Point;
-import java.io.Serializable;
+
+import java.util.Set;
+import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 
-import server.logic.exceptions.NoMoreTilesException;
-import common.Constants;
 import common.Logger;
+import common.game.Roll;
+import common.game.Player;
+import common.game.HexState;
+import common.game.PlayerInfo;
+import common.game.ITileProperties;
 import common.Constants.Building;
+import common.Constants.SetupPhase;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
-import common.Constants.SetupPhase;
-import common.event.network.CurrentPhase;
-import common.event.network.Flip;
 import common.event.network.GameStateProgress;
-import common.event.network.HexOwnershipChanged;
-import common.event.network.HexPlacement;
-import common.event.network.HexStatesChanged;
-import common.event.network.PlayerOrderList;
-import common.event.network.PlayerState;
-import common.event.network.PlayersList;
-import common.event.network.RackPlacement;
-import common.game.HexState;
-import common.game.ITileProperties;
-import common.game.Player;
-import common.game.PlayerInfo;
-import common.game.Roll;
+
+import server.logic.exceptions.NoMoreTilesException;
+
+import static common.Constants.ALL_PLAYERS_ID;
 
 /**
  * GameState can be described by the board and player info
@@ -897,58 +890,13 @@ public class GameState implements Serializable
 		return true;
 	}
 
-	public void notifyClientsOfState()
-	{
+	public void notifyClientsOfState(){
 		GameStateProgress state = new GameStateProgress();
 		state.setPhases( currentSetupPhase, currentRegularPhase, currentCombatPhase);
 		state.setFlipped( currentSetupPhase.ordinal() > SetupPhase.PICK_FIRST_HEX.ordinal());
+		bankHeroes.getAvailableHeroes().toArray( state.getSpecial(bankHeroes.getAvailableHeroes().size()));
 		board.fillArray( state.getHexes( board.getBoardSize()));
 		state.setPlayersAndRacks( players);
-		//TODO racks does not need to be sent to all players, needs to be fixed
-		Constants.fillArray(bankHeroes.getAvailableHeroes(), state.getSpecial(bankHeroes.getAvailableHeroes().size()));
 		state.postNetworkEvent( ALL_PLAYERS_ID);
-		/*HexPlacement hp = new HexPlacement(board.getHexesAsList().size());
-		board.fillArray(hp.getArray());
-		hp.postNetworkEvent(ALL_PLAYERS_ID);
-		
-		new PlayerOrderList(playerOrder).postNetworkEvent(ALL_PLAYERS_ID);
-		new PlayersList(players).postNetworkEvent(ALL_PLAYERS_ID);
-		
-		if(currentSetupPhase.ordinal() > SetupPhase.PICK_FIRST_HEX.ordinal())
-		{
-			new Flip().postNetworkEvent(ALL_PLAYERS_ID);
-		}
-		
-		HexStatesChanged hsc = new HexStatesChanged(board.getHexesAsList().size());
-		board.fillArray(hsc.getArray());
-		hsc.postNetworkEvent(ALL_PLAYERS_ID);
-		
-		for(Player p : players)
-		{
-			new PlayerState(p.getPlayerInfo()).postNetworkEvent(ALL_PLAYERS_ID);
-			
-			for(ITileProperties hex : p.getOwnedHexes())
-			{
-				new HexOwnershipChanged(board.getHexStateForHex(hex)).postNetworkEvent(ALL_PLAYERS_ID);
-			}
-			RackPlacement rp = new RackPlacement(p.getTrayThings().size());
-			ITileProperties[] arry = rp.getArray();
-			int index = 0;
-			for(ITileProperties thing : p.getTrayThings())
-			{
-				arry[index++] = thing;
-			}
-			
-			rp.postNetworkEvent(ALL_PLAYERS_ID);
-		}
-		
-		if(currentSetupPhase == SetupPhase.SETUP_FINISHED)
-		{
-			new CurrentPhase<RegularPhase>( getPlayerInfoArray(), currentRegularPhase).postNetworkEvent( ALL_PLAYERS_ID);
-		}
-		else
-		{
-			new CurrentPhase<SetupPhase>( getPlayerInfoArray(), currentSetupPhase).postNetworkEvent( ALL_PLAYERS_ID);
-		}*/
 	}
 }

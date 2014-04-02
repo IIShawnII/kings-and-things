@@ -14,6 +14,7 @@ import common.event.network.CommandRejected;
 import common.event.network.DieRoll;
 import common.event.network.ExchangedSeaHex;
 import common.event.network.Flip;
+import common.event.network.GameStateProgress;
 import common.event.network.HexOwnershipChanged;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
@@ -131,8 +132,24 @@ public class ConnectionLogic implements Runnable {
 					update.addInstruction( UpdateInstruction.SeaHexChanged);
 					update.putData( UpdateKey.HexState, ((ExchangedSeaHex)event).getSate());
 				}
+				else if( event instanceof GameStateProgress){
+					GameStateProgress progress = (GameStateProgress)event;
+					updateCurrentPlayer( progress.getPlayers());
+					update.addInstruction( UpdateInstruction.UpdatePlayers);
+					update.putData( UpdateKey.Player, player);
+					update.putData( UpdateKey.Players, progress.getPlayers());
+					update.addInstruction( UpdateInstruction.GameState);
+					update.putData( UpdateKey.Flipped, progress.isFlipped());
+					update.putData( UpdateKey.Setup, progress.getSetup());
+					update.putData( UpdateKey.Regular, progress.getRegular());
+					update.putData( UpdateKey.Combat, progress.getCombat());
+					update.putData( UpdateKey.Hex, progress.getHexes( -1));
+					update.putData( UpdateKey.Special, progress.getSpecial( -1));
+					update.putData( UpdateKey.Rack, progress.getRack( player.getID()));
+				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);
+					throw new IllegalStateException("NO handle for: " + event);
 				}
 				/*
 				else if( event instanceof PlayerOrderList){

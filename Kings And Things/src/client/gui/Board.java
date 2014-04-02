@@ -447,6 +447,13 @@ public class Board extends JPanel{
 					hex = (HexState)update.getData( UpdateKey.HexState);
 					locks.getLockForHex( hex.getLocation()).getHex().setState( hex);
 					break;
+				case GameState:
+					animateHexPlacement( (HexState[]) update.getData( UpdateKey.Hex));
+					waitForPhase();
+					if( (boolean) update.getData( UpdateKey.Flipped)){
+						FlipAllHexes();
+					}
+					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
 			}
@@ -455,6 +462,18 @@ public class Board extends JPanel{
 					Thread.sleep( 100);
 				} catch ( InterruptedException e) {}
 			}
+		}
+	}
+	
+	/**
+	 * used primarily for animation wait time.
+	 * thread sleeps till animation is over.
+	 */
+	private synchronized void waitForPhase(){
+		while( !phaseDone){
+			try {
+				Thread.sleep( 50);
+			} catch ( InterruptedException e) {}
 		}
 	}
 	

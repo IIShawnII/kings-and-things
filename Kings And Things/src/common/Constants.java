@@ -33,11 +33,11 @@ public final class Constants {
 	public enum Level { Error, Warning, Notice, Plain, END, LOADING_DIALOG}
 	public enum Ability { Charge, Fly, Range, Special, Magic, Armor, Neutralised}
 	public enum Biome { Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Sea}
-	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP, Player, Hex, Phase, HexState, Roll, Tile}
 	public enum Category { Resources, Building, Cup, Gold, Hex, Special, State, Misc, END, Creature, Event, Magic, Treasure, Buildable}
-	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip}
 	public enum RandomEvent {Big_Juju, Dark_Plague, Defection, Good_Harvest, Mother_Lode, Teenie_Pox, Terrain_Disaster, Vandalism, Weather_Control, Willing_Workers}
+	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP, Player, Hex, Phase, HexState, Roll, Tile, Flipped, Setup, Regular, Combat, Special, Rack}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea, Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
+	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState}
 	
 	//Regular turn phases
 	public enum RegularPhase {RECRUITING_CHARACTERS, RECRUITING_THINGS, RANDOM_EVENTS, MOVEMENT, COMBAT, CONSTRUCTION, SPECIAL_POWERS}
@@ -284,16 +284,5 @@ public final class Constants {
 	 */
 	public static int random( int max){
 		return rand.nextInt((max+1));
-	}
-	
-	public static <T> T[] fillArray(Collection<T> coll, T[] arry)
-	{
-		int i= 0;
-		for(T t : coll)
-		{
-			arry[i++] = t;
-		}
-		
-		return arry;
 	}
 }

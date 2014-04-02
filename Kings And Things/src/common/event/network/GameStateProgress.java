@@ -3,8 +3,8 @@ package common.event.network;
 import java.util.Set;
 import java.util.HashMap;
 
-import common.game.HexState;
 import common.game.Player;
+import common.game.HexState;
 import common.game.PlayerInfo;
 import common.game.ITileProperties;
 import common.Constants.SetupPhase;
@@ -18,8 +18,8 @@ public class GameStateProgress extends AbstractNetwrokEvent{
 
 	private boolean isFlipped;
 	private SetupPhase setup;
-	private RegularPhase regular;
 	private CombatPhase combat;
+	private RegularPhase regular;
 	private HexState[] hexes; 
 	private PlayerInfo[] players;
 	private ITileProperties[] special;
@@ -76,6 +76,11 @@ public class GameStateProgress extends AbstractNetwrokEvent{
 			hexes = new HexState[ size];
 		}
 		return hexes;
+	}
+	
+	public ITileProperties[] getRack( final int ID){
+		Set<ITileProperties> rack = racks.get( ID);
+		return rack.toArray( new ITileProperties[0]);
 	}
 	
 	public PlayerInfo[] getPlayers(){
