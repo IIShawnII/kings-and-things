@@ -334,6 +334,25 @@ public class HexState implements Serializable{
 		
 		return Collections.unmodifiableSet(fightingThings);
 	}
+
+	/**
+	 * Gets the set of all things added to this hex that are
+	 * capable of participating in combat
+	 * @return Set of things that can fight
+	 */
+	public Set<ITileProperties> getFightingThingsInHexOwnedByPlayer(Player p)
+	{
+		HashSet<ITileProperties> things = new HashSet<ITileProperties>();
+		for(ITileProperties thing : getFightingThingsInHex())
+		{
+			if(p.ownsThingOnBoard(thing))
+			{
+				things.add(thing);
+			}
+		}
+		
+		return Collections.unmodifiableSet(things);
+	}
 	
 	/**
 	 * This method removes any special income counter

@@ -102,6 +102,11 @@ public class DiceRoller extends JPanel implements Parent{
 			super.paint( g);
 		}
 	}
+	
+	public int getDiceCount()
+	{
+		return dieCount;
+	}
 
 	public void setDiceCount( int count) {
 		if( count>dieCount){

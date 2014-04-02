@@ -26,7 +26,7 @@ public final class Constants {
 	//Primary for bypassing load of images for faster start
 	public static final boolean DRAW_LOCKS = false;
 	public static final boolean LOAD_SPECIAL = false;
-	public static final boolean LOAD_CUP = false;
+	public static final boolean LOAD_CUP = true;
 
 	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
 	public enum Building {Castle, Citadel, City, Keep, Tower, Village}
@@ -55,6 +55,10 @@ public final class Constants {
 	public static final Image IMAGE_BACKGROUND;
 	public static final Image IMAGE_HEX_REVERSE; 
 	public static final Image IMAGE_TILE_REVERSE;
+	public static final Image CROSSHAIR;
+	public static final Image WHITE_FLAG;
+	public static final Image FIGHT_ON;
+	public static final Image RUN_AWAY;
 	public static final HashMap< Integer, Image> IMAGES = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> HEX = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> CUP = new HashMap<>();
@@ -183,6 +187,10 @@ public final class Constants {
 		IMAGE_TILE_REVERSE = loadImage( "Resources\\Misc\\-n Tile_Reverse.png");
 		IMAGE_GREEN = loadImage( "Resources\\Misc\\-n Green_Surface.png");
 		IMAGE_SKIP = loadImage( "Resources\\Misc\\-n Skip.png");
+		CROSSHAIR = loadImage("Resources\\Misc\\-n Crosshair.png");
+		WHITE_FLAG = loadImage("Resources\\Misc\\-n White_Flag.jpg");
+		FIGHT_ON = loadImage("Resources\\Misc\\-n Fight_On.jpg");
+		RUN_AWAY = loadImage("Resources\\Misc\\-n Run_Away.jpg");
 		IMAGE_DICE = new Image[7];
 		IMAGE_DICE[0] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 0.png");
 		IMAGE_DICE[1] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 1.png");

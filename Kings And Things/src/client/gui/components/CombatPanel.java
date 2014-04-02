@@ -1,52 +1,81 @@
 package client.gui.components;
 
+import static common.Constants.PUBLIC;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import server.event.internal.ApplyHitsCommand;
-import server.event.internal.RollDiceCommand;
-import common.Constants;
-import common.Constants.RollReason;
+import client.gui.Board;
+import common.Constants.CombatPhase;
 import common.event.AbstractUpdateReceiver;
 import common.event.network.CombatHits;
 import common.event.network.DieRoll;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
-import common.game.ITileProperties;
 import common.game.Player;
-import common.game.Roll;
-import static common.Constants.PUBLIC;
 
 public class CombatPanel extends JPanel
 {
 	private static final long serialVersionUID = -8151724738245642539L;
-	private static final String HITS_TO_APPLY_TEXT = "Hits to apply: ";
 	
 	private HexState hs;
-	private JLabel hitsToApply;
-	private int hitsToApplyNum;
 	private final Player p;
-	private final HashMap<ITileProperties,JLabel> rolls;
+	private final CombatArmyPanel playerPanel;
+	private final ArrayList<CombatArmyPanel> otherArmies;
+	private final JScrollPane scrollPane;
+	private final JLabel combatPhaseLabel;
+	private final ArrayList<Player> allPlayersInCombat;
+	private final ArrayList<Integer> playerOrderList;
+	private final Player defendingPlayer;
+	private final HashSet<HexState> adjacentPlayerOwnedHexes;
+	private CombatPhase currentPhase;
 
-	public CombatPanel(HexState hs, Player p)
+	public CombatPanel(HexState hs, Collection<HexState> adjacentPlayerOwnedHexes, Player p, Collection<Player> otherPlayers, CombatPhase currentPhase, Player defendingPlayer, Collection<Integer> playerOrder)
 	{
 		this.hs = hs;
-
 		this.p = p;
-		hitsToApplyNum = 0;
+		this.currentPhase = currentPhase;
+		this.adjacentPlayerOwnedHexes = new HashSet<>(adjacentPlayerOwnedHexes.size());
+		for(HexState adjacentHs : adjacentPlayerOwnedHexes)
+		{
+			adjacentPlayerOwnedHexes.add(adjacentHs);
+		}
+		playerOrderList = new ArrayList<>(playerOrder.size());
+		for(Integer i : playerOrder)
+		{
+			playerOrderList.add(i);
+		}
+		allPlayersInCombat = new ArrayList<>();
+		allPlayersInCombat.add(p);
+		this.defendingPlayer = defendingPlayer;
+		
 		setLayout(new GridBagLayout());
-		hitsToApply = new JLabel(HITS_TO_APPLY_TEXT + hitsToApplyNum);
-		rolls = new HashMap<ITileProperties,JLabel>();
+		playerPanel = new CombatArmyPanel(p.getName(), p.getID(), "No one", hs.getFightingThingsInHexOwnedByPlayer(p));
+		
+		otherArmies = new ArrayList<>(otherPlayers.size());
+		for(Player otherPlayer : otherPlayers)
+		{
+			allPlayersInCombat.add(otherPlayer);
+			CombatArmyPanel otherPanel = new CombatArmyPanel(otherPlayer.getName(),otherPlayer.getID(),"No one", hs.getFightingThingsInHexOwnedByPlayer(otherPlayer));
+			otherPanel.hideInputControls();
+			otherArmies.add(otherPanel);
+		}
+		scrollPane = new JScrollPane();
+		combatPhaseLabel = new JLabel();
+		
 		init();
 		new DieRollReceiver();
 		new HexChangedReceiver();
@@ -55,72 +84,9 @@ public class CombatPanel extends JPanel
 	
 	private void init()
 	{
-		this.removeAll();
-		rolls.clear();
-		GridBagConstraints constraints = new GridBagConstraints();
+		JPanel contentsPanel = new JPanel();
+		contentsPanel.setLayout(new GridBagLayout());
 		
-		constraints.anchor = GridBagConstraints.CENTER;
-		constraints.fill = GridBagConstraints.HORIZONTAL;
-		constraints.gridheight = 1;
-		constraints.gridwidth = 1;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.weightx = 1;
-		constraints.weighty = 0;
-		
-		updateHitsToApplyLabel();
-		add(hitsToApply,constraints);
-		constraints.gridy++;
-		
-		for(ITileProperties thing : hs.getFightingThingsInHex())
-		{
-			if(p.ownsThingOnBoard(thing))
-			{
-				add(generateCreatureRollPanel(thing),constraints);
-				constraints.gridy++;
-			}
-		}
-		
-		constraints.gridx++;
-		constraints.gridy = 0;
-
-		for(ITileProperties thing : hs.getFightingThingsInHex())
-		{
-			if(!p.ownsThingOnBoard(thing))
-			{
-				if(thing.isCreature())
-				{
-					add(new JLabel(new ImageIcon(Constants.IMAGES.get(thing.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT))),constraints);
-				}
-				else
-				{
-					for(ITileProperties b : Constants.BUILDING.values())
-					{
-						if(b.getName().equals(thing.getName()))
-						{
-							add(new JLabel(new ImageIcon(Constants.IMAGES.get(b.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT))),constraints);
-						}
-					}
-				}
-				constraints.gridy++;
-			}
-		}
-	}
-	
-	private void updateHitsToApplyLabel()
-	{
-		SwingUtilities.invokeLater(new Runnable(){
-			@Override
-			public void run()
-			{
-				hitsToApply.setText(HITS_TO_APPLY_TEXT + hitsToApplyNum);
-			}});
-	}
-	
-	private JPanel generateCreatureRollPanel(final ITileProperties thing)
-	{
-		JPanel panel = new JPanel();
-		panel.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		
 		constraints.anchor = GridBagConstraints.CENTER;
@@ -132,52 +98,179 @@ public class CombatPanel extends JPanel
 		constraints.weightx = 1;
 		constraints.weighty = 1;
 		
-		ImageIcon image = null;
-		if(thing.isCreature())
-		{
-			image = new ImageIcon(Constants.IMAGES.get(thing.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT));
-		}
-		else
-		{
-			for(ITileProperties b : Constants.BUILDING.values())
-			{
-				if(b.getName().equals(thing.getName()))
-				{
-					image = new ImageIcon(Constants.IMAGES.get(b.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT));
-				}
-			}
-		}
-		JButton creatureButton = new JButton(image);
+		contentsPanel.add(playerPanel,constraints);
+		constraints.gridx++;
 
-		creatureButton.addActionListener(new ActionListener(){
+		constraints.weightx = 0;
+		constraints.weighty = 0;
+		constraints.fill = GridBagConstraints.NONE;
+		for(CombatArmyPanel panel : otherArmies)
+		{
+			contentsPanel.add(panel,constraints);
+			constraints.gridx++;
+		}
+		constraints.weightx = 1;
+		constraints.weighty = 1;
+		constraints.fill = GridBagConstraints.BOTH;
+		
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.weighty = 0;
+		updateCombatPhaseLabel();
+		combatPhaseLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		combatPhaseLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+		combatPhaseLabel.setFont(Board.STATUS_INDICATOR_FONT);
+		contentsPanel.add(combatPhaseLabel,constraints);
+		
+		setLayout(new GridBagLayout());
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.gridheight = 1;
+		constraints.gridwidth = 1;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.weightx = 1;
+		constraints.weighty = 1;
+		
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scrollPane.setViewportView(contentsPanel);
+		add(scrollPane,constraints);
+		
+		playerPanel.addTargetSelectActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				new ApplyHitsCommand(1, thing).postInternalEvent(p.getID());
-				hitsToApplyNum--;
-				updateHitsToApplyLabel();
+				String[] targetNames = new String[otherArmies.size()];
+				for(int i=0; i<targetNames.length; i++)
+				{
+					targetNames[i] = otherArmies.get(i).getPlayerName();
+				}
+				String currentTarget = playerPanel.getTargetPlayerName();
+				String targetName = (String) JOptionPane.showInputDialog(playerPanel, "Select the player you would like to target", "Change Target", JOptionPane.PLAIN_MESSAGE, null, targetNames, currentTarget.equals("No one")? targetNames[0] : currentTarget);
+				//TODO send target command to server, update label upon getting results
 			}});
-		
-		panel.add(creatureButton,constraints);
-		constraints.gridx++;
-		
-		JButton rollButton = new JButton("Roll");
-
-		rollButton.addActionListener(new ActionListener(){
+		playerPanel.addFightOnButtonListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0)
+			{
+				// TODO send skip command to server, update phase label upon getting results
+			}});
+		playerPanel.addRetreatButtonListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				new RollDiceCommand(new Roll(1,thing,RollReason.ATTACK_WITH_CREATURE,p.getID())).postInternalEvent(p.getID());
+				// TODO Show contents of available retreat hexes and let player select one
 			}});
-
-		panel.add(rollButton,constraints);
-		constraints.gridx++;
+	}
+	
+	private String getPlayerNameByAttackerNumber(int num)
+	{
+		int defenderIndex = playerOrderList.indexOf(defendingPlayer.getID());
+		int offset = defenderIndex - num;
+		int attackerID = playerOrderList.get(offset<0? playerOrderList.size() - offset: offset);
+		for(Player p : allPlayersInCombat)
+		{
+			if(p.getID() == attackerID)
+			{
+				return p.getName();
+			}
+		}
 		
-		JLabel rollValue = new JLabel("");
-		panel.add(rollValue,constraints);
-		rolls.put(thing, rollValue);
-		
-		return panel;
+		throw new IllegalStateException("Unable to find player with ID: " + attackerID);
+	}
+	
+	private void updateCombatPhaseLabel()
+	{
+		String phaseText = "";
+		switch(currentPhase)
+		{
+			case APPLY_RANGED_HITS:
+			case APPLY_MELEE_HITS:
+			case APPLY_MAGIC_HITS:
+			{
+				phaseText = "Apply Damage";
+				break;
+			}
+			case ATTACKER_ONE_RETREAT:
+			{
+				phaseText = getPlayerNameByAttackerNumber(1) + " Retreat";
+				break;
+			}
+			case ATTACKER_THREE_RETREAT:
+			{
+				phaseText = getPlayerNameByAttackerNumber(3) + " Retreat";
+				break;
+			}
+			case ATTACKER_TWO_RETREAT:
+			{
+				phaseText = getPlayerNameByAttackerNumber(2) + " Retreat";
+				break;
+			}
+			case DEFENDER_RETREAT:
+			{
+				phaseText = getPlayerNameByAttackerNumber(0) + " Retreat";
+				break;
+			}
+			case DETERMINE_DAMAGE:
+			{
+				phaseText = "Determine Damage To Hex";
+				break;
+			}
+			case DETERMINE_DEFENDERS:
+			{
+				phaseText = "Determine Defenders";
+				break;
+			}
+			case MAGIC_ATTACK:
+			{
+				phaseText = "Magic Attack";
+				break;
+			}
+			case MELEE_ATTACK:
+			{
+				phaseText = "Melee Attack";
+				break;
+			}
+			case NO_COMBAT:
+			{
+				phaseText = "No Combat";
+				break;
+			}
+			case PLACE_THINGS:
+			{
+				phaseText = "Place Things In Hex";
+				break;
+			}
+			case RANGED_ATTACK:
+			{
+				phaseText = "Ranged Attack";
+				break;
+			}
+			case SELECT_TARGET_PLAYER:
+			{
+				phaseText = "Select Target Player";
+				break;
+			}
+		}
+		combatPhaseLabel.setText(phaseText);
+	}
+	
+	private CombatArmyPanel getPanelForPlayer(int ID)
+	{
+		if(playerPanel.getPlayerID() == ID)
+		{
+			return playerPanel;
+		}
+		for(CombatArmyPanel panel : otherArmies)
+		{
+			if(panel.getPlayerID() == ID)
+			{
+				return panel;
+			}
+		}
+		throw new IllegalArgumentException("Can not find panel for player with ID: " + ID);
 	}
 	
 	private class DieRollReceiver extends AbstractUpdateReceiver<DieRoll>{
@@ -189,12 +282,11 @@ public class CombatPanel extends JPanel
 		@Override
 		protected void handlePrivate( DieRoll update) {
 			final DieRoll r = update;
-			final JLabel valueLabel = rolls.get(update.getDieRoll().getRollTarget());
+			final CombatArmyPanel panel = getPanelForPlayer(r.getDieRoll().getRollingPlayerID());
 			SwingUtilities.invokeLater( new Runnable(){
 				@Override
 				public void run(){
-					int rollNum = r.getDieRoll().getBaseRolls().get(0);
-					valueLabel.setText(valueLabel.getText().equals("")? "" + rollNum : valueLabel.getText() + ", " + r.getDieRoll().getBaseRolls().get(1));
+					panel.setRollResults(r.getDieRoll());
 				}
 			});
 		}
@@ -212,17 +304,12 @@ public class CombatPanel extends JPanel
 		}
 
 		@Override
-		protected void handlePublic( CombatHits update) {
-			if(update.getPlayerReceivingHitID() == p.getID()){
-				hitsToApplyNum += update.getNumberOfHits();
-				updateHitsToApplyLabel();
-			}
+		protected void handlePublic(final CombatHits update) {
+			final CombatArmyPanel panel = getPanelForPlayer(update.getPlayerReceivingHitID());
 			SwingUtilities.invokeLater(new Runnable(){
 				@Override
 				public void run(){
-					for(JLabel rollLabel : rolls.values()){
-						rollLabel.setText("");
-					}
+					panel.setHitsToApply(update.getNumberOfHits());
 				}
 			});
 		}
@@ -236,14 +323,14 @@ public class CombatPanel extends JPanel
 
 		@Override
 		protected void handlePublic( HexStatesChanged update) {
-			hs = update.getArray()[0];
+			/*hs = update.getArray()[0];
 			SwingUtilities.invokeLater(new Runnable(){
 				@Override
 				public void run(){
 					init();
 					invalidate();
 				}
-			});
+			});*/
 		}
 	}
 }

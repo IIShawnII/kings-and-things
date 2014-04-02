@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import server.logic.exceptions.NoMoreTilesException;
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
@@ -71,6 +72,30 @@ public class StateGenerator
 		p3.addOwnedHex(state.getBoard().getHexByXY(1, 10).getHex());
 		p4.addOwnedHex(state.getBoard().getHexByXY(5, 10).getHex());
 		
+		p1.addOwnedHex(state.getBoard().getHexByXY(1, 2).getHex());
+		p2.addOwnedHex(state.getBoard().getHexByXY(5, 2).getHex());
+		p3.addOwnedHex(state.getBoard().getHexByXY(1, 10).getHex());
+		p4.addOwnedHex(state.getBoard().getHexByXY(5, 10).getHex());
+
+		p1.addOwnedHex(state.getBoard().getHexByXY(3, 6).getHex());
+		p1.addOwnedHex(state.getBoard().getHexByXY(2, 5).getHex());
+		p4.addOwnedHex(state.getBoard().getHexByXY(2, 7).getHex());
+		try
+		{
+			addTenThingsToHexForPlayer(p1,state);
+			addTenThingsToHexForPlayer(p2,state);
+			addTenThingsToHexForPlayer(p3,state);
+			addTenThingsToHexForPlayer(p4,state);
+		}
+		catch (NoMoreTilesException e)
+		{
+			common.Logger.getErrorLogger().error("Unable to generate game state due to: ", e);
+		}
+		state.setCurrentSetupPhase(SetupPhase.SETUP_FINISHED);
+		state.setCurrentRegularPhase(RegularPhase.COMBAT);
+		state.setActivePhasePlayer(p1.getID());
+		state.setActiveTurnPlayer(p1.getID());
+		
 		for(Player p : players)
 		{
 			for(ITileProperties tp : p.getOwnedHexes())
@@ -93,6 +118,16 @@ public class StateGenerator
 		try(FileInputStream fs = new FileInputStream(fileName);ObjectInputStream ois = new ObjectInputStream(fs))
 		{
 			return (GameState) ois.readObject();
+		}
+	}
+	
+	private void addTenThingsToHexForPlayer(Player p, GameState state) throws NoMoreTilesException
+	{
+		for(int i=0; i<10; i++)
+		{
+			ITileProperties thing = state.getCup().drawTile();
+			p.addOwnedThingOnBoard(thing);
+			state.getBoard().getHexByXY(3, 6).addThingToHex(thing);
 		}
 	}
 }

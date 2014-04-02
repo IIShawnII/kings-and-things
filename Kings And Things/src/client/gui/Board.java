@@ -78,6 +78,7 @@ public class Board extends JPanel{
 	private static final int HEX_Y_SHIFT = 8-3;
 	private static final int HEX_X_SHIFT = 8-2;
 	public static final int PADDING = 10;
+	public static final Font STATUS_INDICATOR_FONT = new Font("default", Font.BOLD, 30);
 	
 	/**
 	 * create a static image with background and all outlines for faster drawing in Game 
@@ -137,7 +138,6 @@ public class Board extends JPanel{
 	private Input input;
 	private ITileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
-	private Font font = new Font("default", Font.BOLD, 30);
 	private RollReason lastRollReason;
 	private JButton jbSkip;
 	
@@ -176,7 +176,7 @@ public class Board extends JPanel{
 		jtfStatus.setEditable( false);
 		jtfStatus.setOpaque( false);
 		jtfStatus.setBorder( null);
-		jtfStatus.setFont( font);
+		jtfStatus.setFont( STATUS_INDICATOR_FONT);
 		add(jtfStatus);
 		
 		jbSkip = new JButton( new ImageIcon( IMAGE_SKIP));
@@ -242,7 +242,7 @@ public class Board extends JPanel{
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		g2d.drawImage( IMAGE, 0, 0, getWidth(), getHeight(), null);
-		g2d.setFont( font);
+		g2d.setFont( STATUS_INDICATOR_FONT);
 		if( players!=null && currentPlayer!=null){
 			for( int i=0, y=PLAYERS_STATE_PADDING; i<players.length; i++, y+=PLAYERS_STATE_PADDING){
 				if( players[i].getID()!=currentPlayer.getID()){
