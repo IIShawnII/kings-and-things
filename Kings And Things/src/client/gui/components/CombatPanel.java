@@ -16,13 +16,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 
 import client.gui.Board;
+import client.gui.components.combat.AbstractCombatArmyPanel;
+import client.gui.components.combat.ActiveCombatArmyPanel;
+import client.gui.components.combat.InactiveCombatArmyPanel;
+
 import common.Constants.CombatPhase;
 import common.event.AbstractUpdateReceiver;
-import common.event.network.CombatHits;
-import common.event.network.DieRoll;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.Player;
@@ -33,8 +34,8 @@ public class CombatPanel extends JPanel
 	
 	private HexState hs;
 	private final Player p;
-	private final CombatArmyPanel playerPanel;
-	private final ArrayList<CombatArmyPanel> otherArmies;
+	private final ActiveCombatArmyPanel playerPanel;
+	private final ArrayList<InactiveCombatArmyPanel> otherArmies;
 	private final JScrollPane scrollPane;
 	private final JLabel combatPhaseLabel;
 	private final ArrayList<Player> allPlayersInCombat;
@@ -51,7 +52,7 @@ public class CombatPanel extends JPanel
 		this.adjacentPlayerOwnedHexes = new HashSet<>(adjacentPlayerOwnedHexes.size());
 		for(HexState adjacentHs : adjacentPlayerOwnedHexes)
 		{
-			adjacentPlayerOwnedHexes.add(adjacentHs);
+			this.adjacentPlayerOwnedHexes.add(adjacentHs);
 		}
 		playerOrderList = new ArrayList<>(playerOrder.size());
 		for(Integer i : playerOrder)
@@ -63,23 +64,22 @@ public class CombatPanel extends JPanel
 		this.defendingPlayer = defendingPlayer;
 		
 		setLayout(new GridBagLayout());
-		playerPanel = new CombatArmyPanel(p.getName(), p.getID(), "No one", hs.getFightingThingsInHexOwnedByPlayer(p));
+		playerPanel = new ActiveCombatArmyPanel(p.getName(), p.getID(), "No one");
+		playerPanel.init(hs.getFightingThingsInHexOwnedByPlayer(p));
 		
 		otherArmies = new ArrayList<>(otherPlayers.size());
 		for(Player otherPlayer : otherPlayers)
 		{
 			allPlayersInCombat.add(otherPlayer);
-			CombatArmyPanel otherPanel = new CombatArmyPanel(otherPlayer.getName(),otherPlayer.getID(),"No one", hs.getFightingThingsInHexOwnedByPlayer(otherPlayer));
-			otherPanel.hideInputControls();
+			InactiveCombatArmyPanel otherPanel = new InactiveCombatArmyPanel(otherPlayer.getName(),otherPlayer.getID(),"No one");
+			otherPanel.init(hs.getFightingThingsInHexOwnedByPlayer(otherPlayer));
 			otherArmies.add(otherPanel);
 		}
 		scrollPane = new JScrollPane();
 		combatPhaseLabel = new JLabel();
 		
 		init();
-		new DieRollReceiver();
 		new HexChangedReceiver();
-		new HitsReceiver();
 	}
 	
 	private void init()
@@ -104,7 +104,7 @@ public class CombatPanel extends JPanel
 		constraints.weightx = 0;
 		constraints.weighty = 0;
 		constraints.fill = GridBagConstraints.NONE;
-		for(CombatArmyPanel panel : otherArmies)
+		for(AbstractCombatArmyPanel panel : otherArmies)
 		{
 			contentsPanel.add(panel,constraints);
 			constraints.gridx++;
@@ -257,13 +257,13 @@ public class CombatPanel extends JPanel
 		combatPhaseLabel.setText(phaseText);
 	}
 	
-	private CombatArmyPanel getPanelForPlayer(int ID)
+	private AbstractCombatArmyPanel getPanelForPlayer(int ID)
 	{
 		if(playerPanel.getPlayerID() == ID)
 		{
 			return playerPanel;
 		}
-		for(CombatArmyPanel panel : otherArmies)
+		for(AbstractCombatArmyPanel panel : otherArmies)
 		{
 			if(panel.getPlayerID() == ID)
 			{
@@ -271,48 +271,6 @@ public class CombatPanel extends JPanel
 			}
 		}
 		throw new IllegalArgumentException("Can not find panel for player with ID: " + ID);
-	}
-	
-	private class DieRollReceiver extends AbstractUpdateReceiver<DieRoll>{
-
-		protected DieRollReceiver() {
-			super( INTERNAL, PUBLIC, CombatPanel.this);
-		}
-
-		@Override
-		protected void handlePrivate( DieRoll update) {
-			final DieRoll r = update;
-			final CombatArmyPanel panel = getPanelForPlayer(r.getDieRoll().getRollingPlayerID());
-			SwingUtilities.invokeLater( new Runnable(){
-				@Override
-				public void run(){
-					panel.setRollResults(r.getDieRoll());
-				}
-			});
-		}
-
-		@Override
-		protected boolean verifyPrivate( DieRoll update) {
-			return update.isValidID( p.getID());
-		}
-	}
-	
-	private class HitsReceiver extends AbstractUpdateReceiver<CombatHits>{
-
-		protected HitsReceiver() {
-			super( INTERNAL, PUBLIC, CombatPanel.this);
-		}
-
-		@Override
-		protected void handlePublic(final CombatHits update) {
-			final CombatArmyPanel panel = getPanelForPlayer(update.getPlayerReceivingHitID());
-			SwingUtilities.invokeLater(new Runnable(){
-				@Override
-				public void run(){
-					panel.setHitsToApply(update.getNumberOfHits());
-				}
-			});
-		}
 	}
 	
 	private class HexChangedReceiver extends AbstractUpdateReceiver<HexStatesChanged>{
