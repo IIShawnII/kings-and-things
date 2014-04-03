@@ -14,9 +14,11 @@ import server.event.internal.GiveHexToPlayerCommand;
 import server.event.internal.StartSetupPhaseCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
+import server.logic.game.SpecialCharacterManager;
 import server.logic.game.validators.SetupPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
@@ -29,6 +31,7 @@ import common.event.network.CurrentPhase;
 import common.event.network.ExchangedSeaHex;
 import common.event.network.HexPlacement;
 import common.event.network.PlayersList;
+import common.event.network.SpecialCharUpdate;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -55,9 +58,14 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 		
 		new PlayersList( players).postNetworkEvent( ALL_PLAYERS_ID);
 		
-		HexPlacement placement = new HexPlacement( Constants.MAX_HEXES);
-		currentState.getBoard().fillArray( placement.getArray());
+		HexPlacement placement = new HexPlacement( players.size()==Constants.MAX_PLAYERS?Constants.MAX_HEXES:Constants.MIN_HEXES_ON_BOARD);
+		currentState.getBoard().fillArray( placement.getHexes());
 		placement.postNetworkEvent( ALL_PLAYERS_ID);
+		
+		SpecialCharacterManager bank = currentState.getBankHeroes();
+		SpecialCharUpdate special = new SpecialCharUpdate( bank.getAvailableHeroes().size());
+		bank.getAvailableHeroes().toArray( special.getSpecial());
+		special.postNetworkEvent( ALL_PLAYERS_ID);
 		
 		new GameStarted(demoMode, currentState).postInternalEvent();
 		//new Flip().postNetworkEvent();

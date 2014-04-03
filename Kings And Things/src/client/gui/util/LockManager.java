@@ -24,7 +24,7 @@ public class LockManager {
 	private Lock[][] rackLocks;
 	private Lock[][] hexBoardLocks;
 	private Lock hexLock, fortLock, goldLock;
-	private Lock markerLock, specialLock, cupLock;
+	private Lock markerLock, cupLock;/*specialLock,*/ 
 	
 	public LockManager( int playerCount){
 		hexLock = new Lock( 8+(HEX_SIZE.width/2)-LOCK_SIZE/2, 8+(HEX_SIZE.height/2)-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE, true, true);
@@ -32,12 +32,12 @@ public class LockManager {
 		bound.translate( Board.TILE_X_SHIFT, 0);
 		fortLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
 		bound.translate( Board.TILE_X_SHIFT, 0);
-		goldLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
-		bound.translate( Board.TILE_X_SHIFT, 0);
 		markerLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
 		bound.translate( Board.TILE_X_SHIFT, 0);
-		specialLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
+		goldLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
 		bound.translate( Board.TILE_X_SHIFT, 0);
+		//specialLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
+		//bound.translate( Board.TILE_X_SHIFT, 0);
 		cupLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
 		rackLocks = new Lock[1][MAX_RACK_SIZE];
 		hexBoardLocks = new Lock[7][13];
@@ -74,8 +74,8 @@ public class LockManager {
 				return goldLock;
 			case Hex:
 				return hexLock;
-			case Special:
-				return specialLock;
+			/*case Special:
+				return specialLock;*/
 			case State:
 				return markerLock;
 			default:
@@ -120,7 +120,7 @@ public class LockManager {
 	private Lock lookThroughLocks( Lock[][] locks, Point point, boolean isTile){
 		for( int i=0; i<locks.length;i++){
 			for( int j=0; j<locks[i].length;j++){
-				if( locks[i][j]!=null&&locks[i][j].canHold( isTile) && canLock( locks[i][j], point)){
+				if( locks[i][j]!=null&&locks[i][j].canHold( isTile, true) && canLock( locks[i][j], point)){
 					locks[i][j].setInUse( true);
 					return locks[i][j];
 				}
@@ -158,7 +158,7 @@ public class LockManager {
 		g2d.setColor( Color.RED);
 		g2d.fill( hexLock.lock);
 		g2d.fill( fortLock.lock);
-		g2d.fill( specialLock.lock);
+		//g2d.fill( specialLock.lock);
 		g2d.fill( goldLock.lock);
 		g2d.fill( cupLock.lock);
 		g2d.fill( markerLock.lock);
@@ -219,16 +219,20 @@ public class LockManager {
 			return inUse;
 		}
 		
-		private boolean canHold( boolean isTile){
-			if( this.isHex && !permanent && isTile){
+		private boolean canHold( boolean isTile, boolean checkPermanent){
+			if( this.isHex && (!checkPermanent || !permanent) && isTile){
 				return true;
 			}else{
 				return !inUse;
 			}
 		}
 		
+		public boolean canTempHold( Tile tile){
+			return canHold( tile.isTile(), false);
+		}
+		
 		public boolean canHold( Tile tile){
-			return canHold( tile.isTile());
+			return canHold( tile.isTile(), true);
 		}
 		
 		public void setInUse( boolean use){

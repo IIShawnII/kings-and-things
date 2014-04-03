@@ -16,6 +16,7 @@ import common.event.network.ExchangedSeaHex;
 import common.event.network.Flip;
 import common.event.network.GameStateProgress;
 import common.event.network.HexOwnershipChanged;
+import common.event.network.SpecialCharUpdate;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
@@ -84,7 +85,11 @@ public class ConnectionLogic implements Runnable {
 				}
 				else if( event instanceof HexPlacement){
 					update.addInstruction( UpdateInstruction.PlaceBoard);
-					update.putData( UpdateKey.Hex, ((HexPlacement)event).getArray());
+					update.putData( UpdateKey.Hex, ((HexPlacement)event).getHexes());
+				}
+				else if( event instanceof SpecialCharUpdate){
+					update.addInstruction( UpdateInstruction.Special);
+					update.putData( UpdateKey.Special, ((SpecialCharUpdate)event).getSpecial());
 				}
 				else if( event instanceof CurrentPhase){
 					CurrentPhase<?> phase = (CurrentPhase<?>) event;

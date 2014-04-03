@@ -13,7 +13,7 @@ public class HexPlacement extends AbstractNetwrokEvent {
 		hexes = new HexState[boardSize];
 	}
 
-	public HexState[] getArray(){
+	public HexState[] getHexes(){
 		return hexes;
 	}
 	

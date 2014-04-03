@@ -274,6 +274,12 @@ public class TileProperties implements ITileProperties{
 	}
 
 	@Override
+	public boolean hasAbility()
+	{
+		return abilities.size()>=1;
+	}
+
+	@Override
 	public boolean isSpecialCreatureWithAbility(Ability ability)
 	{
 		return isCreature() && hasAbility(ability);
@@ -322,5 +328,10 @@ public class TileProperties implements ITileProperties{
 	@Override
 	public boolean hasRestriction() {
 		return restrictions.size()>=1;
+	}
+	
+	@Override
+	public boolean hasRestriction( Restriction restriction){
+		return restrictions.contains( restriction);
 	}
 }

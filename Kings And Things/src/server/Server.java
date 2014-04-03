@@ -1,5 +1,6 @@
 package server;
 
+
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -22,6 +23,12 @@ public class Server {
 		} catch ( Exception e) {
 			//failed to change look and feel
 		}
+
+		/*try {
+			new StateGenerator( "save", false);
+		} catch ( ClassNotFoundException | IOException e2) {
+			e2.printStackTrace();
+		}*/
 		
 		boolean isDemoMode = false;
 		boolean generateStateFile = false;

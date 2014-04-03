@@ -33,11 +33,13 @@ public interface ITileProperties extends Serializable
 	boolean isTreasure();
 	boolean isCreature();
 	boolean isSpecialCharacter();
+	boolean hasAbility();
 	boolean hasAbility(Ability ability);
 	boolean isSpecialCreatureWithAbility(Ability ability);
 	Biome getBiomeRestriction();
 	boolean isSpecialIncomeCounter();
 	Restriction getRestriction( int index);
+	boolean hasRestriction( Restriction restriction);
 	boolean hasRestriction();
 	ITileProperties clone();
 	//used only on the client side

@@ -161,6 +161,15 @@ public class TwoSidedTileProperties implements ITileProperties {
 	}
 
 	@Override
+	public boolean hasAbility() {
+		if (isFaceUp()) {
+			return faceUp.hasAbility();
+		} else {
+			return faceDown.hasAbility();
+		}
+	}
+
+	@Override
 	public boolean isSpecialCreatureWithAbility(Ability ability) {
 		if (isFaceUp()) {
 			return faceUp.isSpecialCreatureWithAbility(ability);
@@ -217,6 +226,15 @@ public class TwoSidedTileProperties implements ITileProperties {
 			return faceUp.hasRestriction();
 		} else {
 			return faceDown.hasRestriction();
+		}
+	}
+	
+	@Override
+	public boolean hasRestriction( Restriction restriction){
+		if (isFaceUp()) {
+			return faceUp.hasRestriction( restriction);
+		} else {
+			return faceDown.hasRestriction( restriction);
 		}
 	}
 

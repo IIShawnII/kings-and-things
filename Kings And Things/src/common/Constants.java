@@ -37,7 +37,7 @@ public final class Constants {
 	public enum RandomEvent {Big_Juju, Dark_Plague, Defection, Good_Harvest, Mother_Lode, Teenie_Pox, Terrain_Disaster, Vandalism, Weather_Control, Willing_Workers}
 	public enum UpdateKey {Command, Message, PlayerCount, Players, Name, Port, IP, Player, Hex, Phase, HexState, Roll, Tile, Flipped, Setup, Regular, Combat, Special, Rack}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea, Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray}
-	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState}
+	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState, Special}
 	
 	//Regular turn phases
 	public enum RegularPhase {RECRUITING_CHARACTERS, RECRUITING_THINGS, RANDOM_EVENTS, MOVEMENT, COMBAT, CONSTRUCTION, SPECIAL_POWERS}

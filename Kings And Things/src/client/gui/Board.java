@@ -34,6 +34,7 @@ import common.game.PlayerInfo;
 import common.game.TileProperties;
 import common.game.ITileProperties;
 import common.Constants;
+import common.Constants.Ability;
 import common.Constants.Category;
 import common.Constants.UpdateKey;
 import common.Constants.RollReason;
@@ -111,7 +112,7 @@ public class Board extends JPanel{
 		}
 		//draw bank tiles
 		TILE_OUTLINE.translate( INITIAL_TILE_X_SHIFT, TILE_Y_SHIFT);
-		for( int i=0; i<5; i++){
+		for( int i=0; i<4; i++){
 			TILE_OUTLINE.translate( TILE_X_SHIFT, 0);
 			g2d.draw( TILE_OUTLINE);
 		}
@@ -187,17 +188,18 @@ public class Board extends JPanel{
 		jbSkip.setToolTipText( "Skip this phase");
 		jbSkip.setBounds( HEX_BOARD_SIZE.width-DICE_SIZE, getHeight()-DICE_SIZE-10, DICE_SIZE, DICE_SIZE);
 		add(jbSkip);
-		/*Rectangle bound = new Rectangle( INITIAL_TILE_X_SHIFT, TILE_Y_SHIFT, TILE_SIZE.width, TILE_SIZE.height);
+		Rectangle bound = new Rectangle( INITIAL_TILE_X_SHIFT, TILE_Y_SHIFT, TILE_SIZE.width, TILE_SIZE.height);
 		bound.translate( TILE_X_SHIFT, 0);
-		addTile( new Tile( new TileProperties( Category.Buildable)), bound, true);
+		//Tower
+		bound.translate( TILE_X_SHIFT, 0);
+		//Marker
 		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Gold)), bound, true);
-		bound.translate( TILE_X_SHIFT, 0);
-		addTile( new Tile( new TileProperties( Category.State)), bound, true);
+		addTile( new Tile( new TileProperties( Category.Gold)), bound, true);
 		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Special)), bound, true);
 		bound.translate( TILE_X_SHIFT, 0);
-		addTile( new Tile( new TileProperties( Category.Cup)), bound, true);*/
+		addTile( new Tile( new TileProperties( Category.Cup)), bound, true);
 		new UpdateReceiver();
 	}
 	
@@ -355,12 +357,12 @@ public class Board extends JPanel{
 	/**
 	 * animate placement of rack tiles
 	 */
-	private void animateRackPlacement(){
+	private void animateRackPlacement( ITileProperties[] rack){
 		if( !isActive){
-			noneAnimatedPlacement( setupTilesForRack( null));
+			noneAnimatedPlacement( setupTilesForRack( rack));
 			phaseDone = true;
 		}else{
-			MoveAnimation animation = new MoveAnimation( setupTilesForRack( null));
+			MoveAnimation animation = new MoveAnimation( setupTilesForRack( rack));
 			animation.start();
 		}
 	}
@@ -377,15 +379,33 @@ public class Board extends JPanel{
 			flip.start();
 		}
 	}
-
-	/**
-	 * place markers on the board, if no order is provided a demo setup will be placed
-	 */
+	
+	private boolean firstMarker = true;
 	private void placeMarkers(){
 		Point point = locks.getPermanentLock( Category.State).getCenter();
 		Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
+		if( firstMarker){
+			addTile( new Tile( playerMarker), bound, true).flip();
+			firstMarker = false;
+		}
 		addTile( new Tile( playerMarker), bound, true).flip();
-		addTile( new Tile( playerMarker), bound, true).flip();
+	}
+	
+	private boolean firstTower = true;
+	private ITileProperties tower = null;
+	private void placeTower(){
+		Point point = locks.getPermanentLock( Category.Buildable).getCenter();
+		Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
+		if( firstTower){
+			for( TileProperties tile : Constants.BUILDING.values()){
+				if( tile.getName().equals("Tower") && !tile.hasAbility( Ability.Neutralised)){
+					tower = tile;
+				}
+			}
+			addTile( new Tile( tower), bound, true).flip();
+			firstTower = false;
+		}
+		addTile( new Tile( tower), bound, true).flip();
 	}
 	
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
@@ -453,6 +473,9 @@ public class Board extends JPanel{
 					if( (boolean) update.getData( UpdateKey.Flipped)){
 						FlipAllHexes();
 					}
+					waitForPhase();
+					animateRackPlacement( (ITileProperties[]) update.getData( UpdateKey.Rack));
+					waitForPhase();
 					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
@@ -541,7 +564,8 @@ public class Board extends JPanel{
 				jtfStatus.setText( "Place things on board, if any");
 				break;
 			case PLACE_FREE_TOWER:
-				jtfStatus.setText( "Place onc free tower on board");
+				placeTower();
+				jtfStatus.setText( "Place one free tower on board");
 				break;
 			case SETUP_FINISHED:
 				jtfStatus.setText( "Setup Phase Complete");
@@ -655,7 +679,9 @@ public class Board extends JPanel{
 			if( ignore){
 				return;
 			}
-			if( newLock!=null&&currentTile!=null&& newLock.canHold( currentTile)){
+			if(moveHex){
+				
+			}else if( newLock!=null&&currentTile!=null&& newLock.canHold( currentTile)){
 				HexState hex = placeTileOnHex( currentTile);
 				if( hex!=null){
 					new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
