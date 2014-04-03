@@ -28,6 +28,7 @@ import client.gui.tiles.Tile;
 import client.gui.die.DiceRoller;
 import client.gui.util.LockManager;
 import client.gui.util.LockManager.Lock;
+import client.gui.util.undo.UndoManager;
 import common.game.Roll;
 import common.game.HexState;
 import common.game.PlayerInfo;
@@ -128,19 +129,20 @@ public class Board extends JPanel{
 		TILE_OUTLINE.setLocation( 0, 0);
 		g2d.dispose();
 	}
-	
-	private volatile boolean phaseDone = false;
-	private volatile boolean isActive = false;
-	private volatile boolean useDice = false;
 
+	private volatile boolean useDice = false;
+	private volatile boolean isActive = false;
+	private volatile boolean phaseDone = false;
+
+	private Input input;
+	private JButton jbSkip;
 	private DiceRoller dice;
 	private LockManager locks;
 	private JTextField jtfStatus;
-	private Input input;
+	private UndoManager undoManger;
+	private RollReason lastRollReason;
 	private ITileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
-	private RollReason lastRollReason;
-	private JButton jbSkip;
 	
 	/**
 	 * basic super constructor warper for JPanel
@@ -159,6 +161,8 @@ public class Board extends JPanel{
 	 * @param playerCount - number of players to be playing on this board
 	 */
 	public void init( int playerCount){
+		undoManger = new UndoManager();
+		
 		input = new Input();
 		addMouseListener( input);
 		addMouseWheelListener( input);
