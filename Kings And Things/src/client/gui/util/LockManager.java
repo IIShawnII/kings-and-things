@@ -10,11 +10,11 @@ import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
 import common.Constants.Category;
 import static common.Constants.HEX_SIZE;
+import static common.Constants.TILE_SIZE;
 import static common.Constants.LOCK_SIZE;
 import static common.Constants.BOARD_SIZE;
-import static common.Constants.MAX_RACK_SIZE;
 import static common.Constants.TILE_OUTLINE;
-import static common.Constants.TILE_SIZE;
+import static common.Constants.MAX_RACK_SIZE;
 import static common.Constants.BOARD_LOAD_COL;
 import static common.Constants.BOARD_LOAD_ROW;
 import static common.Constants.BOARD_TOP_PADDING;
@@ -115,6 +115,19 @@ public class LockManager {
 	
 	public Lock getLockForHex( Point point){
 		return hexBoardLocks[ point.x][point.y];
+	}
+	
+	public Lock getDropLock( Tile tile){
+		if( tile==null){
+			throw new NullPointerException("Tile cannot be null");
+		}
+		Lock lock = null;
+		if(tile.isTile()){
+			lock = getPermanentLock( Category.Cup);
+		}else{
+			lock = getPermanentLock( Category.Hex);
+		}
+		return lock.canTempHold( tile)?lock:null;
 	}
 	
 	private Lock lookThroughLocks( Lock[][] locks, Point point, boolean isTile){

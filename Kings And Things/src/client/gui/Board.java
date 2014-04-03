@@ -144,7 +144,6 @@ public class Board extends JPanel{
 	
 	/**
 	 * basic super constructor warper for JPanel
-	 * @param layout
 	 */
 	public Board(){
 		super( null, true);
@@ -194,7 +193,6 @@ public class Board extends JPanel{
 		bound.translate( TILE_X_SHIFT, 0);
 		//Marker
 		bound.translate( TILE_X_SHIFT, 0);
-		addTile( new Tile( new TileProperties( Category.Gold)), bound, true);
 		addTile( new Tile( new TileProperties( Category.Gold)), bound, true);
 		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Special)), bound, true);
@@ -663,13 +661,19 @@ public class Board extends JPanel{
 						currentTile.setBounds( bound);
 					}
 				}else{
-					newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
-					if( newLock!=null){
-						currentTile.setLockArea( newLock);
-						Point center = newLock.getCenter();
-						bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
+					if( moveHex){
+						newLock = locks.getDropLock( currentTile);
+					}else if(moveStack){
+						newLock = locks.getDropLock( currentTile);
+					}else{
+						newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
+						if( newLock!=null){
+							currentTile.setLockArea( newLock);
+							Point center = newLock.getCenter();
+							bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
+						}
+						currentTile.setBounds( bound);
 					}
-					currentTile.setBounds( bound);
 				}
 			}
 		}
