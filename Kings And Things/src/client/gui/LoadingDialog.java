@@ -362,7 +362,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 			return;
 		}
 		if(load.peekFirstInstruction()==UpdateInstruction.Category){
-			Category category = (Category)load.getData( UpdateKey.Command);
+			Category category = (Category)load.getData( UpdateKey.Category);
 			switch( category){
 				case Building:
 					jpbBuilding.setValue( jpbBuilding.getValue()+1);

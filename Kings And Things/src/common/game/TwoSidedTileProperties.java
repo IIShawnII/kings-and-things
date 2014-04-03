@@ -148,7 +148,7 @@ public class TwoSidedTileProperties implements ITileProperties {
 	@Override
 	public boolean isSpecialCharacter()
 	{
-		return faceUp.isSpecialCharacter();
+		return faceUp.isSpecialCharacter() && faceDown.isSpecialCharacter();
 	}
 
 	@Override
@@ -180,12 +180,20 @@ public class TwoSidedTileProperties implements ITileProperties {
 
 	@Override
 	public Biome getBiomeRestriction() {
-		return faceUp.getBiomeRestriction();
+		if (isFaceUp()) {
+			return faceUp.getBiomeRestriction();
+		}else{
+			return faceDown.getBiomeRestriction();
+		}
 	}
 
 	@Override
 	public Restriction getRestriction(int index) {
-		return faceUp.getRestriction(index);
+		if (isFaceUp()) {
+			return faceUp.getRestriction(index);
+		}else{
+			return faceDown.getRestriction(index);
+		}
 	}
 
 	private int calculateHashCode()

@@ -113,19 +113,6 @@ public class ConnectionLogic implements Runnable {
 					update.addInstruction( UpdateInstruction.DieValue);
 					update.putData( UpdateKey.Roll, ((DieRoll)event).getDieRoll());
 				}
-				else if( event instanceof CommandRejected){
-					UpdateInstruction instruction = ((CommandRejected)event).getInstruction(); 
-					if(instruction==null){
-						return;
-					}
-					switch( instruction){
-						case TieRoll:
-							update.addInstruction( instruction);
-							break;
-						default:
-							throw new IllegalStateException("Logic.Receive " + (player!=null?player.getID():"-1") + ": No Support for: " + instruction);
-					}
-				}
 				else if(event instanceof HexOwnershipChanged){
 					update.addInstruction( UpdateInstruction.HexOwnership);
 					update.putData( UpdateKey.HexState, ((HexOwnershipChanged)event).getChangedHex());
@@ -151,6 +138,22 @@ public class ConnectionLogic implements Runnable {
 					update.putData( UpdateKey.Hex, progress.getHexes( -1));
 					update.putData( UpdateKey.Special, progress.getSpecial( -1));
 					update.putData( UpdateKey.Rack, progress.getRack( player.getID()));
+				}
+				else if( event instanceof CommandRejected){
+					UpdateInstruction instruction = ((CommandRejected)event).getInstruction(); 
+					if(instruction==null){
+						return;
+					}
+					update.addInstruction( UpdateInstruction.Rejected);
+					switch( instruction){
+						case TieRoll:
+						case SeaHexChanged:
+						case HexOwnership:
+							update.putData(UpdateKey.Instruction, instruction);
+							break;
+						default:
+							throw new IllegalStateException("Logic.Receive " + (player!=null?player.getID():"-1") + ": No Support for: " + instruction);
+					}
 				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);

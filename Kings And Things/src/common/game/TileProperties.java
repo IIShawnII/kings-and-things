@@ -300,7 +300,7 @@ public class TileProperties implements ITileProperties{
 
 	@Override
 	public Restriction getRestriction( int index){
-		return restrictions.get( index);
+		return hasRestriction()?restrictions.get( index):Restriction.None;
 	}
 	
 	@Override

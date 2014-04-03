@@ -61,7 +61,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			update.addInstruction( UpdateInstruction.Category);
 			Files.walkFileTree( RESOURCES_DIRECTORY, this);
 			update.clearDate();
-			update.putData( UpdateKey.Command, Category.END);
+			update.putData( UpdateKey.Category, Category.END);
 			update.postInternalEvent( PROGRESS);
 		} catch ( IOException e) {
 			e.printStackTrace();
@@ -178,7 +178,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					//will never be called
 			}
 			copyTile = 0;
-			update.putData( UpdateKey.Command, currentCategory);
+			update.putData( UpdateKey.Category, currentCategory);
 			update.postInternalEvent( PROGRESS);
 		}
 		return result;

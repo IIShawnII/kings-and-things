@@ -195,8 +195,6 @@ public class Board extends JPanel{
 		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Gold)), bound, true);
 		bound.translate( TILE_X_SHIFT, 0);
-		addTile( new Tile( new TileProperties( Category.Special)), bound, true);
-		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Cup)), bound, true);
 		new UpdateReceiver();
 	}
@@ -438,6 +436,9 @@ public class Board extends JPanel{
 					repaint();
 					phaseDone = true;
 					break;
+				case Rejected:
+					manageRejection( (UpdateInstruction)update.getData( UpdateKey.Instruction));
+					break;
 				case PlaceBoard:
 					animateHexPlacement( (HexState[]) update.getData( UpdateKey.Hex));
 					break;
@@ -446,9 +447,6 @@ public class Board extends JPanel{
 					break;
 				case RegularPhase:
 					manageRegularPhase( (RegularPhase)update.getData( UpdateKey.Phase));
-					break;
-				case TieRoll:
-					prepareForRollDice(2, lastRollReason, "Tie Roll, Roll again", 2);
 					break;
 				case DieValue:
 					Roll roll = (Roll)update.getData( UpdateKey.Roll);
@@ -485,7 +483,7 @@ public class Board extends JPanel{
 			}
 		}
 	}
-	
+
 	/**
 	 * used primarily for animation wait time.
 	 * thread sleeps till animation is over.
@@ -505,6 +503,20 @@ public class Board extends JPanel{
 		lastRollReason = reason;
 		Roll roll = new Roll( count, null, reason, currentPlayer.getID(), value);
 		new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
+	}
+	
+	private void manageRejection( UpdateInstruction data) {
+		switch( data){
+			case TieRoll:
+				prepareForRollDice(2, lastRollReason, "Tie Roll, Roll again", 2);
+				break;
+			case SeaHexChanged:
+				break;
+			case HexOwnership:
+				break;
+			default:
+				throw new IllegalStateException( "No handle for rejection of: " + data);
+		}
 	}
 	
 	private void manageRegularPhase( RegularPhase phase) {
@@ -661,19 +673,17 @@ public class Board extends JPanel{
 						currentTile.setBounds( bound);
 					}
 				}else{
-					if( moveHex){
-						newLock = locks.getDropLock( currentTile);
-					}else if(moveStack){
+					if( moveHex || moveStack){
 						newLock = locks.getDropLock( currentTile);
 					}else{
 						newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
-						if( newLock!=null){
-							currentTile.setLockArea( newLock);
-							Point center = newLock.getCenter();
-							bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
-						}
-						currentTile.setBounds( bound);
 					}
+					if( newLock!=null){
+						currentTile.setLockArea( newLock);
+						Point center = newLock.getCenter();
+						bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
+					}
+					currentTile.setBounds( bound);
 				}
 			}
 		}
@@ -683,12 +693,16 @@ public class Board extends JPanel{
 			if( ignore){
 				return;
 			}
-			if(moveHex){
-				
-			}else if( newLock!=null&&currentTile!=null&& newLock.canHold( currentTile)){
-				HexState hex = placeTileOnHex( currentTile);
-				if( hex!=null){
-					new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
+			if(newLock!=null&&currentTile!=null){
+				if( moveHex){
+					new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( currentPlayer.getID());
+				}else if(moveStack){
+					//TODO support for moving stack, some of stack and dropping to Cup
+				}else if(newLock.canHold( currentTile)){//TODO check canHold, might be unnecessary condition
+					HexState hex = placeTileOnHex( currentTile);
+					if( hex!=null){
+						new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
+					}
 				}
 			}
 			currentTile = null; 
@@ -798,7 +812,8 @@ public class Board extends JPanel{
 		private Tile tile;
 		private Point end;
 		private Timer timer;
-		private int slope, intercept, xTemp=-1, yTemp;
+		private double slope, intercept;
+		private int xTemp=-1, yTemp;
 		private Tile[] list;
 		private int index = -1;
 		private Dimension size;
@@ -808,7 +823,7 @@ public class Board extends JPanel{
 			this.end = tile.getDestination();
 			xTemp = tile.getX();
 			yTemp = tile.getY();
-			slope = (end.y-yTemp)/(end.x-xTemp);
+			slope = (end.y-yTemp)/(double)(end.x-xTemp);
 			intercept = yTemp-slope*xTemp;
 			size = tile.getSize();
 		}

@@ -62,10 +62,11 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 		currentState.getBoard().fillArray( placement.getHexes());
 		placement.postNetworkEvent( ALL_PLAYERS_ID);
 		
-		SpecialCharacterManager bank = currentState.getBankHeroes();
+		//send to client only when client can interact with the cards
+		/*SpecialCharacterManager bank = currentState.getBankHeroes();
 		SpecialCharUpdate special = new SpecialCharUpdate( bank.getAvailableHeroes().size());
 		bank.getAvailableHeroes().toArray( special.getSpecial());
-		special.postNetworkEvent( ALL_PLAYERS_ID);
+		special.postNetworkEvent( ALL_PLAYERS_ID);*/
 		
 		new GameStarted(demoMode, currentState).postInternalEvent();
 		//new Flip().postNetworkEvent();
@@ -314,7 +315,7 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ExchangeSeaHexCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),UpdateInstruction.SeaHexChanged).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -331,7 +332,7 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process GiveHexToPlayerCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),UpdateInstruction.HexOwnership).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
