@@ -113,8 +113,8 @@ public final class Constants {
 	//Sizes
 	public static final int DICE_SIZE = 70;
 	public static final int LOCK_SIZE = 28;
-	public static final int HEX_HEIGHT = 70;
 	public static final Polygon HEX_OUTLINE;
+	public static final int HEX_HEIGHT = 70;
 	public static final int HEX_SPACING = 16;
 	public static final int TIILE_HEIGHT = 60;
 	public static final Rectangle TILE_OUTLINE;
@@ -122,6 +122,7 @@ public final class Constants {
 	public static final int IP_COLUMN_COUNT = 12;
 	public static final int PLAYER_FONT_SIZE = 12;
 	public static final int PORT_COLUMN_COUNT = 7;
+	public static final Polygon HEX_OUTLINE_IMAGE;
 	public static final int TIILE_HEIGHT_BOARD = 35;
 	public static final int BOARD_TOP_PADDING = 100;
 	public static final int BOARD_WIDTH_SEGMENT = 8;
@@ -178,6 +179,9 @@ public final class Constants {
 	static{
 		int w = (int) (HEX_SIZE.getWidth()/4)+1;
 		int h = (int) (HEX_SIZE.getHeight()/2)+2;
+		HEX_OUTLINE_IMAGE = new Polygon( new int[]{w,0,w,w*3,w*4,w*3}, new int[]{h*2,h,0,0,h,h*2}, 6);
+		w -= 1;
+		h -= 1;
 		HEX_OUTLINE = new Polygon( new int[]{w,0,w,w*3,w*4,w*3}, new int[]{h*2,h,0,0,h,h*2}, 6);
 		TILE_OUTLINE = new Rectangle( 0, 0, TILE_SIZE.width, TILE_SIZE.height);
 		IMAGE_BACKGROUND = loadImage( "Resources\\Misc\\-n Woodboard.jpg");

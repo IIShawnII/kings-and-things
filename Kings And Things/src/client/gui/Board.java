@@ -51,7 +51,7 @@ import static common.Constants.HEX_SIZE;
 import static common.Constants.DICE_SIZE;
 import static common.Constants.TILE_SIZE;
 import static common.Constants.BOARD_SIZE;
-import static common.Constants.HEX_OUTLINE;
+import static common.Constants.HEX_OUTLINE_IMAGE;
 import static common.Constants.TILE_OUTLINE;
 import static common.Constants.HEX_BOARD_SIZE;
 import static common.Constants.BOARD_LOAD_ROW;
@@ -89,17 +89,17 @@ public class Board extends JPanel implements CanvasParent{
 		g2d.setStroke( new BasicStroke( 5));
 		g2d.setColor( Color.BLACK);
 		//position the outline for hex
-		HEX_OUTLINE.translate( HEX_X_SHIFT, HEX_Y_SHIFT);
-		g2d.drawPolygon( HEX_OUTLINE);
-		HEX_OUTLINE.translate( -HEX_X_SHIFT, -HEX_Y_SHIFT);
+		HEX_OUTLINE_IMAGE.translate( HEX_X_SHIFT, HEX_Y_SHIFT);
+		g2d.drawPolygon( HEX_OUTLINE_IMAGE);
+		HEX_OUTLINE_IMAGE.translate( -HEX_X_SHIFT, -HEX_Y_SHIFT);
 		//draw hex board
 		for( int ring=0; ring<BOARD_LOAD_ROW.length; ring++){
 			for( int count=0; count<BOARD_LOAD_ROW[ring].length; count++){
 				x = (WIDTH_SEGMENT*Constants.BOARD_LOAD_COL[ring][count]);
 				y = (HEIGHT_SEGMENT*BOARD_LOAD_ROW[ring][count])+Constants.BOARD_TOP_PADDING;
-				HEX_OUTLINE.translate( ((int) (x-HEX_SIZE.getWidth()/2))-2, ((int) (y-HEX_SIZE.getHeight()/2)-3));
-				g2d.drawPolygon( HEX_OUTLINE);
-				HEX_OUTLINE.translate( -((int) (x-HEX_SIZE.getWidth()/2)-2), -((int) (y-HEX_SIZE.getHeight()/2)-3));
+				HEX_OUTLINE_IMAGE.translate( ((int) (x-HEX_SIZE.getWidth()/2))-2, ((int) (y-HEX_SIZE.getHeight()/2)-3));
+				g2d.drawPolygon( HEX_OUTLINE_IMAGE);
+				HEX_OUTLINE_IMAGE.translate( -((int) (x-HEX_SIZE.getWidth()/2)-2), -((int) (y-HEX_SIZE.getHeight()/2)-3));
 			}
 		}
 		//draw bank tiles
@@ -514,7 +514,7 @@ public class Board extends JPanel implements CanvasParent{
 				break;
 			case HexOwnership:
 				jtfStatus.setText( "WARN - cannot own this hex");
-				add( lastRemovedTile);
+				add( lastRemovedTile, 0);
 				revalidate();
 				controller.undo();
 				break;
@@ -760,7 +760,7 @@ public class Board extends JPanel implements CanvasParent{
 					add( currentTile, 0);
 					revalidate();
 					thingUndo = new ThingPlacmentUndo();
-					thingUndo.addStart( ThingPlacmentUndo.createOperation( currentTile, null, currentTile.getLock().getCenter()));
+					thingUndo.addStart( ThingPlacmentUndo.createOperation( currentTile, null, e.getPoint()));
 					//check to see if it is hex
 					if( !currentTile.isTile() && currentTile.hasLock()){
 						if( !moveHex){
