@@ -484,7 +484,7 @@ public abstract class CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process EndPlayerTurnCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),UpdateInstruction.Skip).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getPlayerByPlayerNumber(command.getID()).getPlayerInfo(),UpdateInstruction.Skip).postNetworkEvent(command.getID());
 			}
 		}
 	}
