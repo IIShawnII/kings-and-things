@@ -1,10 +1,5 @@
 package server.gui;
 
-import static common.Constants.CONSOLE_SIZE;
-import static common.Constants.MAX_PLAYERS;
-import static common.Constants.PLAYER_START_ID;
-import static common.Constants.PLAYER_ID_MULTIPLIER;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -23,6 +18,7 @@ import com.google.common.eventbus.Subscribe;
 
 import server.event.EndServer;
 import common.Console;
+import common.Constants;
 import common.event.ConsoleMessage;
 
 /**
@@ -72,7 +68,7 @@ public class ServerGUI extends JFrame implements Runnable{
 		
 		JPanel jpPlayers = new JPanel( new GridLayout( 2, 2, 5, 5));
 		PlayerStatus player;
-		for( int ID=PLAYER_START_ID, count=0; count<MAX_PLAYERS; ID*=PLAYER_ID_MULTIPLIER, count++){
+		for( int ID=Constants.PLAYER_START_ID, count=0; count<Constants.MAX_PLAYERS; ID*=Constants.PLAYER_ID_MULTIPLIER, count++){
 			player = new PlayerStatus( ID);
 			player.initialize();
 			jpPlayers.add( player);
@@ -84,7 +80,7 @@ public class ServerGUI extends JFrame implements Runnable{
 		jpConsol.setBorder( BorderFactory.createEmptyBorder( 0, 5, 5, 5));
 		console = new Console();
 		console.setEditable( false);
-		console.setPreferredSize( CONSOLE_SIZE);
+		console.setPreferredSize( Constants.CONSOLE_SIZE);
 		JScrollPane jsp = new JScrollPane( console);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);

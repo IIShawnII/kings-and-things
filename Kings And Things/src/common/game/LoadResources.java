@@ -10,18 +10,6 @@ import java.nio.file.FileVisitor;
 import java.nio.file.FileVisitResult;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import static common.Constants.RESOURCE_PATH;
-import static common.Constants.LOAD_RESOURCE;
-import static common.Constants.LOAD_SPECIAL;
-import static common.Constants.PROGRESS;
-import static common.Constants.LOAD_CUP;
-import static common.Constants.BUILDING;
-import static common.Constants.SPECIAL;
-import static common.Constants.IMAGES;
-import static common.Constants.STATE;
-import static common.Constants.GOLD;
-import static common.Constants.CUP;
-import static common.Constants.HEX;
 import common.Constants;
 import common.Constants.Biome;
 import common.Constants.Ability;
@@ -30,8 +18,9 @@ import common.Constants.Category;
 import common.Constants.UpdateKey;
 import common.Constants.Restriction;
 import common.Constants.UpdateInstruction;
-import common.event.AbstractUpdateReceiver;
+
 import common.event.UpdatePackage;
+import common.event.AbstractUpdateReceiver;
 
 public class LoadResources implements Runnable, FileVisitor< Path>{
 
@@ -45,7 +34,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	private UpdateReceiver receiver;
 	
 	public LoadResources( boolean isServer){
-		this( RESOURCE_PATH, isServer);
+		this( Constants.RESOURCE_PATH, isServer);
 	}
 	
 	public LoadResources( String directory, boolean isServer){
@@ -62,7 +51,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			Files.walkFileTree( RESOURCES_DIRECTORY, this);
 			update.clearDate();
 			update.putData( UpdateKey.Category, Category.END);
-			update.postInternalEvent( PROGRESS);
+			update.postInternalEvent( Constants.PROGRESS);
 		} catch ( IOException e) {
 			e.printStackTrace();
 		}
@@ -99,14 +88,14 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 						tile.setCategory( Category.Building);
 						for(int i=0; i<6; i++){
 							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
-							CUP.put( tileCopy.hashCode(), tileCopy);
+							Constants.CUP.put( tileCopy.hashCode(), tileCopy);
 							addImage(tileCopy.hashCode(), file);
 						}
 					}else{
 						tile.setInfinite();
 						tile.setSpecialFlip();
 						tile.setCategory( Category.Buildable);
-						BUILDING.put( tile.hashCode(), tile);
+						Constants.BUILDING.put( tile.hashCode(), tile);
 						addImage(tile.hashCode(), file);
 					}
 					break;
@@ -123,13 +112,13 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					}
 					tile.setCategory( currentCupCategory);
 					if( copyTile==0){
-						CUP.put( tile.hashCode(), tile);
-						addImage(tile.hashCode(), file, LOAD_CUP);
+						Constants.CUP.put( tile.hashCode(), tile);
+						addImage(tile.hashCode(), file);
 					}else{
 						for( int i=0; i<copyTile; i++){
 							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
-							CUP.put( tileCopy.hashCode(), tileCopy);
-							addImage(tileCopy.hashCode(), file, LOAD_CUP);
+							Constants.CUP.put( tileCopy.hashCode(), tileCopy);
+							addImage(tileCopy.hashCode(), file);
 						}
 					}
 					break;
@@ -137,7 +126,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setNoFlip();
 					tile.setInfinite();
 					tile.setCategory( currentCategory);
-					GOLD.put( tile.hashCode(), tile);
+					Constants.GOLD.put( tile.hashCode(), tile);
 					addImage(tile.hashCode(), file);
 					break;
 				case Hex:
@@ -154,22 +143,22 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setCategory( currentCategory);
 					for( int i=0; i<copyTile; i++){
 						TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
-						HEX.put( tileCopy.hashCode(), tileCopy);
+						Constants.HEX.put( tileCopy.hashCode(), tileCopy);
 						addImage(tileCopy.hashCode(), file);
 					}
 					break;
 				case Special:
 					tile.setMoveSpeed(Constants.MAX_MOVE_SPEED);
 					tile.setSpecialFlip();
-					SPECIAL.put( tile.hashCode(), tile);
+					Constants.SPECIAL.put( tile.hashCode(), tile);
 					tile.setCategory( currentCategory);
-					addImage(tile.hashCode(), file, LOAD_SPECIAL);
+					addImage(tile.hashCode(), file);
 					break;
 				case State:
 					tile.setNoFlip();
 					tile.setInfinite();
 					tile.setCategory( currentCategory);
-					STATE.put( tile.getRestriction( 0), tile);
+					Constants.STATE.put( tile.getRestriction( 0), tile);
 					addImage(tile.hashCode(), file);
 					break;
 					
@@ -179,20 +168,14 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			}
 			copyTile = 0;
 			update.putData( UpdateKey.Category, currentCategory);
-			update.postInternalEvent( PROGRESS);
+			update.postInternalEvent( Constants.PROGRESS);
 		}
 		return result;
 	}
 	
 	private void addImage( final int hashCode, Path file) throws IOException{
-		addImage( hashCode, file, true);
-	}
-	
-	private void addImage( final int hashCode, Path file, boolean condition) throws IOException{
 		if( isClient){
-			if( condition){
-				IMAGES.put( hashCode, ImageIO.read( file.toFile()));
-			}
+			Constants.IMAGES.put( hashCode, ImageIO.read( file.toFile()));
 		}
 	}
 	
@@ -226,7 +209,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
-			super( INTERNAL, LOAD_RESOURCE, LoadResources.this);
+			super( INTERNAL, Constants.LOAD_RESOURCE, LoadResources.this);
 		}
 
 		@Override

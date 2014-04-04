@@ -8,16 +8,11 @@ import java.awt.Rectangle;
 import client.gui.Board;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
+import common.Constants;
 import common.Constants.Category;
-import static common.Constants.HEX_SIZE;
 import static common.Constants.TILE_SIZE;
 import static common.Constants.LOCK_SIZE;
 import static common.Constants.BOARD_SIZE;
-import static common.Constants.TILE_OUTLINE;
-import static common.Constants.MAX_RACK_SIZE;
-import static common.Constants.BOARD_LOAD_COL;
-import static common.Constants.BOARD_LOAD_ROW;
-import static common.Constants.BOARD_TOP_PADDING;
 
 public class LockManager {
 	
@@ -27,7 +22,7 @@ public class LockManager {
 	private Lock markerLock, cupLock;/*specialLock,*/ 
 	
 	public LockManager( int playerCount){
-		hexLock = new Lock( 8+(HEX_SIZE.width/2)-LOCK_SIZE/2, 8+(HEX_SIZE.height/2)-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE, true, true);
+		hexLock = new Lock( 8+(Constants.HEX_SIZE.width/2)-LOCK_SIZE/2, 8+(Constants.HEX_SIZE.height/2)-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE, true, true);
 		Rectangle bound = new Rectangle( Board.INITIAL_TILE_X_SHIFT, Board.TILE_Y_SHIFT, TILE_SIZE.width, TILE_SIZE.height);
 		bound.translate( Board.TILE_X_SHIFT, 0);
 		fortLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
@@ -39,22 +34,22 @@ public class LockManager {
 		//specialLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
 		//bound.translate( Board.TILE_X_SHIFT, 0);
 		cupLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
-		rackLocks = new Lock[1][MAX_RACK_SIZE];
+		rackLocks = new Lock[1][Constants.MAX_RACK_SIZE];
 		hexBoardLocks = new Lock[7][13];
-		bound.setLocation( BOARD_SIZE.width-Board.PADDING+2, BOARD_SIZE.height-TILE_OUTLINE.height-Board.PADDING+2);
+		bound.setLocation( BOARD_SIZE.width-Board.PADDING+2, BOARD_SIZE.height-Constants.TILE_OUTLINE.height-Board.PADDING+2);
 		for( int i=0; i<rackLocks[0].length;i++){
 			if(i==5){
-				bound.setLocation( BOARD_SIZE.width-Board.PADDING+2, BOARD_SIZE.height-(2*TILE_OUTLINE.height)-(2*Board.PADDING)+2);
+				bound.setLocation( BOARD_SIZE.width-Board.PADDING+2, BOARD_SIZE.height-(2*Constants.TILE_OUTLINE.height)-(2*Board.PADDING)+2);
 			}
 			bound.translate( -Board.TILE_X_SHIFT, 0);
 			rackLocks[0][i] = new Lock( bound.x+LOCK_SIZE/2, bound.y+LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
 		}
 		int x=0, y=0;
-		for(int ring=0; ring<BOARD_LOAD_ROW.length; ring++){
-			for( int count=0; count<BOARD_LOAD_ROW[ring].length; count++){
-				x = (Board.WIDTH_SEGMENT*BOARD_LOAD_COL[ring][count]);
-				y = (Board.HEIGHT_SEGMENT*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
-				hexBoardLocks[BOARD_LOAD_COL[ring][count]-1][BOARD_LOAD_ROW[ring][count]-1] = new Lock( x-LOCK_SIZE/2, y-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE, false, true);
+		for(int ring=0; ring<Constants.BOARD_LOAD_ROW.length; ring++){
+			for( int count=0; count<Constants.BOARD_LOAD_ROW[ring].length; count++){
+				x = (Board.WIDTH_SEGMENT*Constants.BOARD_LOAD_COL[ring][count]);
+				y = (Board.HEIGHT_SEGMENT*Constants.BOARD_LOAD_ROW[ring][count])+Constants.BOARD_TOP_PADDING;
+				hexBoardLocks[Constants.BOARD_LOAD_COL[ring][count]-1][Constants.BOARD_LOAD_ROW[ring][count]-1] = new Lock( x-LOCK_SIZE/2, y-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE, false, true);
 			}
 		}
 	}
@@ -156,7 +151,7 @@ public class LockManager {
 	
 	public Point convertToRowAndCol( int x, int y){
 		int row = x/Board.WIDTH_SEGMENT;
-		int col = (y-BOARD_TOP_PADDING)/Board.HEIGHT_SEGMENT;
+		int col = (y-Constants.BOARD_TOP_PADDING)/Board.HEIGHT_SEGMENT;
 		return new Point( row-1, col-1);
 	}
 	

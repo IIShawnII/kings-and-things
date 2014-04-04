@@ -5,28 +5,24 @@ import java.io.IOException;
 import common.Logger;
 import common.game.PlayerInfo;
 import common.network.Connection;
+import common.Constants;
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
 import common.event.AbstractEvent;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
-import common.event.network.CommandRejected;
-import common.event.network.DieRoll;
-import common.event.network.ExchangedSeaHex;
 import common.event.network.Flip;
-import common.event.network.GameStateProgress;
-import common.event.network.HexOwnershipChanged;
-import common.event.network.SpecialCharUpdate;
+import common.event.network.DieRoll;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
 import common.event.network.CurrentPhase;
 import common.event.network.HexPlacement;
-import static common.Constants.GUI;
-import static common.Constants.LOGIC;
-import static common.Constants.BOARD;
-import static common.Constants.PUBLIC;
-import static common.Constants.PLAYER_READY;
+import common.event.network.CommandRejected;
+import common.event.network.ExchangedSeaHex;
+import common.event.network.GameStateProgress;
+import common.event.network.SpecialCharUpdate;
+import common.event.network.HexOwnershipChanged;
 
 public class ConnectionLogic implements Runnable {
 
@@ -53,11 +49,11 @@ public class ConnectionLogic implements Runnable {
 		}
 		Logger.getStandardLogger().info( "listening");
 		UpdatePackage update = new UpdatePackage("Logic.Run", this);
-		int ID = PUBLIC;
+		int ID = Constants.PUBLIC;
 		try {
 			while( !finished && (event = connection.recieve())!=null){
 				update.clear();
-				ID = player==null ? PUBLIC: player.getID()|BOARD;
+				ID = player==null ? Constants.PUBLIC: player.getID()|Constants.BOARD;
 				Logger.getStandardLogger().info( "Received "+(player!=null?player.getID():"-1") + ": " + event);
 				if( event instanceof PlayersList){
 					PlayerInfo[] players = ((PlayersList)event).getPlayers();
@@ -66,16 +62,16 @@ public class ConnectionLogic implements Runnable {
 					update.putData( UpdateKey.Player, player);
 					update.putData( UpdateKey.Players, players);
 					if( !gameStarted){
-						ID = PUBLIC;
+						ID = Constants.PUBLIC;
 					}else{
-						ID |= GUI;
+						ID |= Constants.GUI;
 					}
 				} 
 				else if( event instanceof StartGame){
 					update.addInstruction( UpdateInstruction.Start);
 					update.putData( UpdateKey.PlayerCount, ((StartGame)event).getPlayerCount());
 					gameStarted = true;
-					ID = PUBLIC;//public event
+					ID = Constants.PUBLIC;//public event
 				} 
 				else if( event instanceof PlayerState){
 					//first data from server, with PlayerInfo object
@@ -97,7 +93,7 @@ public class ConnectionLogic implements Runnable {
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
 					update.putData( UpdateKey.Player, player);
 					update.putData( UpdateKey.Players, phase.getPlayers());
-					ID |= GUI;
+					ID |= Constants.GUI;
 					if( phase.isSetupPhase()){
 						update.addInstruction( UpdateInstruction.SetupPhase);
 						update.putData( UpdateKey.Phase, phase.getPhase());
@@ -149,6 +145,7 @@ public class ConnectionLogic implements Runnable {
 						case TieRoll:
 						case SeaHexChanged:
 						case HexOwnership:
+						case Skip:
 							update.putData(UpdateKey.Instruction, instruction);
 							break;
 						default:
@@ -193,7 +190,7 @@ public class ConnectionLogic implements Runnable {
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
-			super( INTERNAL, LOGIC, ConnectionLogic.this);
+			super( INTERNAL, Constants.LOGIC, ConnectionLogic.this);
 		}
 
 		@Override
@@ -290,7 +287,7 @@ public class ConnectionLogic implements Runnable {
 				sendToServer( new UpdatePackage( UpdateInstruction.State, UpdateKey.Player, player, "Logic "+player.getID()));
 			}else{
 				Logger.getStandardLogger().info( "Send New Player");
-				sendToServer( new UpdatePackage( UpdateInstruction.State, UpdateKey.Player, new PlayerInfo( name, PUBLIC, PLAYER_READY), "Logic -1"));
+				sendToServer( new UpdatePackage( UpdateInstruction.State, UpdateKey.Player, new PlayerInfo( name, Constants.PUBLIC, Constants.PLAYER_READY), "Logic -1"));
 			}
 			return UpdateInstruction.Connect;
 		}
@@ -305,7 +302,7 @@ public class ConnectionLogic implements Runnable {
 	private class UpdateTransmitter extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateTransmitter() {
-			super( NETWORK, LOGIC, ConnectionLogic.this);
+			super( NETWORK, Constants.LOGIC, ConnectionLogic.this);
 		}
 
 		@Override

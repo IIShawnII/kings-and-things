@@ -1,9 +1,8 @@
 package client.gui;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.Timer;
 import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.ImageIcon;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -28,7 +27,11 @@ import client.gui.tiles.Tile;
 import client.gui.die.DiceRoller;
 import client.gui.util.LockManager;
 import client.gui.util.LockManager.Lock;
+import client.gui.util.animation.CanvasParent;
+import client.gui.util.animation.FlipAll;
+import client.gui.util.animation.MoveAnimation;
 import client.gui.util.undo.UndoManager;
+import client.gui.util.undo.ThingPlacmentUndo;
 import common.game.Roll;
 import common.game.HexState;
 import common.game.PlayerInfo;
@@ -44,35 +47,23 @@ import common.Constants.RegularPhase;
 import common.Constants.UpdateInstruction;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
-import static common.Constants.BOARD;
 import static common.Constants.HEX_SIZE;
 import static common.Constants.DICE_SIZE;
 import static common.Constants.TILE_SIZE;
-import static common.Constants.IMAGE_SKIP;
-import static common.Constants.DRAW_LOCKS;
 import static common.Constants.BOARD_SIZE;
 import static common.Constants.HEX_OUTLINE;
 import static common.Constants.TILE_OUTLINE;
-import static common.Constants.MOVE_DISTANCE;
-import static common.Constants.MAX_RACK_SIZE;
 import static common.Constants.HEX_BOARD_SIZE;
 import static common.Constants.BOARD_LOAD_ROW;
-import static common.Constants.BOARD_LOAD_COL;
-import static common.Constants.ANIMATION_DELAY;
-import static common.Constants.IMAGE_BACKGROUND;
-import static common.Constants.BOARD_TOP_PADDING;
-import static common.Constants.MAX_HEXES_ON_BOARD;
-import static common.Constants.BOARD_WIDTH_SEGMENT;
 import static common.Constants.BOARD_RIGHT_PADDING;
-import static common.Constants.BOARD_HEIGHT_SEGMENT;
 import static common.Constants.PLAYERS_STATE_PADDING;
 
 @SuppressWarnings("serial")
-public class Board extends JPanel{
+public class Board extends JPanel implements CanvasParent{
 	
 	private static final BufferedImage IMAGE;
-	public static final int HEIGHT_SEGMENT = (int) ((HEX_BOARD_SIZE.getHeight())/BOARD_HEIGHT_SEGMENT);
-	public static final int WIDTH_SEGMENT = (int) ((HEX_BOARD_SIZE.getWidth())/BOARD_WIDTH_SEGMENT);
+	public static final int HEIGHT_SEGMENT = (int) ((HEX_BOARD_SIZE.getHeight())/Constants.BOARD_HEIGHT_SEGMENT);
+	public static final int WIDTH_SEGMENT = (int) ((HEX_BOARD_SIZE.getWidth())/Constants.BOARD_WIDTH_SEGMENT);
 	//used for placing bank outlines
 	public static final int INITIAL_TILE_X_SHIFT = WIDTH_SEGMENT/2;
 	public static final int TILE_X_SHIFT = (int) (WIDTH_SEGMENT*1.2);
@@ -92,7 +83,7 @@ public class Board extends JPanel{
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		//draw background on the new image
-		g2d.drawImage( IMAGE_BACKGROUND, 0, 0, BOARD_SIZE.width, BOARD_SIZE.height, null);
+		g2d.drawImage( Constants.IMAGE_BACKGROUND, 0, 0, BOARD_SIZE.width, BOARD_SIZE.height, null);
 		int x=0, y=0;
 		//create a thicker stroke
 		g2d.setStroke( new BasicStroke( 5));
@@ -104,8 +95,8 @@ public class Board extends JPanel{
 		//draw hex board
 		for( int ring=0; ring<BOARD_LOAD_ROW.length; ring++){
 			for( int count=0; count<BOARD_LOAD_ROW[ring].length; count++){
-				x = (WIDTH_SEGMENT*BOARD_LOAD_COL[ring][count]);
-				y = (HEIGHT_SEGMENT*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
+				x = (WIDTH_SEGMENT*Constants.BOARD_LOAD_COL[ring][count]);
+				y = (HEIGHT_SEGMENT*BOARD_LOAD_ROW[ring][count])+Constants.BOARD_TOP_PADDING;
 				HEX_OUTLINE.translate( ((int) (x-HEX_SIZE.getWidth()/2))-2, ((int) (y-HEX_SIZE.getHeight()/2)-3));
 				g2d.drawPolygon( HEX_OUTLINE);
 				HEX_OUTLINE.translate( -((int) (x-HEX_SIZE.getWidth()/2)-2), -((int) (y-HEX_SIZE.getHeight()/2)-3));
@@ -119,7 +110,7 @@ public class Board extends JPanel{
 		}
 		//draw rack tiles
 		TILE_OUTLINE.setLocation( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-TILE_OUTLINE.height-PADDING);
-		for( int i=0; i<MAX_RACK_SIZE; i++){
+		for( int i=0; i<Constants.MAX_RACK_SIZE; i++){
 			if(i==5){
 				TILE_OUTLINE.setLocation( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-(2*TILE_OUTLINE.height)-(2*PADDING));
 			}
@@ -134,13 +125,14 @@ public class Board extends JPanel{
 	private volatile boolean isActive = false;
 	private volatile boolean phaseDone = false;
 
-	private Input input;
+	private Tile lastRemovedTile;
 	private JButton jbSkip;
 	private DiceRoller dice;
 	private LockManager locks;
 	private JTextField jtfStatus;
-	private UndoManager undoManger;
+	private Controller controller;
 	private RollReason lastRollReason;
+	private MoveAnimation moveAnimation;
 	private ITileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
 	
@@ -153,7 +145,7 @@ public class Board extends JPanel{
 
 	public void setActive( boolean active) {
 		this.isActive = active;
-		input.ignoreAll( !active);
+		controller.ignoreAll( !active);
 	}
 	
 	/**
@@ -161,17 +153,17 @@ public class Board extends JPanel{
 	 * @param playerCount - number of players to be playing on this board
 	 */
 	public void init( int playerCount){
-		undoManger = new UndoManager();
+		moveAnimation = new MoveAnimation( this);
 		
-		input = new Input();
-		addMouseListener( input);
-		addMouseWheelListener( input);
-		addMouseMotionListener( input);
+		controller = new Controller();
+		addMouseListener( controller);
+		addMouseWheelListener( controller);
+		addMouseMotionListener( controller);
 		
 		dice = new DiceRoller();
 		dice.setBounds( HEX_BOARD_SIZE.width+DICE_SIZE/2, getHeight()-DICE_SIZE-10, DICE_SIZE, DICE_SIZE);
 		dice.init();
-		dice.addMouseListener( input);
+		dice.addMouseListener( controller);
 		add( dice);
 		
 		locks = new LockManager( playerCount);
@@ -183,11 +175,11 @@ public class Board extends JPanel{
 		jtfStatus.setFont( STATUS_INDICATOR_FONT);
 		add(jtfStatus);
 		
-		jbSkip = new JButton( new ImageIcon( IMAGE_SKIP));
+		jbSkip = new JButton( new ImageIcon( Constants.IMAGE_SKIP));
 		jbSkip.setContentAreaFilled(false);
 		jbSkip.setBorderPainted(false);
 		jbSkip.setOpaque( false);
-		jbSkip.addActionListener( input);
+		jbSkip.addActionListener( controller);
 		jbSkip.setToolTipText( "Skip this phase");
 		jbSkip.setBounds( HEX_BOARD_SIZE.width-DICE_SIZE, getHeight()-DICE_SIZE-10, DICE_SIZE, DICE_SIZE);
 		add(jbSkip);
@@ -222,12 +214,8 @@ public class Board extends JPanel{
 	private Tile addTile( Tile tile, Rectangle bound, boolean lock){
 		tile.init();
 		tile.setBounds( bound);
-		if( lock){
-			tile.setLockArea( locks.getPermanentLock( tile));
-			tile.setCanAnimate( false);
-		}else{
-			tile.setCanAnimate( true);
-		}
+		tile.setLockArea( locks.getPermanentLock( tile));
+		tile.setCanAnimate( !lock);
 		add(tile,0);
 		return tile;
 	}
@@ -258,7 +246,7 @@ public class Board extends JPanel{
 			g2d.drawString( (currentPlayer.isActive()?"*":"")+currentPlayer.getName(), HEX_BOARD_SIZE.width+160, BOARD_SIZE.height-TILE_OUTLINE.height*2-PADDING*4);
 			g2d.drawString( "Gold: " + currentPlayer.getGold(), HEX_BOARD_SIZE.width+360, BOARD_SIZE.height-TILE_OUTLINE.height*2-PADDING*4);
 		}
-		if( DRAW_LOCKS){
+		if( Constants.DRAW_LOCKS){
 			locks.draw( g2d);
 		}
 	}
@@ -273,13 +261,13 @@ public class Board extends JPanel{
 	 */
 	private Tile[] setupHexesForPlacement( HexState[] hexes) {
 		Tile tile = null;
-		int x, y, hexCount = hexes==null?MAX_HEXES_ON_BOARD:hexes.length;
+		int x, y, hexCount = hexes==null?Constants.MAX_HEXES_ON_BOARD:hexes.length;
 		Tile[] list = new Tile[hexCount];
 		for(int ring=0, drawIndex=0; ring<BOARD_LOAD_ROW.length&&drawIndex<hexCount; ring++){
 			for( int count=0; count<BOARD_LOAD_ROW[ring].length&&drawIndex<hexCount; count++, drawIndex++){
 				tile = addTile( new Hex( hexes==null?new HexState():hexes[drawIndex]), new Rectangle( 8,8,HEX_SIZE.width, HEX_SIZE.height), false);
-				x = (WIDTH_SEGMENT*BOARD_LOAD_COL[ring][count]);
-				y = (HEIGHT_SEGMENT*BOARD_LOAD_ROW[ring][count])+BOARD_TOP_PADDING;
+				x = (WIDTH_SEGMENT*Constants.BOARD_LOAD_COL[ring][count]);
+				y = (HEIGHT_SEGMENT*BOARD_LOAD_ROW[ring][count])+Constants.BOARD_TOP_PADDING;
 				tile.setDestination( x, y);
 				list[drawIndex] = tile;
 			}
@@ -294,7 +282,7 @@ public class Board extends JPanel{
 	 */
 	private Tile[] setupTilesForRack( ITileProperties[] prop) {
 		Tile tile = null;
-		Tile[] list = new Tile[MAX_RACK_SIZE];
+		Tile[] list = new Tile[Constants.MAX_RACK_SIZE];
 		Lock lock = locks.getPermanentLock( Category.Cup);
 		Point center = lock.getCenter();
 		//create bound for starting position of tile
@@ -302,7 +290,7 @@ public class Board extends JPanel{
 		addTile( new Tile( new TileProperties( Category.Cup)), start, true);
 		//create bound for destination location, this bound starts from outside of board
 		Rectangle bound = new Rectangle( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-TILE_SIZE.height-PADDING, TILE_SIZE.width, TILE_SIZE.height);
-		for( int count=0; count<MAX_RACK_SIZE; count++){
+		for( int count=0; count<Constants.MAX_RACK_SIZE; count++){
 			tile = addTile( new Tile( prop==null?new TileProperties(Category.Cup):prop[count]), start, false);
 			if( count==5){
 				// since rack is two rows of five, at half all bounds must be shifted up, this bound starts from outside of board
@@ -349,8 +337,7 @@ public class Board extends JPanel{
 			noneAnimatedPlacement( setupHexesForPlacement( hexes));
 			phaseDone = true;
 		}else{
-			MoveAnimation animation = new MoveAnimation( setupHexesForPlacement( hexes));
-	        animation.start();
+			moveAnimation.start( setupHexesForPlacement( hexes));
 		}
 	}
 	
@@ -362,8 +349,7 @@ public class Board extends JPanel{
 			noneAnimatedPlacement( setupTilesForRack( rack));
 			phaseDone = true;
 		}else{
-			MoveAnimation animation = new MoveAnimation( setupTilesForRack( rack));
-			animation.start();
+			moveAnimation.start( setupTilesForRack( rack));
 		}
 	}
 	
@@ -375,8 +361,7 @@ public class Board extends JPanel{
 			noneAnimtedFlipAll();
 			phaseDone = true;
 		}else{
-			FlipAll flip = new FlipAll( getComponents());
-			flip.start();
+			new FlipAll( getComponents(), this).start();
 		}
 	}
 	
@@ -385,10 +370,13 @@ public class Board extends JPanel{
 		Point point = locks.getPermanentLock( Category.State).getCenter();
 		Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
 		if( firstMarker){
-			addTile( new Tile( playerMarker), bound, true).flip();
+			addTile( new Tile( playerMarker), bound, false).flip();
+			addTile( new Tile( playerMarker), bound, false).flip();
+			addTile( new Tile( playerMarker), bound, false).flip();
+			addTile( new Tile( playerMarker), bound, false).flip();
 			firstMarker = false;
 		}
-		addTile( new Tile( playerMarker), bound, true).flip();
+		addTile( new Tile( playerMarker), bound, false).flip();
 	}
 	
 	private boolean firstTower = true;
@@ -402,16 +390,19 @@ public class Board extends JPanel{
 					tower = tile;
 				}
 			}
-			addTile( new Tile( tower), bound, true).flip();
+			addTile( new Tile( tower), bound, false).flip();
+			addTile( new Tile( tower), bound, false).flip();
+			addTile( new Tile( tower), bound, false).flip();
+			addTile( new Tile( tower), bound, false).flip();
 			firstTower = false;
 		}
-		addTile( new Tile( tower), bound, true).flip();
+		addTile( new Tile( tower), bound, false).flip();
 	}
 	
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
-			super( INTERNAL, BOARD, Board.this);
+			super( INTERNAL, Constants.BOARD, Board.this);
 		}
 
 		@Override
@@ -510,13 +501,22 @@ public class Board extends JPanel{
 	}
 	
 	private void manageRejection( UpdateInstruction data) {
+		//TODO Handle More Rejections
 		switch( data){
+			case Skip:
+				jtfStatus.setText( "Cannot skip this phase");
+				break;
 			case TieRoll:
 				prepareForRollDice(2, lastRollReason, "Tie Roll, Roll again", 2);
 				break;
 			case SeaHexChanged:
+				controller.undo();
 				break;
 			case HexOwnership:
+				jtfStatus.setText( "WARN - cannot own this hex");
+				add( lastRemovedTile);
+				revalidate();
+				controller.undo();
 				break;
 			default:
 				throw new IllegalStateException( "No handle for rejection of: " + data);
@@ -547,28 +547,28 @@ public class Board extends JPanel{
 	private void manageSetupPhase( SetupPhase phase){
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
-				input.setRollDice(true);
+				controller.setRollDice(true);
 				//TODO add support for custom roll
 				prepareForRollDice(2, RollReason.DETERMINE_PLAYER_ORDER, "Roll dice to determine order", 2);
 				break;
 			case EXCHANGE_SEA_HEXES:
-				input.setMoveHex( true);
+				controller.setMoveHex( true);
 				jtfStatus.setText( "Exchange sea hexes, if any");
 				break;
 			case EXCHANGE_THINGS:
 				jtfStatus.setText( "Exchange things, if any");
 				break;
 			case PICK_FIRST_HEX:
-				input.setMoveBank( true);
+				controller.setMoveBank( true);
 				placeMarkers();
 				jtfStatus.setText( "Pick your first Hex");
 				break;
 			case PICK_SECOND_HEX:
-				input.setMoveBank( true);
+				controller.setMoveBank( true);
 				jtfStatus.setText( "Pick your second Hex");
 				break;
 			case PICK_THIRD_HEX:
-				input.setMoveBank( true);
+				controller.setMoveBank( true);
 				jtfStatus.setText( "Pick your third Hex");
 				break;
 			case PLACE_EXCHANGED_THINGS:
@@ -597,6 +597,7 @@ public class Board extends JPanel{
 	 */
 	private HexState placeTileOnHex( Tile tile) {
 		if( tile.isTile() && tile.hasLock() && tile.getLock().canHold( tile) ){
+			lastRemovedTile = tile;
 			remove(tile);
 			revalidate();
 			return tile.getLock().getHex().getState().addThingToHexGUI( tile.getProperties());
@@ -607,8 +608,10 @@ public class Board extends JPanel{
 	/**
 	 * input class for mouse, used for like assignment and current testing phases suck as placement
 	 */
-	private class Input extends MouseAdapter implements ActionListener{
+	private class Controller extends MouseAdapter implements ActionListener{
 
+		private UndoManager undoManger;
+		private ThingPlacmentUndo thingUndo;
 		private Rectangle bound, boardBound;
 		private Lock newLock;
 		private Tile currentTile;
@@ -620,16 +623,28 @@ public class Board extends JPanel{
 		private boolean moveBank = false;
 		private boolean rollDice = false;
 		
+		public Controller(){
+			this.undoManger = new UndoManager();
+		}
+		
+		public void undo(){
+			undoManger.undo( moveAnimation);
+		}
+		
 		public void ignoreAll( boolean ignore){
 			this.ignore = ignore;
 		}
 		
-		public void setControls( boolean stack, boolean hex, boolean bank, boolean roll){
+		private void setControls( boolean stack, boolean hex, boolean bank, boolean roll){
 			ignore = false;
 			moveHex = hex;
 			moveStack = stack;
 			moveBank = bank;
 			rollDice = roll;
+		}
+		
+		private boolean noMove(){
+			return moveHex==false&&moveBank==false&&moveStack==false;
 		}
 		
 		public void setMoveStack( boolean stack){
@@ -655,9 +670,10 @@ public class Board extends JPanel{
 		 */
 		@Override
 	    public void mouseDragged(MouseEvent e){
-			if( ignore){
+			if( ignore|| noMove()){
 				return;
 			}
+			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
 			if( phaseDone && (moveStack || moveHex || moveBank) && currentTile!=null){
 				boardBound = getBounds();
 				bound = currentTile.getBounds();
@@ -694,19 +710,28 @@ public class Board extends JPanel{
 		
 		@Override
 		public void mouseReleased( MouseEvent e){
-			if( ignore){
+			if( ignore|| noMove()){
 				return;
 			}
-			if(newLock!=null&&currentTile!=null){
-				if( moveHex){
-					new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( currentPlayer.getID());
-				}else if(moveStack){
-					//TODO support for moving stack, some of stack and dropping to Cup
-				}else if(newLock.canHold( currentTile)){//TODO check canHold, might be unnecessary condition
-					HexState hex = placeTileOnHex( currentTile);
-					if( hex!=null){
-						new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
+			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
+			if(currentTile!=null){
+				if(newLock!=null){
+					if( moveHex){
+						new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( currentPlayer.getID());
+					}else if(moveStack){
+						//TODO support for moving stack, some of stack and dropping to Cup
+					}else if(newLock.canHold( currentTile)){//TODO check canHold, might be unnecessary condition
+						HexState hex = placeTileOnHex( currentTile);
+						thingUndo.addEnd( ThingPlacmentUndo.createOperation( currentTile, hex, e.getPoint()));
+						undoManger.addUndo( thingUndo);
+						if( hex!=null){
+							new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
+						}
 					}
+				}else{
+					thingUndo.addEnd( ThingPlacmentUndo.createOperation( currentTile, null, e.getPoint()));
+					undoManger.addUndo( thingUndo);
+					undo();
 				}
 			}
 			currentTile = null; 
@@ -721,9 +746,10 @@ public class Board extends JPanel{
 		 */
 		@Override
 		public void mousePressed( MouseEvent e){
-			if( ignore){
+			if( ignore || noMove()){
 				return;
 			}
+			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
 			//get the deepest component in the given point
 			Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
 			if( phaseDone && deepestComponent!=null){
@@ -733,9 +759,14 @@ public class Board extends JPanel{
 					remove( currentTile);
 					add( currentTile, 0);
 					revalidate();
+					thingUndo = new ThingPlacmentUndo();
+					thingUndo.addStart( ThingPlacmentUndo.createOperation( currentTile, null, currentTile.getLock().getCenter()));
 					//check to see if it is hex
 					if( !currentTile.isTile() && currentTile.hasLock()){
-						if( moveHex){
+						if( !moveHex){
+							currentTile = null;
+							thingUndo = null;
+						}else if( moveHex){
 							
 						}else if( moveStack){
 							newLock = currentTile.getLock();
@@ -767,7 +798,7 @@ public class Board extends JPanel{
 
 		@Override
 		public void mouseClicked( MouseEvent e){
-			if( ignore ){
+			if( ignore){
 				return;
 			}
 			if( !rollDice){
@@ -806,111 +837,34 @@ public class Board extends JPanel{
 			new UpdatePackage( UpdateInstruction.Skip, "Board.Input").postNetworkEvent( currentPlayer.getID());
 		}
 	}
-	
-	/**
-	 * animation task to work with timer, used for animating 
-	 * tile movement from starting position to its destination
-	 */
-	private class MoveAnimation implements ActionListener{
-		
-		private Tile tile;
-		private Point end;
-		private Timer timer;
-		private double slope, intercept;
-		private int xTemp=-1, yTemp;
-		private Tile[] list;
-		private int index = -1;
-		private Dimension size;
-		
-		private void setTile( Tile tile){
-			this.tile = tile;
-			this.end = tile.getDestination();
-			xTemp = tile.getX();
-			yTemp = tile.getY();
-			slope = (end.y-yTemp)/(double)(end.x-xTemp);
-			intercept = yTemp-slope*xTemp;
-			size = tile.getSize();
-		}
-		
-		public MoveAnimation( Tile[] tiles ){
-			list = tiles;
-			tile = null;
-			index = 0;
-		}
-		
-		public void start(){
-			phaseDone = false;
-			timer = new Timer( ANIMATION_DELAY, this);
-            timer.setInitialDelay( 0);
-            timer.start();
-		}
 
-		@Override
-		public void actionPerformed( ActionEvent e) {
-			//animation is done
-			if( !isActive || xTemp==-1){
-				//list is done
-				if( !isActive || index==-1 || index>=list.length){
-					timer.stop();
-					phaseDone = true;
-					return;
-				}
-				//get next index in list
-				if( list[index]!=null && list[index].canAnimate()){
-					setTile((tile = list[index]));
-					index++;
-				}else{
-					index++;
-					return;
-				}
-			}
-			yTemp = (int)(slope*xTemp+intercept);
-			tile.setLocation( xTemp, yTemp);
-			xTemp+=MOVE_DISTANCE;
-			//hex has passed its final location
-			if( xTemp>=end.x-size.width/2){
-				xTemp=-1;
-				tile.setLocation( end.x-size.width/2, end.y-size.height/2);
-				tile.setLockArea( locks.getLock( tile));
-				placeTileOnHex( tile);
-			}
-			repaint();
-		}
+	@Override
+	public void phaseDone() {
+		phaseDone = true;
 	}
-	
-	/**
-	 * Task for Timer to flip all hex tiles
-	 */
-	private class FlipAll implements ActionListener{
 
-		private Timer timer;
-		private Component[] list;
-		private int index = 0;
-		
-		public FlipAll( Component[] components ){
-			list = components;
-			index = 0;
-		}
-		
-		public void start(){
-			phaseDone = false;
-			timer = new Timer( ANIMATION_DELAY, this);
-            timer.setInitialDelay( 0);
-            timer.start();
-		}
+	@Override
+	public void phaseStarted() {
+		phaseDone = false;
+	}
 
-		@Override
-		public void actionPerformed( ActionEvent e) {
-			if(index>=list.length){
-				timer.stop();
-				phaseDone = true;
-			}else{
-				if( list[index] instanceof Hex){
-					((Tile) list[index]).flip();
-					repaint();
-				}
-				index++;
-			}
-		}
+	@Override
+	public void repaintCanvas() {
+		repaint();
+	}
+
+	@Override
+	public boolean isActive() {
+		return isActive;
+	}
+
+	@Override
+	public Lock getLock(Tile tile) {
+		return locks.getLock(tile);
+	}
+
+	@Override
+	public HexState placeOnHex(Tile tile) {
+		return placeTileOnHex(tile);
 	}
 }

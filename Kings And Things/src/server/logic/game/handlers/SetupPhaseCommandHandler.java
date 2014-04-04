@@ -1,11 +1,9 @@
 package server.logic.game.handlers;
 
-import static common.Constants.ALL_PLAYERS_ID;
-
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
+import java.awt.Point;
+import java.util.HashSet;
+import java.util.ArrayList;
 
 import server.event.DiceRolled;
 import server.event.GameStarted;
@@ -14,28 +12,28 @@ import server.event.internal.GiveHexToPlayerCommand;
 import server.event.internal.StartSetupPhaseCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
-import server.logic.game.SpecialCharacterManager;
 import server.logic.game.validators.SetupPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
 
-import common.Constants;
-import common.Constants.CombatPhase;
-import common.Constants.RegularPhase;
-import common.Constants.RollReason;
-import common.Constants.SetupPhase;
-import common.Constants.UpdateInstruction;
 import common.Logger;
-import common.event.network.CommandRejected;
-import common.event.network.CurrentPhase;
-import common.event.network.ExchangedSeaHex;
-import common.event.network.HexPlacement;
-import common.event.network.PlayersList;
-import common.event.network.SpecialCharUpdate;
+import common.game.Roll;
+import common.game.Player;
 import common.game.HexState;
 import common.game.ITileProperties;
-import common.game.Player;
-import common.game.Roll;
+import common.Constants;
+import common.Constants.RollReason;
+import common.Constants.SetupPhase;
+import common.Constants.CombatPhase;
+import common.Constants.RegularPhase;
+import common.Constants.UpdateInstruction;
+import common.event.network.PlayersList;
+import common.event.network.CurrentPhase;
+import common.event.network.HexPlacement;
+import common.event.network.CommandRejected;
+import common.event.network.ExchangedSeaHex;
+
+import static common.Constants.ALL_PLAYERS_ID;
 
 public class SetupPhaseCommandHandler extends CommandHandler{
 	

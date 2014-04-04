@@ -1,12 +1,11 @@
 package client.gui.util;
 
-import static common.Constants.BOARD_SIZE;
-
 import java.awt.GridBagConstraints;
 
 import javax.swing.JPanel;
 
 import client.gui.Board;
+import common.Constants;
 import common.game.PlayerInfo;
 
 public class MultiBoardManager {
@@ -29,8 +28,8 @@ public class MultiBoardManager {
 		boards = new Board[players.length];
 		for( int i=0; i<boards.length; i++){
 			boards[ i] = new Board();
-			boards[ i].setPreferredSize( BOARD_SIZE);
-			boards[ i].setSize( BOARD_SIZE);
+			boards[ i].setPreferredSize( Constants.BOARD_SIZE);
+			boards[ i].setSize( Constants.BOARD_SIZE);
 			boards[ i].init( boards.length);
 			boards[ i].setCurrentPlayer( players[i]);
 		}

@@ -5,9 +5,10 @@ import javax.swing.SwingUtilities;
 
 import org.apache.log4j.PropertyConfigurator;
 
+import common.Constants;
+
 import client.logic.ConnectionLogic;
 import client.gui.ClientGUI;
-import static common.Constants.GAME_TITLE;
 
 /**
  * main class for starting the server
@@ -25,7 +26,7 @@ public class Client {
 		
 		ConnectionLogic logic = new ConnectionLogic();
 		new Thread( logic, "Client Logic").start();
-		ClientGUI clientGUI = new ClientGUI( GAME_TITLE);
+		ClientGUI clientGUI = new ClientGUI( Constants.GAME_TITLE);
 		SwingUtilities.invokeLater( clientGUI);
 	}
 }

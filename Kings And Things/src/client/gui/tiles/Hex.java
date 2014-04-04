@@ -1,14 +1,11 @@
 package client.gui.tiles;
 
-import static common.Constants.HEX_OUTLINE;
-import static common.Constants.IMAGE_HEX_REVERSE;
-
 import java.awt.Graphics;
 import java.awt.Point;
 
 import client.gui.util.LockManager.Lock;
+import common.Constants;
 import common.game.HexState;
-import static common.Constants.TILE_SIZE_BOARD;
 
 @SuppressWarnings("serial")
 public class Hex extends Tile{
@@ -22,14 +19,14 @@ public class Hex extends Tile{
 	
 	@Override
 	public void init(){
-		drawTile = IMAGE_HEX_REVERSE;
+		drawTile = Constants.IMAGE_HEX_REVERSE;
 	}
 	
 	@Override
 	public void paintComponent( Graphics g){
 		super.paintComponent( g);
 		if(state!=null){
-			state.paint( g, getTileCenter( TILE_SIZE_BOARD));
+			state.paint( g, getTileCenter( Constants.TILE_SIZE_BOARD));
 		}
 	}
 	
@@ -40,7 +37,7 @@ public class Hex extends Tile{
 	
 	@Override
 	public boolean contains( int x, int y){
-		return super.contains( x, y)&&HEX_OUTLINE.contains( x, y);
+		return super.contains( x, y)&&Constants.HEX_OUTLINE.contains( x, y);
 	}
 	
 	@Override

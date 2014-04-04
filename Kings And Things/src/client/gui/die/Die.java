@@ -10,10 +10,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static common.Constants.IMAGE_DICE;
-import static common.Constants.DICE_SIZE;
-import static common.Constants.MAX_ROLLS;
-
 @SuppressWarnings("serial")
 public class Die extends JPanel implements ActionListener{
 	
@@ -34,7 +30,7 @@ public class Die extends JPanel implements ActionListener{
 		setFace();
 		setOpaque( false);
 		timer = new Timer( 125, this);
-		setPreferredSize( new Dimension( DICE_SIZE, DICE_SIZE));
+		setPreferredSize( new Dimension( Constants.DICE_SIZE, Constants.DICE_SIZE));
 		return this;
 	}
 	
@@ -68,7 +64,7 @@ public class Die extends JPanel implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		setFace();
 		roll++;
-		if( roll>=MAX_ROLLS && faceValue==target){
+		if( roll>=Constants.MAX_ROLLS && faceValue==target){
 			timer.stop();
 			parent.doneRolling();
 		}
@@ -78,6 +74,6 @@ public class Die extends JPanel implements ActionListener{
 	@Override
 	public void paintComponent( Graphics g) {
 		super.paintComponent( g);
-		g.drawImage( IMAGE_DICE[faceValue], 0, 0, getWidth(), getHeight(), null);
+		g.drawImage( Constants.IMAGE_DICE[faceValue], 0, 0, getWidth(), getHeight(), null);
 	}
 }

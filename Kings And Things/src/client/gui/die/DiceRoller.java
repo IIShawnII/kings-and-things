@@ -4,17 +4,14 @@ import javax.swing.JPanel;
 
 import com.google.common.primitives.Ints;
 
-import client.gui.util.SizeChangeAnimation;
+import common.Constants;
+import client.gui.util.animation.SizeChangeAnimation;
 
 import java.util.List;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-
-import static common.Constants.DICE_SIZE;
-import static common.Constants.IMAGE_DICE;
-import static common.Constants.IMAGE_GREEN;
 
 @SuppressWarnings("serial")
 public class DiceRoller extends JPanel implements Parent{
@@ -31,8 +28,8 @@ public class DiceRoller extends JPanel implements Parent{
 	public DiceRoller init() {
 		setOpaque( false);
 		setBackground( Color.GREEN.darker().darker());
-		change = new SizeChangeAnimation( IMAGE_DICE[0], DICE_SIZE, this);
-		setPreferredSize( new Dimension( DICE_SIZE,DICE_SIZE));
+		change = new SizeChangeAnimation( Constants.IMAGE_DICE[0], Constants.DICE_SIZE, this);
+		setPreferredSize( new Dimension(Constants. DICE_SIZE,Constants.DICE_SIZE));
 		dice = new Die[]{ new Die( this).init(), new Die( this).init()};
 		results = new int[]{ 6, 6};
 		setLayout( new FlowLayout());
@@ -56,7 +53,7 @@ public class DiceRoller extends JPanel implements Parent{
 	}
 	
 	public void expand(){
-		change.expandTo( DICE_SIZE*3, (int)(DICE_SIZE*1.2));
+		change.expandTo( Constants.DICE_SIZE*3, (int)(Constants.DICE_SIZE*1.2));
 	}
 	
 	public void shrink(){
@@ -93,7 +90,7 @@ public class DiceRoller extends JPanel implements Parent{
 	@Override
 	public void paintComponent( Graphics g){
 		super.paintComponent( g);
-		g.drawImage( IMAGE_GREEN, 0, 0, getWidth(), getHeight(), null);
+		g.drawImage( Constants.IMAGE_GREEN, 0, 0, getWidth(), getHeight(), null);
 	}
 	
 	@Override

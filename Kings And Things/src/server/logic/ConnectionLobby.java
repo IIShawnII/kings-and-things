@@ -1,42 +1,40 @@
 package server.logic;
 
-import static common.Constants.ALL_PLAYERS_ID;
-import static common.Constants.MAX_PLAYERS;
-import static common.Constants.PLAYER_ID_MULTIPLIER;
-import static common.Constants.PLAYER_START_ID;
-import static common.Constants.SERVER_PORT;
-import static common.Constants.SERVER_TIMEOUT;
-
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.net.Socket;
+import java.net.ServerSocket;
+import java.net.SocketTimeoutException;
 
 import server.event.EndServer;
 import server.event.GameStarted;
 import server.event.PlayerUpdated;
 import server.event.internal.StartSetupPhaseCommand;
-import server.logic.game.CommandHandlerManager;
 import server.logic.game.GameState;
 import server.logic.game.StateGenerator;
+import server.logic.game.CommandHandlerManager;
 
 import com.google.common.eventbus.Subscribe;
+
+import common.Logger;
+import common.Constants;
 import common.Constants.Level;
 import common.Constants.UpdateKey;
-import common.Logger;
+import common.game.Player;
+import common.game.PlayerInfo;
+import common.game.LoadResources;
+import common.network.Connection;
 import common.event.ConsoleMessage;
 import common.event.EventDispatch;
 import common.event.UpdatePackage;
-import common.event.network.CommandRejected;
+import common.event.network.StartGame;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
-import common.event.network.StartGame;
-import common.game.LoadResources;
-import common.game.Player;
-import common.game.PlayerInfo;
-import common.network.Connection;
+import common.event.network.CommandRejected;
+
+import static common.Constants.SERVER_PORT;
+import static common.Constants.MAX_PLAYERS;
 
 public class ConnectionLobby implements Runnable {
 
@@ -70,7 +68,7 @@ public class ConnectionLobby implements Runnable {
 		new ConsoleMessage( "Loaded Resources", Level.Plain, this).postInternalEvent();
 		try {
 			serverSocket = new ServerSocket( SERVER_PORT);
-            serverSocket.setSoTimeout( SERVER_TIMEOUT*1000);
+            serverSocket.setSoTimeout( Constants.SERVER_TIMEOUT*1000);
 			Logger.getStandardLogger().info("Listening on port " + SERVER_PORT);
 			new ConsoleMessage( "Listening on port " + SERVER_PORT, Level.Notice, this).postInternalEvent();
 		} catch ( IOException e) {
@@ -79,7 +77,7 @@ public class ConnectionLobby implements Runnable {
 			return;
 		}
 		game.initialize();
-		int count=0, playerID = PLAYER_START_ID;
+		int count=0, playerID = Constants.PLAYER_START_ID;
 		boolean oldClient = false;
 		Socket socket = null;
 		Connection connection = null;
@@ -122,7 +120,7 @@ public class ConnectionLobby implements Runnable {
 	            	pc.sendNotificationToClient( new PlayerState( info, playerID));
 	            	connectedPlayers.add( pc);
 	            	count++;
-	            	playerID*=PLAYER_ID_MULTIPLIER;
+	            	playerID*=Constants.PLAYER_ID_MULTIPLIER;
         			new ConsoleMessage( "Recieved connection from " + connection + ", assigned to " + pc.getPlayer(), Level.Notice, this).postInternalEvent();
 	            	Logger.getStandardLogger().info("Recieved connection from " + connection + ", assigned to " + pc.getPlayer());
             	}
@@ -162,14 +160,14 @@ public class ConnectionLobby implements Runnable {
 			}
 		}
 		if( connections.getPlayers().length>0){
-			connections.postNetworkEvent( ALL_PLAYERS_ID);
+			connections.postNetworkEvent( Constants.ALL_PLAYERS_ID);
 		}
-		if( !anyUnReady && connectedPlayers.size()==MAX_PLAYERS){
+		if( !anyUnReady && connectedPlayers.size()==Constants.MAX_PLAYERS){
 			HashSet< Player> set = new HashSet<>();
 			for( PlayerConnection pc : connectedPlayers){
 				set.add( pc.getPlayer());
 			}
-			new StartGame( set.size()).postNetworkEvent( ALL_PLAYERS_ID);
+			new StartGame( set.size()).postNetworkEvent( Constants.ALL_PLAYERS_ID);
 			if(loadStateFile || generateStateFile)
 			{
 				try
@@ -181,7 +179,7 @@ public class ConnectionLobby implements Runnable {
 				catch (ClassNotFoundException | IOException e)
 				{
 					Logger.getErrorLogger().error("Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: ", e);
-					new CommandRejected(null, null, null, "Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: " + e).postNetworkEvent(ALL_PLAYERS_ID);
+					new CommandRejected(null, null, null, "Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: " + e).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 				}
 			}
 			else

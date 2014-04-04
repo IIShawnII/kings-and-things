@@ -1,8 +1,5 @@
 package client.gui.tiles;
 
-import static common.Constants.IMAGES;
-import static common.Constants.IMAGE_TILE_REVERSE;
-
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -11,6 +8,7 @@ import java.awt.Point;
 import javax.swing.JComponent;
 
 import client.gui.util.LockManager.Lock;
+import common.Constants;
 import common.game.ITileProperties;
 
 @SuppressWarnings("serial")
@@ -45,7 +43,7 @@ public class Tile extends JComponent{
 	}
 	
 	public void init(){
-		drawTile = IMAGE_TILE_REVERSE;
+		drawTile = Constants.IMAGE_TILE_REVERSE;
 	}
 	
 	public void setDestination( int x, int y){
@@ -77,7 +75,7 @@ public class Tile extends JComponent{
 
 	public void flip() {
 		if( prop!=null && !prop.isFake()){
-			drawTile = IMAGES.get( prop.hashCode());
+			drawTile = Constants.IMAGES.get( prop.hashCode());
 		}
 	}
 	

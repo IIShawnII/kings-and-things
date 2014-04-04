@@ -5,7 +5,6 @@ import common.Constants.Biome;
 import common.Constants.Category;
 import common.Constants.Restriction;
 
-
 public class TwoSidedTileProperties implements ITileProperties {
 	
 	private static final long serialVersionUID = -6715600368392464765L;

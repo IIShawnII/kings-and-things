@@ -1,4 +1,4 @@
-package client.gui.util;
+package client.gui.util.animation;
 
 import java.awt.Image;
 import java.awt.Graphics;

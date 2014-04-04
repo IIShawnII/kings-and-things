@@ -1,9 +1,8 @@
 package common.game;
 
-import static common.Constants.INFINITE_TILE;
-
 import java.util.ArrayList;
 
+import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Biome;
 import common.Constants.Category;
@@ -205,12 +204,12 @@ public class TileProperties implements ITileProperties{
 	}
 
 	protected void setInfinite() {
-		number = INFINITE_TILE;
+		number = Constants.INFINITE_TILE;
 	}
 
 	@Override
 	public boolean isInfinit(){
-		return number == INFINITE_TILE;
+		return number == Constants.INFINITE_TILE;
 	}
 
 	@Override

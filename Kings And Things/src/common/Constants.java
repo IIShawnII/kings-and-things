@@ -25,8 +25,6 @@ public final class Constants {
 	
 	//Primary for bypassing load of images for faster start
 	public static final boolean DRAW_LOCKS = false;
-	public static final boolean LOAD_SPECIAL = false;
-	public static final boolean LOAD_CUP = true;
 
 	public enum BuildableBuilding {Tower, Keep, Castle, Citadel}
 	public enum Building {Castle, Citadel, City, Keep, Tower, Village}

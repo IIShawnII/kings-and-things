@@ -3,20 +3,20 @@ package server.logic;
 import java.io.IOException;
 
 import server.event.PlayerUpdated;
+import server.event.internal.RollDiceCommand;
+import server.event.internal.DoneRollingCommand;
 import server.event.internal.EndPlayerTurnCommand;
 import server.event.internal.GiveHexToPlayerCommand;
-import server.event.internal.DoneRollingCommand;
-import server.event.internal.RollDiceCommand;
 
 import com.google.common.eventbus.Subscribe;
 
 import common.Logger;
 import common.network.Connection;
 import common.Constants.UpdateKey;
+import common.game.Roll;
 import common.game.Player;
 import common.game.HexState;
 import common.game.PlayerInfo;
-import common.game.Roll;
 import common.event.UpdatePackage;
 import common.event.AbstractNetwrokEvent;
 

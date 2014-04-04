@@ -25,18 +25,10 @@ import java.awt.event.ActionListener;
 import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
 import common.game.PlayerInfo;
+import common.Constants;
 import common.Constants.Category;
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
-import static common.Constants.LOGIC;
-import static common.Constants.PUBLIC;
-import static common.Constants.PROGRESS;
-import static common.Constants.SERVER_IP;
-import static common.Constants.SERVER_PORT;
-import static common.Constants.CONSOLE_SIZE;
-import static common.Constants.PROGRESS_SIZE;
-import static common.Constants.IP_COLUMN_COUNT;
-import static common.Constants.PORT_COLUMN_COUNT;
 
 @SuppressWarnings("serial")
 public class LoadingDialog extends JDialog implements Runnable{
@@ -108,12 +100,12 @@ public class LoadingDialog extends JDialog implements Runnable{
 		constraints.gridx = 3;
 		jpMain.add( label, constraints);
 		
-		jtfIP = new JTextField( SERVER_IP, IP_COLUMN_COUNT);
+		jtfIP = new JTextField( Constants.SERVER_IP, Constants.IP_COLUMN_COUNT);
 		constraints.gridx = 2;
 		constraints.weightx = .6;
 		jpMain.add( jtfIP, constraints);
 		
-		jtfPort = new JTextField( SERVER_PORT+"", PORT_COLUMN_COUNT);
+		jtfPort = new JTextField( Constants.SERVER_PORT+"", Constants.PORT_COLUMN_COUNT);
 		constraints.gridx = 4;
 		constraints.weightx = .4;
 		jpMain.add( jtfPort, constraints);
@@ -137,7 +129,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 		listModel = new DefaultListModel<>();
 		JList<PlayerInfo> jlPlayers = new JList<>( listModel);
 		JScrollPane jsp = new JScrollPane( jlPlayers);
-		jsp.setPreferredSize( CONSOLE_SIZE);
+		jsp.setPreferredSize( Constants.CONSOLE_SIZE);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		constraints.gridheight = 5;
@@ -151,7 +143,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 	
 	private JPanel createLoadingPanel(){
 		JPanel jpMain = new JPanel( new GridBagLayout());
-		jpMain.setPreferredSize( PROGRESS_SIZE);
+		jpMain.setPreferredSize( Constants.PROGRESS_SIZE);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.insets = new Insets( 5, 5, 5, 5);
@@ -248,7 +240,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 		remove( jpProgress);
 		jpProgress = null;
 		Dimension size = getSize();
-		size.height -= PROGRESS_SIZE.height;
+		size.height -= Constants.PROGRESS_SIZE.height;
 		setMinimumSize( size);
 		setPreferredSize( size);
 		setSize( size);
@@ -283,10 +275,10 @@ public class LoadingDialog extends JDialog implements Runnable{
 				}else{
 					update.addInstruction( UpdateInstruction.Disconnect);
 				}
-				update.postInternalEvent(LOGIC);
+				update.postInternalEvent(Constants.LOGIC);
 			}else if( isConnected && source==jbReady){
 				update.addInstruction( UpdateInstruction.State);
-				update.postInternalEvent(LOGIC);
+				update.postInternalEvent(Constants.LOGIC);
 			}
 		}
 		
@@ -299,7 +291,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
-			super( INTERNAL, PUBLIC, LoadingDialog.this);
+			super( INTERNAL, Constants.PUBLIC, LoadingDialog.this);
 		}
 
 		@Override
@@ -314,7 +306,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 		
 		@Override
 		protected boolean verifyPrivate( UpdatePackage update){
-			return update.isValidID( PROGRESS);
+			return update.isValidID( Constants.PROGRESS);
 		}
 	}
 
@@ -385,7 +377,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 				case END:
 					remove( jpProgress);
 					Dimension size = getSize();
-					size.height -= PROGRESS_SIZE.height+10;
+					size.height -= Constants.PROGRESS_SIZE.height+10;
 					setMinimumSize( size);
 					setSize( size);
 					revalidate();

@@ -11,20 +11,8 @@ import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
 
 import common.Console;
+import common.Constants;
 import common.Constants.Level;
-import static common.Constants.RED;
-import static common.Constants.BLUE;
-import static common.Constants.GREEN;
-import static common.Constants.YELLOW;
-import static common.Constants.DARK_RED;
-import static common.Constants.DARK_BLUE;
-import static common.Constants.DARK_GREEN;
-import static common.Constants.DARK_YELLOW;
-import static common.Constants.PLAYER_START_ID;
-import static common.Constants.LABEL_SIZE;
-import static common.Constants.CONSOLE_SIZE;
-import static common.Constants.LABEL_FONT_SIZE;
-import static common.Constants.PLAYER_FONT_SIZE;
 
 /**
  * complete set of GUI components that represent the current state of a player and related server activities
@@ -42,7 +30,7 @@ public class PlayerStatus extends JPanel{
 	 */
 	public PlayerStatus( final int PLAYER_ID) {
 		super();
-		if( PLAYER_ID<PLAYER_START_ID){
+		if( PLAYER_ID<Constants.PLAYER_START_ID){
 			String message = "ERROR - PLAYER_ID Must be bigger than common.Constants.PLAYER";
 			throw new IllegalArgumentException( message);
 		}
@@ -69,7 +57,7 @@ public class PlayerStatus extends JPanel{
 		console = new Console();
 		console.setEnabled( false);
 		console.setEditable( false);
-		console.setPreferredSize( CONSOLE_SIZE);
+		console.setPreferredSize( Constants.CONSOLE_SIZE);
 		JScrollPane jsp = new JScrollPane( console);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -86,8 +74,8 @@ public class PlayerStatus extends JPanel{
 		GridBagConstraints con = new GridBagConstraints();
 		con.fill = GridBagConstraints.HORIZONTAL;
 
-		Font player = font.deriveFont( Font.BOLD, font.getSize() + PLAYER_FONT_SIZE);
-		Font label = font.deriveFont( Font.BOLD, font.getSize() + LABEL_FONT_SIZE);
+		Font player = font.deriveFont( Font.BOLD, font.getSize() + Constants.PLAYER_FONT_SIZE);
+		Font label = font.deriveFont( Font.BOLD, font.getSize() + Constants.LABEL_FONT_SIZE);
 		
 		JLabel jlPlayer = new JLabel( "Player " + PLAYER_ID);
 		jlPlayer.setAlignmentX( LEFT_ALIGNMENT);
@@ -98,22 +86,22 @@ public class PlayerStatus extends JPanel{
 		StatusLabel wait = new StatusLabel();
 		wait.setAlignmentX( RIGHT_ALIGNMENT);
 		con.weightx = 0.0;
-		wait.initialize( "Waiting for Players move", "W", YELLOW, DARK_YELLOW, label, LABEL_SIZE);
+		wait.initialize( "Waiting for Players move", "W", Constants.YELLOW, Constants.DARK_YELLOW, label, Constants.LABEL_SIZE);
 		jpMain.add( wait, con);
 		
 		StatusLabel analyse = new StatusLabel();
 		analyse.setAlignmentX( RIGHT_ALIGNMENT);
-		analyse.initialize( "Analysing Player Move", "A", BLUE, DARK_BLUE, label, LABEL_SIZE);
+		analyse.initialize( "Analysing Player Move", "A", Constants.BLUE, Constants.DARK_BLUE, label, Constants.LABEL_SIZE);
 		jpMain.add( analyse, con);
 		
 		StatusLabel hold = new StatusLabel();
 		hold.setAlignmentX( RIGHT_ALIGNMENT);
-		hold.initialize( "Waiting for Players Turn", "H", RED, DARK_RED, label, LABEL_SIZE);
+		hold.initialize( "Waiting for Players Turn", "H", Constants.RED, Constants.DARK_RED, label, Constants.LABEL_SIZE);
 		jpMain.add( hold, con);
 		
 		StatusLabel update = new StatusLabel();
 		update.setAlignmentX( RIGHT_ALIGNMENT);
-		update.initialize( "Syncing Data", "U", GREEN, DARK_GREEN, label, LABEL_SIZE);
+		update.initialize( "Syncing Data", "U", Constants.GREEN, Constants.DARK_GREEN, label, Constants.LABEL_SIZE);
 		jpMain.add( update, con);
 		
 		return jpMain;

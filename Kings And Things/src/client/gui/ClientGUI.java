@@ -22,11 +22,10 @@ import common.game.PlayerInfo;
 import common.game.LoadResources;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
+import common.Constants;
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
 import common.Logger;
-import static common.Constants.GUI;
-import static common.Constants.BOARD_SIZE;
 
 /**
  * client GUI to hold all and display all game related information
@@ -88,8 +87,8 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 	 */
 	private JComponent createGUI() {
 		JPanel jpMain = new JPanel( new GridBagLayout());
-		jpMain.setPreferredSize( BOARD_SIZE);
-		jpMain.setSize( BOARD_SIZE);
+		jpMain.setPreferredSize( Constants.BOARD_SIZE);
+		jpMain.setSize( Constants.BOARD_SIZE);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.gridx = 0;
@@ -184,7 +183,7 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
-			super( INTERNAL, GUI, ClientGUI.this);
+			super( INTERNAL, Constants.GUI, ClientGUI.this);
 		}
 
 		@Override

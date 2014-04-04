@@ -16,10 +16,6 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.BadLocationException;
 
 import static common.Constants.Level;
-import static common.Constants.COLOR_PLAIN;
-import static common.Constants.COLOR_ERROR;
-import static common.Constants.COLOR_NOTICE;
-import static common.Constants.COLOR_WARNNING;
 
 /**
  * a basic GUI object to hold text information,
@@ -45,14 +41,14 @@ public class Console extends JTextPane {
 		if( message!=null){
 			switch( level){
 				case Warning:
-					add( COLOR_WARNNING, message);break;
+					add( Constants.COLOR_WARNNING, message);break;
 				case Error:
-					add( COLOR_ERROR, message);break;
+					add( Constants.COLOR_ERROR, message);break;
 				case Notice:
-					add( COLOR_NOTICE, message);break;
+					add( Constants.COLOR_NOTICE, message);break;
 				case Plain:
 				default:
-					add( COLOR_PLAIN, message);
+					add( Constants.COLOR_PLAIN, message);
 			}
 		}
 	}

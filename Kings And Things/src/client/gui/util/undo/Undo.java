@@ -1,44 +1,14 @@
 package client.gui.util.undo;
 
-public class Undo<T extends OperationInterface>{
-		
-	private T start, end;
+import client.gui.util.animation.MoveAnimation;
+
+public interface Undo{
 	
-	protected Undo(){
-		start = null;
-		end = null;
-	}
+	public void undo( MoveAnimation animation);
 	
-	protected void add( T operation){
-		if( start==null){
-			start = operation;
-		}else if( end==null){
-			end = operation;
-		}else{
-			throw new IllegalStateException("start and end Operations are assigned already");
-		}
-	}
+	public void addStart( OperationInterface operation);
 	
-	public T getStart(){
-		return start;
-	}
-	
-	public T getEnd(){
-		return end;
-	}
-	
-	protected boolean isComplete(){
-		return start!=null && end!=null;
-	}
-	
-	protected void clear(){
-		if( start!=null){
-			start.clear();
-		}
-		start = null;
-		if( end!=null){
-			end.clear();
-		}
-		end = null;
-	}
+	public void addEnd( OperationInterface operation);
+
+	public boolean isComplete();
 }
