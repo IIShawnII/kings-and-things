@@ -119,7 +119,7 @@ public class HexTileManager extends AbstractTileManager
 						numDraws++;
 						return drawHexTileByType(Biome.Desert);
 					default:
-						throw new NoMoreTilesException("A hex tile could not be drawn because there are no more available.");
+						return super.drawTile();
 				}
 			}
 		}
