@@ -125,7 +125,6 @@ public class Board extends JPanel implements CanvasParent{
 	private volatile boolean isActive = false;
 	private volatile boolean phaseDone = false;
 
-	private Tile lastRemovedTile;
 	private JButton jbSkip;
 	private DiceRoller dice;
 	private LockManager locks;
@@ -514,8 +513,6 @@ public class Board extends JPanel implements CanvasParent{
 				break;
 			case HexOwnership:
 				jtfStatus.setText( "WARN - cannot own this hex");
-				add( lastRemovedTile, 0);
-				revalidate();
 				controller.undo();
 				break;
 			default:
@@ -597,9 +594,6 @@ public class Board extends JPanel implements CanvasParent{
 	 */
 	private HexState placeTileOnHex( Tile tile) {
 		if( tile.isTile() && tile.hasLock() && tile.getLock().canHold( tile) ){
-			lastRemovedTile = tile;
-			remove(tile);
-			revalidate();
 			return tile.getLock().getHex().getState().addThingToHexGUI( tile.getProperties());
 		}
 		return null;
@@ -610,6 +604,7 @@ public class Board extends JPanel implements CanvasParent{
 	 */
 	private class Controller extends MouseAdapter implements ActionListener{
 
+		private Tile lastRemovedTile;
 		private UndoManager undoManger;
 		private ThingPlacmentUndo thingUndo;
 		private Rectangle bound, boardBound;
@@ -628,6 +623,10 @@ public class Board extends JPanel implements CanvasParent{
 		}
 		
 		public void undo(){
+			if( lastRemovedTile!=null){
+				add( lastRemovedTile, 0);
+				revalidate();
+			}
 			undoManger.undo( moveAnimation);
 		}
 		
@@ -722,6 +721,10 @@ public class Board extends JPanel implements CanvasParent{
 						//TODO support for moving stack, some of stack and dropping to Cup
 					}else if(newLock.canHold( currentTile)){//TODO check canHold, might be unnecessary condition
 						HexState hex = placeTileOnHex( currentTile);
+						lastRemovedTile = currentTile;
+						remove( currentTile);
+						revalidate();
+						repaint();
 						thingUndo.addEnd( ThingPlacmentUndo.createOperation( currentTile, hex, e.getPoint()));
 						undoManger.addUndo( thingUndo);
 						if( hex!=null){
@@ -734,6 +737,7 @@ public class Board extends JPanel implements CanvasParent{
 					undo();
 				}
 			}
+			thingUndo = null;
 			currentTile = null; 
 			lastPoint = null;
 			newLock = null;
@@ -759,8 +763,9 @@ public class Board extends JPanel implements CanvasParent{
 					remove( currentTile);
 					add( currentTile, 0);
 					revalidate();
+					repaint();
 					thingUndo = new ThingPlacmentUndo();
-					thingUndo.addStart( ThingPlacmentUndo.createOperation( currentTile, null, e.getPoint()));
+					thingUndo.addStart( ThingPlacmentUndo.createOperation( currentTile, null, currentTile.getLock().getCenter()));
 					//check to see if it is hex
 					if( !currentTile.isTile() && currentTile.hasLock()){
 						if( !moveHex){
