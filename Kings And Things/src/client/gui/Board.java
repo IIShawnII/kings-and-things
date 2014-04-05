@@ -123,6 +123,7 @@ public class Board extends JPanel implements CanvasParent{
 		g2d.dispose();
 	}
 
+	private final boolean demo;
 	private volatile boolean useDice = false;
 	private volatile boolean isActive = false;
 	private volatile boolean phaseDone = false;
@@ -140,8 +141,9 @@ public class Board extends JPanel implements CanvasParent{
 	/**
 	 * basic super constructor warper for JPanel
 	 */
-	public Board(){
+	public Board( boolean demo){
 		super( null, true);
+		this.demo = demo;
 	}
 
 	public void setActive( boolean active) {
@@ -893,7 +895,10 @@ public class Board extends JPanel implements CanvasParent{
 				if( e.getSource()==dice){
 					if( useDice && dice.canRoll()){
 						useDice = false;
-						int rollValue = Integer.parseInt(JOptionPane.showInputDialog(Board.this, "Select desired roll value", "RollValue", JOptionPane.PLAIN_MESSAGE));
+						int rollValue = 0;
+						if(demo){
+							rollValue = Integer.parseInt(JOptionPane.showInputDialog(Board.this, "Select desired roll value", "RollValue", JOptionPane.PLAIN_MESSAGE));
+						}
 						Roll roll = new Roll( dice.getDiceCount(), null, lastRollReason, currentPlayer.getID(), rollValue);
 						new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
 						dice.roll();

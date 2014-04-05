@@ -16,8 +16,10 @@ public class MultiBoardManager {
 	private GridBagConstraints constraints;
 	private int currentID = -1;
 	private boolean created = false;
+	private final boolean demo;
 	
-	public MultiBoardManager( JPanel container, GridBagConstraints constraints){
+	public MultiBoardManager( JPanel container, GridBagConstraints constraints, boolean demo){
+		this.demo = demo;
 		setProperties( container, constraints);
 	}
 	
@@ -27,7 +29,7 @@ public class MultiBoardManager {
 		}
 		boards = new Board[players.length];
 		for( int i=0; i<boards.length; i++){
-			boards[ i] = new Board();
+			boards[ i] = new Board( demo);
 			boards[ i].setPreferredSize( Constants.BOARD_SIZE);
 			boards[ i].setSize( Constants.BOARD_SIZE);
 			boards[ i].init( boards.length);

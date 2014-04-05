@@ -239,6 +239,9 @@ public class ConnectionLogic implements Runnable {
 							try{
 								logic = new ConnectionLogic();
 								netaction = logic.connect( ip, port, names[i]);
+								if( netaction==UpdateInstruction.Disconnect){
+									break;
+								}
 								startLogic( logic);
 							}catch(IllegalArgumentException | IOException ex){
 								message += "\n" + ex.getMessage();

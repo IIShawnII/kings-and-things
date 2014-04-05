@@ -65,6 +65,7 @@ public class Die extends JPanel implements ActionListener{
 		setFace();
 		roll++;
 		if( roll>=Constants.MAX_ROLLS && faceValue==target){
+			target=0;
 			timer.stop();
 			parent.doneRolling();
 		}

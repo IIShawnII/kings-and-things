@@ -38,6 +38,7 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 	private JButton jbNext, jbPrev;
 	private MultiBoardManager boards;
 	private JComboBox< PlayerInfo> jcbPlayers;
+	private boolean demo = false;
 	
 	/**
 	 * construct Client GUI
@@ -61,10 +62,13 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
         setVisible(true);
         dialog = new LoadingDialog( new LoadResources( true), "Lobby", true, true, getGraphicsConfiguration());
 		dialog.run();
+		demo = dialog.isDemo();
     	dispose();
 		if(dialog==null || !dialog.isForceClosed()){
 	        setUndecorated(false);
-	        setJMenuBar( createMenu());
+	        if( demo){
+	        	setJMenuBar( createMenu());
+	        }
 			setContentPane( createGUI());
 			pack();
 			Dimension size = new Dimension( getWidth(), getHeight());
@@ -94,7 +98,7 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 
-		boards = new MultiBoardManager( jpMain, constraints);
+		boards = new MultiBoardManager( jpMain, constraints, demo);
 		boards.creatBoards( players);
 		boards.show( -1);
 		

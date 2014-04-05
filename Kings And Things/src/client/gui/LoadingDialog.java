@@ -241,6 +241,10 @@ public class LoadingDialog extends JDialog implements Runnable{
 		return jpMain;
 	}
 	
+	public boolean isDemo(){
+		return jtfName.getText().trim().contains( "-demo");
+	}
+	
 	public void removeProgress(){
 		remove( jpProgress);
 		jpProgress = null;
