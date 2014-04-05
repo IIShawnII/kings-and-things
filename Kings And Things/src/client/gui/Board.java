@@ -465,7 +465,7 @@ public class Board extends JPanel implements CanvasParent{
 					phaseDone = true;
 					break;
 				case Rejected:
-					manageRejection( (UpdateInstruction)update.getData( UpdateKey.Instruction));
+					manageRejection( (UpdateInstruction)update.getData( UpdateKey.Instruction), (String)update.getData( UpdateKey.Message));
 					break;
 				case PlaceBoard:
 					animateHexPlacement( (HexState[]) update.getData( UpdateKey.Hex));
@@ -599,7 +599,7 @@ public class Board extends JPanel implements CanvasParent{
 		lastRollReason = reason;
 	}
 	
-	private void manageRejection( UpdateInstruction data) {
+	private void manageRejection( UpdateInstruction data, String message) {
 		//TODO Handle More Rejections
 		switch( data){
 			case Skip:
@@ -612,6 +612,8 @@ public class Board extends JPanel implements CanvasParent{
 				break;
 			case SeaHexChanged:
 				controller.setPermission( Permissions.ExchangeHex);
+				JOptionPane.showMessageDialog( this, message, "Rejceted", JOptionPane.ERROR_MESSAGE);
+				jtfStatus.setText( "Sea Hex exchange not possible");
 				controller.undo();
 				break;
 			case HexOwnership:

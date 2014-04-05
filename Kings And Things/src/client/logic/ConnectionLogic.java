@@ -148,14 +148,15 @@ public class ConnectionLogic implements Runnable {
 					}
 					update.addInstruction( UpdateInstruction.Rejected);
 					switch( instruction){
-						case TieRoll:
 						case SeaHexChanged:
+							update.putData(UpdateKey.Message, ((CommandRejected)event).getErrorMessage());
+						case TieRoll:
 						case HexOwnership:
 						case Skip:
 							update.putData(UpdateKey.Instruction, instruction);
 							break;
 						default:
-							throw new IllegalStateException("Logic.Receive " + (player!=null?player.getID():"-1") + ": No Support for: " + instruction);
+							throw new IllegalStateException("Logic.Receive " + (player!=null?player.getID():"-1") + ": No Support for rejection: " + instruction);
 					}
 				}
 				else if(event instanceof InitiateCombat)

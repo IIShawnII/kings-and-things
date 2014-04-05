@@ -313,7 +313,7 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ExchangeSeaHexCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),UpdateInstruction.SeaHexChanged).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.SeaHexChanged).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

@@ -139,7 +139,7 @@ public class BoardGenerator implements Serializable
 		{
 			throw new IllegalArgumentException("The entered hex tile must not be null.");
 		}
-		if(hex.isHexTile())
+		if(!hex.isHexTile())
 		{
 			throw new IllegalArgumentException("The entered tile must be a hex tile.");
 		}
