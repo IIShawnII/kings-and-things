@@ -1,63 +1,65 @@
 package client.gui;
 
+import static common.Constants.BOARD_LOAD_ROW;
+import static common.Constants.BOARD_RIGHT_PADDING;
+import static common.Constants.BOARD_SIZE;
+import static common.Constants.DICE_SIZE;
+import static common.Constants.HEX_BOARD_SIZE;
+import static common.Constants.HEX_OUTLINE_IMAGE;
+import static common.Constants.HEX_SIZE;
+import static common.Constants.PLAYERS_STATE_PADDING;
+import static common.Constants.TILE_OUTLINE;
+import static common.Constants.TILE_SIZE;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.ImageIcon;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import java.awt.Font;
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Graphics;
-import java.awt.Dimension;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.Graphics2D;
-import java.awt.BasicStroke;
-import java.awt.RenderingHints;
-import java.awt.event.MouseEvent;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-
+import client.gui.die.DiceRoller;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
-import client.gui.die.DiceRoller;
 import client.gui.util.LockManager;
 import client.gui.util.LockManager.Lock;
 import client.gui.util.animation.CanvasParent;
 import client.gui.util.animation.FlipAll;
 import client.gui.util.animation.MoveAnimation;
-import client.gui.util.undo.UndoManager;
 import client.gui.util.undo.ThingPlacmentUndo;
-import common.game.Roll;
-import common.game.HexState;
-import common.game.PlayerInfo;
-import common.game.TileProperties;
-import common.game.ITileProperties;
+import client.gui.util.undo.UndoManager;
+
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Category;
-import common.Constants.UpdateKey;
+import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
-import common.Constants.RegularPhase;
 import common.Constants.UpdateInstruction;
-import common.event.UpdatePackage;
+import common.Constants.UpdateKey;
 import common.event.AbstractUpdateReceiver;
-import static common.Constants.HEX_SIZE;
-import static common.Constants.DICE_SIZE;
-import static common.Constants.TILE_SIZE;
-import static common.Constants.BOARD_SIZE;
-import static common.Constants.HEX_OUTLINE_IMAGE;
-import static common.Constants.TILE_OUTLINE;
-import static common.Constants.HEX_BOARD_SIZE;
-import static common.Constants.BOARD_LOAD_ROW;
-import static common.Constants.BOARD_RIGHT_PADDING;
-import static common.Constants.PLAYERS_STATE_PADDING;
+import common.event.UpdatePackage;
+import common.game.HexState;
+import common.game.ITileProperties;
+import common.game.PlayerInfo;
+import common.game.Roll;
+import common.game.TileProperties;
 
 @SuppressWarnings("serial")
 public class Board extends JPanel implements CanvasParent{
@@ -291,7 +293,7 @@ public class Board extends JPanel implements CanvasParent{
 		//create bound for destination location, this bound starts from outside of board
 		Rectangle bound = new Rectangle( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-TILE_SIZE.height-PADDING, TILE_SIZE.width, TILE_SIZE.height);
 		for( int count=0; count<Constants.MAX_RACK_SIZE; count++){
-			tile = addTile( new Tile( prop==null?new TileProperties(Category.Cup):prop[count]), start, false);
+			tile = addTile( new Tile( prop==null || count>=prop.length?new TileProperties(Category.Cup):prop[count]), start, false);
 			if( count==5){
 				// since rack is two rows of five, at half all bounds must be shifted up, this bound starts from outside of board
 				bound.setLocation( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-(2*TILE_OUTLINE.height)-(PADDING*2));
@@ -467,6 +469,29 @@ public class Board extends JPanel implements CanvasParent{
 					waitForPhase();
 					animateRackPlacement( (ITileProperties[]) update.getData( UpdateKey.Rack));
 					waitForPhase();
+
+					players = (PlayerInfo[]) update.getData( UpdateKey.Players);
+					setCurrentPlayer( (PlayerInfo)update.getData( UpdateKey.Player));
+					
+					SetupPhase currSetupPhase = (SetupPhase) update.getData(UpdateKey.Setup);
+					if(currSetupPhase.ordinal() > SetupPhase.DETERMINE_PLAYER_ORDER.ordinal())
+					{
+						placeMarkers();
+					}
+					if(currSetupPhase.ordinal() >= SetupPhase.PLACE_FREE_TOWER.ordinal())
+					{
+						placeTower();
+					}
+					if(currSetupPhase != SetupPhase.SETUP_FINISHED)
+					{
+						manageSetupPhase(currSetupPhase);
+					}
+					else
+					{
+						manageRegularPhase((RegularPhase) update.getData(UpdateKey.Regular));
+					}
+
+					repaint();
 					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
@@ -522,18 +547,25 @@ public class Board extends JPanel implements CanvasParent{
 	private void manageRegularPhase( RegularPhase phase) {
 		switch( phase){
 			case COMBAT:
+				jtfStatus.setText( "Select combat to resolve, if any");
 				break;
 			case CONSTRUCTION:
+				jtfStatus.setText( "Construct or upgrade buildings, if any");
 				break;
 			case MOVEMENT:
+				jtfStatus.setText( "Move things on board, if any");
 				break;
 			case RANDOM_EVENTS:
+				jtfStatus.setText( "Play random event, if any");
 				break;
 			case RECRUITING_CHARACTERS:
+				jtfStatus.setText( "Select hero to recruit, if any");
 				break;
 			case RECRUITING_THINGS:
+				jtfStatus.setText( "Recruit things");
 				break;
 			case SPECIAL_POWERS:
+				jtfStatus.setText( "Use hero abilities, if any");
 				break;
 			default:
 				break;

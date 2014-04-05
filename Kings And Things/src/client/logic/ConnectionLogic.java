@@ -59,6 +59,7 @@ public class ConnectionLogic implements Runnable {
 					PlayerInfo[] players = ((PlayersList)event).getPlayers();
 					updateCurrentPlayer( players);
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
+					updatePlayerFromList(players);
 					update.putData( UpdateKey.Player, player);
 					update.putData( UpdateKey.Players, players);
 					if( !gameStarted){
@@ -91,6 +92,7 @@ public class ConnectionLogic implements Runnable {
 					CurrentPhase<?> phase = (CurrentPhase<?>) event;
 					updateCurrentPlayer( phase.getPlayers());
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
+					updatePlayerFromList(phase.getPlayers());
 					update.putData( UpdateKey.Player, player);
 					update.putData( UpdateKey.Players, phase.getPlayers());
 					ID |= Constants.GUI;
@@ -124,6 +126,8 @@ public class ConnectionLogic implements Runnable {
 					GameStateProgress progress = (GameStateProgress)event;
 					updateCurrentPlayer( progress.getPlayers());
 					update.addInstruction( UpdateInstruction.UpdatePlayers);
+
+					updatePlayerFromList(progress.getPlayers());
 					update.putData( UpdateKey.Player, player);
 					update.putData( UpdateKey.Players, progress.getPlayers());
 					update.addInstruction( UpdateInstruction.GameState);
@@ -322,6 +326,18 @@ public class ConnectionLogic implements Runnable {
 			connection.send( event);
 		} catch ( IOException e) {
 			Logger.getStandardLogger().warn( e);
+		}
+	}
+	
+	private void updatePlayerFromList(PlayerInfo[] playerList)
+	{
+		for(PlayerInfo pi : playerList)
+		{
+			if(pi.getID() == player.getID())
+			{
+				player = pi;
+				break;
+			}
 		}
 	}
 }
