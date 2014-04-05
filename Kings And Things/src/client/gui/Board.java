@@ -31,6 +31,7 @@ import client.gui.util.LockManager.Lock;
 import client.gui.util.animation.CanvasParent;
 import client.gui.util.animation.FlipAll;
 import client.gui.util.animation.MoveAnimation;
+import client.gui.util.undo.Parent;
 import client.gui.util.undo.UndoManager;
 import client.gui.util.undo.UndoTileMovement;
 import common.game.Roll;
@@ -322,6 +323,8 @@ public class Board extends JPanel implements CanvasParent{
 			tile.setLockArea( locks.getLock( tile));
 			placeTileOnHex( tile);
 		}
+		revalidate();
+		repaint();
 	}
 	
 	private void noneAnimtedFlipAll() {
@@ -644,7 +647,7 @@ public class Board extends JPanel implements CanvasParent{
 	/**
 	 * input class for mouse, used for like assignment and current testing phases suck as placement
 	 */
-	private class Controller extends MouseAdapter implements ActionListener{
+	private class Controller extends MouseAdapter implements ActionListener, Parent{
 
 		private Tile lastRemovedTile;
 		private UndoManager undoManger;
@@ -702,37 +705,25 @@ public class Board extends JPanel implements CanvasParent{
 					}
 				}else{
 					switch( permission){
+						case MoveFromCup:
+						case MoveFromRack:
 						case MoveMarker:
-							break;
-						case ExchangeThing:
+						case MoveTower:
+							newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
 							break;
 						case ExchangeHex:
-							break;
-						case MoveFromCup:
-							break;
-						case MoveFromRack:
-							break;
-						case MoveTower:
+						case ExchangeThing:
+							newLock = locks.getDropLock( currentTile);
 							break;
 						default:
 							return;
-					}
-					//code for getting locks, need to be updated
-					/*if(	moveBank){
-						newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
-					}
-					if( moveHex || moveStack){
-						newLock = locks.getDropLock( currentTile);
-					}
-					if( newLock==null){
-						newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
 					}
 					if( newLock!=null){
 						currentTile.setLockArea( newLock);
 						Point center = newLock.getCenter();
 						bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
 					}
-					currentTile.setBounds( bound);*/
+					currentTile.setBounds( bound);
 				}
 			}
 		}
@@ -750,10 +741,25 @@ public class Board extends JPanel implements CanvasParent{
 				}
 				switch( permission){
 					case MoveMarker:
+						if( newLock.canHold( currentTile)){
+							HexState hex = placeTileOnHex( currentTile);
+							if( hex!=null){
+								lastRemovedTile = currentTile;
+								undoManger.addUndo( new UndoTileMovement(currentTile, hex));
+								removeCurrentTile();
+								new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
+							}
+						}
 						break;
 					case ExchangeThing:
 						break;
 					case ExchangeHex:
+						if( newLock.canTempHold( currentTile)){
+							lastRemovedTile = currentTile;
+							undoManger.addUndo( new UndoTileMovement(currentTile));
+							removeCurrentTile();
+							new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( currentPlayer.getID());
+						}
 						break;
 					case MoveFromCup:
 						break;
@@ -766,23 +772,6 @@ public class Board extends JPanel implements CanvasParent{
 				}
 			}
 			prepareForNextMouseRelease();
-			//TODO code for placement and exchange, must be updated
-			/*if(newLock!=null){
-				if( moveHex){
-					new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( currentPlayer.getID());
-				}else if(moveStack){
-					//TODO support for moving stack, some of stack and dropping to Cup
-				}else if(newLock.canHold( currentTile)){//TODO check canHold, might be unnecessary condition
-					HexState hex = placeTileOnHex( currentTile);
-					lastRemovedTile = currentTile;
-					remove( currentTile);
-					revalidate();
-					repaint();
-					if( hex!=null){
-						new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
-					}
-				}
-			}*/
 		}
 
 		/**
@@ -800,7 +789,7 @@ public class Board extends JPanel implements CanvasParent{
 				if( !checkTilePermission( currentTile)){
 					return;
 				}
-				//bring the component to the top, to prevent overlapping
+				//move the component to the top, prevents overlapping
 				remove( currentTile);
 				add( currentTile, 0);
 				revalidate();
@@ -867,6 +856,12 @@ public class Board extends JPanel implements CanvasParent{
 			new UpdatePackage( UpdateInstruction.Skip, "Board.Input").postNetworkEvent( currentPlayer.getID());
 		}
 		
+		private void removeCurrentTile(){
+			remove( currentTile);
+			revalidate();
+			repaint();
+		}
+		
 		private void prepareForNextMouseRelease(){
 			currentTile = null; 
 			lastPoint = null;
@@ -897,7 +892,11 @@ public class Board extends JPanel implements CanvasParent{
 						useDice = false;
 						int rollValue = 0;
 						if(demo){
-							rollValue = Integer.parseInt(JOptionPane.showInputDialog(Board.this, "Select desired roll value", "RollValue", JOptionPane.PLAIN_MESSAGE));
+							try{
+								rollValue = Integer.parseInt(JOptionPane.showInputDialog(Board.this, "Select desired roll value", "RollValue", JOptionPane.PLAIN_MESSAGE));
+							}catch(NumberFormatException ex){
+								rollValue = 0;
+							}
 						}
 						Roll roll = new Roll( dice.getDiceCount(), null, lastRollReason, currentPlayer.getID(), rollValue);
 						new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
@@ -923,6 +922,11 @@ public class Board extends JPanel implements CanvasParent{
 		
 		private boolean canMove(){
 			return permission!=Permissions.NoMove && permission!=Permissions.Roll;
+		}
+
+		@Override
+		public void addTile(Tile tile) {
+			Board.this.add(tile);
 		}
 	}
 

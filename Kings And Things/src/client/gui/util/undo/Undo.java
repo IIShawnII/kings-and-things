@@ -4,5 +4,7 @@ import client.gui.util.animation.MoveAnimation;
 
 public interface Undo{
 	
-	public void undo( MoveAnimation animation);
+	public boolean undoLast();
+	
+	public void undo( MoveAnimation animation, Parent parent);
 }

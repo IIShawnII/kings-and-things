@@ -10,6 +10,7 @@ import client.gui.util.animation.MoveAnimation;
  */
 public class UndoManager {
 	
+	private Parent parent;
 	private Deque< Undo> operations;
 	
 	public UndoManager(){
@@ -24,6 +25,10 @@ public class UndoManager {
 	}
 	
 	public void undo( MoveAnimation animation){
-		operations.getLast().undo( animation);
+		Undo undo = operations.getLast();
+		undo.undo(animation, parent);
+		if( undo.undoLast()){
+			operations.getLast().undo( animation, parent);
+		}
 	}
 }
