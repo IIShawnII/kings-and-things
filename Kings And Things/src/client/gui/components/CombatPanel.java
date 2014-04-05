@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -21,7 +22,7 @@ import client.gui.Board;
 import client.gui.components.combat.AbstractCombatArmyPanel;
 import client.gui.components.combat.ActiveCombatArmyPanel;
 import client.gui.components.combat.InactiveCombatArmyPanel;
-
+import client.gui.components.combat.RetreatPanel;
 import common.Constants.CombatPhase;
 import common.event.AbstractUpdateReceiver;
 import common.event.network.HexStatesChanged;
@@ -161,7 +162,9 @@ public class CombatPanel extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				// TODO Show contents of available retreat hexes and let player select one
+				JDialog retreatDialog = new JDialog();
+				retreatDialog.add(new RetreatPanel(adjacentPlayerOwnedHexes,hs));
+				retreatDialog.setVisible(true);
 			}});
 	}
 	

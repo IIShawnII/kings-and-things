@@ -57,6 +57,7 @@ public final class Constants {
 	public static final Image WHITE_FLAG;
 	public static final Image FIGHT_ON;
 	public static final Image RUN_AWAY;
+	public static final Image PICK_ME_KITTEN;
 	public static final HashMap< Integer, Image> IMAGES = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> HEX = new HashMap<>();
 	public static final HashMap< Integer, TileProperties> CUP = new HashMap<>();
@@ -175,7 +176,9 @@ public final class Constants {
 																												.put("Deerhunter","Grand_Duke")
 																												.put("Marksman","Forest_King")
 																												.put("Swamp_King","Sir_Lancealot").build();
-			
+
+	private static final String RESOURCES_DIRECTORY = "..\\Kings And Things\\Resources\\";
+	private static final String MISC_DIRECTORY = RESOURCES_DIRECTORY + "Misc\\";
 	static{
 		int w = (int) (HEX_SIZE.getWidth()/4)+1;
 		int h = (int) (HEX_SIZE.getHeight()/2)+2;
@@ -184,23 +187,24 @@ public final class Constants {
 		h -= 1;
 		HEX_OUTLINE = new Polygon( new int[]{w,0,w,w*3,w*4,w*3}, new int[]{h*2,h,0,0,h,h*2}, 6);
 		TILE_OUTLINE = new Rectangle( 0, 0, TILE_SIZE.width, TILE_SIZE.height);
-		IMAGE_BACKGROUND = loadImage( "Resources\\Misc\\-n Woodboard.jpg");
-		IMAGE_HEX_REVERSE = loadImage( "Resources\\Misc\\-n Hex_Reverse.png");
-		IMAGE_TILE_REVERSE = loadImage( "Resources\\Misc\\-n Tile_Reverse.png");
-		IMAGE_GREEN = loadImage( "Resources\\Misc\\-n Green_Surface.png");
-		IMAGE_SKIP = loadImage( "Resources\\Misc\\-n Skip.png");
-		CROSSHAIR = loadImage("Resources\\Misc\\-n Crosshair.png");
-		WHITE_FLAG = loadImage("Resources\\Misc\\-n White_Flag.jpg");
-		FIGHT_ON = loadImage("Resources\\Misc\\-n Fight_On.jpg");
-		RUN_AWAY = loadImage("Resources\\Misc\\-n Run_Away.jpg");
+		IMAGE_BACKGROUND = loadImage( MISC_DIRECTORY + "-n Woodboard.jpg");
+		IMAGE_HEX_REVERSE = loadImage( MISC_DIRECTORY + "-n Hex_Reverse.png");
+		IMAGE_TILE_REVERSE = loadImage( MISC_DIRECTORY + "-n Tile_Reverse.png");
+		IMAGE_GREEN = loadImage( MISC_DIRECTORY + "-n Green_Surface.png");
+		IMAGE_SKIP = loadImage( MISC_DIRECTORY + "-n Skip.png");
+		CROSSHAIR = loadImage(MISC_DIRECTORY + "-n Crosshair.png");
+		WHITE_FLAG = loadImage(MISC_DIRECTORY + "-n White_Flag.jpg");
+		FIGHT_ON = loadImage(MISC_DIRECTORY + "-n Fight_On.jpg");
+		RUN_AWAY = loadImage(MISC_DIRECTORY + "-n Run_Away.jpg");
+		PICK_ME_KITTEN = loadImage(MISC_DIRECTORY + "Pick Me Kitten.jpeg");
 		IMAGE_DICE = new Image[7];
-		IMAGE_DICE[0] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 0.png");
-		IMAGE_DICE[1] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 1.png");
-		IMAGE_DICE[2] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 2.png");
-		IMAGE_DICE[3] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 3.png");
-		IMAGE_DICE[4] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 4.png");
-		IMAGE_DICE[5] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 5.png");
-		IMAGE_DICE[6] = loadImage( "Resources\\Misc\\Dice\\-n Dice -a 6.png");
+		IMAGE_DICE[0] = loadImage( MISC_DIRECTORY + "Dice\\-n Dice -a 0.png");
+		IMAGE_DICE[1] = loadImage( MISC_DIRECTORY + "Dice\\-n Dice -a 1.png");
+		IMAGE_DICE[2] = loadImage( MISC_DIRECTORY + "Dice\\-n Dice -a 2.png");
+		IMAGE_DICE[3] = loadImage( MISC_DIRECTORY + "Dice\\-n Dice -a 3.png");
+		IMAGE_DICE[4] = loadImage( MISC_DIRECTORY + "Dice\\-n Dice -a 4.png");
+		IMAGE_DICE[5] = loadImage( MISC_DIRECTORY + "Dice\\-n Dice -a 5.png");
+		IMAGE_DICE[6] = loadImage( MISC_DIRECTORY + "Dice\\-n Dice -a 6.png");
 	}
 	
 	private static Image loadImage( String path){
@@ -294,5 +298,80 @@ public final class Constants {
 	 */
 	public static int random( int max){
 		return rand.nextInt((max+1));
+	}
+	
+
+	private static final String DIRECTION_DIRECTORY = MISC_DIRECTORY + "Directional Arrows\\";
+	
+	public static enum Direction{
+		NORTH(DIRECTION_DIRECTORY + "N.png"),
+		NORTH_EAST(DIRECTION_DIRECTORY + "NE.png"),
+		EAST(DIRECTION_DIRECTORY + "E.png"),
+		SOUTH_EAST(DIRECTION_DIRECTORY + "SE.png"),
+		SOUTH(DIRECTION_DIRECTORY + "S.png"),
+		SOUTH_WEST(DIRECTION_DIRECTORY + "SW.png"),
+		WEST(DIRECTION_DIRECTORY + "W.png"),
+		NORTH_WEST(DIRECTION_DIRECTORY + "NW.png");
+		
+		private final Image image;
+		
+		private Direction(String fileName)
+		{
+			image = loadImage(fileName);
+		}
+		
+		public Image getImage()
+		{
+			return image;
+		}
+		
+		public static Direction getFromAdjacentPoints(Point origin, Point destination)
+		{
+			if(origin.x < destination.x)
+			{
+				if(origin.y < destination.y)
+				{
+					return SOUTH_EAST;
+				}
+				else if(origin.y > destination.y)
+				{
+					return NORTH_EAST;
+				}
+				else
+				{
+					return EAST;
+				}
+			}
+			else if(origin.x > destination.x)
+			{
+				if(origin.y < destination.y)
+				{
+					return SOUTH_WEST;
+				}
+				else if(origin.y > destination.y)
+				{
+					return NORTH_WEST;
+				}
+				else
+				{
+					return WEST;
+				}
+			}
+			else
+			{
+				if(origin.y < destination.y)
+				{
+					return SOUTH;
+				}
+				else if(origin.y > destination.y)
+				{
+					return NORTH;
+				}
+				else
+				{
+					return null;
+				}
+			}
+		}
 	}
 }

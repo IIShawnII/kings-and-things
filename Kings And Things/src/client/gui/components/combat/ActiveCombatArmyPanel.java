@@ -16,6 +16,7 @@ import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -184,8 +185,8 @@ public class ActiveCombatArmyPanel extends AbstractCombatArmyPanel
 				{
 					roller.roll();
 					
-					Roll r = new Roll(roller.getDiceCount(), tile, RollReason.ATTACK_WITH_CREATURE, getPlayerID());
-					//TODO Send roll to server
+					int rollValue = Integer.parseInt(JOptionPane.showInputDialog(ActiveCombatArmyPanel.this, "Select desired roll value", "RollValue", JOptionPane.PLAIN_MESSAGE));
+					Roll r = new Roll(roller.getDiceCount(), tile, RollReason.ATTACK_WITH_CREATURE, getPlayerID(), rollValue);
 				}
 				@Override
 				public void mouseEntered(MouseEvent arg0)

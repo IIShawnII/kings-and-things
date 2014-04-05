@@ -1,5 +1,6 @@
 package client.gui;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
@@ -490,13 +491,11 @@ public class Board extends JPanel implements CanvasParent{
 		}
 	}
 	
-	private void prepareForRollDice( int count, RollReason reason, String message, int value){
+	private void prepareForRollDice( int count, RollReason reason, String message){
 		useDice = true;
 		dice.setDiceCount( count);
 		jtfStatus.setText( message);
 		lastRollReason = reason;
-		Roll roll = new Roll( count, null, reason, currentPlayer.getID(), value);
-		new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
 	}
 	
 	private void manageRejection( UpdateInstruction data) {
@@ -506,7 +505,7 @@ public class Board extends JPanel implements CanvasParent{
 				jtfStatus.setText( "Cannot skip this phase");
 				break;
 			case TieRoll:
-				prepareForRollDice(2, lastRollReason, "Tie Roll, Roll again", 2);
+				prepareForRollDice(2, lastRollReason, "Tie Roll, Roll again");
 				break;
 			case SeaHexChanged:
 				controller.undo();
@@ -546,7 +545,7 @@ public class Board extends JPanel implements CanvasParent{
 			case DETERMINE_PLAYER_ORDER:
 				controller.setRollDice(true);
 				//TODO add support for custom roll
-				prepareForRollDice(2, RollReason.DETERMINE_PLAYER_ORDER, "Roll dice to determine order", 2);
+				prepareForRollDice(2, RollReason.DETERMINE_PLAYER_ORDER, "Roll dice to determine order");
 				break;
 			case EXCHANGE_SEA_HEXES:
 				controller.setMoveHex( true);
@@ -813,6 +812,9 @@ public class Board extends JPanel implements CanvasParent{
 				if( e.getSource()==dice){
 					if( useDice && dice.canRoll()){
 						useDice = false;
+						int rollValue = Integer.parseInt(JOptionPane.showInputDialog(Board.this, "Select desired roll value", "RollValue", JOptionPane.PLAIN_MESSAGE));
+						Roll roll = new Roll( dice.getDiceCount(), null, lastRollReason, currentPlayer.getID(), rollValue);
+						new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
 						dice.roll();
 						new Thread( new Runnable() {
 							@Override

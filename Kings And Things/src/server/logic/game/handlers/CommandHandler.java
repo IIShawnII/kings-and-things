@@ -3,7 +3,6 @@ package server.logic.game.handlers;
 import static common.Constants.ALL_PLAYERS_ID;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +20,6 @@ import server.logic.game.RollModification;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
@@ -371,8 +369,6 @@ public abstract class CommandHandler
 		}
 	}
 
-	//for holding all values rolled at SetupPhase.DETERMINE_PLAYER_ORDER
-	private Set<Integer> rolls = new HashSet<>(4);
 	private void makeDiceRoll(Roll roll)
 	{
 		if(roll.getRollReason() == RollReason.ENTERTAINMENT)
@@ -395,11 +391,7 @@ public abstract class CommandHandler
 			currentState.addNeededRoll(rollToAddTo);
 		}
 
-		int total = 0;
-		//loop is to for bypassing tie at SetupPhase.DETERMINE_PLAYER_ORDER
-		do{
-			total = rollDie(roll.getTargetValue(), roll.getDiceCount(), roll.getDiceCount()*6);
-		}while( currentState.getCurrentSetupPhase()==SetupPhase.DETERMINE_PLAYER_ORDER&&!rolls.add( total));
+		int total = rollDie(roll.getTargetValue(), roll.getDiceCount(), roll.getDiceCount()*6);
 		rollToAddTo.addBaseRolls( Constants.convertToDice( total, roll.getDiceCount()));
 		if(currentState.hasRollModificationFor(rollToAddTo))
 		{
