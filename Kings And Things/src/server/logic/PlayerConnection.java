@@ -3,16 +3,19 @@ package server.logic;
 import java.io.IOException;
 
 import server.event.PlayerUpdated;
+import server.event.internal.ResolveCombatCommand;
 import server.event.internal.RollDiceCommand;
 import server.event.internal.DoneRollingCommand;
 import server.event.internal.EndPlayerTurnCommand;
 import server.event.internal.GiveHexToPlayerCommand;
+import server.event.internal.TargetPlayerCommand;
 
 import com.google.common.eventbus.Subscribe;
 
 import common.Logger;
 import common.network.Connection;
 import common.Constants.UpdateKey;
+import common.game.ITileProperties;
 import common.game.Roll;
 import common.game.Player;
 import common.game.HexState;
@@ -107,6 +110,11 @@ public class PlayerConnection implements Runnable{
 					case Skip:
 						new EndPlayerTurnCommand().postInternalEvent( ID);
 						break;
+					case InitiateCombat:
+						new ResolveCombatCommand((ITileProperties) event.getData(UpdateKey.Hex)).postInternalEvent(ID);
+						break;
+					case TargetPlayer:
+						new TargetPlayerCommand((int) event.getData(UpdateKey.Player)).postInternalEvent(ID);
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
 				}

@@ -23,8 +23,12 @@ import client.gui.components.combat.AbstractCombatArmyPanel;
 import client.gui.components.combat.ActiveCombatArmyPanel;
 import client.gui.components.combat.InactiveCombatArmyPanel;
 import client.gui.components.combat.RetreatPanel;
+import common.Constants;
 import common.Constants.CombatPhase;
+import common.Constants.UpdateInstruction;
+import common.Constants.UpdateKey;
 import common.event.AbstractUpdateReceiver;
+import common.event.UpdatePackage;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.Player;
@@ -150,7 +154,15 @@ public class CombatPanel extends JPanel
 				}
 				String currentTarget = playerPanel.getTargetPlayerName();
 				String targetName = (String) JOptionPane.showInputDialog(playerPanel, "Select the player you would like to target", "Change Target", JOptionPane.PLAIN_MESSAGE, null, targetNames, currentTarget.equals("No one")? targetNames[0] : currentTarget);
-				//TODO send target command to server, update label upon getting results
+				int targetID = Constants.PUBLIC;
+				for(InactiveCombatArmyPanel panel : otherArmies)
+				{
+					if(panel.getPlayerName().equals(targetName))
+					{
+						targetID = panel.getPlayerID();
+					}
+				}
+				new UpdatePackage(UpdateInstruction.TargetPlayer, UpdateKey.Player, targetID, "Combat Panel for: " + playerPanel.getPlayerName()).postNetworkEvent(playerPanel.getPlayerID());
 			}});
 		playerPanel.addFightOnButtonListener(new ActionListener(){
 			@Override

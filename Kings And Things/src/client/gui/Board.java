@@ -1,31 +1,47 @@
 package client.gui;
 
+import static common.Constants.BOARD_LOAD_ROW;
+import static common.Constants.BOARD_RIGHT_PADDING;
+import static common.Constants.BOARD_SIZE;
+import static common.Constants.DICE_SIZE;
+import static common.Constants.HEX_BOARD_SIZE;
+import static common.Constants.HEX_OUTLINE_IMAGE;
+import static common.Constants.HEX_SIZE;
+import static common.Constants.PLAYERS_STATE_PADDING;
+import static common.Constants.TILE_OUTLINE;
+import static common.Constants.TILE_SIZE;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.HashSet;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.ImageIcon;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import java.awt.Font;
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Graphics;
-import java.awt.Dimension;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.Graphics2D;
-import java.awt.BasicStroke;
-import java.awt.RenderingHints;
-import java.awt.event.MouseEvent;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-
+import client.gui.components.CombatPanel;
+import client.gui.die.DiceRoller;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
-import client.gui.die.DiceRoller;
 import client.gui.util.LockManager;
 import client.gui.util.LockManager.Lock;
 import client.gui.util.animation.CanvasParent;
@@ -34,32 +50,25 @@ import client.gui.util.animation.MoveAnimation;
 import client.gui.util.undo.Parent;
 import client.gui.util.undo.UndoManager;
 import client.gui.util.undo.UndoTileMovement;
-import common.game.Roll;
-import common.game.HexState;
-import common.game.PlayerInfo;
-import common.game.TileProperties;
-import common.game.ITileProperties;
+
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Category;
 import common.Constants.Permissions;
-import common.Constants.UpdateKey;
+import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
-import common.Constants.RegularPhase;
 import common.Constants.UpdateInstruction;
-import common.event.UpdatePackage;
+import common.Constants.UpdateKey;
 import common.event.AbstractUpdateReceiver;
-import static common.Constants.HEX_SIZE;
-import static common.Constants.DICE_SIZE;
-import static common.Constants.TILE_SIZE;
-import static common.Constants.BOARD_SIZE;
-import static common.Constants.HEX_OUTLINE_IMAGE;
-import static common.Constants.TILE_OUTLINE;
-import static common.Constants.HEX_BOARD_SIZE;
-import static common.Constants.BOARD_LOAD_ROW;
-import static common.Constants.BOARD_RIGHT_PADDING;
-import static common.Constants.PLAYERS_STATE_PADDING;
+import common.event.UpdatePackage;
+import common.event.network.InitiateCombat;
+import common.game.HexState;
+import common.game.ITileProperties;
+import common.game.Player;
+import common.game.PlayerInfo;
+import common.game.Roll;
+import common.game.TileProperties;
 
 @SuppressWarnings("serial")
 public class Board extends JPanel implements CanvasParent{
@@ -406,7 +415,23 @@ public class Board extends JPanel implements CanvasParent{
 		}
 		addTile( new Tile( tower), bound, false).flip();
 	}
-	
+/*
+	private boolean firstBattle = true;
+	private ITileProperties battle = null;
+	private void placeBattleMarker(){
+		Point point = locks.getPermanentLock( Category.State).getCenter();
+		Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
+		if( firstBattle){
+			battle = Constants.STATE.get(Restriction.Battle);
+			addTile( new Tile( battle), bound, false).flip();
+			addTile( new Tile( battle), bound, false).flip();
+			addTile( new Tile( battle), bound, false).flip();
+			addTile( new Tile( battle), bound, false).flip();
+			firstBattle = false;
+		}
+		addTile( new Tile( battle), bound, false).flip();
+	}
+	*/
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
@@ -499,6 +524,51 @@ public class Board extends JPanel implements CanvasParent{
 
 					repaint();
 					break;
+				case InitiateCombat:
+					final InitiateCombat combat = (InitiateCombat) update.getData(UpdateKey.Combat);
+					SwingUtilities.invokeLater(new Runnable(){
+						@Override
+						public void run() {
+							HashSet<HexState> possibleRetreatHexes = new HashSet<>();
+							for(Point p : combat.getCombatHexState().getAdjacentLocations())
+							{
+								try
+								{
+									Lock l = locks.getLockForHex(p);
+									if(l != null)
+									{
+										if(l.getHex().getState().hasMarkerForPlayer(currentPlayer.getID()))
+										{
+											possibleRetreatHexes.add(l.getHex().getState());
+										}
+									}
+								}
+								catch(IndexOutOfBoundsException e)
+								{
+								}
+							}
+							Player player = null;
+							HashSet<Player> otherPlayers = new HashSet<>();
+							for(Player p : combat.getInvolvedPlayers())
+							{
+								if(p.getID() == currentPlayer.getID())
+								{
+									player = p;
+								}
+								else
+								{
+									otherPlayers.add(p);
+								}
+							}
+							
+							JFrame combatDialog = new JFrame("Combat!");
+							combatDialog.setContentPane(new CombatPanel(combat.getCombatHexState(), possibleRetreatHexes, player, otherPlayers,
+									combat.getCurrentCombatPhase(), combat.getDefendingPlayer(), combat.getPlayerOrder()));
+							combatDialog.setLocationRelativeTo(null);
+							combatDialog.pack();
+							combatDialog.setVisible(true);
+						}});
+					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
 			}
@@ -557,6 +627,7 @@ public class Board extends JPanel implements CanvasParent{
 	private void manageRegularPhase( RegularPhase phase) {
 		switch( phase){
 			case COMBAT:
+				controller.setPermission(Permissions.ResolveCombat);
 				jtfStatus.setText( "Select combat to resolve, if any");
 				break;
 			case CONSTRUCTION:
@@ -629,7 +700,6 @@ public class Board extends JPanel implements CanvasParent{
 			default:
 				break;
 		}
-		
 	}
 
 	/**
@@ -845,6 +915,8 @@ public class Board extends JPanel implements CanvasParent{
 				case Roll:
 					tryToRoll( e);
 					break;
+				case ResolveCombat:
+					tryResolveCombat(e);
 				case NoMove:
 				default:
 					return;
@@ -873,6 +945,7 @@ public class Board extends JPanel implements CanvasParent{
 		private boolean checkTilePermission( Tile tile){
 			switch( permission){
 				case ExchangeHex:
+				case ResolveCombat:
 					return !tile.isTile();
 				case ExchangeThing:
 				case MoveFromCup:
@@ -916,6 +989,31 @@ public class Board extends JPanel implements CanvasParent{
 					}else{
 						dice.expand();
 					}
+				}
+			}
+		}
+		
+		private void tryResolveCombat(MouseEvent e)
+		{
+			if(SwingUtilities.isRightMouseButton(e))
+			{
+
+				e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
+				Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
+				if(deepestComponent instanceof Hex)
+				{
+					Hex source = (Hex) deepestComponent;
+					e = SwingUtilities.convertMouseEvent(Board.this, e, source);
+					final ITileProperties hex = source.getState().getHex();
+					JPopupMenu clickMenu = new JPopupMenu("Select Action");
+					JMenuItem initiateCombat = new JMenuItem("Resolve Combat");
+					initiateCombat.addActionListener(new ActionListener(){
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							new UpdatePackage(UpdateInstruction.InitiateCombat, UpdateKey.Hex,hex,"Board " + currentPlayer.getID()).postNetworkEvent(currentPlayer.getID());
+						}});
+					clickMenu.add(initiateCombat);
+					clickMenu.show(source, e.getX(), e.getY());
 				}
 			}
 		}

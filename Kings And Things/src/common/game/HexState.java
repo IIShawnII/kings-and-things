@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -112,6 +113,22 @@ public class HexState implements Serializable{
 		return new Point( location);
 	}
 	
+	public ArrayList<Point> getAdjacentLocations()
+	{
+		int x = location.x;
+		int y = location.y;
+			
+		ArrayList<Point> coordsToTest = new ArrayList<>();
+		coordsToTest.add(new Point(x,y-2));
+		coordsToTest.add(new Point(x,y+2));
+		coordsToTest.add(new Point(x-1,y-1));
+		coordsToTest.add(new Point(x-1,y+1));
+		coordsToTest.add(new Point(x+1,y-1));
+		coordsToTest.add(new Point(x+1,y+1));
+		
+		return coordsToTest;
+	}
+	
 	public HexState setLocation( int x, int y){
 		location.setLocation( x, y);
 		return this;
@@ -150,6 +167,11 @@ public class HexState implements Serializable{
 	public void removeMarker(){
 		this.marker = null;
 		markerImage = null;
+	}
+	
+	public boolean hasMarkerForPlayer(int id)
+	{
+		return marker!=null && marker.equals(Constants.getPlayerMarker(id));
 	}
 	
 	public void paint( Graphics g, Point point){

@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 
 import common.event.AbstractUpdateReceiver;
 import common.event.network.CombatHits;
+import common.event.network.PlayerTargetChanged;
 import common.game.ITileProperties;
 
 public abstract class AbstractCombatArmyPanel extends JPanel
@@ -49,6 +50,7 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 		hitsToApply.setHorizontalAlignment(SwingConstants.CENTER);
 		hitsToApply.setHorizontalTextPosition(SwingConstants.CENTER);
 		new HitsReceiver();
+		new TargetChangedReceiver();
 	}
 	
 	public void init(Collection<ITileProperties> things)
@@ -146,6 +148,27 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 					AbstractCombatArmyPanel.this.setHitsToApply(update.getNumberOfHits());
 				}
 			});
+		}
+	}
+	
+	private class TargetChangedReceiver extends AbstractUpdateReceiver<PlayerTargetChanged>{
+
+		protected TargetChangedReceiver() {
+			super( INTERNAL, PUBLIC, AbstractCombatArmyPanel.this);
+		}
+
+		@Override
+		protected void handlePublic(final PlayerTargetChanged update) {
+			SwingUtilities.invokeLater(new Runnable(){
+				@Override
+				public void run(){
+					AbstractCombatArmyPanel.this.setTargetPlayerName(update.getPlayersTarget().getName());
+				}
+			});
+		}
+		
+		protected boolean verifyPublic( PlayerTargetChanged update){
+			return update.isPublic() && update.getTargettingPlayer().getID() == playerID;
 		}
 	}
 }

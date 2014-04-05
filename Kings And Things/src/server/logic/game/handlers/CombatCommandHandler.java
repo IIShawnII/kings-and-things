@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import server.event.DiceRolled;
 import server.event.PlayerRemovedThingsFromHex;
 import server.event.PlayerWaivedRetreat;
-import server.event.DiceRolled;
 import server.event.internal.ApplyHitsCommand;
 import server.event.internal.ResolveCombatCommand;
 import server.event.internal.RetreatCommand;
@@ -29,6 +29,8 @@ import common.Logger;
 import common.event.network.CombatHits;
 import common.event.network.CommandRejected;
 import common.event.network.HexStatesChanged;
+import common.event.network.InitiateCombat;
+import common.event.network.PlayerTargetChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -108,6 +110,13 @@ public class CombatCommandHandler extends CommandHandler
 				autoDetermineTargets();
 				advanceToNextCombatPhase();
 			}
+			int playerIDMask = 0;
+			for(Player p : getCurrentState().getPlayersStillFightingInCombatHex())
+			{
+				playerIDMask |= p.getPlayerInfo().getID();
+			}
+			
+			new InitiateCombat(getCurrentState().getCombatHex(), getCurrentState().getPlayersStillFightingInCombatHex(), getCurrentState().getDefendingPlayerNumber(), getCurrentState().getPlayerOrder(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(playerIDMask);
 		}
 	}
 
@@ -232,6 +241,13 @@ public class CombatCommandHandler extends CommandHandler
 	private void makePlayersTarget(int playerNumber, int targetPlayerNumber)
 	{
 		getCurrentState().setPlayersTarget(playerNumber, targetPlayerNumber);
+		
+		int idMask = 0;
+		for(Player p : getCurrentState().getPlayersStillFightingInCombatHex())
+		{
+			idMask |= p.getID();
+		}
+		new PlayerTargetChanged(getCurrentState().getPlayerByPlayerNumber(playerNumber), getCurrentState().getPlayerByPlayerNumber(targetPlayerNumber)).postNetworkEvent(idMask);
 		boolean someoneNeedsToSelectTarget = false;
 		for(Player p : getCurrentState().getPlayersStillFightingInCombatHex())
 		{

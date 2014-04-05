@@ -13,6 +13,8 @@ import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
 import common.event.network.Flip;
 import common.event.network.DieRoll;
+import common.event.network.InitiateCombat;
+import common.event.network.PlayerTargetChanged;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
@@ -155,6 +157,16 @@ public class ConnectionLogic implements Runnable {
 						default:
 							throw new IllegalStateException("Logic.Receive " + (player!=null?player.getID():"-1") + ": No Support for: " + instruction);
 					}
+				}
+				else if(event instanceof InitiateCombat)
+				{
+					update.addInstruction(UpdateInstruction.InitiateCombat);
+					update.putData(UpdateKey.Combat, event);
+				}
+				else if(event instanceof PlayerTargetChanged)
+				{
+					update.addInstruction(UpdateInstruction.TargetPlayer);
+					update.putData(UpdateKey.Combat, event);
 				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);

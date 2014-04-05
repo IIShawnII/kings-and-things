@@ -287,17 +287,7 @@ public class HexBoard implements Serializable
 	 */
 	public List<HexState> getAdjacentHexesTo(ITileProperties hex)
 	{
-		Point coords = getXYCoordinatesOfHex(hex);
-		int x = coords.x;
-		int y = coords.y;
-		
-		ArrayList<Point> coordsToTest = new ArrayList<Point>();
-		coordsToTest.add(new Point(x,y-2));
-		coordsToTest.add(new Point(x,y+2));
-		coordsToTest.add(new Point(x-1,y-1));
-		coordsToTest.add(new Point(x-1,y+1));
-		coordsToTest.add(new Point(x+1,y-1));
-		coordsToTest.add(new Point(x+1,y+1));
+		ArrayList<Point> coordsToTest = getHexStateForHex(hex).getAdjacentLocations();
 		
 		Iterator<Point> it = coordsToTest.iterator();
 		while(it.hasNext())
