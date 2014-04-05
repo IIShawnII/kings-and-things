@@ -177,7 +177,7 @@ public final class Constants {
 																												.put("Marksman","Forest_King")
 																												.put("Swamp_King","Sir_Lancealot").build();
 
-	private static final String RESOURCES_DIRECTORY = "..\\Kings And Things\\Resources\\";
+	private static final String RESOURCES_DIRECTORY = "Resources\\";
 	private static final String MISC_DIRECTORY = RESOURCES_DIRECTORY + "Misc\\";
 	static{
 		int w = (int) (HEX_SIZE.getWidth()/4)+1;
