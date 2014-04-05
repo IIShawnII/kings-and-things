@@ -29,6 +29,7 @@ import common.Constants;
 import common.Constants.Category;
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
+import common.Logger;
 
 @SuppressWarnings("serial")
 public class LoadingDialog extends JDialog implements Runnable{
@@ -66,7 +67,11 @@ public class LoadingDialog extends JDialog implements Runnable{
 		Thread thread = new Thread( task, title);
 		thread.setDaemon( true);
 		thread.start();
-		setVisible( true);
+		try{
+			setVisible( true);
+		}catch( ArrayIndexOutOfBoundsException ex){
+			Logger.getStandardLogger().warn( "Unknown error after exiting from JDialog", ex);
+		}
 	}
 	
 	private JPanel createGUI(){

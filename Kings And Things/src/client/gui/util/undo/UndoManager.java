@@ -20,9 +20,6 @@ public class UndoManager {
 		if( undo==null){
 			throw new NullPointerException();
 		}
-		if( !undo.isComplete()){
-			throw new IllegalArgumentException( "undo state must be complete before adding");
-		}
 		operations.addFirst( undo);
 	}
 	

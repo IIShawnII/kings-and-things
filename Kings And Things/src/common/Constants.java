@@ -45,6 +45,8 @@ public final class Constants {
 	public enum SetupPhase {DETERMINE_PLAYER_ORDER, PICK_FIRST_HEX, EXCHANGE_SEA_HEXES, PICK_SECOND_HEX, PICK_THIRD_HEX, PLACE_FREE_TOWER, PLACE_FREE_THINGS, EXCHANGE_THINGS, PLACE_EXCHANGED_THINGS, SETUP_FINISHED}
 	//Combat phases
 	public enum CombatPhase {DETERMINE_DEFENDERS, SELECT_TARGET_PLAYER, MAGIC_ATTACK, APPLY_MAGIC_HITS, RANGED_ATTACK, APPLY_RANGED_HITS, MELEE_ATTACK, APPLY_MELEE_HITS, ATTACKER_ONE_RETREAT, ATTACKER_TWO_RETREAT, ATTACKER_THREE_RETREAT, DEFENDER_RETREAT, DETERMINE_DAMAGE, PLACE_THINGS, NO_COMBAT}
+	//Control permissions for client GUI
+	public enum Permissions { Roll, NoMove, MoveMarker, ExchangeThing, ExchangeHex, MoveFromCup, MoveTower, MoveFromRack};
 	
 	//Resources
 	public static final Image IMAGE_SKIP;
@@ -96,7 +98,7 @@ public final class Constants {
 	public static final int ALL_PLAYERS_ID = 240;		//11110000
 	
 	//Maximums
-	public static final int MAX_ROLLS = 10;
+	public static final int MAX_ROLLS = 7;
 	public static final int MAX_HEXES = 48;
 	public static final int MAX_PLAYERS = 4;
 	public static final int MAX_DICE_FACE = 6;
