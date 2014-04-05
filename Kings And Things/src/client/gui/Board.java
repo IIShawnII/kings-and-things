@@ -83,7 +83,7 @@ public class Board extends JPanel implements CanvasParent{
 	private static final int HEX_Y_SHIFT = 8-3;
 	private static final int HEX_X_SHIFT = 8-2;
 	public static final int PADDING = 10;
-	public static final Font STATUS_INDICATOR_FONT = new Font("default", Font.BOLD, 30);
+	public static final Font STATUS_INDICATOR_FONT = new Font("default", Font.BOLD, 28);
 	
 	/**
 	 * create a static image with background and all outlines for faster drawing in Game 
@@ -176,7 +176,7 @@ public class Board extends JPanel implements CanvasParent{
 		addMouseMotionListener( controller);
 		
 		dice = new DiceRoller();
-		dice.setBounds( HEX_BOARD_SIZE.width+DICE_SIZE/2, getHeight()-DICE_SIZE-10, DICE_SIZE, DICE_SIZE);
+		dice.setBounds( HEX_BOARD_SIZE.width+DICE_SIZE, getHeight()-(DICE_SIZE*2)-10, DICE_SIZE, DICE_SIZE);
 		dice.init();
 		dice.addMouseListener( controller);
 		add( dice);
@@ -196,7 +196,7 @@ public class Board extends JPanel implements CanvasParent{
 		jbSkip.setOpaque( false);
 		jbSkip.addActionListener( controller);
 		jbSkip.setToolTipText( "Skip this phase");
-		jbSkip.setBounds( HEX_BOARD_SIZE.width-DICE_SIZE, getHeight()-DICE_SIZE-10, DICE_SIZE, DICE_SIZE);
+		jbSkip.setBounds( HEX_BOARD_SIZE.width+DICE_SIZE, getHeight()-DICE_SIZE-10, DICE_SIZE, DICE_SIZE);
 		add(jbSkip);
 		Rectangle bound = new Rectangle( INITIAL_TILE_X_SHIFT, TILE_Y_SHIFT, TILE_SIZE.width, TILE_SIZE.height);
 		bound.translate( TILE_X_SHIFT, 0);
@@ -719,7 +719,6 @@ public class Board extends JPanel implements CanvasParent{
 	 */
 	private class Controller extends MouseAdapter implements ActionListener, Parent{
 
-		private Tile lastRemovedTile;
 		private UndoManager undoManger;
 		private Rectangle bound, boardBound;
 		private Lock newLock;
@@ -729,14 +728,10 @@ public class Board extends JPanel implements CanvasParent{
 		private Permissions permission;
 		
 		public Controller(){
-			this.undoManger = new UndoManager();
+			this.undoManger = new UndoManager( this);
 		}
 		
 		public void undo(){
-			if( lastRemovedTile!=null){
-				add( lastRemovedTile, 0);
-				revalidate();
-			}
 			undoManger.undo( moveAnimation);
 		}
 		
@@ -808,37 +803,36 @@ public class Board extends JPanel implements CanvasParent{
 			if(currentTile!=null){
 				if( newLock==null){
 					undo();
-				}
-				switch( permission){
-					case MoveMarker:
-						if( newLock.canHold( currentTile)){
-							HexState hex = placeTileOnHex( currentTile);
-							if( hex!=null){
-								lastRemovedTile = currentTile;
-								undoManger.addUndo( new UndoTileMovement(currentTile, hex));
-								removeCurrentTile();
-								new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
+				}else{
+					switch( permission){
+						case MoveMarker:
+							if( newLock.canHold( currentTile)){
+								HexState hex = placeTileOnHex( currentTile);
+								if( hex!=null){
+									undoManger.addUndo( new UndoTileMovement(currentTile, hex));
+									removeCurrentTile();
+									new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
+								}
 							}
-						}
-						break;
-					case ExchangeThing:
-						break;
-					case ExchangeHex:
-						if( newLock.canTempHold( currentTile)){
-							lastRemovedTile = currentTile;
-							undoManger.addUndo( new UndoTileMovement(currentTile));
-							removeCurrentTile();
-							new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( currentPlayer.getID());
-						}
-						break;
-					case MoveFromCup:
-						break;
-					case MoveFromRack:
-						break;
-					case MoveTower:
-						break;
-					default:
-						return;
+							break;
+						case ExchangeThing:
+							break;
+						case ExchangeHex:
+							if( newLock.canTempHold( currentTile)){
+								undoManger.addUndo( new UndoTileMovement(currentTile));
+								removeCurrentTile();
+								new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( currentPlayer.getID());
+							}
+							break;
+						case MoveFromCup:
+							break;
+						case MoveFromRack:
+							break;
+						case MoveTower:
+							break;
+						default:
+							return;
+					}
 				}
 			}
 			prepareForNextMouseRelease();
@@ -970,6 +964,10 @@ public class Board extends JPanel implements CanvasParent{
 							}catch(NumberFormatException ex){
 								rollValue = 0;
 							}
+						}
+						if( rollValue<dice.getDiceCount()*Constants.MIN_DICE_FACE || rollValue>dice.getDiceCount()*Constants.MAX_DICE_FACE){
+							jtfStatus.setText( "value must be between " + (dice.getDiceCount()*Constants.MIN_DICE_FACE) + " and " + (dice.getDiceCount()*Constants.MAX_DICE_FACE));
+							return;
 						}
 						Roll roll = new Roll( dice.getDiceCount(), null, lastRollReason, currentPlayer.getID(), rollValue);
 						new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());

@@ -69,7 +69,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 		thread.start();
 		try{
 			setVisible( true);
-		}catch( ArrayIndexOutOfBoundsException ex){
+		}catch( Throwable ex){
 			Logger.getStandardLogger().warn( "Unknown error after exiting from JDialog", ex);
 		}
 	}

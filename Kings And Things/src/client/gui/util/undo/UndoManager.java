@@ -13,8 +13,9 @@ public class UndoManager {
 	private Parent parent;
 	private Deque< Undo> operations;
 	
-	public UndoManager(){
+	public UndoManager( Parent parent){
 		operations = new ArrayDeque<>();
+		this.parent = parent;
 	}
 	
 	public void addUndo( Undo undo){
@@ -25,10 +26,13 @@ public class UndoManager {
 	}
 	
 	public void undo( MoveAnimation animation){
-		Undo undo = operations.getLast();
+		if(operations.size()<=0){
+			return;
+		}
+		Undo undo = operations.removeFirst();
 		undo.undo(animation, parent);
 		if( undo.undoLast()){
-			operations.getLast().undo( animation, parent);
+			operations.removeFirst().undo( animation, parent);
 		}
 	}
 }

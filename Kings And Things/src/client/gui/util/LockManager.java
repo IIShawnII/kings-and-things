@@ -128,7 +128,7 @@ public class LockManager {
 	private Lock lookThroughLocks( Lock[][] locks, Point point, boolean isTile){
 		for( int i=0; i<locks.length;i++){
 			for( int j=0; j<locks[i].length;j++){
-				if( locks[i][j]!=null&&locks[i][j].canHold( isTile, true) && canLock( locks[i][j], point)){
+				if( locks[i][j]!=null&&locks[i][j].canHold( isTile, true, true) && canLock( locks[i][j], point)){
 					locks[i][j].setInUse( true);
 					return locks[i][j];
 				}
@@ -227,8 +227,8 @@ public class LockManager {
 			return inUse;
 		}
 		
-		private boolean canHold( boolean isTile, boolean checkPermanent){
-			if( this.isHex && (!checkPermanent || !permanent) && isTile){
+		private boolean canHold( boolean isTile, boolean checkPermanent, boolean checkTile){
+			if( this.isHex && (!checkPermanent || !permanent) && ( !checkTile || isTile)){
 				return true;
 			}else{
 				return !inUse;
@@ -236,11 +236,11 @@ public class LockManager {
 		}
 		
 		public boolean canTempHold( Tile tile){
-			return canHold( tile.isTile(), false);
+			return canHold( tile.isTile(), false, false);
 		}
 		
 		public boolean canHold( Tile tile){
-			return canHold( tile.isTile(), true);
+			return canHold( tile.isTile(), true, true);
 		}
 		
 		public void setInUse( boolean use){

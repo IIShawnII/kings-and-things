@@ -1,8 +1,11 @@
 package server.logic;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import server.event.PlayerUpdated;
+import server.event.internal.ExchangeSeaHexCommand;
+import server.event.internal.ExchangeThingsCommand;
 import server.event.internal.ResolveCombatCommand;
 import server.event.internal.RollDiceCommand;
 import server.event.internal.DoneRollingCommand;
@@ -15,11 +18,11 @@ import com.google.common.eventbus.Subscribe;
 import common.Logger;
 import common.network.Connection;
 import common.Constants.UpdateKey;
-import common.game.ITileProperties;
 import common.game.Roll;
 import common.game.Player;
 import common.game.HexState;
 import common.game.PlayerInfo;
+import common.game.ITileProperties;
 import common.event.UpdatePackage;
 import common.event.AbstractNetwrokEvent;
 
@@ -86,6 +89,7 @@ public class PlayerConnection implements Runnable{
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run(){
 		final int ID = player.getID();
@@ -115,6 +119,13 @@ public class PlayerConnection implements Runnable{
 						break;
 					case TargetPlayer:
 						new TargetPlayerCommand((int) event.getData(UpdateKey.Player)).postInternalEvent(ID);
+						break;
+					case SeaHexChanged:
+						new ExchangeSeaHexCommand( (HexState) event.getData(UpdateKey.HexState)).postInternalEvent(ID);
+						break;
+					case ThingChanged:
+						new ExchangeThingsCommand((Collection<ITileProperties>) event.getData(UpdateKey.ThingArray)).postInternalEvent(ID);
+						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
 				}

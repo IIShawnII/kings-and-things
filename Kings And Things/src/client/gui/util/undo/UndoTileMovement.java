@@ -63,4 +63,16 @@ public class UndoTileMovement implements Undo{
 	public boolean undoLast() {
 		return location==null || ( state==null && location==null);
 	}
+	
+	@Override
+	public String toString(){
+		if( state==null && location==null){
+			return "Hex Exchange";
+		}else if( location==null){
+			return "Marker Placed";
+		}else if( state==null){
+			return "First Click";
+		}
+		return "Never";
+	}
 }
