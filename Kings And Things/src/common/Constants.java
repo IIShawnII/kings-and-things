@@ -207,6 +207,19 @@ public final class Constants {
 		IMAGE_DICE[6] = loadImage( MISC_DIRECTORY + "Dice\\-n Dice -a 6.png");
 	}
 	
+	public static Image getImageForBiome(Biome biome)
+	{
+		for(ITileProperties hex : HEX.values())
+		{
+			if(hex.getBiomeRestriction() == biome)
+			{
+				return IMAGES.get(hex.hashCode());
+			}
+		}
+		
+		throw new IllegalArgumentException("Unable to find hex for biome type: " + biome);
+	}
+	
 	private static Image loadImage( String path){
 		try {
 			return ImageIO.read( new File( path));

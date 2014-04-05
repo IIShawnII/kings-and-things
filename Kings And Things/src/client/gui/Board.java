@@ -544,7 +544,6 @@ public class Board extends JPanel implements CanvasParent{
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
 				controller.setRollDice(true);
-				//TODO add support for custom roll
 				prepareForRollDice(2, RollReason.DETERMINE_PLAYER_ORDER, "Roll dice to determine order");
 				break;
 			case EXCHANGE_SEA_HEXES:

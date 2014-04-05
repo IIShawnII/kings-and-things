@@ -75,7 +75,15 @@ public class Tile extends JComponent{
 
 	public void flip() {
 		if( prop!=null && !prop.isFake()){
-			drawTile = Constants.IMAGES.get( prop.hashCode());
+			if(prop.isHexTile())
+			{
+				//in demo mode there are infinite tiles, which screws with the hash code mappings
+				drawTile = Constants.getImageForBiome(prop.getBiomeRestriction());
+			}
+			else
+			{
+				drawTile = Constants.IMAGES.get( prop.hashCode());
+			}
 		}
 	}
 	
