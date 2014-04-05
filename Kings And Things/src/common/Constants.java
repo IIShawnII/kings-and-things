@@ -269,7 +269,7 @@ public final class Constants {
 
 	public static List< Integer> convertToDice( int total, final int count){
 		if( count<=0 || total<=0){
-			throw new IllegalArgumentException( "ERROR - arguments must be positive and none-zero");
+			throw new IllegalArgumentException( "ERROR - arguments must be positive and non-zero");
 		}
 		if( total < MIN_DICE_FACE*count || total > MAX_DICE_FACE*count){
 			throw new IllegalArgumentException( "Error - when count is " + count + ", total(" + total + ") must be between " + MIN_DICE_FACE*count + " and " + MAX_DICE_FACE*count);
