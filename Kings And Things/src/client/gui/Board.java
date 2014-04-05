@@ -1,65 +1,64 @@
 package client.gui;
 
-import static common.Constants.BOARD_LOAD_ROW;
-import static common.Constants.BOARD_RIGHT_PADDING;
-import static common.Constants.BOARD_SIZE;
-import static common.Constants.DICE_SIZE;
-import static common.Constants.HEX_BOARD_SIZE;
-import static common.Constants.HEX_OUTLINE_IMAGE;
-import static common.Constants.HEX_SIZE;
-import static common.Constants.PLAYERS_STATE_PADDING;
-import static common.Constants.TILE_OUTLINE;
-import static common.Constants.TILE_SIZE;
-
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.ImageIcon;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import client.gui.die.DiceRoller;
+import java.awt.Font;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Graphics;
+import java.awt.Dimension;
+import java.awt.Component;
+import java.awt.Rectangle;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
+import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
+import client.gui.die.DiceRoller;
 import client.gui.util.LockManager;
 import client.gui.util.LockManager.Lock;
 import client.gui.util.animation.CanvasParent;
 import client.gui.util.animation.FlipAll;
 import client.gui.util.animation.MoveAnimation;
-import client.gui.util.undo.ThingPlacmentUndo;
 import client.gui.util.undo.UndoManager;
-
+import client.gui.util.undo.UndoTileMovement;
+import common.game.Roll;
+import common.game.HexState;
+import common.game.PlayerInfo;
+import common.game.TileProperties;
+import common.game.ITileProperties;
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Category;
-import common.Constants.RegularPhase;
+import common.Constants.Permissions;
+import common.Constants.UpdateKey;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
+import common.Constants.RegularPhase;
 import common.Constants.UpdateInstruction;
-import common.Constants.UpdateKey;
-import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
-import common.game.HexState;
-import common.game.ITileProperties;
-import common.game.PlayerInfo;
-import common.game.Roll;
-import common.game.TileProperties;
+import common.event.AbstractUpdateReceiver;
+import static common.Constants.HEX_SIZE;
+import static common.Constants.DICE_SIZE;
+import static common.Constants.TILE_SIZE;
+import static common.Constants.BOARD_SIZE;
+import static common.Constants.HEX_OUTLINE_IMAGE;
+import static common.Constants.TILE_OUTLINE;
+import static common.Constants.HEX_BOARD_SIZE;
+import static common.Constants.BOARD_LOAD_ROW;
+import static common.Constants.BOARD_RIGHT_PADDING;
+import static common.Constants.PLAYERS_STATE_PADDING;
 
 @SuppressWarnings("serial")
 public class Board extends JPanel implements CanvasParent{
@@ -147,7 +146,9 @@ public class Board extends JPanel implements CanvasParent{
 
 	public void setActive( boolean active) {
 		this.isActive = active;
-		controller.ignoreAll( !active);
+		if( !active){
+			controller.setPermission( Permissions.NoMove);
+		}
 	}
 	
 	/**
@@ -527,15 +528,19 @@ public class Board extends JPanel implements CanvasParent{
 		//TODO Handle More Rejections
 		switch( data){
 			case Skip:
+				controller.setPermission( Permissions.NoMove);
 				jtfStatus.setText( "Cannot skip this phase");
 				break;
 			case TieRoll:
+				controller.setPermission( Permissions.Roll);
 				prepareForRollDice(2, lastRollReason, "Tie Roll, Roll again");
 				break;
 			case SeaHexChanged:
+				controller.setPermission( Permissions.ExchangeHex);
 				controller.undo();
 				break;
 			case HexOwnership:
+				controller.setPermission( Permissions.MoveMarker);
 				jtfStatus.setText( "WARN - cannot own this hex");
 				controller.undo();
 				break;
@@ -575,40 +580,45 @@ public class Board extends JPanel implements CanvasParent{
 	private void manageSetupPhase( SetupPhase phase){
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
-				controller.setRollDice(true);
+				controller.setPermission( Permissions.Roll);
 				prepareForRollDice(2, RollReason.DETERMINE_PLAYER_ORDER, "Roll dice to determine order");
 				break;
 			case EXCHANGE_SEA_HEXES:
-				controller.setMoveHex( true);
+				controller.setPermission( Permissions.ExchangeHex);
 				jtfStatus.setText( "Exchange sea hexes, if any");
 				break;
 			case EXCHANGE_THINGS:
+				controller.setPermission( Permissions.ExchangeThing);
 				jtfStatus.setText( "Exchange things, if any");
 				break;
 			case PICK_FIRST_HEX:
-				controller.setMoveBank( true);
+				controller.setPermission( Permissions.MoveMarker);
 				placeMarkers();
 				jtfStatus.setText( "Pick your first Hex");
 				break;
 			case PICK_SECOND_HEX:
-				controller.setMoveBank( true);
+				controller.setPermission( Permissions.MoveMarker);
 				jtfStatus.setText( "Pick your second Hex");
 				break;
 			case PICK_THIRD_HEX:
-				controller.setMoveBank( true);
+				controller.setPermission( Permissions.MoveMarker);
 				jtfStatus.setText( "Pick your third Hex");
 				break;
 			case PLACE_EXCHANGED_THINGS:
+				controller.setPermission( Permissions.MoveFromRack);
 				jtfStatus.setText( "Place exchanged things on board, if any");
 				break;
 			case PLACE_FREE_THINGS:
+				controller.setPermission( Permissions.MoveFromRack);
 				jtfStatus.setText( "Place things on board, if any");
 				break;
 			case PLACE_FREE_TOWER:
+				controller.setPermission( Permissions.MoveTower);
 				placeTower();
 				jtfStatus.setText( "Place one free tower on board");
 				break;
 			case SETUP_FINISHED:
+				controller.setPermission( Permissions.NoMove);
 				jtfStatus.setText( "Setup Phase Complete");
 				break;
 			default:
@@ -636,17 +646,12 @@ public class Board extends JPanel implements CanvasParent{
 
 		private Tile lastRemovedTile;
 		private UndoManager undoManger;
-		private ThingPlacmentUndo thingUndo;
 		private Rectangle bound, boardBound;
 		private Lock newLock;
 		private Tile currentTile;
 		private Point lastPoint;
 		private HexState movingState;
-		private boolean ignore = true;
-		private boolean moveHex = false;
-		private boolean moveStack = false;
-		private boolean moveBank = false;
-		private boolean rollDice = false;
+		private Permissions permission;
 		
 		public Controller(){
 			this.undoManger = new UndoManager();
@@ -660,36 +665,8 @@ public class Board extends JPanel implements CanvasParent{
 			undoManger.undo( moveAnimation);
 		}
 		
-		public void ignoreAll( boolean ignore){
-			this.ignore = ignore;
-		}
-		
-		private void setControls( boolean stack, boolean hex, boolean bank, boolean roll){
-			ignore = false;
-			moveHex = hex;
-			moveStack = stack;
-			moveBank = bank;
-			rollDice = roll;
-		}
-		
-		private boolean noMove(){
-			return moveHex==false&&moveBank==false&&moveStack==false;
-		}
-		
-		public void setMoveStack( boolean stack){
-			setControls( stack, false, false, false);
-		}
-		
-		public void setMoveHex( boolean hex){
-			setControls( false, hex, false, false);
-		}
-		
-		public void setMoveBank( boolean bank){
-			setControls( false, false, bank, false);
-		}
-		
-		public void setRollDice( boolean roll){
-			setControls( false, false, false, roll);
+		public void setPermission( Permissions permission){
+			this.permission = permission;
 		}
 		
 		/**
@@ -699,11 +676,11 @@ public class Board extends JPanel implements CanvasParent{
 		 */
 		@Override
 	    public void mouseDragged(MouseEvent e){
-			if( ignore|| noMove()){
+			if( !canMove()){
 				return;
 			}
 			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
-			if( phaseDone && (moveStack || moveHex || moveBank) && currentTile!=null){
+			if( phaseDone && currentTile!=null){
 				boardBound = getBounds();
 				bound = currentTile.getBounds();
 				lastPoint = bound.getLocation();
@@ -722,9 +699,30 @@ public class Board extends JPanel implements CanvasParent{
 						currentTile.setBounds( bound);
 					}
 				}else{
+					switch( permission){
+						case MoveMarker:
+							break;
+						case ExchangeThing:
+							break;
+						case ExchangeHex:
+							break;
+						case MoveFromCup:
+							break;
+						case MoveFromRack:
+							break;
+						case MoveTower:
+							break;
+						default:
+							return;
+					}
+					//code for getting locks, need to be updated
+					/*if(	moveBank){
+						newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
+					}
 					if( moveHex || moveStack){
 						newLock = locks.getDropLock( currentTile);
-					}else{
+					}
+					if( newLock==null){
 						newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
 					}
 					if( newLock!=null){
@@ -732,47 +730,57 @@ public class Board extends JPanel implements CanvasParent{
 						Point center = newLock.getCenter();
 						bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
 					}
-					currentTile.setBounds( bound);
+					currentTile.setBounds( bound);*/
 				}
 			}
 		}
 		
 		@Override
 		public void mouseReleased( MouseEvent e){
-			if( ignore|| noMove()){
+			if( !canMove()){
 				return;
 			}
 			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
+			//TODO this condition might need to be updated for future phases
 			if(currentTile!=null){
-				if(newLock!=null){
-					if( moveHex){
-						new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( currentPlayer.getID());
-					}else if(moveStack){
-						//TODO support for moving stack, some of stack and dropping to Cup
-					}else if(newLock.canHold( currentTile)){//TODO check canHold, might be unnecessary condition
-						HexState hex = placeTileOnHex( currentTile);
-						lastRemovedTile = currentTile;
-						remove( currentTile);
-						revalidate();
-						repaint();
-						thingUndo.addEnd( ThingPlacmentUndo.createOperation( currentTile, hex, e.getPoint()));
-						undoManger.addUndo( thingUndo);
-						if( hex!=null){
-							new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
-						}
-					}
-				}else{
-					thingUndo.addEnd( ThingPlacmentUndo.createOperation( currentTile, null, e.getPoint()));
-					undoManger.addUndo( thingUndo);
+				if( newLock==null){
 					undo();
 				}
+				switch( permission){
+					case MoveMarker:
+						break;
+					case ExchangeThing:
+						break;
+					case ExchangeHex:
+						break;
+					case MoveFromCup:
+						break;
+					case MoveFromRack:
+						break;
+					case MoveTower:
+						break;
+					default:
+						return;
+				}
 			}
-			thingUndo = null;
-			currentTile = null; 
-			lastPoint = null;
-			newLock = null;
-			bound = null;
-			repaint();
+			prepareForNextMouseRelease();
+			//TODO code for placement and exchange, must be updated
+			/*if(newLock!=null){
+				if( moveHex){
+					new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( currentPlayer.getID());
+				}else if(moveStack){
+					//TODO support for moving stack, some of stack and dropping to Cup
+				}else if(newLock.canHold( currentTile)){//TODO check canHold, might be unnecessary condition
+					HexState hex = placeTileOnHex( currentTile);
+					lastRemovedTile = currentTile;
+					remove( currentTile);
+					revalidate();
+					repaint();
+					if( hex!=null){
+						new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
+					}
+				}
+			}*/
 		}
 
 		/**
@@ -780,65 +788,107 @@ public class Board extends JPanel implements CanvasParent{
 		 */
 		@Override
 		public void mousePressed( MouseEvent e){
-			if( ignore || noMove()){
+			if( !canMove()){
 				return;
 			}
 			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
-			//get the deepest component in the given point
 			Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
-			if( phaseDone && deepestComponent!=null){
-				if( deepestComponent instanceof Tile){
-					currentTile = (Tile) deepestComponent;
-					//bring the component to the top, to prevent overlapping
-					remove( currentTile);
-					add( currentTile, 0);
-					revalidate();
-					repaint();
-					thingUndo = new ThingPlacmentUndo();
-					thingUndo.addStart( ThingPlacmentUndo.createOperation( currentTile, null, currentTile.getLock().getCenter()));
-					//check to see if it is hex
-					if( !currentTile.isTile() && currentTile.hasLock()){
-						if( !moveHex){
-							currentTile = null;
-							thingUndo = null;
-						}else if( moveHex){
-							
-						}else if( moveStack){
-							newLock = currentTile.getLock();
-							movingState = newLock.getHex().getState();
-							if( movingState.hasMarker()){
-								if( movingState.hasThings()){
-									lastPoint = newLock.getCenter();
-									Rectangle bound = new Rectangle( TILE_SIZE);
-									bound.setLocation( lastPoint.x-(TILE_SIZE.width/2), lastPoint.y-(TILE_SIZE.height/2));
-									currentTile = addTile( new Tile( playerMarker), bound, false);
-									currentTile.setLockArea( newLock);
-									currentTile.flip();
-									revalidate();
-									moveStack = true;
-								} else {
-									currentTile = null;
-								}
-							}
-						}
-					}
+			if( phaseDone && deepestComponent!=null && deepestComponent instanceof Tile){
+				currentTile = (Tile) deepestComponent;
+				if( !checkTilePermission( currentTile)){
+					return;
 				}
+				//bring the component to the top, to prevent overlapping
+				remove( currentTile);
+				add( currentTile, 0);
+				revalidate();
+				repaint();
+				switch( permission){
+					case MoveMarker:break;//nothing to do
+					case ExchangeHex:break;//nothing to do
+					case ExchangeThing:
+						break;
+					case MoveFromCup:
+						break;
+					case MoveFromRack:
+						break;
+					case MoveTower:
+						break;
+					default:
+						return;
+				}
+				if( currentPlayer!=null){
+					undoManger.addUndo( new UndoTileMovement( currentTile, currentTile.getCenter()));
+				}
+				//code for moving stack, need update
+				/*newLock = currentTile.getLock();
+				movingState = newLock.getHex().getState();
+				if( movingState.hasMarker()){
+					if( movingState.hasThings()){
+						lastPoint = newLock.getCenter();
+						Rectangle bound = new Rectangle( TILE_SIZE);
+						bound.setLocation( lastPoint.x-(TILE_SIZE.width/2), lastPoint.y-(TILE_SIZE.height/2));
+						currentTile = addTile( new Tile( playerMarker), bound, false);
+						currentTile.setLockArea( newLock);
+						currentTile.flip();
+						revalidate();
+						moveStack = true;
+					} else {
+						currentTile = null;
+					}
+				}*/
 			}
+			
 		}
 		
 		@Override
 		public void mouseExited(MouseEvent e){
-			dice.shrink();
+			if( e.getSource()==dice){
+				dice.shrink();
+			}
 		}
 
 		@Override
 		public void mouseClicked( MouseEvent e){
-			if( ignore){
-				return;
+			switch( permission){
+				case Roll:
+					tryToRoll( e);
+					break;
+				case NoMove:
+				default:
+					return;
 			}
-			if( !rollDice){
-				return;
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent e) {
+			new UpdatePackage( UpdateInstruction.Skip, "Board.Input").postNetworkEvent( currentPlayer.getID());
+		}
+		
+		private void prepareForNextMouseRelease(){
+			currentTile = null; 
+			lastPoint = null;
+			newLock = null;
+			bound = null;
+			repaint();
+		}
+		
+		private boolean checkTilePermission( Tile tile){
+			switch( permission){
+				case ExchangeHex:
+					return !tile.isTile();
+				case ExchangeThing:
+				case MoveFromCup:
+				case MoveFromRack:
+				case MoveMarker:
+				case MoveTower:
+					return tile.isTile();
+				default:
+					throw new IllegalStateException(" Encountered none tile permission: " + permission);
 			}
+		}
+		
+		private void tryToRoll( MouseEvent e){
 			if( SwingUtilities.isLeftMouseButton(e)){
 				if( e.getSource()==dice){
 					if( useDice && dice.canRoll()){
@@ -863,16 +913,11 @@ public class Board extends JPanel implements CanvasParent{
 						dice.expand();
 					}
 				}
-			}else if( SwingUtilities.isRightMouseButton( e)){
-				//TODO mouse right click support
-			}else if( SwingUtilities.isMiddleMouseButton( e)){
-				//TODO mouse middle click support
 			}
 		}
-
-		@Override
-		public void actionPerformed( ActionEvent e) {
-			new UpdatePackage( UpdateInstruction.Skip, "Board.Input").postNetworkEvent( currentPlayer.getID());
+		
+		private boolean canMove(){
+			return permission!=Permissions.NoMove && permission!=Permissions.Roll;
 		}
 	}
 
