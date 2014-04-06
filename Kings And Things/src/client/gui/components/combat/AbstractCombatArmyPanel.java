@@ -1,11 +1,11 @@
 package client.gui.components.combat;
 
-import static common.Constants.PUBLIC;
-
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -13,8 +13,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import common.Constants;
-import common.event.AbstractUpdateReceiver;
+import com.google.common.eventbus.Subscribe;
+
+import common.event.EventDispatch;
 import common.event.network.CombatHits;
 import common.event.network.PlayerTargetChanged;
 import common.game.ITileProperties;
@@ -31,6 +32,8 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 	private final JLabel armyLabel;
 	private final JLabel hitsToApply;
 	private final int playerID;
+	private JPanel mainArmyPanel;
+	private JPanel armyHeaderPanel;
 	
 	public AbstractCombatArmyPanel(String playerName, int playerID, String targetPlayerName)
 	{
@@ -50,12 +53,13 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 		hitsToApply = new JLabel(HITS_TAKEN_STRING + 0);
 		hitsToApply.setHorizontalAlignment(SwingConstants.CENTER);
 		hitsToApply.setHorizontalTextPosition(SwingConstants.CENTER);
-		new HitsReceiver();
-		new TargetChangedReceiver();
 	}
 	
 	public void init(Collection<ITileProperties> things)
 	{
+		mainArmyPanel = generateMainArmyPanel(things);
+		armyHeaderPanel = generateArmyHeaderPanel();
+		
 		setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor = GridBagConstraints.CENTER;
@@ -67,13 +71,15 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		
-		add(generateArmyHeaderPanel(),constraints);
+		add(armyHeaderPanel,constraints);
 		
 		constraints.gridy++;
 		constraints.gridwidth = 1;
 		constraints.weighty = 1;
 		
-		add(generateMainArmyPanel(things),constraints);
+		add(mainArmyPanel,constraints);
+		
+		EventDispatch.registerOnInternalEvents(this);
 	}
 	
 	public void setHitsToApply(int hitCount)
@@ -87,9 +93,19 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 		targetArmyLabel.setText(generateTargetLabelString());
 	}
 	
-	public void removeThing(ITileProperties thing)
+	public void removeThingsNotInList(Collection<ITileProperties> things)
 	{
-		remove(army.remove(thing));
+		Iterator<Entry<ITileProperties,JButton>> it = army.entrySet().iterator();
+		while(it.hasNext())
+		{
+			Entry<ITileProperties,JButton> entry = it.next();
+			if(!things.contains(entry.getKey()))
+			{
+				mainArmyPanel.remove(entry.getValue());
+				thingRemoved(entry.getKey());
+				it.remove();
+			}
+		}
 	}
 	
 	public int getPlayerID()
@@ -105,6 +121,10 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 	public String getTargetPlayerName()
 	{
 		return targetPlayerName;
+	}
+
+	protected void thingRemoved(ITileProperties thing)
+	{
 	}
 	
 	protected JLabel getArmyLabel()
@@ -122,6 +142,16 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 		return hitsToApply;
 	}
 	
+	protected JPanel getMainArmyPanel()
+	{
+		return mainArmyPanel;
+	}
+	
+	protected JPanel getArmyHeaderPanel()
+	{
+		return armyHeaderPanel;
+	}
+	
 	protected void addArmyMapping(JButton button, ITileProperties thing)
 	{
 		army.put(thing, button);
@@ -135,41 +165,47 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 		return "Targetting " + targetPlayerName + "'s rag tag army";
 	}
 
-	private class HitsReceiver extends AbstractUpdateReceiver<CombatHits>{
-
-		protected HitsReceiver() {
-			super( INTERNAL, PUBLIC, AbstractCombatArmyPanel.this);
-		}
-
-		@Override
-		protected void handlePublic(final CombatHits update) {
-			SwingUtilities.invokeLater(new Runnable(){
+	@Subscribe
+	public void recieveCombatHits(final CombatHits evt)
+	{
+		if(evt.getPlayerReceivingHitID() == getPlayerID())
+		{
+			Runnable logic = new Runnable(){
 				@Override
 				public void run(){
-					AbstractCombatArmyPanel.this.setHitsToApply(update.getNumberOfHits());
+					setHitsToApply(evt.getNumberOfHits());
 				}
-			});
+			};
+			if(!SwingUtilities.isEventDispatchThread())
+			{
+				SwingUtilities.invokeLater(logic);
+			}
+			else
+			{
+				logic.run();
+			}
 		}
 	}
 	
-	private class TargetChangedReceiver extends AbstractUpdateReceiver<PlayerTargetChanged>{
-
-		protected TargetChangedReceiver() {
-			super( INTERNAL, playerID | Constants.COMBAT_PANEL_ID, AbstractCombatArmyPanel.this);
-		}
-
-		@Override
-		protected void handlePrivate(final PlayerTargetChanged update) {
-			SwingUtilities.invokeLater(new Runnable(){
+	@Subscribe
+	public void recieveTargetChanged(final PlayerTargetChanged evt)
+	{
+		if(evt.getTargettingPlayer().getID() == getPlayerID())
+		{
+			Runnable logic = new Runnable(){
 				@Override
 				public void run(){
-					AbstractCombatArmyPanel.this.setTargetPlayerName(update.getPlayersTarget().getName());
+					setTargetPlayerName(evt.getPlayersTarget().getName());
 				}
-			});
-		}
-		
-		protected boolean verifyPrivate( PlayerTargetChanged update){
-			return update.getTargettingPlayer().getID() == playerID;
+			};
+			if(!SwingUtilities.isEventDispatchThread())
+			{
+				SwingUtilities.invokeLater(logic);
+			}
+			else
+			{
+				logic.run();
+			}
 		}
 	}
 }

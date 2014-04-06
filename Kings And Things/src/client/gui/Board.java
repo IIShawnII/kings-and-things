@@ -546,8 +546,10 @@ public class Board extends JPanel implements CanvasParent{
 							}
 							
 							JFrame combatDialog = new JFrame("Combat!");
-							combatDialog.setContentPane(new CombatPanel(combat.getCombatHexState(), possibleRetreatHexes, player, otherPlayers,
-									combat.getCurrentCombatPhase(), combat.getDefendingPlayer(), combat.getPlayerOrder()));
+							CombatPanel panel = new CombatPanel(combat.getCombatHexState(), possibleRetreatHexes, player, otherPlayers,
+									combat.getCurrentCombatPhase(), combat.getDefendingPlayer(), combat.getPlayerOrder());
+							panel.init();
+							combatDialog.setContentPane(panel);
 							combatDialog.pack();
 							combatDialog.setLocationRelativeTo(null);
 							combatDialog.setVisible(true);

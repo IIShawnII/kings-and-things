@@ -1,7 +1,5 @@
 package client.gui.components;
 
-import static common.Constants.PUBLIC;
-
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -24,11 +22,14 @@ import client.gui.components.combat.AbstractCombatArmyPanel;
 import client.gui.components.combat.ActiveCombatArmyPanel;
 import client.gui.components.combat.InactiveCombatArmyPanel;
 import client.gui.components.combat.RetreatPanel;
+
+import com.google.common.eventbus.Subscribe;
+
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
-import common.event.AbstractUpdateReceiver;
+import common.event.EventDispatch;
 import common.event.UpdatePackage;
 import common.event.network.CurrentPhase;
 import common.event.network.HexStatesChanged;
@@ -40,7 +41,6 @@ public class CombatPanel extends JPanel
 	private static final long serialVersionUID = -8151724738245642539L;
 	
 	private HexState hs;
-	private final Player p;
 	private final ActiveCombatArmyPanel playerPanel;
 	private final ArrayList<InactiveCombatArmyPanel> otherArmies;
 	private final JScrollPane scrollPane;
@@ -54,7 +54,6 @@ public class CombatPanel extends JPanel
 	public CombatPanel(HexState hs, Collection<HexState> adjacentPlayerOwnedHexes, Player p, Collection<Player> otherPlayers, CombatPhase currentPhase, Player defendingPlayer, Collection<Integer> playerOrder)
 	{
 		this.hs = hs;
-		this.p = p;
 		this.currentPhase = currentPhase;
 		this.adjacentPlayerOwnedHexes = new HashSet<>(adjacentPlayerOwnedHexes.size());
 		for(HexState adjacentHs : adjacentPlayerOwnedHexes)
@@ -84,13 +83,9 @@ public class CombatPanel extends JPanel
 		}
 		scrollPane = new JScrollPane();
 		combatPhaseLabel = new JLabel();
-		
-		init();
-		new HexChangedReceiver();
-		new CombatPhaseChangedReceiver();
 	}
 	
-	private void init()
+	public void init()
 	{
 		JPanel contentsPanel = new JPanel();
 		contentsPanel.setLayout(new GridBagLayout());
@@ -181,6 +176,8 @@ public class CombatPanel extends JPanel
 				retreatDialog.add(new RetreatPanel(adjacentPlayerOwnedHexes,hs));
 				retreatDialog.setVisible(true);
 			}});
+
+		EventDispatch.registerOnInternalEvents(this);
 	}
 	
 	private String getPlayerNameByAttackerNumber(int num)
@@ -281,59 +278,51 @@ public class CombatPanel extends JPanel
 		combatPhaseLabel.setText(phaseText);
 	}
 	
-	private AbstractCombatArmyPanel getPanelForPlayer(int ID)
+	private void combatHexChanged(HexState hex)
 	{
-		if(playerPanel.getPlayerID() == ID)
+		hs = hex;
+		playerPanel.removeThingsNotInList(hex.getFightingThingsInHex());
+		for(AbstractCombatArmyPanel p : otherArmies)
 		{
-			return playerPanel;
+			p.removeThingsNotInList(hex.getFightingThingsInHex());
 		}
-		for(AbstractCombatArmyPanel panel : otherArmies)
-		{
-			if(panel.getPlayerID() == ID)
-			{
-				return panel;
-			}
-		}
-		throw new IllegalArgumentException("Can not find panel for player with ID: " + ID);
 	}
 	
-	private class HexChangedReceiver extends AbstractUpdateReceiver<HexStatesChanged>{
-
-		protected HexChangedReceiver() {
-			super( INTERNAL, PUBLIC, CombatPanel.this);
+	@Subscribe
+	public void recieveHexChanged(final HexStatesChanged evt)
+	{
+		Runnable logic = new Runnable(){
+			@Override
+			public void run(){
+				combatHexChanged(evt.getArray()[0]);
+			}
+		};
+		if(!SwingUtilities.isEventDispatchThread())
+		{
+			SwingUtilities.invokeLater(logic);
 		}
-
-		@Override
-		protected void handlePublic( HexStatesChanged update) {
-			/*hs = update.getArray()[0];
-			SwingUtilities.invokeLater(new Runnable(){
-				@Override
-				public void run(){
-					init();
-					invalidate();
-				}
-			});*/
+		else
+		{
+			logic.run();
 		}
 	}
 
-	private class CombatPhaseChangedReceiver extends AbstractUpdateReceiver<CurrentPhase<CombatPhase>>{
-
-		protected CombatPhaseChangedReceiver() {
-			super( INTERNAL, playerPanel.getPlayerID() | Constants.COMBAT_PANEL_ID, CombatPanel.this);
+	@Subscribe
+	public void recieveCombatPhaseChanged(final CurrentPhase<CombatPhase> evt)
+	{
+		Runnable logic = new Runnable(){
+			@Override
+			public void run(){
+				setCombatPhase(evt.getPhase());
+			}
+		};
+		if(!SwingUtilities.isEventDispatchThread())
+		{
+			SwingUtilities.invokeLater(logic);
 		}
-
-		@Override
-		protected void handlePrivate(final CurrentPhase<CombatPhase> update) {
-			SwingUtilities.invokeLater(new Runnable(){
-				@Override
-				public void run(){
-					setCombatPhase(update.getPhase());
-				}
-			});
-		}
-		
-		protected boolean verifyPrivate( CurrentPhase<CombatPhase> update){
-			return (update.getID() & playerPanel.getPlayerID()) >0;
+		else
+		{
+			logic.run();
 		}
 	}
 }

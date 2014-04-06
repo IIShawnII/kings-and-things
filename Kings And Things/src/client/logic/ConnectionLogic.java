@@ -11,8 +11,10 @@ import common.Constants.UpdateInstruction;
 import common.event.AbstractEvent;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
+import common.event.network.CombatHits;
 import common.event.network.Flip;
 import common.event.network.DieRoll;
+import common.event.network.HexStatesChanged;
 import common.event.network.InitiateCombat;
 import common.event.network.PlayerTargetChanged;
 import common.event.network.StartGame;
@@ -105,7 +107,7 @@ public class ConnectionLogic implements Runnable {
 						update.addInstruction( UpdateInstruction.RegularPhase);
 						update.putData( UpdateKey.Phase, phase.getPhase());
 					}else if( phase.isCombatPhase()){
-						event.postInternalEvent(ID |= Constants.COMBAT_PANEL_ID);
+						event.postInternalEvent();
 					}
 				}
 				else if( event instanceof DieRoll){
@@ -115,7 +117,7 @@ public class ConnectionLogic implements Runnable {
 					{
 						case ATTACK_WITH_CREATURE:
 						case CALCULATE_DAMAGE_TO_TILE:
-							evt.postInternalEvent(evt.getDieRoll().getRollingPlayerID() | Constants.COMBAT_PANEL_ID);
+							evt.postInternalEvent();
 							break;
 						default:
 							update.addInstruction( UpdateInstruction.DieValue);
@@ -174,10 +176,9 @@ public class ConnectionLogic implements Runnable {
 					update.addInstruction(UpdateInstruction.InitiateCombat);
 					update.putData(UpdateKey.Combat, event);
 				}
-				else if(event instanceof PlayerTargetChanged)
+				else if(event instanceof PlayerTargetChanged || event instanceof CombatHits || event instanceof HexStatesChanged)
 				{
-					PlayerTargetChanged evt = ((PlayerTargetChanged)event);
-					evt.postInternalEvent(evt.getTargettingPlayer().getID() | Constants.COMBAT_PANEL_ID);
+					event.postInternalEvent();
 				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);

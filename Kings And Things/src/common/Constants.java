@@ -36,7 +36,7 @@ public final class Constants {
 	public enum UpdateKey {Category, Message, PlayerCount, Players, Name, Port, IP, Player, Hex, Phase, HexState, Roll, Tile, Flipped, Setup, Regular, Combat, Special, Rack, Instruction, ThingArray}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea, Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray, None}
 	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase,
-		NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState, Special, Rejected, InitiateCombat, TargetPlayer, ThingChanged}
+		NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState, Special, Rejected, InitiateCombat, TargetPlayer, ThingChanged, ApplyHit}
 	
 	//Regular turn phases
 	public enum RegularPhase {RECRUITING_CHARACTERS, RECRUITING_THINGS, RANDOM_EVENTS, MOVEMENT, COMBAT, CONSTRUCTION, SPECIAL_POWERS}
@@ -97,7 +97,6 @@ public final class Constants {
 	public static final int PLAYER_3_ID = 64;			//01000000
 	public static final int PLAYER_4_ID = 128;			//10000000
 	public static final int ALL_PLAYERS_ID = 240;		//11110000
-	public static final int COMBAT_PANEL_ID = 0b1_0000_0000;
 	
 	//Maximums
 	public static final int MAX_ROLLS = 7;

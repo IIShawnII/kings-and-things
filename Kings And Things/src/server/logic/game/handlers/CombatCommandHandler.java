@@ -141,10 +141,12 @@ public class CombatCommandHandler extends CommandHandler
 			}
 			HexStatesChanged notification = new HexStatesChanged(1);
 			notification.getArray()[0] = getCurrentState().getCombatHex();
-			notification.postNetworkEvent();
+			notification.postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
 		}
 		
 		getCurrentState().removeHitsFromPlayer(playerNumber, hitCount);
+
+		new CombatHits(playerNumber,getCurrentState().getHitsOnPlayer(playerNumber)).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
 		
 		boolean someoneNeedsToApplyHits = false;
 		for(Player p : getCurrentState().getPlayers())
@@ -471,8 +473,6 @@ public class CombatCommandHandler extends CommandHandler
 					if(hitCount > 0)
 					{
 						getCurrentState().addHitsToPlayer(getCurrentState().getPlayersTarget(rollingPlayerID).getID(), hitCount);
-						//notifies players of hits
-						new CombatHits(rollingPlayerID,getCurrentState().getPlayersTarget(rollingPlayerID).getID(),hitCount).postNetworkEvent();
 					}
 					break;
 				}
@@ -530,6 +530,7 @@ public class CombatCommandHandler extends CommandHandler
 						//give hex to player
 						makeHexOwnedByPlayer(r.getRollTarget(), r.getRollingPlayerID());
 						getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
+						new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
 					} else {
 						List<ITileProperties> listOfDefenders = new ArrayList<>(roll_value);
 						List<ITileProperties> listOfSpecialIncomeCounters = new ArrayList<>();
@@ -596,6 +597,20 @@ public class CombatCommandHandler extends CommandHandler
 			{
 				advanceToNextCombatPhase();
 			}
+			else
+			{
+				new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+
+				for(Player p : getCurrentState().getPlayersStillFightingInCombatHex())
+				{
+					int hitsOnPlayer = getCurrentState().getHitsOnPlayer(p.getID());
+					if(hitsOnPlayer>0)
+					{
+						//notifies players of hits
+						new CombatHits(p.getID(),hitsOnPlayer).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+					}
+				}
+			}
 		}
 		if(determinedDamage)
 		{
@@ -607,6 +622,7 @@ public class CombatCommandHandler extends CommandHandler
 				}
 			}
 			getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(getCurrentState().getCurrentCombatPhase().ordinal() + 1));
+			new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
 		}
 		for(Roll r : handledRolls)
 		{

@@ -6,25 +6,16 @@ public class CombatHits extends AbstractNetwrokEvent {
 	
 	
 	private static final long serialVersionUID = 8022414721166100889L;
-	private final int playerApplyingHit;
 	private final int playerReceivingHit;
 	private int numberOfHits;
 	
 	// constructor
-	public CombatHits(final int playerApplyingHit, final int playerReceivingHit, int numberOfHits) {
-		this.playerApplyingHit = playerApplyingHit;
+	public CombatHits(final int playerReceivingHit, int numberOfHits) {
 		this.playerReceivingHit = playerReceivingHit;
 		this.numberOfHits = numberOfHits;
 	}
 	
 	/*Getter Methods*/
-	
-	/*
-	 * getPlayerApplyingHitID retrieves the ID of the player delivering hits
-	 */
-	public final int getPlayerApplyingHitID() {
-		return playerApplyingHit;
-	}
 	
 	/*
 	 * getPlayerReceivingHitID retrieves the ID of the player receiving hits

@@ -18,16 +18,15 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 
 import client.gui.die.DiceRoller;
+
+import com.google.common.eventbus.Subscribe;
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.RollReason;
 import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
-import common.Logger;
-import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
 import common.event.network.DieRoll;
 import common.game.ITileProperties;
@@ -49,8 +48,6 @@ public class ActiveCombatArmyPanel extends AbstractCombatArmyPanel
 		retreatButton = new JButton(new ImageIcon(Constants.RUN_AWAY));
 		fightOnButton = new JButton(new ImageIcon(Constants.FIGHT_ON));
 		rollerMap = new HashMap<>();
-
-		new DieRollReceiver();
 	}
 
 	public void addRetreatButtonListener(ActionListener listener)
@@ -150,7 +147,7 @@ public class ActiveCombatArmyPanel extends AbstractCombatArmyPanel
 				@Override
 				public void actionPerformed(ActionEvent e)
 				{
-					// TODO Send apply hits command to server
+					new UpdatePackage(UpdateInstruction.ApplyHit,UpdateKey.ThingArray,tile,"Combat Panel for: " + getPlayerName()).postNetworkEvent(getPlayerID());
 				}});
 			mainArmyPanel.add(button,constraints);
 			
@@ -221,27 +218,30 @@ public class ActiveCombatArmyPanel extends AbstractCombatArmyPanel
 	}
 	
 	@Override
-	public void removeThing(ITileProperties thing)
+	protected void thingRemoved(ITileProperties thing)
 	{
-		super.removeThing(thing);
 		remove(rollerMap.remove(thing));
 	}
 	
-	private class DieRollReceiver extends AbstractUpdateReceiver<DieRoll>{
-
-		protected DieRollReceiver() {
-			super( INTERNAL, getPlayerID() | Constants.COMBAT_PANEL_ID, ActiveCombatArmyPanel.this);
-		}
-
-		@Override
-		protected void handlePrivate( DieRoll update) {
-			final DieRoll r = update;
-			setRollResults(r.getDieRoll());
-		}
-
-		@Override
-		protected boolean verifyPrivate( DieRoll update) {
-			return (update.getDieRoll().getRollingPlayerID() & getPlayerID()) > 0;
+	@Subscribe
+	public void recieveDieRoll(final DieRoll evt)
+	{
+		if(evt.getDieRoll().getRollingPlayerID() == getPlayerID())
+		{
+			Runnable logic = new Runnable(){
+				@Override
+				public void run(){
+					setRollResults(evt.getDieRoll());
+				}
+			};
+			if(!SwingUtilities.isEventDispatchThread())
+			{
+				SwingUtilities.invokeLater(logic);
+			}
+			else
+			{
+				logic.run();
+			}
 		}
 	}
 }

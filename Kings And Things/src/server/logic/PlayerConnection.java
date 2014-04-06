@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import server.event.PlayerUpdated;
+import server.event.internal.ApplyHitsCommand;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.ExchangeThingsCommand;
 import server.event.internal.ResolveCombatCommand;
@@ -125,6 +126,9 @@ public class PlayerConnection implements Runnable{
 						break;
 					case ThingChanged:
 						new ExchangeThingsCommand((Collection<ITileProperties>) event.getData(UpdateKey.ThingArray)).postInternalEvent(ID);
+						break;
+					case ApplyHit:
+						new ApplyHitsCommand(1, (ITileProperties) event.getData(UpdateKey.ThingArray)).postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
