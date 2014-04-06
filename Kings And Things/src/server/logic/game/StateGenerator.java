@@ -12,6 +12,7 @@ import java.util.HashSet;
 
 import server.logic.exceptions.NoMoreTilesException;
 import common.Constants;
+import common.Constants.BuildableBuilding;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
@@ -79,6 +80,11 @@ public class StateGenerator
 		p4.addOwnedHex(state.getBoard().getHexByXY(5, 10).getHex());
 
 		p1.addOwnedHex(state.getBoard().getHexByXY(3, 6).getHex());
+		
+		ITileProperties keep = BuildableBuildingGenerator.createBuildingTileForType(BuildableBuilding.Keep);
+		p1.addOwnedThingOnBoard(keep);
+		state.getBoard().getHexByXY(3, 6).addThingToHex(keep);
+		
 		p1.addOwnedHex(state.getBoard().getHexByXY(2, 5).getHex());
 		p4.addOwnedHex(state.getBoard().getHexByXY(2, 7).getHex());
 		try

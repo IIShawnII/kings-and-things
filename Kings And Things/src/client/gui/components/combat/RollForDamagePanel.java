@@ -5,20 +5,31 @@ import static common.Constants.DICE_SIZE;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import client.gui.die.DiceRoller;
 
+import com.google.common.eventbus.Subscribe;
 import common.Constants;
+import common.Constants.CombatPhase;
 import common.Constants.RollReason;
+import common.Constants.UpdateInstruction;
+import common.Constants.UpdateKey;
+import common.event.EventDispatch;
+import common.event.UpdatePackage;
+import common.event.network.CurrentPhase;
+import common.event.network.DieRoll;
+import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -29,19 +40,30 @@ public class RollForDamagePanel extends JPanel
 	private static final long serialVersionUID = -2881029431754333752L;
 	
 	private final HashMap<ITileProperties, DiceRoller> rollerMap;
-	private final HexState hex;
+	private HexState hex;
 	private final Player p;
+	private final JFrame parent;
 	
-	public RollForDamagePanel(HexState hs, Player p)
+	public RollForDamagePanel(HexState hs, Player p, JFrame parent)
 	{
 		hex = hs;
 		this.p = p;
 		rollerMap = new HashMap<>(2);
-		init();
+		this.parent = parent;
+		parent.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 	}
 	
-	private void init()
+	public void init()
 	{
+		updateAfterHexChange();
+		EventDispatch.registerOnInternalEvents(this);
+	}
+	
+	private void updateAfterHexChange()
+	{
+		removeAll();
+		rollerMap.clear();
+		
 		setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor = GridBagConstraints.CENTER;
@@ -55,14 +77,8 @@ public class RollForDamagePanel extends JPanel
 		
 		if(hex.hasBuilding())
 		{
-			ImageIcon image = null;
-			for(ITileProperties b : Constants.BUILDING.values())
-			{
-				if(b.getName().equals(hex.getBuilding().getName()))
-				{
-					image = new ImageIcon(Constants.IMAGES.get(b.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT));
-				}
-			}
+			ImageIcon image =  new ImageIcon(Constants.getImageForTile(hex.getBuilding()));
+			
 			JLabel tileLabel = new JLabel(image);
 			add(tileLabel,constraints);
 			
@@ -82,7 +98,7 @@ public class RollForDamagePanel extends JPanel
 					
 					int rollValue = Integer.parseInt(JOptionPane.showInputDialog(RollForDamagePanel.this, "Select desired roll value", "RollValue", JOptionPane.PLAIN_MESSAGE));
 					Roll r = new Roll(roller.getDiceCount(), hex.getBuilding(), RollReason.CALCULATE_DAMAGE_TO_TILE, p.getID(), rollValue);
-					//TODO send roll command to server
+					new UpdatePackage(UpdateInstruction.NeedRoll, UpdateKey.Roll, r, "Determine damage panel for: " + p).postNetworkEvent(p.getID());
 				}
 				@Override
 				public void mouseEntered(MouseEvent arg0)
@@ -118,7 +134,7 @@ public class RollForDamagePanel extends JPanel
 
 		if(hex.hasSpecialIncomeCounter())
 		{
-			ImageIcon image = new ImageIcon(Constants.IMAGES.get(hex.getSpecialIncomeCounter().hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT));
+			ImageIcon image = new ImageIcon(Constants.getImageForTile(hex.getSpecialIncomeCounter()));
 			JLabel tileLabel = new JLabel(image);
 			add(tileLabel,constraints);
 			
@@ -138,7 +154,7 @@ public class RollForDamagePanel extends JPanel
 					
 					int rollValue = Integer.parseInt(JOptionPane.showInputDialog(RollForDamagePanel.this, "Select desired roll value", "RollValue", JOptionPane.PLAIN_MESSAGE));
 					Roll r = new Roll(roller.getDiceCount(), hex.getSpecialIncomeCounter(), RollReason.CALCULATE_DAMAGE_TO_TILE, p.getID(), rollValue);
-					//TODO send roll command to server
+					new UpdatePackage(UpdateInstruction.NeedRoll, UpdateKey.Roll, r, "Determine damage panel for: " + p).postNetworkEvent(p.getID());
 				}
 				@Override
 				public void mouseEntered(MouseEvent arg0)
@@ -170,6 +186,90 @@ public class RollForDamagePanel extends JPanel
 			constraints.weightx = 1;
 			constraints.weighty = 1;
 			constraints.gridy++;
+		}
+	}
+	
+	private void close()
+	{
+		EventDispatch.unregisterFromInternalEvents(this);
+		parent.dispose();
+	}
+	
+	public void combatHexChanged(HexState hs)
+	{
+		this.hex = hs;
+		updateAfterHexChange();
+	}
+
+	public void setRollResults(final Roll result)
+	{
+		final DiceRoller roller = rollerMap.get(result.getRollTarget());
+		roller.setResult(Constants.convertToDice(result.getFinalTotal(), result.getDiceCount()));
+	}
+
+	@Subscribe
+	public void recieveHexChanged(final HexStatesChanged evt)
+	{
+		for(final HexState hs : evt.getArray())
+		{
+			if(hs.getHex().equals(this.hex.getHex()))
+			{
+				Runnable logic = new Runnable(){
+					@Override
+					public void run(){
+						combatHexChanged(hs);
+					}
+				};
+				if(!SwingUtilities.isEventDispatchThread())
+				{
+					SwingUtilities.invokeLater(logic);
+				}
+				else
+				{
+					logic.run();
+				}
+			}
+		}
+	}
+
+	@Subscribe
+	public void recieveCombatPhaseChanged(final CurrentPhase<CombatPhase> evt)
+	{
+		Runnable logic = new Runnable(){
+			@Override
+			public void run(){
+				close();
+			}
+		};
+		if(!SwingUtilities.isEventDispatchThread())
+		{
+			SwingUtilities.invokeLater(logic);
+		}
+		else
+		{
+			logic.run();
+		}
+	}
+	
+	@Subscribe
+	public void recieveDieRoll(final DieRoll evt)
+	{
+		if(evt.getDieRoll().getRollingPlayerID() == p.getID())
+		{
+			Runnable logic = new Runnable(){
+				@Override
+				public void run(){
+					setRollResults(evt.getDieRoll());
+				}
+			};
+			if(!SwingUtilities.isEventDispatchThread())
+			{
+				SwingUtilities.invokeLater(logic);
+			}
+			else
+			{
+				logic.run();
+			}
 		}
 	}
 }

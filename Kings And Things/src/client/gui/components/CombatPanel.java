@@ -23,8 +23,10 @@ import client.gui.components.combat.AbstractCombatArmyPanel;
 import client.gui.components.combat.ActiveCombatArmyPanel;
 import client.gui.components.combat.InactiveCombatArmyPanel;
 import client.gui.components.combat.RetreatPanel;
+import client.gui.components.combat.RollForDamagePanel;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.UpdateInstruction;
@@ -242,7 +244,22 @@ public class CombatPanel extends JPanel
 			}
 			case DETERMINE_DAMAGE:
 			{
-				phaseText = "Determine Damage To Hex";
+				if(hs.getFightingThingsInHexOwnedByPlayer(p).size()==0)
+				{
+					JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(this, "Your enemies have been destroyed!", "Victory!", JOptionPane.INFORMATION_MESSAGE);
+					JFrame determineDamageFrame = new JFrame("Determine damage to hex");
+					RollForDamagePanel panel = new RollForDamagePanel(hs, p, determineDamageFrame);
+					panel.init();
+					determineDamageFrame.setContentPane(panel);
+					determineDamageFrame.pack();
+					determineDamageFrame.setLocationRelativeTo(null);
+					determineDamageFrame.setVisible(true);
+				}
+				close();
 				break;
 			}
 			case DETERMINE_DEFENDERS:
@@ -267,7 +284,15 @@ public class CombatPanel extends JPanel
 			}
 			case PLACE_THINGS:
 			{
-				phaseText = "Place Things In Hex";
+				if(hs.getFightingThingsInHexOwnedByPlayer(p).size()==0)
+				{
+					JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(this, "Your enemies have been destroyed!", "Victory!", JOptionPane.INFORMATION_MESSAGE);
+				}
+				close();
 				break;
 			}
 			case RANGED_ATTACK:
@@ -293,17 +318,23 @@ public class CombatPanel extends JPanel
 		for(AbstractCombatArmyPanel p : otherArmies)
 		{
 			p.removeThingsNotInList(hex.getFightingThingsInHex(), isRetreat);
-			if(closing)
-			{
-				EventDispatch.unregisterFromInternalEvents(p);
-			}
 		}
 		if(closing)
 		{
-			JOptionPane.showConfirmDialog(this, isRetreat?"Your cowardice has cost you the battle!":"Your rag tag army has been destroyed!", "Defeat!", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
-			EventDispatch.unregisterFromInternalEvents(this);
-			parent.dispose();
+			JOptionPane.showMessageDialog(this, isRetreat?"Your cowardice has cost you the battle!":"Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+			close();
 		}
+	}
+	
+	private void close()
+	{
+		EventDispatch.unregisterFromInternalEvents(playerPanel);
+		for(AbstractCombatArmyPanel p : otherArmies)
+		{
+			EventDispatch.unregisterFromInternalEvents(p);
+		}
+		EventDispatch.unregisterFromInternalEvents(this);
+		parent.dispose();
 	}
 	
 	@Subscribe

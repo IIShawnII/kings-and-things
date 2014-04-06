@@ -36,6 +36,6 @@ public abstract class BuildableBuildingGenerator
 			throw new IllegalArgumentException("No building tiles found for type: " + building);
 		}
 		
-		return new TwoSidedTileProperties(new TileProperties(buildingFaceUp,id++),new TileProperties(buildingFaceUp,id++));
+		return new TwoSidedTileProperties(new TileProperties(buildingFaceUp,id++),new TileProperties(buildingFaceDown,id++));
 	}
 }

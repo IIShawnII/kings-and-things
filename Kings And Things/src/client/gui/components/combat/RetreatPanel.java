@@ -14,9 +14,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
 
 import client.gui.components.HexContentsPanel;
+
 import common.Constants;
 import common.Constants.Direction;
 import common.Constants.UpdateInstruction;
@@ -32,7 +32,6 @@ public class RetreatPanel extends JPanel
 	public RetreatPanel(Collection<HexState> validOptions, HexState combatHex, int playerID, JFrame parent)
 	{
 		this.parent = parent;
-		parent.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		init(validOptions, combatHex, playerID);
 	}
 	

@@ -53,10 +53,10 @@ import client.gui.util.animation.MoveAnimation;
 import client.gui.util.undo.Parent;
 import client.gui.util.undo.UndoManager;
 import client.gui.util.undo.UndoTileMovement;
-
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Category;
+import common.Constants.CombatPhase;
 import common.Constants.Permissions;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;
@@ -465,6 +465,8 @@ public class Board extends JPanel implements CanvasParent{
 				case RegularPhase:
 					manageRegularPhase( (RegularPhase)update.getData( UpdateKey.Phase));
 					break;
+				case CombatPhase:
+					manageCombatPhase((CombatPhase)update.getData(UpdateKey.Combat));
 				case DieValue:
 					Roll roll = (Roll)update.getData( UpdateKey.Roll);
 					dice.setResult( roll.getBaseRolls());
@@ -472,6 +474,12 @@ public class Board extends JPanel implements CanvasParent{
 				case HexOwnership:
 					hex = (HexState)update.getData( UpdateKey.HexState);
 					locks.getLockForHex( hex.getLocation()).getHex().setState( hex);
+					break;
+				case HexStatesChanged:
+					for(HexState hs : (HexState[])update.getData(UpdateKey.HexState))
+					{
+						locks.getLockForHex(hs.getLocation()).getHex().setState(hs);
+					}
 					break;
 				case FlipAll:
 					FlipAllHexes();
@@ -672,6 +680,18 @@ public class Board extends JPanel implements CanvasParent{
 				break;
 			case SPECIAL_POWERS:
 				jtfStatus.setText( "Use hero abilities, if any");
+				break;
+			default:
+				break;
+		}
+	}
+	
+	private void manageCombatPhase(CombatPhase phase)
+	{
+		switch(phase)
+		{
+			case PLACE_THINGS:
+				jtfStatus.setText( "Place things in combat hex");
 				break;
 			default:
 				break;

@@ -3,9 +3,11 @@ package client.logic;
 import java.io.IOException;
 
 import common.Logger;
+import common.game.Player;
 import common.game.PlayerInfo;
 import common.network.Connection;
 import common.Constants;
+import common.Constants.CombatPhase;
 import common.Constants.UpdateKey;
 import common.Constants.UpdateInstruction;
 import common.event.AbstractEvent;
@@ -108,6 +110,12 @@ public class ConnectionLogic implements Runnable {
 						update.addInstruction( UpdateInstruction.RegularPhase);
 						update.putData( UpdateKey.Phase, phase.getPhase());
 					}else if( phase.isCombatPhase()){
+						CombatPhase cp = (CombatPhase) phase.getPhase();
+						if(cp == CombatPhase.PLACE_THINGS)
+						{
+							update.addInstruction(UpdateInstruction.CombatPhase);
+							update.putData(UpdateKey.Phase, cp);
+						}
 						event.postInternalEvent();
 					}
 				}
@@ -174,12 +182,30 @@ public class ConnectionLogic implements Runnable {
 				}
 				else if(event instanceof InitiateCombat)
 				{
-					update.addInstruction(UpdateInstruction.InitiateCombat);
-					update.putData(UpdateKey.Combat, event);
+					boolean handle = false;
+					for(Player p : ((InitiateCombat)event).getInvolvedPlayers())
+					{
+						if(player.getID() == p.getID())
+						{
+							handle = true;
+							break;
+						}
+					}
+					if(handle)
+					{
+						update.addInstruction(UpdateInstruction.InitiateCombat);
+						update.putData(UpdateKey.Combat, event);
+					}
 				}
 				else if(event instanceof PlayerTargetChanged || event instanceof CombatHits || event instanceof HexStatesChanged)
 				{
 					event.postInternalEvent();
+					if(event instanceof HexStatesChanged)
+					{
+						HexStatesChanged evt = (HexStatesChanged)event;
+						update.addInstruction(UpdateInstruction.HexStatesChanged);
+						update.putData(UpdateKey.HexState, evt.getArray());
+					}
 				}
 				else if(event instanceof HexNeedsThingsRemoved)
 				{

@@ -1,7 +1,5 @@
 package client.gui.components;
 
-import java.awt.Image;
-
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
@@ -26,22 +24,7 @@ public class TileButton extends JButton {
 	
 	private static ImageIcon getIconForTile(ITileProperties tile)
 	{
-		ImageIcon image = null;
-		if(tile.isCreature())
-		{
-			image = new ImageIcon(Constants.IMAGES.get(tile.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT));
-		}
-		else
-		{
-			for(ITileProperties b : Constants.BUILDING.values())
-			{
-				if(b.getName().equals(tile.getName()))
-				{
-					image = new ImageIcon(Constants.IMAGES.get(b.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT));
-				}
-			}
-		}
-		
+		ImageIcon image = new ImageIcon(Constants.getImageForTile(tile));
 		return image;
 	}
 }

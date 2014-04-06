@@ -8,6 +8,7 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +18,6 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import com.google.common.collect.ImmutableBiMap;
-
 import common.game.ITileProperties;
 import common.game.TileProperties;
 
@@ -37,7 +37,7 @@ public final class Constants {
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea, Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray, None}
 	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers,Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase,
 		NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState, Special, Rejected, InitiateCombat, TargetPlayer, ThingChanged, 
-		ApplyHit, Retreat, RemoveThingsFromHex}
+		ApplyHit, Retreat, RemoveThingsFromHex, HexStatesChanged}
 	
 	//Regular turn phases
 	public enum RegularPhase {RECRUITING_CHARACTERS, RECRUITING_THINGS, RANDOM_EVENTS, MOVEMENT, COMBAT, CONSTRUCTION, SPECIAL_POWERS}
@@ -222,6 +222,26 @@ public final class Constants {
 		}
 		
 		throw new IllegalArgumentException("Unable to find hex for biome type: " + biome);
+	}
+	
+	public static Image getImageForTile(ITileProperties tile)
+	{
+		if(tile.isBuilding())
+		{
+			for(ITileProperties b : Constants.BUILDING.values())
+			{
+				if(b.getName().equals(tile.getName()) && Arrays.equals(b.getAbilities(), tile.getAbilities()))
+				{
+					return Constants.IMAGES.get(b.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT);
+				}
+			}
+		}
+		else
+		{
+			return Constants.IMAGES.get(tile.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT);
+		}
+		
+		return null;
 	}
 	
 	private static Image loadImage( String path){

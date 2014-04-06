@@ -64,8 +64,14 @@ public class TwoSidedTileProperties implements ITileProperties {
 
 	@Override
 	public void setValue(int value) {
-		faceUp.setValue(value);
-		faceDown.setValue(value);
+		if(isFaceUp)
+		{
+			faceUp.setValue(value);
+		}
+		else
+		{
+			faceDown.setValue(value);
+		}
 	}
 
 	@Override
@@ -219,7 +225,7 @@ public class TwoSidedTileProperties implements ITileProperties {
 			return false;
 		}
 		TwoSidedTileProperties o = (TwoSidedTileProperties) obj;
-		return o.hashCode==o.hashCode;
+		return hashCode==o.hashCode;
 	}
 
 	@Override

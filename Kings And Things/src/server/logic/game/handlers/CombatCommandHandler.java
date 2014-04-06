@@ -57,8 +57,16 @@ public class CombatCommandHandler extends CommandHandler
 
 	public void applyHits(ITileProperties thing, int playerNumber, int hitCount)
 	{
-		CombatPhaseValidator.validateCanApplyHits(thing, playerNumber, hitCount, getCurrentState());
-		makeHitsApplied(thing,playerNumber,hitCount);
+		ITileProperties myVersion = null;
+		for(ITileProperties tp : getCurrentState().getPlayerByPlayerNumber(playerNumber).getOwnedThingsOnBoard())
+		{
+			if(tp.equals(thing))
+			{
+				myVersion = tp;
+			}
+		}
+		CombatPhaseValidator.validateCanApplyHits(myVersion, playerNumber, hitCount, getCurrentState());
+		makeHitsApplied(myVersion,playerNumber,hitCount);
 	}
 	
 	public void setPlayersTarget(int playerNumber, int targetPlayerNumber)
@@ -86,6 +94,10 @@ public class CombatCommandHandler extends CommandHandler
 			}
 		}
 		getCurrentState().setCombatLocation(getCurrentState().getBoard().getXYCoordinatesOfHex(hex));
+		getCurrentState().getCombatHex().setMarker(Constants.getPlayerMarker(Constants.PUBLIC));
+		HexStatesChanged msg = new HexStatesChanged(1);
+		msg.getArray()[0] = getCurrentState().getCombatHex();
+		msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		if(isExploration)
 		{
 			List<Integer> playerOrder = getCurrentState().getPlayerOrder();
@@ -140,14 +152,14 @@ public class CombatCommandHandler extends CommandHandler
 			{
 				removePlayerThingFromBoard(playerNumber, getCurrentState().getCombatHex().getHex(), thing);
 			}
-			HexStatesChanged notification = new HexStatesChanged(1);
-			notification.getArray()[0] = getCurrentState().getCombatHex();
-			notification.postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
 		}
+		HexStatesChanged notification = new HexStatesChanged(1);
+		notification.getArray()[0] = getCurrentState().getCombatHex();
+		notification.postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		
 		getCurrentState().removeHitsFromPlayer(playerNumber, hitCount);
 
-		new CombatHits(playerNumber,getCurrentState().getHitsOnPlayer(playerNumber)).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+		new CombatHits(playerNumber,getCurrentState().getHitsOnPlayer(playerNumber)).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		
 		boolean someoneNeedsToApplyHits = false;
 		for(Player p : getCurrentState().getPlayers())
@@ -164,81 +176,98 @@ public class CombatCommandHandler extends CommandHandler
 		
 		if(!someoneNeedsToApplyHits)
 		{
-			if(getCurrentState().getPlayersStillFightingInCombatHex().size()>1)
+			advanceOrEnd();
+		}
+	}
+	
+	private void advanceOrEnd()
+	{
+		if(getCurrentState().getPlayersStillFightingInCombatHex().size()>1)
+		{
+			advanceToNextCombatPhase();
+		}
+		else
+		{
+			getCurrentState().removeAllHitsFromAllPlayers();
+			for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
 			{
-				advanceToNextCombatPhase();
-			}
-			else
-			{
-				getCurrentState().removeAllHitsFromAllPlayers();
-				for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+				if(tp.isFaceUp() && tp.isCreature() && !tp.isSpecialCharacter())
 				{
-					if(tp.isFaceUp() && tp.isCreature() && !tp.isSpecialCharacter())
-					{
-						tp.flip();
-					}
+					tp.flip();
 				}
-				Player oldOwner = null;
-				Player newOwner = null;
+			}
+			Player oldOwner = null;
+			Player newOwner = null;
+			for(Player p : getCurrentState().getPlayers())
+			{
+				if(p.ownsHex(getCurrentState().getCombatHex().getHex()))
+				{
+					oldOwner = p;
+					break;
+				}
+			}
+			for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+			{
 				for(Player p : getCurrentState().getPlayers())
 				{
-					if(p.ownsHex(getCurrentState().getCombatHex().getHex()))
+					if(p.ownsThingOnBoard(tp))
 					{
-						oldOwner = p;
+						newOwner = p;
 						break;
 					}
 				}
-				for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
-				{
-					for(Player p : getCurrentState().getPlayers())
-					{
-						if(p.ownsThingOnBoard(tp))
-						{
-							newOwner = p;
-							break;
-						}
-					}
-				}
-				if(newOwner != null && !oldOwner.equals(newOwner))
-				{
-					oldOwner.removeHexFromOwnership(getCurrentState().getCombatHex().getHex());
-					newOwner.addOwnedHex(getCurrentState().getCombatHex().getHex());
-					if(getCurrentState().getCombatHex().hasSpecialIncomeCounter())
-					{
-						oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getSpecialIncomeCounter());
-						newOwner.addOwnedThingOnBoard(getCurrentState().getCombatHex().getSpecialIncomeCounter());
-					}
-					if(getCurrentState().getCombatHex().hasBuilding())
-					{
-						oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
-						newOwner.addOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
-						if(getCurrentState().getCombatHex().getBuilding().getName().equals(Building.Citadel.name()))
-						{
-							getCurrentState().addHexToListOfConstructedHexes(getCurrentState().getCombatHex());
-						}
-					}
-				}
+			}
+			if(newOwner != null && !oldOwner.equals(newOwner))
+			{
+				oldOwner.removeHexFromOwnership(getCurrentState().getCombatHex().getHex());
+				newOwner.addOwnedHex(getCurrentState().getCombatHex().getHex());
 				if(getCurrentState().getCombatHex().hasSpecialIncomeCounter())
 				{
-					getCurrentState().addNeededRoll(new Roll(1,getCurrentState().getCombatHex().getSpecialIncomeCounter(),RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
+					oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getSpecialIncomeCounter());
+					newOwner.addOwnedThingOnBoard(getCurrentState().getCombatHex().getSpecialIncomeCounter());
 				}
 				if(getCurrentState().getCombatHex().hasBuilding())
 				{
-					ITileProperties building = getCurrentState().getCombatHex().getBuilding();
-					if(!building.getName().equals(Building.Citadel.name()))
+					oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
+					newOwner.addOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
+					if(getCurrentState().getCombatHex().getBuilding().getName().equals(Building.Citadel.name()))
 					{
-						getCurrentState().addNeededRoll(new Roll(1,building,RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
+						getCurrentState().addHexToListOfConstructedHexes(getCurrentState().getCombatHex());
 					}
 				}
-				if(getCurrentState().isWaitingForRolls())
+				getCurrentState().getCombatHex().setMarker(Constants.getPlayerMarker(newOwner.getID()));
+				HexStatesChanged msg = new HexStatesChanged(1);
+				msg.getArray()[0] = getCurrentState().getCombatHex();
+				msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
+			}
+			else if(oldOwner != null)
+			{
+				getCurrentState().getCombatHex().setMarker(Constants.getPlayerMarker(oldOwner.getID()));
+				HexStatesChanged msg = new HexStatesChanged(1);
+				msg.getArray()[0] = getCurrentState().getCombatHex();
+				msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
+			}
+			if(getCurrentState().getCombatHex().hasSpecialIncomeCounter())
+			{
+				getCurrentState().addNeededRoll(new Roll(1,getCurrentState().getCombatHex().getSpecialIncomeCounter(),RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
+			}
+			if(getCurrentState().getCombatHex().hasBuilding())
+			{
+				ITileProperties building = getCurrentState().getCombatHex().getBuilding();
+				if(!building.getName().equals(Building.Citadel.name()))
 				{
-					getCurrentState().setCurrentCombatPhase(CombatPhase.DETERMINE_DAMAGE);
-				}
-				else
-				{
-					getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
+					getCurrentState().addNeededRoll(new Roll(1,building,RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
 				}
 			}
+			if(getCurrentState().isWaitingForRolls())
+			{
+				getCurrentState().setCurrentCombatPhase(CombatPhase.DETERMINE_DAMAGE);
+			}
+			else
+			{
+				getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
+			}
+			new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		}
 	}
 	
@@ -246,7 +275,7 @@ public class CombatCommandHandler extends CommandHandler
 	{
 		getCurrentState().setPlayersTarget(playerNumber, targetPlayerNumber);
 		
-		new PlayerTargetChanged(getCurrentState().getPlayerByPlayerNumber(playerNumber), getCurrentState().getPlayerByPlayerNumber(targetPlayerNumber)).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+		new PlayerTargetChanged(getCurrentState().getPlayerByPlayerNumber(playerNumber), getCurrentState().getPlayerByPlayerNumber(targetPlayerNumber)).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		boolean someoneNeedsToSelectTarget = false;
 		for(Player p : getCurrentState().getPlayersStillFightingInCombatHex())
 		{
@@ -295,7 +324,7 @@ public class CombatCommandHandler extends CommandHandler
 		}
 		else
 		{
-			advanceToNextCombatPhase();
+			advanceOrEnd();
 		}
 		HexStatesChanged evt = new HexStatesChanged(2);
 		evt.getArray()[0] = getCurrentState().getCombatHex();
@@ -327,7 +356,7 @@ public class CombatCommandHandler extends CommandHandler
 				new HexNeedsThingsRemoved(hs, getCurrentState().getThingsToRemoveFromHex(hs), false,getCurrentState().getPlayerByPlayerNumber(playerNumber)).postNetworkEvent(playerNumber);
 				if(!getCurrentState().hasHexesThatNeedThingsRemoved())
 				{
-					advanceToNextCombatPhase();
+					advanceOrEnd();
 				}
 				break;
 			}
@@ -339,7 +368,7 @@ public class CombatCommandHandler extends CommandHandler
 	private void advanceToNextCombatPhase()
 	{
 		advanceToNextCombatPhaseHelper();
-		new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+		new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 	}
 	
 	private void advanceToNextCombatPhaseHelper()
@@ -453,8 +482,8 @@ public class CombatCommandHandler extends CommandHandler
 		getCurrentState().setPlayersTarget(p2.getID(), p1.getID());
 		
 
-		new PlayerTargetChanged(p1, p2).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
-		new PlayerTargetChanged(p2, p1).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+		new PlayerTargetChanged(p1, p2).postNetworkEvent(Constants.ALL_PLAYERS_ID);
+		new PlayerTargetChanged(p2, p1).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 	}
 
 	private void applyRollEffects() throws NoMoreTilesException
@@ -542,7 +571,7 @@ public class CombatCommandHandler extends CommandHandler
 						//give hex to player
 						makeHexOwnedByPlayer(r.getRollTarget(), r.getRollingPlayerID());
 						getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
-						new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+						new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 					} else {
 						List<ITileProperties> listOfDefenders = new ArrayList<>(roll_value);
 						List<ITileProperties> listOfSpecialIncomeCounters = new ArrayList<>();
@@ -611,7 +640,7 @@ public class CombatCommandHandler extends CommandHandler
 			}
 			else
 			{
-				new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+				new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 
 				for(Player p : getCurrentState().getPlayersStillFightingInCombatHex())
 				{
@@ -619,7 +648,7 @@ public class CombatCommandHandler extends CommandHandler
 					if(hitsOnPlayer>0)
 					{
 						//notifies players of hits
-						new CombatHits(p.getID(),hitsOnPlayer).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+						new CombatHits(p.getID(),hitsOnPlayer).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 					}
 				}
 			}
@@ -634,7 +663,7 @@ public class CombatCommandHandler extends CommandHandler
 				}
 			}
 			getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(getCurrentState().getCurrentCombatPhase().ordinal() + 1));
-			new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+			new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		}
 		for(Roll r : handledRolls)
 		{

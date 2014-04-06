@@ -33,7 +33,7 @@ public class HexContentsPanel extends JPanel
 		
 		for(ITileProperties tp : model.getThingsInHex())
 		{
-			Image tileImage = Constants.IMAGES.get(tp.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT);
+			Image tileImage = Constants.getImageForTile(tp);
 			add(new JLabel(new ImageIcon(tileImage)));
 		}
 	}
