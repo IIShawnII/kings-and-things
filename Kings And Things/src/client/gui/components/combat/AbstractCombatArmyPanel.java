@@ -14,7 +14,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.event.EventDispatch;
 import common.event.network.CombatHits;
 import common.event.network.PlayerTargetChanged;
@@ -93,17 +92,26 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 		targetArmyLabel.setText(generateTargetLabelString());
 	}
 	
-	public void removeThingsNotInList(Collection<ITileProperties> things)
+	public void removeThingsNotInList(Collection<ITileProperties> things, boolean retreat)
 	{
-		Iterator<Entry<ITileProperties,JButton>> it = army.entrySet().iterator();
-		while(it.hasNext())
+		if(army.size()>0)
 		{
-			Entry<ITileProperties,JButton> entry = it.next();
-			if(!things.contains(entry.getKey()))
+			Iterator<Entry<ITileProperties,JButton>> it = army.entrySet().iterator();
+			while(it.hasNext())
 			{
-				mainArmyPanel.remove(entry.getValue());
-				thingRemoved(entry.getKey());
-				it.remove();
+				Entry<ITileProperties,JButton> entry = it.next();
+				if(!things.contains(entry.getKey()))
+				{
+					mainArmyPanel.remove(entry.getValue());
+					thingRemoved(entry.getKey());
+					it.remove();
+				}
+			}
+			if(army.size()==0)
+			{
+				targetArmyLabel.setText(retreat?"Ran like a wipped dog":"Has been destroyed!");
+				armyHeaderPanel.remove(hitsToApply);
+				EventDispatch.unregisterFromInternalEvents(this);
 			}
 		}
 	}

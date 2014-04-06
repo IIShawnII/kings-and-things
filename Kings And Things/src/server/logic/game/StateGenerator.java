@@ -1,5 +1,6 @@
 package server.logic.game;
 
+import java.awt.Point;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -82,10 +83,11 @@ public class StateGenerator
 		p4.addOwnedHex(state.getBoard().getHexByXY(2, 7).getHex());
 		try
 		{
-			addTenThingsToHexForPlayer(p1,state);
-			addTenThingsToHexForPlayer(p2,state);
-			addTenThingsToHexForPlayer(p3,state);
-			addTenThingsToHexForPlayer(p4,state);
+			addThingsToHexForPlayer(3,new Point(3, 6),p1,state);
+			addThingsToHexForPlayer(3,new Point(3, 6),p2,state);
+			addThingsToHexForPlayer(3,new Point(3, 6),p3,state);
+			addThingsToHexForPlayer(3,new Point(3, 6),p4,state);
+			addThingsToHexForPlayer(10,new Point(2, 5),p1,state);
 		}
 		catch (NoMoreTilesException e)
 		{
@@ -121,13 +123,23 @@ public class StateGenerator
 		}
 	}
 	
-	private void addTenThingsToHexForPlayer(Player p, GameState state) throws NoMoreTilesException
+	private void addThingsToHexForPlayer(int count, Point loc, Player p, GameState state) throws NoMoreTilesException
 	{
-		for(int i=0; i<10; i++)
+		ArrayList<ITileProperties> removedThings = new ArrayList<>();
+		for(int i=0; i<count; i++)
 		{
 			ITileProperties thing = state.getCup().drawTile();
+			while(!thing.isCreature())
+			{
+				removedThings.add(thing);
+				thing = state.getCup().drawTile();
+			}
 			p.addOwnedThingOnBoard(thing);
-			state.getBoard().getHexByXY(3, 6).addThingToHex(thing);
+			state.getBoard().getHexByXY(loc.x,loc.y).addThingToHex(thing);
+		}
+		for(ITileProperties thing : removedThings)
+		{
+			state.getCup().reInsertTile(thing);
 		}
 	}
 }

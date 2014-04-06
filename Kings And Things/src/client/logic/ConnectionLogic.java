@@ -14,6 +14,7 @@ import common.event.AbstractUpdateReceiver;
 import common.event.network.CombatHits;
 import common.event.network.Flip;
 import common.event.network.DieRoll;
+import common.event.network.HexNeedsThingsRemoved;
 import common.event.network.HexStatesChanged;
 import common.event.network.InitiateCombat;
 import common.event.network.PlayerTargetChanged;
@@ -179,6 +180,22 @@ public class ConnectionLogic implements Runnable {
 				else if(event instanceof PlayerTargetChanged || event instanceof CombatHits || event instanceof HexStatesChanged)
 				{
 					event.postInternalEvent();
+				}
+				else if(event instanceof HexNeedsThingsRemoved)
+				{
+					HexNeedsThingsRemoved evt = (HexNeedsThingsRemoved) event;
+					if(evt.getPlayerRemovingThings().getID() == player.getID())
+					{
+						if(evt.isFirstNotificationForThisHex())
+						{
+							update.addInstruction(UpdateInstruction.RemoveThingsFromHex);
+							update.putData(UpdateKey.HexState, evt);
+						}
+						else
+						{
+							evt.postInternalEvent();
+						}
+					}
 				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);

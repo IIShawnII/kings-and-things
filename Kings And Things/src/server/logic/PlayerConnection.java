@@ -2,12 +2,15 @@ package server.logic;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 
 import server.event.PlayerUpdated;
 import server.event.internal.ApplyHitsCommand;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.ExchangeThingsCommand;
+import server.event.internal.RemoveThingsFromHexCommand;
 import server.event.internal.ResolveCombatCommand;
+import server.event.internal.RetreatCommand;
 import server.event.internal.RollDiceCommand;
 import server.event.internal.DoneRollingCommand;
 import server.event.internal.EndPlayerTurnCommand;
@@ -129,6 +132,17 @@ public class PlayerConnection implements Runnable{
 						break;
 					case ApplyHit:
 						new ApplyHitsCommand(1, (ITileProperties) event.getData(UpdateKey.ThingArray)).postInternalEvent(ID);
+						break;
+					case Retreat:
+						new RetreatCommand((ITileProperties) event.getData(UpdateKey.Hex)).postInternalEvent(ID);
+						break;
+					case RemoveThingsFromHex:
+						HashSet<ITileProperties> thingsToRemove = new HashSet<>();
+						for(ITileProperties thing : (ITileProperties[]) event.getData(UpdateKey.ThingArray))
+						{
+							thingsToRemove.add(thing);
+						}
+						new RemoveThingsFromHexCommand((ITileProperties) event.getData(UpdateKey.Hex), thingsToRemove).postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());

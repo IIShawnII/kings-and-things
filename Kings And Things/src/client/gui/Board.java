@@ -35,10 +35,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
 import client.gui.components.CombatPanel;
+import client.gui.components.RemoveThingsFromHexPanel;
 import client.gui.die.DiceRoller;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
@@ -60,8 +63,10 @@ import common.Constants.RollReason;
 import common.Constants.SetupPhase;
 import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
+import common.Logger;
 import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
+import common.event.network.HexNeedsThingsRemoved;
 import common.event.network.InitiateCombat;
 import common.game.HexState;
 import common.game.ITileProperties;
@@ -510,50 +515,82 @@ public class Board extends JPanel implements CanvasParent{
 					break;
 				case InitiateCombat:
 					final InitiateCombat combat = (InitiateCombat) update.getData(UpdateKey.Combat);
-					SwingUtilities.invokeLater(new Runnable(){
-						@Override
-						public void run() {
-							HashSet<HexState> possibleRetreatHexes = new HashSet<>();
-							for(Point p : combat.getCombatHexState().getAdjacentLocations())
-							{
-								try
+					try {
+						SwingUtilities.invokeAndWait(new Runnable(){
+							@Override
+							public void run() {
+								HashSet<HexState> possibleRetreatHexes = new HashSet<>();
+								for(Point p : combat.getCombatHexState().getAdjacentLocations())
 								{
-									Lock l = locks.getLockForHex(p);
-									if(l != null)
+									try
 									{
-										if(l.getHex().getState().hasMarkerForPlayer(currentPlayer.getID()))
+										Lock l = locks.getLockForHex(p);
+										if(l != null)
 										{
-											possibleRetreatHexes.add(l.getHex().getState());
+											if(l.getHex().getState().hasMarkerForPlayer(currentPlayer.getID()))
+											{
+												possibleRetreatHexes.add(l.getHex().getState());
+											}
 										}
 									}
+									catch(IndexOutOfBoundsException e)
+									{
+									}
 								}
-								catch(IndexOutOfBoundsException e)
+								Player player = null;
+								HashSet<Player> otherPlayers = new HashSet<>();
+								for(Player p : combat.getInvolvedPlayers())
 								{
+									if(p.getID() == currentPlayer.getID())
+									{
+										player = p;
+									}
+									else
+									{
+										otherPlayers.add(p);
+									}
 								}
-							}
-							Player player = null;
-							HashSet<Player> otherPlayers = new HashSet<>();
-							for(Player p : combat.getInvolvedPlayers())
+								
+								JFrame combatDialog = new JFrame("Combat!");
+								CombatPanel panel = new CombatPanel(combat.getCombatHexState(), possibleRetreatHexes, player, otherPlayers,
+										combat.getCurrentCombatPhase(), combat.getDefendingPlayer(), combat.getPlayerOrder(), combatDialog);
+								panel.init();
+								combatDialog.setContentPane(panel);
+								combatDialog.pack();
+								combatDialog.setLocationRelativeTo(null);
+								combatDialog.setVisible(true);
+							}});
+					} catch (Throwable t) {
+						Logger.getErrorLogger().error("Problem processing combat initiation command: ", t);
+					}
+					break;
+				case RemoveThingsFromHex:
+					final HexNeedsThingsRemoved evt = (HexNeedsThingsRemoved) update.getData(UpdateKey.HexState);
+					if(evt.isFirstNotificationForThisHex())
+					{
+						try
+						{
+							SwingUtilities.invokeAndWait(new Runnable()
 							{
-								if(p.getID() == currentPlayer.getID())
-								{
-									player = p;
-								}
-								else
-								{
-									otherPlayers.add(p);
-								}
-							}
-							
-							JFrame combatDialog = new JFrame("Combat!");
-							CombatPanel panel = new CombatPanel(combat.getCombatHexState(), possibleRetreatHexes, player, otherPlayers,
-									combat.getCurrentCombatPhase(), combat.getDefendingPlayer(), combat.getPlayerOrder());
-							panel.init();
-							combatDialog.setContentPane(panel);
-							combatDialog.pack();
-							combatDialog.setLocationRelativeTo(null);
-							combatDialog.setVisible(true);
-						}});
+								@Override
+								public void run() {
+									JFrame removalDialog = new JFrame("Remove things");
+									JScrollPane scrollPane = new JScrollPane();
+									scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+									scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+									
+									RemoveThingsFromHexPanel panel = new RemoveThingsFromHexPanel(evt.getPlayerRemovingThings(), removalDialog, evt.getHex().getHex());
+									panel.init(evt.getHex().getThingsInHexOwnedByPlayer(evt.getPlayerRemovingThings()), evt.getNumToRemove());
+									scrollPane.setViewportView(panel);
+									removalDialog.setContentPane(scrollPane);
+									removalDialog.pack();
+									removalDialog.setLocationRelativeTo(null);
+									removalDialog.setVisible(true);
+								}});
+						} catch (Throwable t) {
+							Logger.getErrorLogger().error("Problem processing remove things from hex command: ", t);
+						}
+					}
 					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());

@@ -173,7 +173,6 @@ public abstract class CommandValidator
 		}
 		else
 		{
-			validateIsPlayerActive(playerNumber,currentState);
 			if(currentState.getThingsToRemoveFromHex(hex) < thingsToRemove.size())
 			{
 				throw new IllegalArgumentException("You only need to discard " + currentState.getThingsToRemoveFromHex(hex) + " things from that hex");

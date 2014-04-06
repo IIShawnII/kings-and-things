@@ -19,9 +19,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import client.gui.components.TileButton;
 import client.gui.die.DiceRoller;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.RollReason;
@@ -127,22 +129,7 @@ public class ActiveCombatArmyPanel extends AbstractCombatArmyPanel
 		
 		for(final ITileProperties tile : things)
 		{
-			ImageIcon image = null;
-			if(tile.isCreature())
-			{
-				image = new ImageIcon(Constants.IMAGES.get(tile.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT));
-			}
-			else
-			{
-				for(ITileProperties b : Constants.BUILDING.values())
-				{
-					if(b.getName().equals(tile.getName()))
-					{
-						image = new ImageIcon(Constants.IMAGES.get(b.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT));
-					}
-				}
-			}
-			JButton button = new JButton(image);
+			JButton button = new TileButton(tile);
 			button.addActionListener(new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent e)
@@ -220,7 +207,7 @@ public class ActiveCombatArmyPanel extends AbstractCombatArmyPanel
 	@Override
 	protected void thingRemoved(ITileProperties thing)
 	{
-		remove(rollerMap.remove(thing));
+		getMainArmyPanel().remove(rollerMap.remove(thing));
 	}
 	
 	@Subscribe

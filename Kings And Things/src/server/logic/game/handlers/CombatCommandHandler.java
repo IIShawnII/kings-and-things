@@ -29,6 +29,7 @@ import common.Logger;
 import common.event.network.CombatHits;
 import common.event.network.CommandRejected;
 import common.event.network.CurrentPhase;
+import common.event.network.HexNeedsThingsRemoved;
 import common.event.network.HexStatesChanged;
 import common.event.network.InitiateCombat;
 import common.event.network.PlayerTargetChanged;
@@ -290,11 +291,16 @@ public class CombatCommandHandler extends CommandHandler
 		if(creatureCount>Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX && !(getCurrentState().getBoard().getHexStateForHex(destinationHex).hasBuilding() && getCurrentState().getBoard().getHexStateForHex(destinationHex).getBuilding().getName().equals(Building.Citadel)))
 		{
 			getCurrentState().addHexThatNeedsThingsRemoved(getCurrentState().getBoard().getHexStateForHex(destinationHex), creatureCount - Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX);
+			new HexNeedsThingsRemoved(getCurrentState().getBoard().getHexStateForHex(destinationHex), creatureCount - Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX, true,coward).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		}
 		else
 		{
 			advanceToNextCombatPhase();
 		}
+		HexStatesChanged evt = new HexStatesChanged(2);
+		evt.getArray()[0] = getCurrentState().getCombatHex();
+		evt.getArray()[1] = getCurrentState().getBoard().getHexStateForHex(destinationHex);
+		evt.postNetworkEvent(Constants.ALL_PLAYERS_ID);
 	}
 	
 	private void removeThingsFromHex(int playerNumber, ITileProperties hex, Set<ITileProperties> things)
@@ -312,7 +318,13 @@ public class CombatCommandHandler extends CommandHandler
 					removePlayerThingFromBoard(playerNumber,hex,thing);
 				}
 				HexState hs = getCurrentState().getBoard().getHexStateForHex(hex);
+				
+				HexStatesChanged msg = new HexStatesChanged(1);
+				msg.getArray()[0] = hs;
+				msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
+				
 				getCurrentState().updateHexThatNeedsThingsRemoved(hs, getCurrentState().getThingsToRemoveFromHex(hs) - things.size());
+				new HexNeedsThingsRemoved(hs, getCurrentState().getThingsToRemoveFromHex(hs), false,getCurrentState().getPlayerByPlayerNumber(playerNumber)).postNetworkEvent(playerNumber);
 				if(!getCurrentState().hasHexesThatNeedThingsRemoved())
 				{
 					advanceToNextCombatPhase();

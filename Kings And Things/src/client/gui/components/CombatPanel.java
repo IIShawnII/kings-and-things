@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import client.gui.Board;
 import client.gui.components.combat.AbstractCombatArmyPanel;
@@ -24,7 +25,6 @@ import client.gui.components.combat.InactiveCombatArmyPanel;
 import client.gui.components.combat.RetreatPanel;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.UpdateInstruction;
@@ -41,6 +41,7 @@ public class CombatPanel extends JPanel
 	private static final long serialVersionUID = -8151724738245642539L;
 	
 	private HexState hs;
+	private final Player p;
 	private final ActiveCombatArmyPanel playerPanel;
 	private final ArrayList<InactiveCombatArmyPanel> otherArmies;
 	private final JScrollPane scrollPane;
@@ -50,9 +51,13 @@ public class CombatPanel extends JPanel
 	private final Player defendingPlayer;
 	private final HashSet<HexState> adjacentPlayerOwnedHexes;
 	private CombatPhase currentPhase;
+	private final JFrame parent;
 
-	public CombatPanel(HexState hs, Collection<HexState> adjacentPlayerOwnedHexes, Player p, Collection<Player> otherPlayers, CombatPhase currentPhase, Player defendingPlayer, Collection<Integer> playerOrder)
+	public CombatPanel(HexState hs, Collection<HexState> adjacentPlayerOwnedHexes, Player p, Collection<Player> otherPlayers, CombatPhase currentPhase, Player defendingPlayer, Collection<Integer> playerOrder, JFrame parent)
 	{
+		this.p = p;
+		this.parent = parent;
+		parent.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.hs = hs;
 		this.currentPhase = currentPhase;
 		this.adjacentPlayerOwnedHexes = new HashSet<>(adjacentPlayerOwnedHexes.size());
@@ -166,14 +171,16 @@ public class CombatPanel extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				// TODO send skip command to server, update phase label upon getting results
+				new UpdatePackage(UpdateInstruction.Skip, "Combat Panel for: " + playerPanel.getPlayerName()).postNetworkEvent(playerPanel.getPlayerID());
 			}});
 		playerPanel.addRetreatButtonListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				JDialog retreatDialog = new JDialog();
-				retreatDialog.add(new RetreatPanel(adjacentPlayerOwnedHexes,hs));
+				JFrame retreatDialog = new JFrame("Retreat!");
+				retreatDialog.add(new RetreatPanel(adjacentPlayerOwnedHexes,hs,playerPanel.getPlayerID(),retreatDialog));
+				retreatDialog.pack();
+				retreatDialog.setLocationRelativeTo(null);
 				retreatDialog.setVisible(true);
 			}});
 
@@ -183,8 +190,7 @@ public class CombatPanel extends JPanel
 	private String getPlayerNameByAttackerNumber(int num)
 	{
 		int defenderIndex = playerOrderList.indexOf(defendingPlayer.getID());
-		int offset = defenderIndex - num;
-		int attackerID = playerOrderList.get(offset<0? playerOrderList.size() - offset: offset);
+		int attackerID = playerOrderList.get((defenderIndex + num) % playerOrderList.size());
 		for(Player p : allPlayersInCombat)
 		{
 			if(p.getID() == attackerID)
@@ -278,32 +284,50 @@ public class CombatPanel extends JPanel
 		combatPhaseLabel.setText(phaseText);
 	}
 	
-	private void combatHexChanged(HexState hex)
+	private void combatHexChanged(HexState hex, boolean isRetreat)
 	{
 		hs = hex;
-		playerPanel.removeThingsNotInList(hex.getFightingThingsInHex());
+		playerPanel.removeThingsNotInList(hex.getFightingThingsInHex(), isRetreat);
+		boolean closing = hex.getFightingThingsInHexOwnedByPlayer(p).size()==0;
+		
 		for(AbstractCombatArmyPanel p : otherArmies)
 		{
-			p.removeThingsNotInList(hex.getFightingThingsInHex());
+			p.removeThingsNotInList(hex.getFightingThingsInHex(), isRetreat);
+			if(closing)
+			{
+				EventDispatch.unregisterFromInternalEvents(p);
+			}
+		}
+		if(closing)
+		{
+			JOptionPane.showConfirmDialog(this, isRetreat?"Your cowardice has cost you the battle!":"Your rag tag army has been destroyed!", "Defeat!", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+			EventDispatch.unregisterFromInternalEvents(this);
+			parent.dispose();
 		}
 	}
 	
 	@Subscribe
 	public void recieveHexChanged(final HexStatesChanged evt)
 	{
-		Runnable logic = new Runnable(){
-			@Override
-			public void run(){
-				combatHexChanged(evt.getArray()[0]);
+		for(final HexState hs : evt.getArray())
+		{
+			if(hs.getHex().equals(this.hs.getHex()))
+			{
+				Runnable logic = new Runnable(){
+					@Override
+					public void run(){
+						combatHexChanged(hs,evt.getArray().length==2);
+					}
+				};
+				if(!SwingUtilities.isEventDispatchThread())
+				{
+					SwingUtilities.invokeLater(logic);
+				}
+				else
+				{
+					logic.run();
+				}
 			}
-		};
-		if(!SwingUtilities.isEventDispatchThread())
-		{
-			SwingUtilities.invokeLater(logic);
-		}
-		else
-		{
-			logic.run();
 		}
 	}
 

@@ -2,16 +2,15 @@ package client.gui.components.combat;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import common.Constants;
+import client.gui.components.TileButton;
+
 import common.game.ITileProperties;
 
 public class InactiveCombatArmyPanel extends AbstractCombatArmyPanel
@@ -66,22 +65,7 @@ public class InactiveCombatArmyPanel extends AbstractCombatArmyPanel
 		
 		for(final ITileProperties tile : things)
 		{
-			ImageIcon image = null;
-			if(tile.isCreature())
-			{
-				image = new ImageIcon(Constants.IMAGES.get(tile.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT));
-			}
-			else
-			{
-				for(ITileProperties b : Constants.BUILDING.values())
-				{
-					if(b.getName().equals(tile.getName()))
-					{
-						image = new ImageIcon(Constants.IMAGES.get(b.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT));
-					}
-				}
-			}
-			JButton button = new JButton(image);
+			JButton button = new TileButton(tile);
 			button.addActionListener(new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent e)
