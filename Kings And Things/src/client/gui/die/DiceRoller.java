@@ -65,8 +65,8 @@ public class DiceRoller extends JPanel implements Parent{
 	}
 	
 	public void roll(){
-		for( Die die: dice){
-			die.roll();
+		for(int i=0; i<dieCount; i++){
+			dice[i].roll();
 			rollingCount++;
 		}
 	}

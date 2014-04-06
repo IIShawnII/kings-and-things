@@ -404,6 +404,15 @@ public abstract class CommandHandler
 		}
 		//notifies players of die roll
 		new DieRoll(rollToAddTo).postNetworkEvent( roll.getRollingPlayerID());
+		
+		//combat phase doesn't need doneRolling mechanism
+		if(getCurrentState().getCurrentRegularPhase() == RegularPhase.COMBAT)
+		{
+			if(!currentState.isWaitingForRolls())
+			{
+				new DiceRolled().postInternalEvent();
+			}
+		}
 	}
 	
 	private int rollDie( int rollValue, int min, int max)

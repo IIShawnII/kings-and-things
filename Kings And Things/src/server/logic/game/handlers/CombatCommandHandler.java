@@ -28,6 +28,7 @@ import common.Constants.RollReason;
 import common.Logger;
 import common.event.network.CombatHits;
 import common.event.network.CommandRejected;
+import common.event.network.CurrentPhase;
 import common.event.network.HexStatesChanged;
 import common.event.network.InitiateCombat;
 import common.event.network.PlayerTargetChanged;
@@ -242,12 +243,7 @@ public class CombatCommandHandler extends CommandHandler
 	{
 		getCurrentState().setPlayersTarget(playerNumber, targetPlayerNumber);
 		
-		int idMask = 0;
-		for(Player p : getCurrentState().getPlayersStillFightingInCombatHex())
-		{
-			idMask |= p.getID();
-		}
-		new PlayerTargetChanged(getCurrentState().getPlayerByPlayerNumber(playerNumber), getCurrentState().getPlayerByPlayerNumber(targetPlayerNumber)).postNetworkEvent(idMask);
+		new PlayerTargetChanged(getCurrentState().getPlayerByPlayerNumber(playerNumber), getCurrentState().getPlayerByPlayerNumber(targetPlayerNumber)).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
 		boolean someoneNeedsToSelectTarget = false;
 		for(Player p : getCurrentState().getPlayersStillFightingInCombatHex())
 		{
@@ -328,6 +324,12 @@ public class CombatCommandHandler extends CommandHandler
 
 	private void advanceToNextCombatPhase()
 	{
+		advanceToNextCombatPhaseHelper();
+		new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+	}
+	
+	private void advanceToNextCombatPhaseHelper()
+	{
 		int currentPhaseOrdinal = getCurrentState().getCurrentCombatPhase().ordinal();
 		CombatPhase nextPhase = getCombatPhaseByOrdinal((currentPhaseOrdinal + 1) % CombatPhase.values().length);
 		
@@ -355,28 +357,28 @@ public class CombatCommandHandler extends CommandHandler
 			if(!getCurrentState().isWaitingForRolls())
 			{
 				getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(nextPhase.ordinal() + 1));
-				advanceToNextCombatPhase();
+				advanceToNextCombatPhaseHelper();
 			}
 		}
 		else if(nextPhase == CombatPhase.ATTACKER_ONE_RETREAT)
 		{
 			if(getCurrentState().getAttackerByIndex(1) == null)
 			{
-				advanceToNextCombatPhase();
+				advanceToNextCombatPhaseHelper();
 			}
 		}
 		else if(nextPhase == CombatPhase.ATTACKER_TWO_RETREAT)
 		{
 			if(getCurrentState().getAttackerByIndex(2) == null)
 			{
-				advanceToNextCombatPhase();
+				advanceToNextCombatPhaseHelper();
 			}
 		}
 		else if(nextPhase == CombatPhase.ATTACKER_THREE_RETREAT)
 		{
 			if(getCurrentState().getAttackerByIndex(3) == null)
 			{
-				advanceToNextCombatPhase();
+				advanceToNextCombatPhaseHelper();
 			}
 		}
 		else if((nextPhase == CombatPhase.DEFENDER_RETREAT && !getCurrentState().getPlayersStillFightingInCombatHex().contains(getCurrentState().getDefendingPlayer())) || nextPhase == CombatPhase.DETERMINE_DAMAGE)
@@ -392,7 +394,7 @@ public class CombatCommandHandler extends CommandHandler
 				autoDetermineTargets();
 				//wrap around to magic attack
 				getCurrentState().setCurrentCombatPhase(getCombatPhaseByOrdinal(CombatPhase.MAGIC_ATTACK.ordinal()-1));
-				advanceToNextCombatPhase();
+				advanceToNextCombatPhaseHelper();
 			}
 		}
 	}
@@ -435,6 +437,10 @@ public class CombatCommandHandler extends CommandHandler
 		p2 = it.next();
 		getCurrentState().setPlayersTarget(p1.getID(), p2.getID());
 		getCurrentState().setPlayersTarget(p2.getID(), p1.getID());
+		
+
+		new PlayerTargetChanged(p1, p2).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
+		new PlayerTargetChanged(p2, p1).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
 	}
 
 	private void applyRollEffects() throws NoMoreTilesException

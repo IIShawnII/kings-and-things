@@ -889,6 +889,16 @@ public class GameState implements Serializable
 		}
 		return true;
 	}
+	
+	public int getPlayersInCombatIDMask()
+	{
+		int mask = 0;
+		for(Player p : getPlayersStillFightingInCombatHex())
+		{
+			mask |= p.getID();
+		}
+		return mask;
+	}
 
 	public void notifyClientsOfState(){
 		GameStateProgress state = new GameStateProgress();

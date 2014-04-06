@@ -415,23 +415,7 @@ public class Board extends JPanel implements CanvasParent{
 		}
 		addTile( new Tile( tower), bound, false).flip();
 	}
-/*
-	private boolean firstBattle = true;
-	private ITileProperties battle = null;
-	private void placeBattleMarker(){
-		Point point = locks.getPermanentLock( Category.State).getCenter();
-		Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
-		if( firstBattle){
-			battle = Constants.STATE.get(Restriction.Battle);
-			addTile( new Tile( battle), bound, false).flip();
-			addTile( new Tile( battle), bound, false).flip();
-			addTile( new Tile( battle), bound, false).flip();
-			addTile( new Tile( battle), bound, false).flip();
-			firstBattle = false;
-		}
-		addTile( new Tile( battle), bound, false).flip();
-	}
-	*/
+	
 	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
 		protected UpdateReceiver() {
@@ -564,8 +548,8 @@ public class Board extends JPanel implements CanvasParent{
 							JFrame combatDialog = new JFrame("Combat!");
 							combatDialog.setContentPane(new CombatPanel(combat.getCombatHexState(), possibleRetreatHexes, player, otherPlayers,
 									combat.getCurrentCombatPhase(), combat.getDefendingPlayer(), combat.getPlayerOrder()));
-							combatDialog.setLocationRelativeTo(null);
 							combatDialog.pack();
+							combatDialog.setLocationRelativeTo(null);
 							combatDialog.setVisible(true);
 						}});
 					break;
@@ -913,6 +897,7 @@ public class Board extends JPanel implements CanvasParent{
 					break;
 				case ResolveCombat:
 					tryResolveCombat(e);
+					break;
 				case NoMove:
 				default:
 					return;

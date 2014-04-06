@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import client.gui.Board;
 import client.gui.components.combat.AbstractCombatArmyPanel;
@@ -29,6 +30,7 @@ import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
 import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
+import common.event.network.CurrentPhase;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.Player;
@@ -85,6 +87,7 @@ public class CombatPanel extends JPanel
 		
 		init();
 		new HexChangedReceiver();
+		new CombatPhaseChangedReceiver();
 	}
 	
 	private void init()
@@ -196,6 +199,12 @@ public class CombatPanel extends JPanel
 		throw new IllegalStateException("Unable to find player with ID: " + attackerID);
 	}
 	
+	private void setCombatPhase(CombatPhase phase)
+	{
+		currentPhase = phase;
+		updateCombatPhaseLabel();
+	}
+	
 	private void updateCombatPhaseLabel()
 	{
 		String phaseText = "";
@@ -304,6 +313,27 @@ public class CombatPanel extends JPanel
 					invalidate();
 				}
 			});*/
+		}
+	}
+
+	private class CombatPhaseChangedReceiver extends AbstractUpdateReceiver<CurrentPhase<CombatPhase>>{
+
+		protected CombatPhaseChangedReceiver() {
+			super( INTERNAL, playerPanel.getPlayerID() | Constants.COMBAT_PANEL_ID, CombatPanel.this);
+		}
+
+		@Override
+		protected void handlePrivate(final CurrentPhase<CombatPhase> update) {
+			SwingUtilities.invokeLater(new Runnable(){
+				@Override
+				public void run(){
+					setCombatPhase(update.getPhase());
+				}
+			});
+		}
+		
+		protected boolean verifyPrivate( CurrentPhase<CombatPhase> update){
+			return (update.getID() & playerPanel.getPlayerID()) >0;
 		}
 	}
 }

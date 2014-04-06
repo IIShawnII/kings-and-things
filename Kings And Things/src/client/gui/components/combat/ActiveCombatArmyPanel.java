@@ -1,7 +1,6 @@
 package client.gui.components.combat;
 
 import static common.Constants.DICE_SIZE;
-import static common.Constants.PUBLIC;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -19,14 +18,17 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import client.gui.die.DiceRoller;
-
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.RollReason;
+import common.Constants.UpdateInstruction;
+import common.Constants.UpdateKey;
 import common.Logger;
 import common.event.AbstractUpdateReceiver;
+import common.event.UpdatePackage;
 import common.event.network.DieRoll;
 import common.game.ITileProperties;
 import common.game.Roll;
@@ -66,22 +68,9 @@ public class ActiveCombatArmyPanel extends AbstractCombatArmyPanel
 		targetArmyButton.addActionListener(listener);
 	}
 
-	public void setRollResults(Roll result)
+	public void setRollResults(final Roll result)
 	{
-		DiceRoller roller = rollerMap.get(result.getRollTarget());
-		//to deal with server sending instant results, wait for animation to finish first
-		while(roller.isRolling())
-		{
-			try
-			{
-				Thread.sleep(100);
-			}
-			catch (InterruptedException e)
-			{
-				Logger.getStandardLogger().warn("Ignoring thread interrupt: ", e);
-			}
-		}
-				
+		final DiceRoller roller = rollerMap.get(result.getRollTarget());
 		roller.setResult(Constants.convertToDice(result.getFinalTotal(), result.getDiceCount()));
 	}
 	
@@ -187,6 +176,7 @@ public class ActiveCombatArmyPanel extends AbstractCombatArmyPanel
 					
 					int rollValue = Integer.parseInt(JOptionPane.showInputDialog(ActiveCombatArmyPanel.this, "Select desired roll value", "RollValue", JOptionPane.PLAIN_MESSAGE));
 					Roll r = new Roll(roller.getDiceCount(), tile, RollReason.ATTACK_WITH_CREATURE, getPlayerID(), rollValue);
+					new UpdatePackage(UpdateInstruction.NeedRoll, UpdateKey.Roll, r, "Combat Panel for: " + getPlayerName()).postNetworkEvent(getPlayerID());
 				}
 				@Override
 				public void mouseEntered(MouseEvent arg0)
@@ -240,23 +230,18 @@ public class ActiveCombatArmyPanel extends AbstractCombatArmyPanel
 	private class DieRollReceiver extends AbstractUpdateReceiver<DieRoll>{
 
 		protected DieRollReceiver() {
-			super( INTERNAL, PUBLIC, ActiveCombatArmyPanel.this);
+			super( INTERNAL, getPlayerID() | Constants.COMBAT_PANEL_ID, ActiveCombatArmyPanel.this);
 		}
 
 		@Override
 		protected void handlePrivate( DieRoll update) {
 			final DieRoll r = update;
-			SwingUtilities.invokeLater( new Runnable(){
-				@Override
-				public void run(){
-					ActiveCombatArmyPanel.this.setRollResults(r.getDieRoll());
-				}
-			});
+			setRollResults(r.getDieRoll());
 		}
 
 		@Override
 		protected boolean verifyPrivate( DieRoll update) {
-			return update.isValidID( update.getID());
+			return (update.getDieRoll().getRollingPlayerID() & getPlayerID()) > 0;
 		}
 	}
 }

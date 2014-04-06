@@ -105,13 +105,23 @@ public class ConnectionLogic implements Runnable {
 						update.addInstruction( UpdateInstruction.RegularPhase);
 						update.putData( UpdateKey.Phase, phase.getPhase());
 					}else if( phase.isCombatPhase()){
-						update.addInstruction( UpdateInstruction.CombatPhase);
-						update.putData( UpdateKey.Phase, phase.getPhase());
+						event.postInternalEvent(ID |= Constants.COMBAT_PANEL_ID);
 					}
 				}
 				else if( event instanceof DieRoll){
-					update.addInstruction( UpdateInstruction.DieValue);
-					update.putData( UpdateKey.Roll, ((DieRoll)event).getDieRoll());
+					
+					DieRoll evt = (DieRoll)event;
+					switch(evt.getDieRoll().getRollReason())
+					{
+						case ATTACK_WITH_CREATURE:
+						case CALCULATE_DAMAGE_TO_TILE:
+							evt.postInternalEvent(evt.getDieRoll().getRollingPlayerID() | Constants.COMBAT_PANEL_ID);
+							break;
+						default:
+							update.addInstruction( UpdateInstruction.DieValue);
+							update.putData( UpdateKey.Roll, evt.getDieRoll());
+							break;
+					}
 				}
 				else if(event instanceof HexOwnershipChanged){
 					update.addInstruction( UpdateInstruction.HexOwnership);
@@ -166,8 +176,8 @@ public class ConnectionLogic implements Runnable {
 				}
 				else if(event instanceof PlayerTargetChanged)
 				{
-					update.addInstruction(UpdateInstruction.TargetPlayer);
-					update.putData(UpdateKey.Combat, event);
+					PlayerTargetChanged evt = ((PlayerTargetChanged)event);
+					evt.postInternalEvent(evt.getTargettingPlayer().getID() | Constants.COMBAT_PANEL_ID);
 				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);

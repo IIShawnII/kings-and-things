@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import common.Constants;
 import common.event.AbstractUpdateReceiver;
 import common.event.network.CombatHits;
 import common.event.network.PlayerTargetChanged;
@@ -154,11 +155,11 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 	private class TargetChangedReceiver extends AbstractUpdateReceiver<PlayerTargetChanged>{
 
 		protected TargetChangedReceiver() {
-			super( INTERNAL, PUBLIC, AbstractCombatArmyPanel.this);
+			super( INTERNAL, playerID | Constants.COMBAT_PANEL_ID, AbstractCombatArmyPanel.this);
 		}
 
 		@Override
-		protected void handlePublic(final PlayerTargetChanged update) {
+		protected void handlePrivate(final PlayerTargetChanged update) {
 			SwingUtilities.invokeLater(new Runnable(){
 				@Override
 				public void run(){
@@ -167,8 +168,8 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 			});
 		}
 		
-		protected boolean verifyPublic( PlayerTargetChanged update){
-			return update.isPublic() && update.getTargettingPlayer().getID() == playerID;
+		protected boolean verifyPrivate( PlayerTargetChanged update){
+			return update.getTargettingPlayer().getID() == playerID;
 		}
 	}
 }
