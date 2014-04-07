@@ -126,6 +126,17 @@ public abstract class CommandHandler
 		return isDemoMode;
 	}
 
+	protected void notifyClientsOfPlayerTray(int playerNumber)
+	{
+		RackPlacement toClient = new RackPlacement(getCurrentState().getPlayerByPlayerNumber(playerNumber).getTrayThings().size());
+		int i=0;
+		for(ITileProperties tp : getCurrentState().getPlayerByPlayerNumber(playerNumber).getTrayThings())
+		{
+			toClient.getArray()[i++] = tp;
+		}
+		toClient.postNetworkEvent(playerNumber);
+	}
+
 	protected void makeHexOwnedByPlayer(ITileProperties hex, int playerNumber)
 	{
 		for(Player p : currentState.getPlayers())

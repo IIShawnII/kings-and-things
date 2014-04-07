@@ -12,7 +12,6 @@ import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.validators.RecruitingThingsPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants;
 import common.Constants.Category;
 import common.Constants.RegularPhase;
@@ -20,7 +19,6 @@ import common.Constants.SetupPhase;
 import common.Logger;
 import common.event.network.CommandRejected;
 import common.event.network.HexStatesChanged;
-import common.event.network.RackPlacement;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -206,17 +204,6 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		moveThingsFromHandToTray(p);
 	}
 	
-	private void notifyClientsOfPlayerTray(int playerNumber)
-	{
-		RackPlacement toClient = new RackPlacement(getCurrentState().getPlayerByPlayerNumber(playerNumber).getTrayThings().size());
-		int i=0;
-		for(ITileProperties tp : getCurrentState().getPlayerByPlayerNumber(playerNumber).getTrayThings())
-		{
-			toClient.getArray()[i++] = tp;
-		}
-		toClient.postNetworkEvent();
-	}
-
 	@Subscribe
 	public void recieveExchangeThingsCommand(ExchangeThingsCommand command)
 	{

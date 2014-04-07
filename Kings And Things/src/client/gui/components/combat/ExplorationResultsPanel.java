@@ -104,7 +104,14 @@ public class ExplorationResultsPanel extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				new UpdatePackage(UpdateInstruction.Skip, "Combat Panel for: " + explorerID).postNetworkEvent(explorerID);
+				if(creatures.size() == 0)
+				{
+					close();
+				}
+				else
+				{
+					new UpdatePackage(UpdateInstruction.Skip, "Combat Panel for: " + explorerID).postNetworkEvent(explorerID);
+				}
 			}});
 		add(done,constraints);
 		
@@ -126,7 +133,7 @@ public class ExplorationResultsPanel extends JPanel
 				it.remove();
 			}
 		}
-		parent.pack();
+		parent.validate();
 	}
 	
 	private void close()

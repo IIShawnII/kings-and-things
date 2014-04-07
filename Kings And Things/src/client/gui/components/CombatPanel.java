@@ -301,6 +301,15 @@ public class CombatPanel extends JPanel
 			}
 			case NO_COMBAT:
 			{
+				if(!isStillInCombat())
+				{
+					JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(this, "Your enemies have been destroyed!", "Victory!", JOptionPane.INFORMATION_MESSAGE);
+				}
+				close();
 				phaseText = "No Combat";
 				break;
 			}
