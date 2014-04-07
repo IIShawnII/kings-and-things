@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -56,6 +57,7 @@ public class CombatPanel extends JPanel
 	private final HashSet<HexState> adjacentPlayerOwnedHexes;
 	private CombatPhase currentPhase;
 	private final JFrame parent;
+	private final AtomicBoolean isClosing = new AtomicBoolean();
 
 	public CombatPanel(HexState hs, Collection<HexState> adjacentPlayerOwnedHexes, Player p, Collection<Player> otherPlayers, CombatPhase currentPhase, Player defendingPlayer, Collection<Integer> playerOrder, JFrame parent)
 	{
@@ -266,22 +268,25 @@ public class CombatPanel extends JPanel
 			}
 			case DETERMINE_DAMAGE:
 			{
-				if(!isStillInCombat())
+				if(isClosing.compareAndSet(false, true))
 				{
-					JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+					if(!isStillInCombat())
+					{
+						JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(this, "Your enemies have been destroyed!", "Victory!", JOptionPane.INFORMATION_MESSAGE);
+						JFrame determineDamageFrame = new JFrame("Determine damage to hex");
+						RollForDamagePanel panel = new RollForDamagePanel(hs, p, determineDamageFrame);
+						panel.init();
+						determineDamageFrame.setContentPane(panel);
+						determineDamageFrame.pack();
+						determineDamageFrame.setLocationRelativeTo(null);
+						determineDamageFrame.setVisible(true);
+					}
+					close();
 				}
-				else
-				{
-					JOptionPane.showMessageDialog(this, "Your enemies have been destroyed!", "Victory!", JOptionPane.INFORMATION_MESSAGE);
-					JFrame determineDamageFrame = new JFrame("Determine damage to hex");
-					RollForDamagePanel panel = new RollForDamagePanel(hs, p, determineDamageFrame);
-					panel.init();
-					determineDamageFrame.setContentPane(panel);
-					determineDamageFrame.pack();
-					determineDamageFrame.setLocationRelativeTo(null);
-					determineDamageFrame.setVisible(true);
-				}
-				close();
 				break;
 			}
 			case DETERMINE_DEFENDERS:
@@ -301,29 +306,35 @@ public class CombatPanel extends JPanel
 			}
 			case NO_COMBAT:
 			{
-				if(!isStillInCombat())
+				if(isClosing.compareAndSet(false, true))
 				{
-					JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+					if(!isStillInCombat())
+					{
+						JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(this, "Your enemies have been destroyed!", "Victory!", JOptionPane.INFORMATION_MESSAGE);
+					}
+					close();
+					phaseText = "No Combat";
 				}
-				else
-				{
-					JOptionPane.showMessageDialog(this, "Your enemies have been destroyed!", "Victory!", JOptionPane.INFORMATION_MESSAGE);
-				}
-				close();
-				phaseText = "No Combat";
 				break;
 			}
 			case PLACE_THINGS:
 			{
-				if(!isStillInCombat())
+				if(isClosing.compareAndSet(false, true))
 				{
-					JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+					if(!isStillInCombat())
+					{
+						JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(this, "Your enemies have been destroyed!", "Victory!", JOptionPane.INFORMATION_MESSAGE);
+					}
+					close();
 				}
-				else
-				{
-					JOptionPane.showMessageDialog(this, "Your enemies have been destroyed!", "Victory!", JOptionPane.INFORMATION_MESSAGE);
-				}
-				close();
 				break;
 			}
 			case RANGED_ATTACK:
@@ -356,8 +367,11 @@ public class CombatPanel extends JPanel
 		}
 		if(!isStillInCombat())
 		{
-			JOptionPane.showMessageDialog(this, isRetreat?"Your cowardice has cost you the battle!":"Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
-			close();
+			if(isClosing.compareAndSet(false, true))
+			{
+				JOptionPane.showMessageDialog(this, isRetreat?"Your cowardice has cost you the battle!":"Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
+				close();
+			}
 		}
 	}
 	
