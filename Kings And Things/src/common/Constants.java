@@ -238,7 +238,14 @@ public final class Constants {
 		}
 		else
 		{
-			return Constants.IMAGES.get(tile.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT);
+			if(tile.isFaceUp() || tile.isSpecialCharacter() || !tile.isCreature())
+			{
+				return Constants.IMAGES.get(tile.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT);
+			}
+			else
+			{
+				return IMAGE_TILE_REVERSE;
+			}
 		}
 		
 		return null;

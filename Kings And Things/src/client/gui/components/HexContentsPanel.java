@@ -15,15 +15,17 @@ public class HexContentsPanel extends JPanel
 {
 	private static final long serialVersionUID = 7410672134640031418L;
 	
-	private HexState model;
+	private final HexState model;
+	private final boolean myHex;
 	
 	/**
 	 * Simple panel for displaying a hex's contents
 	 * @param model The hex to display contents of
 	 */
-	public HexContentsPanel(HexState model)
+	public HexContentsPanel(HexState model, boolean myHex)
 	{
 		this.model = model;
+		this.myHex = myHex;
 		init();
 	}
 	
@@ -33,6 +35,13 @@ public class HexContentsPanel extends JPanel
 		
 		for(ITileProperties tp : model.getThingsInHex())
 		{
+			if(tp.isCreature() && !tp.isSpecialCharacter())
+			{
+				if((myHex && !tp.isFaceUp()) || (!myHex && tp.isFaceUp()))
+				{
+					tp.flip();
+				}
+			}
 			Image tileImage = Constants.getImageForTile(tp);
 			add(new JLabel(new ImageIcon(tileImage)));
 		}

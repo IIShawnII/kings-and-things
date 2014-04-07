@@ -41,6 +41,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
 import client.gui.components.CombatPanel;
+import client.gui.components.HexContentsPanel;
 import client.gui.components.RemoveThingsFromHexPanel;
 import client.gui.components.combat.ExplorationResultsPanel;
 import client.gui.die.DiceRoller;
@@ -1001,10 +1002,11 @@ public class Board extends JPanel implements CanvasParent{
 					tryToRoll( e);
 					break;
 				case ResolveCombat:
-					tryResolveCombat(e);
+					showContextMenu(e,true);
 					break;
 				case NoMove:
 				default:
+					showContextMenu(e,false);
 					return;
 			}
 		}
@@ -1086,7 +1088,7 @@ public class Board extends JPanel implements CanvasParent{
 			}
 		}
 		
-		private void tryResolveCombat(MouseEvent e)
+		private void showContextMenu(MouseEvent e, boolean resolveCombatPermission)
 		{
 			if(SwingUtilities.isRightMouseButton(e))
 			{
@@ -1094,11 +1096,13 @@ public class Board extends JPanel implements CanvasParent{
 				Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
 				if(deepestComponent instanceof Hex)
 				{
-					Hex source = (Hex) deepestComponent;
+					final Hex source = (Hex) deepestComponent;
 					e = SwingUtilities.convertMouseEvent(Board.this, e, source);
 					final ITileProperties hex = source.getState().getHex();
 					JPopupMenu clickMenu = new JPopupMenu("Select Action");
+					
 					JMenuItem initiateCombat = new JMenuItem("Resolve Combat");
+					initiateCombat.setEnabled(resolveCombatPermission);
 					initiateCombat.addActionListener(new ActionListener(){
 						@Override
 						public void actionPerformed(ActionEvent arg0) {
@@ -1106,9 +1110,55 @@ public class Board extends JPanel implements CanvasParent{
 							new UpdatePackage(UpdateInstruction.InitiateCombat, UpdateKey.Hex,hex,"Board " + currentPlayer.getID()).postNetworkEvent(currentPlayer.getID());
 						}});
 					clickMenu.add(initiateCombat);
+					
+					JMenuItem removeThings = new JMenuItem("Remove Things");
+					removeThings.setEnabled(!isSomeoneElsesHex(source.getState()));
+					removeThings.addActionListener(new ActionListener(){
+						@Override
+						public void actionPerformed(ActionEvent arg0)
+						{
+							// TODO let player remove special income counter/heroes in hex
+						}});
+					clickMenu.add(removeThings);
+
+					JMenuItem viewContents = new JMenuItem("See Contents");
+					viewContents.addActionListener(new ActionListener(){
+						@Override
+						public void actionPerformed(ActionEvent arg0)
+						{
+							JFrame frame = new JFrame("Hex Contents");
+							frame.setContentPane(new HexContentsPanel(source.getState(),!isSomeoneElsesHex(source.getState())));
+							frame.pack();
+							frame.setLocationRelativeTo(null);
+							frame.setVisible(true);
+						}});
+					clickMenu.add(viewContents);
+					
+					JMenuItem moveThings = new JMenuItem("Move Things");
+					moveThings.setEnabled(!isSomeoneElsesHex(source.getState()));
+					moveThings.addActionListener(new ActionListener(){
+						@Override
+						public void actionPerformed(ActionEvent arg0)
+						{
+							// TODO let player select which things to move
+						}});
+					clickMenu.add(moveThings);
+					
 					clickMenu.show(source, e.getX(), e.getY());
 				}
 			}
+		}
+		
+		private boolean isSomeoneElsesHex(HexState hs)
+		{
+			for(PlayerInfo pi : players)
+			{
+				if(hs.hasMarkerForPlayer(pi.getID()) && pi.getID() != currentPlayer.getID())
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 		
 		private boolean canMove(){
