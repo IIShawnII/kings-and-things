@@ -111,7 +111,7 @@ public class ConnectionLogic implements Runnable {
 						update.putData( UpdateKey.Phase, phase.getPhase());
 					}else if( phase.isCombatPhase()){
 						CombatPhase cp = (CombatPhase) phase.getPhase();
-						if(cp == CombatPhase.PLACE_THINGS)
+						if(cp == CombatPhase.PLACE_THINGS || cp == CombatPhase.DETERMINE_DEFENDERS)
 						{
 							update.addInstruction(UpdateInstruction.CombatPhase);
 							update.putData(UpdateKey.Phase, cp);

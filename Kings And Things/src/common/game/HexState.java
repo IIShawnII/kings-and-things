@@ -263,7 +263,11 @@ public class HexState implements Serializable{
 		return thingsInHex.add(tile);
 	}
 	
-
+	public boolean addThingToHexForExploration(ITileProperties tile)
+	{
+		validateCanAddThingToExplorationHex(tile);
+		return thingsInHex.add(tile);
+	}
 	
 	/**
 	 * Add something to this hexState ONLY for use in GUI side
@@ -308,6 +312,27 @@ public class HexState implements Serializable{
 		if(tile.isSpecialIncomeCounter() && hasSpecialIncomeCounter())
 		{
 			throw new IllegalArgumentException("Can not add more than one special income counter to a hex");
+		}
+		if(tile.isSpecialIncomeCounter() && tile.getBiomeRestriction() != getHex().getBiomeRestriction())
+		{
+			throw new IllegalArgumentException("The special income counter is not keyed for this terrain type");
+		}
+	}
+	
+	public void validateCanAddThingToExplorationHex(ITileProperties tile)
+	{
+		validateTileNotNull(tile);
+		if(tile.isBuilding() && hasBuilding())
+		{
+			throw new IllegalArgumentException("Can not add more than one building to a hex");
+		}
+		if(tile.isSpecialIncomeCounter() && hasSpecialIncomeCounter())
+		{
+			throw new IllegalArgumentException("Can not add more than one special income counter to a hex");
+		}
+		if(tile.isSpecialIncomeCounter() && tile.getBiomeRestriction() != getHex().getBiomeRestriction())
+		{
+			throw new IllegalArgumentException("The special income counter is not keyed for this terrain type");
 		}
 	}
 	
@@ -463,6 +488,29 @@ public class HexState implements Serializable{
 		}
 		
 		return Collections.unmodifiableSet(returnSet);
+	}
+	
+	public Set<ITileProperties> getFightingThingsInHexNotOwnedByPlayers(Collection<Player> players)
+	{
+		HashSet<ITileProperties> unownedDefenders = new HashSet<>();
+		for(ITileProperties thing : getFightingThingsInHex())
+		{
+			boolean owned = false;
+			for(Player p : players)
+			{
+				if(p.ownsThingOnBoard(thing))
+				{
+					owned = true;
+					break;
+				}
+			}
+			if(!owned)
+			{
+				unownedDefenders.add(thing);
+			}
+		}
+		
+		return Collections.unmodifiableSet(unownedDefenders);
 	}
 	
 	@Override

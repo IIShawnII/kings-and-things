@@ -1,6 +1,7 @@
 package server.logic.game.validators;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import server.logic.game.GameState;
 import common.Constants.Ability;
@@ -57,6 +58,52 @@ public abstract class CombatPhaseValidator
 		}
 	}
 	
+	public static void validateCanBribeDefender(ITileProperties defender, int playerNumber, GameState currentState)
+	{
+		CommandValidator.validateNoPendingRolls(currentState);
+		
+		Set<ITileProperties> explorationDefenders = currentState.getCombatHex().getFightingThingsInHexNotOwnedByPlayers(currentState.getPlayers());
+		HashSet<Player> playersInCombat = currentState.getPlayersStillFightingInCombatHex();
+		if(!playersInCombat.contains(currentState.getPlayerByPlayerNumber(playerNumber)))
+		{
+			throw new IllegalArgumentException("The entered player number is not involved in combat.");
+		}
+		if(explorationDefenders.size()==0)
+		{
+			throw new IllegalArgumentException("There are no exploration defenders to bribe");
+		}
+		if(currentState.getCurrentCombatPhase() != CombatPhase.BRIBE_CREATURES)
+		{
+			throw new IllegalStateException("Can not bribe creatures during the " + currentState.getCurrentCombatPhase() + " phase");
+		}
+		if(!explorationDefenders.contains(defender))
+		{
+			throw new IllegalArgumentException("Can only bribe exploration defenders");
+		}
+		if(!defender.isCreature() && !defender.isBuilding())
+		{
+			throw new IllegalArgumentException("Can only bribe creatures and buildings");
+		}
+		boolean highAmount = false;
+		
+		for(ITileProperties thing : currentState.getCombatHex().getThingsInHex())
+		{
+			if(thing.isTreasure() || thing.isSpecialIncomeCounter() || thing.isMagicItem())
+			{
+				highAmount = true;
+				break;
+			}
+		}
+		
+		int multiplier = highAmount? 2 : 1;
+		int goldAmount = multiplier * defender.getValue();
+		
+		if(currentState.getPlayerByPlayerNumber(playerNumber).getGold() < goldAmount)
+		{
+			throw new IllegalStateException("You don't have enough gold for that");
+		}
+	}
+	
 	public static void validateCanTargetPlayer(int playerNumber, int targetPlayerID, GameState currentState)
 	{
 		CommandValidator.validateNoPendingRolls(currentState);
@@ -104,6 +151,10 @@ public abstract class CombatPhaseValidator
 		{
 			throw new IllegalArgumentException("Can only retreat to a friendly non-combat hex.");
 		}
+		if(playerNumber == currentState.getDefendingPlayerNumber() && currentState.getCombatHex().getFightingThingsInHexNotOwnedByPlayers(currentState.getPlayers()).size()>0)
+		{
+			throw new IllegalArgumentException("Exploration defenders can not retreat");
+		}
 	}
 
 	/**
@@ -132,7 +183,10 @@ public abstract class CombatPhaseValidator
 		}
 		if(!currentState.getPlayerByPlayerNumber(playerNumber).ownsThingOnBoard(thing))
 		{
-			throw new IllegalArgumentException("Can only apply hits to your own things");
+			if(currentState.getDefendingPlayerNumber()!=playerNumber || !currentState.getCombatHex().getFightingThingsInHexNotOwnedByPlayers(currentState.getPlayers()).contains(thing))
+			{
+				throw new IllegalArgumentException("Can only apply hits to your own things");
+			}
 		}
 		int absorbtionValue = thing.hasAbility(Ability.Armor)? thing.getValue() : 1;
 		if(hitCount > absorbtionValue)

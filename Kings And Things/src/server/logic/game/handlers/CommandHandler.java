@@ -9,6 +9,7 @@ import java.util.Set;
 import server.event.DiceRolled;
 import server.event.GameStarted;
 import server.event.PlayerRemovedThingsFromHex;
+import server.event.PlayerWaivedBribe;
 import server.event.PlayerWaivedRetreat;
 import server.event.internal.DoneRollingCommand;
 import server.event.internal.EndPlayerTurnCommand;
@@ -20,6 +21,7 @@ import server.logic.game.RollModification;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
@@ -74,6 +76,10 @@ public abstract class CommandHandler
 				currentState.getCurrentCombatPhase() == CombatPhase.ATTACKER_THREE_RETREAT || currentState.getCurrentCombatPhase() == CombatPhase.DEFENDER_RETREAT)
 		{
 			new PlayerWaivedRetreat().postInternalEvent(playerNumber);
+		}
+		else if(currentState.getCurrentCombatPhase() == CombatPhase.BRIBE_CREATURES)
+		{
+			new PlayerWaivedBribe().postInternalEvent(playerNumber);
 		}
 		else
 		{

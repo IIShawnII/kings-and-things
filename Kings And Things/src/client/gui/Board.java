@@ -693,6 +693,10 @@ public class Board extends JPanel implements CanvasParent{
 			case PLACE_THINGS:
 				jtfStatus.setText( "Place things in combat hex");
 				break;
+			case DETERMINE_DEFENDERS:
+				controller.setPermission(Permissions.Roll);
+				prepareForRollDice(1,RollReason.EXPLORE_HEX, "Roll to explore hex");
+				break;
 			default:
 				break;
 		}

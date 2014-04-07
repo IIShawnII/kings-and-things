@@ -8,8 +8,10 @@ import java.util.Set;
 
 import server.event.DiceRolled;
 import server.event.PlayerRemovedThingsFromHex;
+import server.event.PlayerWaivedBribe;
 import server.event.PlayerWaivedRetreat;
 import server.event.internal.ApplyHitsCommand;
+import server.event.internal.BribeDefenderCommand;
 import server.event.internal.ResolveCombatCommand;
 import server.event.internal.RetreatCommand;
 import server.event.internal.TargetPlayerCommand;
@@ -54,11 +56,17 @@ public class CombatCommandHandler extends CommandHandler
 		CombatPhaseValidator.validateCanResolveCombat(hex,playerNumber,getCurrentState());
 		beginCombatResolution(hex, playerNumber);
 	}
+	
+	public void bribeDefender(ITileProperties defender, int playerNumber)
+	{
+		CombatPhaseValidator.validateCanBribeDefender(defender,playerNumber,getCurrentState());
+		makeDefenderBribed(defender,playerNumber);
+	}
 
 	public void applyHits(ITileProperties thing, int playerNumber, int hitCount)
 	{
 		ITileProperties myVersion = null;
-		for(ITileProperties tp : getCurrentState().getPlayerByPlayerNumber(playerNumber).getOwnedThingsOnBoard())
+		for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
 		{
 			if(tp.equals(thing))
 			{
@@ -103,10 +111,20 @@ public class CombatCommandHandler extends CommandHandler
 			List<Integer> playerOrder = getCurrentState().getPlayerOrder();
 			int attackerIndex = playerOrder.indexOf(playerNumber);
 			int defenderIndex = attackerIndex>0? attackerIndex-1 : playerOrder.size()-1;
-			
-			getCurrentState().setCurrentCombatPhase(CombatPhase.DETERMINE_DEFENDERS);
 			getCurrentState().setDefendingPlayerNumber(playerOrder.get(defenderIndex));
-			getCurrentState().addNeededRoll(new Roll(1,getCurrentState().getCombatHex().getHex(),RollReason.EXPLORE_HEX,playerNumber));
+			
+			if(getCurrentState().getCombatHex().getFightingThingsInHexNotOwnedByPlayers(getCurrentState().getPlayers()).size()>0)
+			{
+				getCurrentState().setCurrentCombatPhase(CombatPhase.BRIBE_CREATURES);
+				advanceOrEnd();
+			}
+			else
+			{
+				getCurrentState().setCurrentCombatPhase(CombatPhase.DETERMINE_DEFENDERS);
+				getCurrentState().addNeededRoll(new Roll(1,getCurrentState().getCombatHex().getHex(),RollReason.EXPLORE_HEX,playerNumber));
+			}
+			
+			new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(playerNumber);
 		}
 		else
 		{
@@ -180,6 +198,41 @@ public class CombatCommandHandler extends CommandHandler
 		}
 	}
 	
+	private void makeDefenderBribed(ITileProperties defender, int playerNumber)
+	{
+		boolean highAmount = false;
+		
+		for(ITileProperties thing : getCurrentState().getCombatHex().getThingsInHex())
+		{
+			if(thing.isTreasure() || thing.isSpecialIncomeCounter() || thing.isMagicItem())
+			{
+				highAmount = true;
+				break;
+			}
+		}
+		
+		int multiplier = highAmount? 2 : 1;
+		int goldAmount = multiplier * defender.getValue();
+		
+		getCurrentState().getPlayerByPlayerNumber(playerNumber).removeGold(goldAmount);
+
+		if(defender.isCreature())
+		{
+			getCurrentState().getCup().reInsertTile(defender);
+			getCurrentState().getCombatHex().removeThingFromHex(defender);
+		}
+		else
+		{
+			defender.setValue(0);
+			defender.flip();
+			//neutralized
+		}
+		if(getCurrentState().getPlayersStillFightingInCombatHex().size() == 1)
+		{
+			givePlayerExplorationHex(playerNumber);
+		}
+	}
+	
 	private void advanceOrEnd()
 	{
 		if(getCurrentState().getPlayersStillFightingInCombatHex().size()>1)
@@ -217,23 +270,45 @@ public class CombatCommandHandler extends CommandHandler
 					}
 				}
 			}
-			if(newOwner != null && !oldOwner.equals(newOwner))
+			if(newOwner != null && !newOwner.equals(oldOwner))
 			{
-				oldOwner.removeHexFromOwnership(getCurrentState().getCombatHex().getHex());
+				if(oldOwner!=null)
+				{
+					oldOwner.removeHexFromOwnership(getCurrentState().getCombatHex().getHex());
+				}
 				newOwner.addOwnedHex(getCurrentState().getCombatHex().getHex());
 				if(getCurrentState().getCombatHex().hasSpecialIncomeCounter())
 				{
-					oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getSpecialIncomeCounter());
+					if(oldOwner!=null)
+					{
+						oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getSpecialIncomeCounter());
+					}
 					newOwner.addOwnedThingOnBoard(getCurrentState().getCombatHex().getSpecialIncomeCounter());
 				}
 				if(getCurrentState().getCombatHex().hasBuilding())
 				{
-					oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
+					if(oldOwner!=null)
+					{
+						oldOwner.removeOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
+					}
 					newOwner.addOwnedThingOnBoard(getCurrentState().getCombatHex().getBuilding());
 					if(getCurrentState().getCombatHex().getBuilding().getName().equals(Building.Citadel.name()))
 					{
 						getCurrentState().addHexToListOfConstructedHexes(getCurrentState().getCombatHex());
 					}
+				}
+				boolean wasExploration = false;
+				for(ITileProperties thing : getCurrentState().getCombatHex().getThingsInHex())
+				{
+					if(!thing.isCreature() || !thing.isSpecialIncomeCounter() || !thing.isBuilding())
+					{
+						wasExploration = true;
+						break;
+					}
+				}
+				if(wasExploration)
+				{
+					givePlayerExplorationHex(newOwner.getID());
 				}
 				getCurrentState().getCombatHex().setMarker(Constants.getPlayerMarker(newOwner.getID()));
 				HexStatesChanged msg = new HexStatesChanged(1);
@@ -293,6 +368,12 @@ public class CombatCommandHandler extends CommandHandler
 	
 	private void playerWaivedRetreat(int playerNumber)
 	{
+		advanceToNextCombatPhase();
+	}
+	
+	private void playerWaivedBribe(int playerNumber)
+	{
+		getCurrentState().setCurrentCombatPhase(CombatPhase.DEFENDER_RETREAT);
 		advanceToNextCombatPhase();
 	}
 
@@ -387,13 +468,23 @@ public class CombatCommandHandler extends CommandHandler
 					(nextPhase == CombatPhase.RANGED_ATTACK && thing.hasAbility(Ability.Range)) ||
 					(nextPhase == CombatPhase.MELEE_ATTACK && (!thing.hasAbility(Ability.Range) && !thing.hasAbility(Ability.Magic))))
 				{
+					boolean owned = false;
 					for(Player p : getCurrentState().getPlayers())
 					{
-						if(p.ownsThingOnBoard(thing) && getCurrentState().getPlayersStillFightingInCombatHex().contains(getCurrentState().getPlayersTarget(p.getID())))
+						if(p.ownsThingOnBoard(thing))
 						{
-							int diceCount = thing.isSpecialCreatureWithAbility(Ability.Charge)? 2 : 1;
-							getCurrentState().addNeededRoll(new Roll(diceCount,thing,RollReason.ATTACK_WITH_CREATURE,p.getID()));
+							owned = true;
+							if(getCurrentState().getPlayersStillFightingInCombatHex().contains(getCurrentState().getPlayersTarget(p.getID())))
+							{
+								int diceCount = thing.isSpecialCreatureWithAbility(Ability.Charge)? 2 : 1;
+								getCurrentState().addNeededRoll(new Roll(diceCount,thing,RollReason.ATTACK_WITH_CREATURE,p.getID()));
+							}
 						}
+					}
+					if(!owned)
+					{
+						int diceCount = thing.isSpecialCreatureWithAbility(Ability.Charge)? 2 : 1;
+						getCurrentState().addNeededRoll(new Roll(diceCount,thing,RollReason.ATTACK_WITH_CREATURE,getCurrentState().getDefendingPlayerNumber()));
 					}
 				}
 			}
@@ -424,7 +515,10 @@ public class CombatCommandHandler extends CommandHandler
 				advanceToNextCombatPhaseHelper();
 			}
 		}
-		else if((nextPhase == CombatPhase.DEFENDER_RETREAT && !getCurrentState().getPlayersStillFightingInCombatHex().contains(getCurrentState().getDefendingPlayer())) || nextPhase == CombatPhase.DETERMINE_DAMAGE)
+		else if((nextPhase == CombatPhase.DEFENDER_RETREAT && 
+					(!getCurrentState().getPlayersStillFightingInCombatHex().contains(getCurrentState().getDefendingPlayer()) || 
+					getCurrentState().getCombatHex().getFightingThingsInHexNotOwnedByPlayers(getCurrentState().getPlayers()).size()>0)) 
+				|| nextPhase == CombatPhase.DETERMINE_DAMAGE)
 		{
 			getCurrentState().clearAllPlayerTargets();
 			if(needToChooseTargets(getCurrentState().getCombatHex().getHex()))
@@ -565,7 +659,7 @@ public class CombatCommandHandler extends CommandHandler
 				case EXPLORE_HEX:
 				{
 					handledRolls.add(r);
-					int roll_value = r.getFinalRolls().get(0);
+					int roll_value = r.getFinalTotal();
 					
 					if(roll_value == 1 || roll_value == 6) {
 						//give hex to player
@@ -573,13 +667,13 @@ public class CombatCommandHandler extends CommandHandler
 						getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
 						new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 					} else {
-						List<ITileProperties> listOfDefenders = new ArrayList<>(roll_value);
+						List<ITileProperties> listOfThings = new ArrayList<>(roll_value);
 						List<ITileProperties> listOfSpecialIncomeCounters = new ArrayList<>();
 						ITileProperties nextTile;
 						for (int i = 0; i < roll_value; i++) {
 							nextTile = getCurrentState().getCup().drawTile();
 							if (nextTile.isSpecialIncomeCounter()) {
-								if (!nextTile.isBuilding() || nextTile.getBiomeRestriction() != getCurrentState().getCombatHex().getHex().getBiomeRestriction()) {
+								if (!nextTile.isBuilding() && nextTile.getBiomeRestriction() != getCurrentState().getCombatHex().getHex().getBiomeRestriction()) {
 									// returns special income counter to the cup
 									getCurrentState().getCup().reInsertTile(nextTile);
 								} else {
@@ -591,24 +685,36 @@ public class CombatCommandHandler extends CommandHandler
 								// returns random event to the cup immediately
 								getCurrentState().getCup().reInsertTile(nextTile);
 							} else {
-								listOfDefenders.add(nextTile);
+								listOfThings.add(nextTile);
 							}
 						}
-						ITileProperties lowestIncomeValue;
-						for (int j = 0; j < listOfSpecialIncomeCounters.size(); j++) {
-							/*TODO Check which special income counters to remove*/
+						ITileProperties highestValueCounter = null;
+						for(ITileProperties thing : listOfSpecialIncomeCounters)
+						{
+							if(highestValueCounter == null || highestValueCounter.getValue() < thing.getValue())
+							{
+								highestValueCounter = thing;
+							}
+						}
+						listOfSpecialIncomeCounters.remove(highestValueCounter);
+						for(ITileProperties thing : listOfSpecialIncomeCounters)
+						{
+							getCurrentState().getCup().reInsertTile(thing);
 						}
 						
+						if(highestValueCounter!=null)
+						{
+							getCurrentState().getCombatHex().addThingToHexForExploration(highestValueCounter);
+						}
 						boolean defendingCreaturesExist = false;
 						
-						for (ITileProperties thing : listOfDefenders) {
+						for (ITileProperties thing : listOfThings) {
 							if (thing.isCreature()) {
 								defendingCreaturesExist = true;
 							}
-							getCurrentState().getCombatHex().addThingToHex(thing);
+							getCurrentState().getCombatHex().addThingToHexForExploration(thing);
 						}
 						
-						// code for existing defending creatures, cities, or villages
 						if (defendingCreaturesExist) {
 							int rollingPlayerIndex = -1;
 							for (int i = 0; i < getCurrentState().getPlayers().size(); i++) {
@@ -623,6 +729,13 @@ public class CombatCommandHandler extends CommandHandler
 							} else {
 								getCurrentState().setDefendingPlayerNumber(getCurrentState().getPlayerOrder().get(rollingPlayerIndex-1));
 							}
+							
+							getCurrentState().setCurrentCombatPhase(CombatPhase.BRIBE_CREATURES);
+							new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(r.getRollingPlayerID());
+						}
+						else
+						{
+							givePlayerExplorationHex(r.getRollingPlayerID());
 						}
 					}
 					break;
@@ -671,6 +784,30 @@ public class CombatCommandHandler extends CommandHandler
 		}
 	}
 	
+	private void givePlayerExplorationHex(int playerID)
+	{
+		ArrayList<ITileProperties> thingsToRemove = new ArrayList<>();
+		for(ITileProperties thing : getCurrentState().getCombatHex().getThingsInHex())
+		{
+			if(!thing.isCreature() && !thing.isBuilding() && !thing.isSpecialIncomeCounter())
+			{
+				getCurrentState().getPlayerByPlayerNumber(playerID).addThingToTrayOrHand(thing);
+				thingsToRemove.add(thing);
+			}
+			else if(thing.isBuilding() || thing.isSpecialIncomeCounter())
+			{
+				getCurrentState().getPlayerByPlayerNumber(playerID).addOwnedThingOnBoard(thing);
+			}
+		}
+		for(ITileProperties thing : thingsToRemove)
+		{
+			getCurrentState().getCombatHex().removeThingFromHex(thing);
+		}
+		
+		makeHexOwnedByPlayer(getCurrentState().getCombatHex().getHex(),playerID);
+		getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
+	}
+	
 	@Subscribe
 	public void playerRemovedThingsFromBoard(PlayerRemovedThingsFromHex event)
 	{
@@ -696,6 +833,22 @@ public class CombatCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process PlayerWaivedRetreat due to: ", t);
+			}
+		}
+	}
+
+	@Subscribe
+	public void receivePlayerWaivedBribe(PlayerWaivedBribe event)
+	{
+		if(event.isUnhandled())
+		{
+			try
+			{
+				playerWaivedBribe(event.getID());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process PlayerWaivedBribe due to: ", t);
 			}
 		}
 	}
@@ -764,6 +917,23 @@ public class CombatCommandHandler extends CommandHandler
 		}
 	}
 
+	@Subscribe
+	public void receiveBribeDefenderCommand(BribeDefenderCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				bribeDefender(command.getDefender(), command.getID());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process BribeDefenderCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			}
+		}
+	}
+	
 	@Subscribe
 	public void receiveResolveCombatCommand(ResolveCombatCommand command)
 	{

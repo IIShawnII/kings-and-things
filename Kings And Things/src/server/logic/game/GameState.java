@@ -326,6 +326,10 @@ public class GameState implements Serializable
 				}
 			}
 		}
+		if(getCombatHex().getFightingThingsInHexNotOwnedByPlayers(players).size()>0)
+		{
+			fightingPlayers.add(getDefendingPlayer());
+		}
 		return fightingPlayers;
 	}
 
