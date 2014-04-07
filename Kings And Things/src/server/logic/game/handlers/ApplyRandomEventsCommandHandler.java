@@ -13,6 +13,7 @@ import common.Constants.Biome;
 import common.Constants.BuildableBuilding;
 import common.Constants.RandomEvent;
 import common.Constants.RollReason;
+import common.Constants.UpdateInstruction;
 import common.Logger;
 import common.event.network.CommandRejected;
 import common.game.HexState;
@@ -236,7 +237,7 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 			applyRoll();
 		} catch (Throwable t) {
 			Logger.getErrorLogger().error("Unable to apply random event due to: ",t);
-			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.NeedRoll).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 		}
 	}
 	
@@ -246,7 +247,7 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 			applyRandomEventEffect(randomEvent.getEventOfPlayer(), randomEvent.getTargetOfEvent(), randomEvent.getID());
 		} catch (Throwable t) {
 			Logger.getErrorLogger().error("Unable to apply random event due to: ",t);
-			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 		}
 	}
 }

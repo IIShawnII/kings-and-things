@@ -113,7 +113,7 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 		catch(Throwable t)
 		{
 			Logger.getErrorLogger().error("Unable to process ModifyRollForSpecialCharacter due to: ", t);
-			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 		}
 	}
 }

@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 import server.event.PlayerUpdated;
 import server.event.internal.ApplyHitsCommand;
+import server.event.internal.BribeDefenderCommand;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.ExchangeThingsCommand;
 import server.event.internal.RemoveThingsFromHexCommand;
@@ -132,6 +133,9 @@ public class PlayerConnection implements Runnable{
 						break;
 					case ApplyHit:
 						new ApplyHitsCommand(1, (ITileProperties) event.getData(UpdateKey.ThingArray)).postInternalEvent(ID);
+						break;
+					case BribeCreature:
+						new BribeDefenderCommand(((ITileProperties[])event.getData(UpdateKey.ThingArray))[0]).postInternalEvent(ID);
 						break;
 					case Retreat:
 						new RetreatCommand((ITileProperties) event.getData(UpdateKey.Hex)).postInternalEvent(ID);

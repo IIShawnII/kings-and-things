@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -36,6 +37,7 @@ import common.event.UpdatePackage;
 import common.event.network.CurrentPhase;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
+import common.game.ITileProperties;
 import common.game.Player;
 
 public class CombatPanel extends JPanel
@@ -62,6 +64,10 @@ public class CombatPanel extends JPanel
 		parent.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.hs = hs;
 		this.currentPhase = currentPhase;
+		HashSet<Player> allPlayers = new HashSet<>();
+		allPlayers.add(p);
+		allPlayers.addAll(otherPlayers);
+		Set<ITileProperties> explorationDefenders = hs.getFightingThingsInHexNotOwnedByPlayers(allPlayers);
 		this.adjacentPlayerOwnedHexes = new HashSet<>(adjacentPlayerOwnedHexes.size());
 		for(HexState adjacentHs : adjacentPlayerOwnedHexes)
 		{
@@ -78,14 +84,30 @@ public class CombatPanel extends JPanel
 		
 		setLayout(new GridBagLayout());
 		playerPanel = new ActiveCombatArmyPanel(p.getName(), p.getID(), "No one");
-		playerPanel.init(hs.getFightingThingsInHexOwnedByPlayer(p));
+		if(p.getID() == defendingPlayer.getID() && explorationDefenders.size()>0)
+		{
+			playerPanel.init(explorationDefenders);
+		}
+		else
+		{
+			playerPanel.init(hs.getFightingThingsInHexOwnedByPlayer(p));
+		}
 		
 		otherArmies = new ArrayList<>(otherPlayers.size());
 		for(Player otherPlayer : otherPlayers)
 		{
 			allPlayersInCombat.add(otherPlayer);
 			InactiveCombatArmyPanel otherPanel = new InactiveCombatArmyPanel(otherPlayer.getName(),otherPlayer.getID(),"No one");
-			otherPanel.init(hs.getFightingThingsInHexOwnedByPlayer(otherPlayer));
+
+			if(otherPlayer.getID() == defendingPlayer.getID() && explorationDefenders.size()>0)
+			{
+				otherPanel.init(explorationDefenders);
+			}
+			else
+			{
+				otherPanel.init(hs.getFightingThingsInHexOwnedByPlayer(otherPlayer));
+			}
+			
 			otherArmies.add(otherPanel);
 		}
 		scrollPane = new JScrollPane();
@@ -244,7 +266,7 @@ public class CombatPanel extends JPanel
 			}
 			case DETERMINE_DAMAGE:
 			{
-				if(hs.getFightingThingsInHexOwnedByPlayer(p).size()==0)
+				if(!isStillInCombat())
 				{
 					JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
 				}
@@ -284,7 +306,7 @@ public class CombatPanel extends JPanel
 			}
 			case PLACE_THINGS:
 			{
-				if(hs.getFightingThingsInHexOwnedByPlayer(p).size()==0)
+				if(!isStillInCombat())
 				{
 					JOptionPane.showMessageDialog(this, "Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
 				}
@@ -305,6 +327,11 @@ public class CombatPanel extends JPanel
 				phaseText = "Select Target Player";
 				break;
 			}
+			case BRIBE_CREATURES:
+			{
+				phaseText = "Select Creatures to Bribe";
+				break;
+			}
 		}
 		combatPhaseLabel.setText(phaseText);
 	}
@@ -313,17 +340,21 @@ public class CombatPanel extends JPanel
 	{
 		hs = hex;
 		playerPanel.removeThingsNotInList(hex.getFightingThingsInHex(), isRetreat);
-		boolean closing = hex.getFightingThingsInHexOwnedByPlayer(p).size()==0;
 		
 		for(AbstractCombatArmyPanel p : otherArmies)
 		{
 			p.removeThingsNotInList(hex.getFightingThingsInHex(), isRetreat);
 		}
-		if(closing)
+		if(!isStillInCombat())
 		{
 			JOptionPane.showMessageDialog(this, isRetreat?"Your cowardice has cost you the battle!":"Your rag tag army has been destroyed!", "Defeat!", JOptionPane.INFORMATION_MESSAGE);
 			close();
 		}
+	}
+	
+	private boolean isStillInCombat()
+	{
+		return hs.getFightingThingsInHexOwnedByPlayer(p).size()>0 || (p.getID() == defendingPlayer.getID() && hs.getFightingThingsInHexNotOwnedByPlayers(allPlayersInCombat).size()>0);
 	}
 	
 	private void close()

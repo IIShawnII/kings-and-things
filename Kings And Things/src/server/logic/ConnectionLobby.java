@@ -179,7 +179,7 @@ public class ConnectionLobby implements Runnable {
 				catch (ClassNotFoundException | IOException e)
 				{
 					Logger.getErrorLogger().error("Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: ", e);
-					new CommandRejected(null, null, null, "Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: " + e).postNetworkEvent(Constants.ALL_PLAYERS_ID);
+					new CommandRejected(null, null, null, "Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: " + e,null).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 				}
 			}
 			else

@@ -38,7 +38,12 @@ public class DiceRoller extends JPanel implements Parent{
 	}
 	
 	public List<Integer> getResults(){
-		return Ints.asList( results);
+		int[] cleanedResults = new int[dieCount];
+		for(int i=0; i<dieCount; i++)
+		{
+			cleanedResults[i] = results[i];
+		}
+		return Ints.asList( cleanedResults);
 	}
 	
 	public void setResult( List< Integer> results){

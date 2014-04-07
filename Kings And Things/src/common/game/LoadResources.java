@@ -49,7 +49,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		try {
 			update.addInstruction( UpdateInstruction.Category);
 			Files.walkFileTree( RESOURCES_DIRECTORY, this);
-			update.clearDate();
+			update.clearData();
 			update.putData( UpdateKey.Category, Category.END);
 			update.postInternalEvent( Constants.PROGRESS);
 		} catch ( IOException e) {
@@ -79,7 +79,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 
 	@Override
 	public FileVisitResult visitFile( Path file, BasicFileAttributes attrs) throws IOException {
-		update.clearDate();
+		update.clearData();
 		if( currentCategory!=null && currentCategory!=Category.Resources  && currentCategory!=Category.Misc){
 			TileProperties tile = createTile( file.getFileName().toString());
 			switch( currentCategory){

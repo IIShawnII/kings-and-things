@@ -64,7 +64,7 @@ public class MovementCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process MoveThingsCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

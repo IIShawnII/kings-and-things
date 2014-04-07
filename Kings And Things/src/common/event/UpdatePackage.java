@@ -77,7 +77,7 @@ public class UpdatePackage extends AbstractEvent implements Serializable {
 		return data.size()>=1;
 	}
 	
-	public void clearDate(){
+	public void clearData(){
 		data.clear();
 	}
 	
@@ -86,7 +86,7 @@ public class UpdatePackage extends AbstractEvent implements Serializable {
 	}
 	
 	public void clear(){
-		clearDate();
+		clearData();
 		clearInstruction();
 	}
 

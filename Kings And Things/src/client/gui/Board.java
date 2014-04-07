@@ -42,6 +42,7 @@ import javax.swing.SwingUtilities;
 
 import client.gui.components.CombatPanel;
 import client.gui.components.RemoveThingsFromHexPanel;
+import client.gui.components.combat.ExplorationResultsPanel;
 import client.gui.die.DiceRoller;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
@@ -66,6 +67,7 @@ import common.Constants.UpdateKey;
 import common.Logger;
 import common.event.AbstractUpdateReceiver;
 import common.event.UpdatePackage;
+import common.event.network.ExplorationResults;
 import common.event.network.HexNeedsThingsRemoved;
 import common.event.network.InitiateCombat;
 import common.game.HexState;
@@ -149,9 +151,11 @@ public class Board extends JPanel implements CanvasParent{
 	private JTextField jtfStatus;
 	private Controller controller;
 	private RollReason lastRollReason;
+	private ITileProperties lastRollTarget;
 	private MoveAnimation moveAnimation;
 	private ITileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
+	private ITileProperties lastCombatResolvedHex;
 	
 	/**
 	 * basic super constructor warper for JPanel
@@ -466,7 +470,8 @@ public class Board extends JPanel implements CanvasParent{
 					manageRegularPhase( (RegularPhase)update.getData( UpdateKey.Phase));
 					break;
 				case CombatPhase:
-					manageCombatPhase((CombatPhase)update.getData(UpdateKey.Combat));
+					manageCombatPhase((CombatPhase)update.getData(UpdateKey.Phase));
+					break;
 				case DieValue:
 					Roll roll = (Roll)update.getData( UpdateKey.Roll);
 					dice.setResult( roll.getBaseRolls());
@@ -600,6 +605,42 @@ public class Board extends JPanel implements CanvasParent{
 						}
 					}
 					break;
+				case ShowExplorationResults:
+					final ExplorationResults results = (ExplorationResults)update.getData(UpdateKey.Combat);
+
+					while(dice.isRolling())
+					{
+						try
+						{
+							Thread.sleep(100);
+						}
+						catch (InterruptedException e)
+						{
+						}
+					}
+					try
+					{
+						SwingUtilities.invokeAndWait(new Runnable()
+						{
+							@Override
+							public void run() {
+								JFrame resultsDialog = new JFrame("Exploration");
+								JScrollPane scrollPane = new JScrollPane();
+								scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+								scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+									
+								ExplorationResultsPanel panel = new ExplorationResultsPanel(results.getExplorer().getID(),results.getHex(),resultsDialog);
+								panel.init(results.results());
+								scrollPane.setViewportView(panel);
+								resultsDialog.setContentPane(scrollPane);
+								resultsDialog.pack();
+								resultsDialog.setLocationRelativeTo(null);
+								resultsDialog.setVisible(true);
+							}});
+					} catch (Throwable t) {
+						Logger.getErrorLogger().error("Problem processing exploration results command: ", t);
+					}
+					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
 			}
@@ -623,11 +664,12 @@ public class Board extends JPanel implements CanvasParent{
 		}
 	}
 	
-	private void prepareForRollDice( int count, RollReason reason, String message){
+	private void prepareForRollDice( int count, RollReason reason, String message, ITileProperties target){
 		useDice = true;
 		dice.setDiceCount( count);
 		jtfStatus.setText( message);
 		lastRollReason = reason;
+		lastRollTarget = target;
 	}
 	
 	private void manageRejection( UpdateInstruction data, String message) {
@@ -639,7 +681,7 @@ public class Board extends JPanel implements CanvasParent{
 				break;
 			case TieRoll:
 				controller.setPermission( Permissions.Roll);
-				prepareForRollDice(2, lastRollReason, "Tie Roll, Roll again");
+				prepareForRollDice(2, lastRollReason, "Tie Roll, Roll again", lastRollTarget);
 				break;
 			case SeaHexChanged:
 				controller.setPermission( Permissions.ExchangeHex);
@@ -695,7 +737,7 @@ public class Board extends JPanel implements CanvasParent{
 				break;
 			case DETERMINE_DEFENDERS:
 				controller.setPermission(Permissions.Roll);
-				prepareForRollDice(1,RollReason.EXPLORE_HEX, "Roll to explore hex");
+				prepareForRollDice(1,RollReason.EXPLORE_HEX, "Roll to explore hex", lastCombatResolvedHex);
 				break;
 			default:
 				break;
@@ -706,7 +748,7 @@ public class Board extends JPanel implements CanvasParent{
 		switch( phase){
 			case DETERMINE_PLAYER_ORDER:
 				controller.setPermission( Permissions.Roll);
-				prepareForRollDice(2, RollReason.DETERMINE_PLAYER_ORDER, "Roll dice to determine order");
+				prepareForRollDice(2, RollReason.DETERMINE_PLAYER_ORDER, "Roll dice to determine order", null);
 				break;
 			case EXCHANGE_SEA_HEXES:
 				controller.setPermission( Permissions.ExchangeHex);
@@ -1019,7 +1061,7 @@ public class Board extends JPanel implements CanvasParent{
 							jtfStatus.setText( "value must be between " + (dice.getDiceCount()*Constants.MIN_DICE_FACE) + " and " + (dice.getDiceCount()*Constants.MAX_DICE_FACE));
 							return;
 						}
-						Roll roll = new Roll( dice.getDiceCount(), null, lastRollReason, currentPlayer.getID(), rollValue);
+						Roll roll = new Roll( dice.getDiceCount(), lastRollTarget, lastRollReason, currentPlayer.getID(), rollValue);
 						new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
 						dice.roll();
 						new Thread( new Runnable() {
@@ -1031,7 +1073,10 @@ public class Board extends JPanel implements CanvasParent{
 									} catch ( InterruptedException e) {}
 								}
 								jtfStatus.setText( "Done Rolling: " + dice.getResults());
-								new UpdatePackage( UpdateInstruction.DoneRolling, "Board.Input").postNetworkEvent( currentPlayer.getID());
+								if(lastRollReason != RollReason.EXPLORE_HEX)
+								{
+									new UpdatePackage( UpdateInstruction.DoneRolling, "Board.Input").postNetworkEvent( currentPlayer.getID());
+								}
 							}
 						}, "Dice Wait").start();
 					}else{
@@ -1045,7 +1090,6 @@ public class Board extends JPanel implements CanvasParent{
 		{
 			if(SwingUtilities.isRightMouseButton(e))
 			{
-
 				e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
 				Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
 				if(deepestComponent instanceof Hex)
@@ -1058,6 +1102,7 @@ public class Board extends JPanel implements CanvasParent{
 					initiateCombat.addActionListener(new ActionListener(){
 						@Override
 						public void actionPerformed(ActionEvent arg0) {
+							lastCombatResolvedHex = hex;
 							new UpdatePackage(UpdateInstruction.InitiateCombat, UpdateKey.Hex,hex,"Board " + currentPlayer.getID()).postNetworkEvent(currentPlayer.getID());
 						}});
 					clickMenu.add(initiateCombat);

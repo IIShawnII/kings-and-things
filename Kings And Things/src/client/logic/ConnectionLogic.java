@@ -14,6 +14,7 @@ import common.event.AbstractEvent;
 import common.event.UpdatePackage;
 import common.event.AbstractUpdateReceiver;
 import common.event.network.CombatHits;
+import common.event.network.ExplorationResults;
 import common.event.network.Flip;
 import common.event.network.DieRoll;
 import common.event.network.HexNeedsThingsRemoved;
@@ -165,19 +166,23 @@ public class ConnectionLogic implements Runnable {
 				else if( event instanceof CommandRejected){
 					UpdateInstruction instruction = ((CommandRejected)event).getInstruction(); 
 					if(instruction==null){
-						return;
+						Logger.getErrorLogger().fatal("Recieved command rejected event with no instructions!");
 					}
-					update.addInstruction( UpdateInstruction.Rejected);
-					switch( instruction){
-						case SeaHexChanged:
-							update.putData(UpdateKey.Message, ((CommandRejected)event).getErrorMessage());
-						case TieRoll:
-						case HexOwnership:
-						case Skip:
-							update.putData(UpdateKey.Instruction, instruction);
-							break;
-						default:
-							throw new IllegalStateException("Logic.Receive " + (player!=null?player.getID():"-1") + ": No Support for rejection: " + instruction);
+					else
+					{
+						update.addInstruction( UpdateInstruction.Rejected);
+						switch( instruction){
+							case SeaHexChanged:
+								update.putData(UpdateKey.Message, ((CommandRejected)event).getErrorMessage());
+							case TieRoll:
+							case HexOwnership:
+							case Skip:
+								update.putData(UpdateKey.Instruction, instruction);
+								break;
+							default:
+								Logger.getErrorLogger().fatal("Logic.Receive " + (player!=null?player.getID():"-1") + ": No Support for rejection: " + instruction);
+								break;
+						}
 					}
 				}
 				else if(event instanceof InitiateCombat)
@@ -194,6 +199,14 @@ public class ConnectionLogic implements Runnable {
 					if(handle)
 					{
 						update.addInstruction(UpdateInstruction.InitiateCombat);
+						update.putData(UpdateKey.Combat, event);
+					}
+				}
+				else if(event instanceof ExplorationResults)
+				{
+					if(((ExplorationResults)event).getExplorer().getID() == player.getID())
+					{
+						update.addInstruction(UpdateInstruction.ShowExplorationResults);
 						update.putData(UpdateKey.Combat, event);
 					}
 				}

@@ -450,7 +450,7 @@ public abstract class CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process DoneRollingCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.DoneRolling).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -474,7 +474,7 @@ public abstract class CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process RemoveThingFromHexCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.RemoveThingsFromHex).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -509,7 +509,7 @@ public abstract class CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process RollDieCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.NeedRoll).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

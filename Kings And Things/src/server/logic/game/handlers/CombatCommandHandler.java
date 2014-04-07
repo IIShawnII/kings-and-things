@@ -27,14 +27,17 @@ import common.Constants.BuildableBuilding;
 import common.Constants.Building;
 import common.Constants.CombatPhase;
 import common.Constants.RollReason;
+import common.Constants.UpdateInstruction;
 import common.Logger;
 import common.event.network.CombatHits;
 import common.event.network.CommandRejected;
 import common.event.network.CurrentPhase;
+import common.event.network.ExplorationResults;
 import common.event.network.HexNeedsThingsRemoved;
 import common.event.network.HexStatesChanged;
 import common.event.network.InitiateCombat;
 import common.event.network.PlayerTargetChanged;
+import common.event.network.PlayersList;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -115,8 +118,9 @@ public class CombatCommandHandler extends CommandHandler
 			
 			if(getCurrentState().getCombatHex().getFightingThingsInHexNotOwnedByPlayers(getCurrentState().getPlayers()).size()>0)
 			{
-				getCurrentState().setCurrentCombatPhase(CombatPhase.BRIBE_CREATURES);
+				getCurrentState().setCurrentCombatPhase(CombatPhase.DEFENDER_RETREAT);
 				advanceOrEnd();
+				new InitiateCombat(getCurrentState().getCombatHex(), getCurrentState().getPlayersStillFightingInCombatHex(), getCurrentState().getDefendingPlayerNumber(), getCurrentState().getPlayerOrder(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 			}
 			else
 			{
@@ -142,13 +146,8 @@ public class CombatCommandHandler extends CommandHandler
 				autoDetermineTargets();
 				advanceToNextCombatPhase();
 			}
-			int playerIDMask = 0;
-			for(Player p : getCurrentState().getPlayersStillFightingInCombatHex())
-			{
-				playerIDMask |= p.getPlayerInfo().getID();
-			}
 			
-			new InitiateCombat(getCurrentState().getCombatHex(), getCurrentState().getPlayersStillFightingInCombatHex(), getCurrentState().getDefendingPlayerNumber(), getCurrentState().getPlayerOrder(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(playerIDMask);
+			new InitiateCombat(getCurrentState().getCombatHex(), getCurrentState().getPlayersStillFightingInCombatHex(), getCurrentState().getDefendingPlayerNumber(), getCurrentState().getPlayerOrder(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		}
 	}
 
@@ -231,6 +230,11 @@ public class CombatCommandHandler extends CommandHandler
 		{
 			givePlayerExplorationHex(playerNumber);
 		}
+		
+		new PlayersList(getCurrentState().getPlayers()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
+		HexStatesChanged msg = new HexStatesChanged(1);
+		msg.getArray()[0] = getCurrentState().getCombatHex();
+		msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
 	}
 	
 	private void advanceOrEnd()
@@ -322,25 +326,32 @@ public class CombatCommandHandler extends CommandHandler
 				msg.getArray()[0] = getCurrentState().getCombatHex();
 				msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
 			}
-			if(getCurrentState().getCombatHex().hasSpecialIncomeCounter())
+			if(oldOwner==null && newOwner==null)
 			{
-				getCurrentState().addNeededRoll(new Roll(1,getCurrentState().getCombatHex().getSpecialIncomeCounter(),RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
-			}
-			if(getCurrentState().getCombatHex().hasBuilding())
-			{
-				ITileProperties building = getCurrentState().getCombatHex().getBuilding();
-				if(!building.getName().equals(Building.Citadel.name()))
-				{
-					getCurrentState().addNeededRoll(new Roll(1,building,RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
-				}
-			}
-			if(getCurrentState().isWaitingForRolls())
-			{
-				getCurrentState().setCurrentCombatPhase(CombatPhase.DETERMINE_DAMAGE);
+				getCurrentState().setCurrentCombatPhase(CombatPhase.NO_COMBAT);
 			}
 			else
 			{
-				getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
+				if(getCurrentState().getCombatHex().hasSpecialIncomeCounter())
+				{
+					getCurrentState().addNeededRoll(new Roll(1,getCurrentState().getCombatHex().getSpecialIncomeCounter(),RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
+				}
+				if(getCurrentState().getCombatHex().hasBuilding())
+				{
+					ITileProperties building = getCurrentState().getCombatHex().getBuilding();
+					if(!building.getName().equals(Building.Citadel.name()))
+					{
+						getCurrentState().addNeededRoll(new Roll(1,building,RollReason.CALCULATE_DAMAGE_TO_TILE,newOwner==null? oldOwner.getID() : newOwner.getID()));
+					}
+				}
+				if(getCurrentState().isWaitingForRolls())
+				{
+					getCurrentState().setCurrentCombatPhase(CombatPhase.DETERMINE_DAMAGE);
+				}
+				else
+				{
+					getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
+				}
 			}
 			new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		}
@@ -375,6 +386,7 @@ public class CombatCommandHandler extends CommandHandler
 	{
 		getCurrentState().setCurrentCombatPhase(CombatPhase.DEFENDER_RETREAT);
 		advanceToNextCombatPhase();
+		new InitiateCombat(getCurrentState().getCombatHex(), getCurrentState().getPlayersStillFightingInCombatHex(), getCurrentState().getDefendingPlayerNumber(), getCurrentState().getPlayerOrder(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 	}
 
 	private void retreatFromHex(int playerNumber, ITileProperties destinationHex)
@@ -714,6 +726,14 @@ public class CombatCommandHandler extends CommandHandler
 							}
 							getCurrentState().getCombatHex().addThingToHexForExploration(thing);
 						}
+
+						if(listOfThings.size()>0)
+						{
+							new ExplorationResults(getCurrentState().getCombatHex(), getCurrentState().getPlayerByPlayerNumber(r.getRollingPlayerID())).postNetworkEvent(Constants.ALL_PLAYERS_ID);
+						}
+						HexStatesChanged msg = new HexStatesChanged(1);
+						msg.getArray()[0] = getCurrentState().getCombatHex();
+						msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
 						
 						if (defendingCreaturesExist) {
 							int rollingPlayerIndex = -1;
@@ -878,7 +898,7 @@ public class CombatCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process RetreatCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.Retreat).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -895,7 +915,7 @@ public class CombatCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process TargetPlayerCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.TargetPlayer).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -912,7 +932,7 @@ public class CombatCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ApplyHitsCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.ApplyHit).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -929,7 +949,7 @@ public class CombatCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process BribeDefenderCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.BribeCreature).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -946,7 +966,7 @@ public class CombatCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ResolveCombatCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.InitiateCombat).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

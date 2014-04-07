@@ -231,7 +231,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ExchangeThingsCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -254,7 +254,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process PlaceThingOnBoardCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -273,7 +273,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process RecruitThingsCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -293,7 +293,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process DiscardThingsCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage()).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

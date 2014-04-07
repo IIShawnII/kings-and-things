@@ -1,7 +1,12 @@
 package common.event.network;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import common.event.AbstractNetwrokEvent;
 import common.game.HexState;
+import common.game.ITileProperties;
 import common.game.Player;
 
 public class ExplorationResults extends AbstractNetwrokEvent
@@ -24,5 +29,19 @@ public class ExplorationResults extends AbstractNetwrokEvent
 	public Player getExplorer()
 	{
 		return explorer;
+	}
+	
+	public Set<ITileProperties> results()
+	{
+		HashSet<ITileProperties> things = new HashSet<>();
+		for(ITileProperties thing : hex.getThingsInHex())
+		{
+			if(!explorer.ownsThingOnBoard(thing))
+			{
+				things.add(thing);
+			}
+		}
+		
+		return Collections.unmodifiableSet(things);
 	}
 }

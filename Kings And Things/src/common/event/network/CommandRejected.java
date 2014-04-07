@@ -25,11 +25,6 @@ public class CommandRejected extends AbstractNetwrokEvent
 		message = msg;
 	}
 	
-	public CommandRejected(RegularPhase regularPhase, SetupPhase setupPhase, PlayerInfo player, String msg)
-	{
-		this( regularPhase, setupPhase, player, msg, null);
-	}
-	
 	public CommandRejected(RegularPhase regularPhase, SetupPhase setupPhase, PlayerInfo player, UpdateInstruction instruction)
 	{
 		this( regularPhase, setupPhase, player, null, instruction);
