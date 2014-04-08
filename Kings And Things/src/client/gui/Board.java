@@ -180,9 +180,9 @@ public class Board extends JPanel implements CanvasParent{
 
 	public void setActive( boolean active) {
 		this.isActive = active;
-		if( !active){
+		/*if( !active){
 			controller.setPermission( Permissions.NoMove);
-		}
+		}*/
 	}
 	
 	/**
@@ -691,6 +691,10 @@ public class Board extends JPanel implements CanvasParent{
 	
 	private void manageRejection( UpdateInstruction data, String message) {
 		//TODO Handle More Rejections
+		if(data == null)
+		{
+			return;
+		}
 		switch( data){
 			case Skip:
 				controller.setPermission( Permissions.NoMove);

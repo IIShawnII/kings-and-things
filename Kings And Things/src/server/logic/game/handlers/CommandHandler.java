@@ -11,6 +11,7 @@ import server.event.GameStarted;
 import server.event.PlayerRemovedThingsFromHex;
 import server.event.PlayerWaivedBribe;
 import server.event.PlayerWaivedRetreat;
+import server.event.internal.CallBluffCommand;
 import server.event.internal.DoneRollingCommand;
 import server.event.internal.EndPlayerTurnCommand;
 import server.event.internal.RemoveThingsFromHexCommand;
@@ -21,8 +22,8 @@ import server.logic.game.RollModification;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants;
+import common.Constants.Biome;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;
@@ -35,7 +36,8 @@ import common.event.network.CurrentPhase;
 import common.event.network.DieRoll;
 import common.event.network.Flip;
 import common.event.network.HexOwnershipChanged;
-import common.event.network.PlayerState;
+import common.event.network.HexStatesChanged;
+import common.event.network.PlayersList;
 import common.event.network.RackPlacement;
 import common.game.HexState;
 import common.game.ITileProperties;
@@ -114,6 +116,12 @@ public abstract class CommandHandler
 		{
 			new PlayerRemovedThingsFromHex(hex, thingsToRemove).postInternalEvent(playerNumber);
 		}
+	}
+	
+	public void callBluff(int playerNumber, ITileProperties creature)
+	{
+		CommandValidator.validateCanCallBluff(playerNumber, creature, currentState);
+		makeBluffCalled(playerNumber, creature);
 	}
 
 	protected final GameState getCurrentState()
@@ -337,9 +345,8 @@ public abstract class CommandHandler
 					}
 					
 					tray.postNetworkEvent(p.getID());
-					new PlayerState(p.getPlayerInfo()).postNetworkEvent(p.getID());
 				}
-				//TODO send full player list?
+				new PlayersList(currentState.getPlayers()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 				break;
 			}
 			case SETUP_FINISHED:
@@ -349,6 +356,72 @@ public abstract class CommandHandler
 			}
 			default:
 				break;
+		}
+	}
+	
+	protected boolean isCreatureSupported(ITileProperties creature)
+	{
+		Player owner = null;
+		for(Player p : getCurrentState().getPlayers())
+		{
+			if(p.ownsThingOnBoard(creature))
+			{
+				owner = p;
+				break;
+			}
+		}
+		
+		Biome r = creature.getBiomeRestriction();
+		HexState containingHex = null;
+
+		for(ITileProperties hex : owner.getOwnedHexes())
+		{
+			if(hex.getBiomeRestriction() == r)
+			{
+				return true;
+			}
+		}
+		for(HexState hs : getCurrentState().getBoard().getHexesAsList())
+		{
+			if(hs.getThingsInHexOwnedByPlayer(owner).contains(creature))
+			{
+				containingHex = hs;
+			}
+		}
+		String necessaryLordName = Constants.getTerrainLordNameForBiome(r);
+		for(ITileProperties thing : containingHex.getThingsInHexOwnedByPlayer(owner))
+		{
+			if(thing.getName().equals(necessaryLordName))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private void makeBluffCalled(int playerNumber, ITileProperties creature)
+	{
+		if(!isCreatureSupported(creature))
+		{
+			for(Player p : getCurrentState().getPlayers())
+			{
+				if(p.ownsThingOnBoard(creature))
+				{
+					for(HexState hs : getCurrentState().getBoard().getHexesAsList())
+					{
+						if(hs.getThingsInHexOwnedByPlayer(p).contains(creature))
+						{
+							p.removeOwnedThingOnBoard(creature);
+							hs.removeThingFromHex(creature);
+							HexStatesChanged msg = new HexStatesChanged(1);
+							msg.getArray()[0] = hs;
+							msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
+						}
+					}
+					getCurrentState().getCup().reInsertTile(creature);
+				}
+			}
 		}
 	}
 
@@ -521,6 +594,23 @@ public abstract class CommandHandler
 			{
 				Logger.getErrorLogger().error("Unable to process RollDieCommand due to: ", t);
 				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.NeedRoll).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			}
+		}
+	}
+
+	@Subscribe
+	public void receiveCallBluffCommand(CallBluffCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				callBluff(command.getID(), command.getCreature());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process CallBluffCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.CallBluff).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

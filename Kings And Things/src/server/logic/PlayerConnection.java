@@ -7,6 +7,7 @@ import java.util.HashSet;
 import server.event.PlayerUpdated;
 import server.event.internal.ApplyHitsCommand;
 import server.event.internal.BribeDefenderCommand;
+import server.event.internal.CallBluffCommand;
 import server.event.internal.ConstructBuildingCommand;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.ExchangeThingsCommand;
@@ -160,6 +161,10 @@ public class PlayerConnection implements Runnable{
 						BuildableBuilding toBuild = (BuildableBuilding) event.getData(UpdateKey.Tile);
 						ITileProperties hex = (ITileProperties) event.getData(UpdateKey.Hex);
 						new ConstructBuildingCommand(toBuild,hex).postInternalEvent(ID);
+						break;
+					case CallBluff:
+						ITileProperties thing = (ITileProperties) event.getData(UpdateKey.ThingArray);
+						new CallBluffCommand(thing).postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());

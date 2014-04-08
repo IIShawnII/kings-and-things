@@ -10,7 +10,9 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import client.gui.components.TileButton;
-
+import common.Constants.UpdateInstruction;
+import common.Constants.UpdateKey;
+import common.event.UpdatePackage;
 import common.game.ITileProperties;
 
 public class InactiveCombatArmyPanel extends AbstractCombatArmyPanel
@@ -70,7 +72,7 @@ public class InactiveCombatArmyPanel extends AbstractCombatArmyPanel
 				@Override
 				public void actionPerformed(ActionEvent e)
 				{
-					// TODO Send call bluff command to server
+					new UpdatePackage(UpdateInstruction.CallBluff, UpdateKey.ThingArray, tile, "Inactive combat army panel for Player: " + getPlayerName()).postNetworkEvent(getPlayerID());
 				}});
 			mainArmyPanel.add(button,constraints);
 			

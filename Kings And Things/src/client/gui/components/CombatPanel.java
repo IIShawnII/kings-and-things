@@ -373,6 +373,7 @@ public class CombatPanel extends JPanel
 				close();
 			}
 		}
+		validate();
 	}
 	
 	private boolean isStillInCombat()

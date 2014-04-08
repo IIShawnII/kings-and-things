@@ -37,7 +37,7 @@ public final class Constants {
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea, Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray, None}
 	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers, Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase,
 		NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState, Special, Rejected, InitiateCombat, TargetPlayer, ThingChanged, 
-		ApplyHit, Retreat, RemoveThingsFromHex, HexStatesChanged, BribeCreature, ShowExplorationResults, MoveThings, RackChanged, ConstructBuilding}
+		ApplyHit, Retreat, RemoveThingsFromHex, HexStatesChanged, BribeCreature, ShowExplorationResults, MoveThings, RackChanged, ConstructBuilding, CallBluff}
 	
 	//Regular turn phases
 	public enum RegularPhase {RECRUITING_CHARACTERS, RECRUITING_THINGS, RANDOM_EVENTS, MOVEMENT, COMBAT, CONSTRUCTION, SPECIAL_POWERS}
@@ -415,6 +415,45 @@ public final class Constants {
 				{
 					return null;
 				}
+			}
+		}
+	}
+	
+	public static String getTerrainLordNameForBiome(Biome b)
+	{
+		switch(b)
+		{
+			case Desert:
+			{
+				return "Desert_Master";
+			}
+			case Forest:
+			{
+				return "Forest_King";
+			}
+			case Frozen_Waste:
+			{
+				return "Ice_Lord";
+			}
+			case Jungle:
+			{
+				return "Jungle_Lord";
+			}
+			case Mountain:
+			{
+				return "Mountain_King";
+			}
+			case Plains:
+			{
+				return "Plains_Lord";
+			}
+			case Swamp:
+			{
+				return "Swamp_King";
+			}
+			default:
+			{
+				return "";
 			}
 		}
 	}

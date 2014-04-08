@@ -5,6 +5,7 @@ import java.util.Set;
 
 import server.logic.game.GameState;
 import common.Constants;
+import common.Constants.Biome;
 import common.Constants.Building;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
@@ -48,6 +49,30 @@ public abstract class CommandValidator
 			if(!roll.getRollTarget().isSpecialCharacter())
 			{
 				throw new IllegalArgumentException("Must specify a special character to roll for");
+			}
+			
+			boolean isTerrainLord = false;
+			for(Biome b : Biome.values())
+			{
+				if(Constants.getTerrainLordNameForBiome(b).equals(roll.getRollTarget().getName()))
+				{
+					isTerrainLord = true;
+					break;
+				}
+			}
+			
+			if(isTerrainLord)
+			{
+				for(ITileProperties thing: currentState.getPlayerByPlayerNumber(roll.getRollingPlayerID()).getOwnedThingsOnBoard())
+				{
+					for(Biome b : Biome.values())
+					{
+						if(Constants.getTerrainLordNameForBiome(b).equals(thing.getName()))
+						{
+							throw new IllegalStateException("Can not recruit more than one terrain lord at a time");
+						}
+					}
+				}
 			}
 		}
 		if(!rollNeeded && roll.getRollReason() != RollReason.ENTERTAINMENT && roll.getRollReason() != RollReason.RECRUIT_SPECIAL_CHARACTER)
@@ -144,6 +169,38 @@ public abstract class CommandValidator
 			}
 			default:
 				break;
+		}
+	}
+	
+	public static void validateCanCallBluff(int playerNumber, ITileProperties creature, GameState currentState)
+	{
+		if(!creature.isFaceUp())
+		{
+			throw new IllegalStateException("Can not call bluff on face down creatures");
+		}
+		if(!creature.isCreature())
+		{
+			throw new IllegalStateException("Can only call bluff on creature tiles");
+		}
+		boolean owned = false;
+		for(Player p : currentState.getPlayers())
+		{
+			if(p.ownsThingOnBoard(creature))
+			{
+				owned = true;
+			}
+			if(p.ownsThingInTray(creature) || p.ownsThingInHand(creature))
+			{
+				throw new IllegalStateException("Can only call bluff on creatures on the board");
+			}
+		}
+		if(!owned)
+		{
+			throw new IllegalStateException("Can not call bluff on exploration defenders");
+		}
+		if(creature.isSpecialCharacter())
+		{
+			throw new IllegalArgumentException("Can not call bluff on heroes");
 		}
 	}
 	

@@ -688,6 +688,9 @@ public class CombatCommandHandler extends CommandHandler
 						getCurrentState().getCombatHex().getBuilding().flip();
 						getCurrentState().getCombatHex().getBuilding().resetValue();
 					}
+					HexStatesChanged msg = new HexStatesChanged(1);
+					msg.getArray()[0] = getCurrentState().getCombatHex();
+					msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
 					break;
 				}
 				case EXPLORE_HEX:
