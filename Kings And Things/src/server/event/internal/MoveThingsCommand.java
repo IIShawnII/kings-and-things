@@ -1,6 +1,7 @@
 package server.event.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -14,8 +15,7 @@ public class MoveThingsCommand extends AbstractInternalEvent{
 	private final Set<ITileProperties> things;
 	private final List<ITileProperties> hexes;
 	
-	public MoveThingsCommand(Set<ITileProperties> things, List<ITileProperties> hexes){
-		super();
+	public MoveThingsCommand(Collection<ITileProperties> things, Collection<ITileProperties> hexes){
 		this.things = new HashSet<ITileProperties>(things);
 		this.hexes = new ArrayList<ITileProperties>(hexes);
 	}

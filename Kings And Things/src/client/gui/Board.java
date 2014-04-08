@@ -26,7 +26,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -36,13 +39,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
 import client.gui.components.CombatPanel;
 import client.gui.components.HexContentsPanel;
+import client.gui.components.ISelectionListener;
 import client.gui.components.RemoveThingsFromHexPanel;
+import client.gui.components.SelectThingsForMovementPanel;
 import client.gui.components.combat.ExplorationResultsPanel;
 import client.gui.die.DiceRoller;
 import client.gui.tiles.Hex;
@@ -157,6 +163,8 @@ public class Board extends JPanel implements CanvasParent{
 	private ITileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
 	private ITileProperties lastCombatResolvedHex;
+	private final HashSet<ITileProperties> lastMovementSelection;
+	private final LinkedHashSet<ITileProperties> hexMovementSelection;
 	
 	/**
 	 * basic super constructor warper for JPanel
@@ -164,6 +172,8 @@ public class Board extends JPanel implements CanvasParent{
 	public Board( boolean demo){
 		super( null, true);
 		this.demo = demo;
+		lastMovementSelection = new HashSet<>();
+		hexMovementSelection = new LinkedHashSet<>();
 	}
 
 	public void setActive( boolean active) {
@@ -1134,15 +1144,56 @@ public class Board extends JPanel implements CanvasParent{
 						}});
 					clickMenu.add(viewContents);
 					
-					JMenuItem moveThings = new JMenuItem("Move Things");
+					//put move stuff in own section
+					clickMenu.add(new JSeparator());
+					
+					JMenuItem moveThings = new JMenuItem("Start Movement");
 					moveThings.setEnabled(!isSomeoneElsesHex(source.getState()));
 					moveThings.addActionListener(new ActionListener(){
 						@Override
 						public void actionPerformed(ActionEvent arg0)
 						{
-							// TODO let player select which things to move
+							hexMovementSelection.clear();
+							hexMovementSelection.add(source.getState().getHex());
+							JFrame movementSelector = new JFrame("Movement");
+							movementSelector.setContentPane(new SelectThingsForMovementPanel(movementSelector,source.getState().getCreaturesInHex(),new ISelectionListener<ITileProperties>(){
+								@Override
+								public void selectionChanged(Collection<ITileProperties> newSelection)
+								{
+									lastMovementSelection.clear();
+									lastMovementSelection.addAll(newSelection);
+									jtfStatus.setText("Select Hexes To Move Through");
+								}}));
+							movementSelector.pack();
+							movementSelector.setLocationRelativeTo(null);
+							movementSelector.setVisible(true);
 						}});
 					clickMenu.add(moveThings);
+					
+					JMenuItem addMoveHex = new JMenuItem("Add to Movement Path");
+					addMoveHex.setEnabled(lastMovementSelection.size()>0);
+					addMoveHex.addActionListener(new ActionListener(){
+						@Override
+						public void actionPerformed(ActionEvent arg0)
+						{
+							hexMovementSelection.add(source.getState().getHex());
+						}});
+					clickMenu.add(addMoveHex);
+
+					JMenuItem finishMoveHex = new JMenuItem("Finish Movement Here");
+					finishMoveHex.setEnabled(lastMovementSelection.size()>0);
+					finishMoveHex.addActionListener(new ActionListener(){
+						@Override
+						public void actionPerformed(ActionEvent arg0)
+						{
+							hexMovementSelection.add(source.getState().getHex());
+							UpdatePackage msg = new UpdatePackage(UpdateInstruction.MoveThings, UpdateKey.Hex, new ArrayList<>(hexMovementSelection), "Board " + currentPlayer);
+							msg.putData(UpdateKey.ThingArray, new ArrayList<>(lastMovementSelection));
+							msg.postNetworkEvent(currentPlayer.getID());
+							hexMovementSelection.clear();
+							lastMovementSelection.clear();
+						}});
+					clickMenu.add(finishMoveHex);
 					
 					clickMenu.show(source, e.getX(), e.getY());
 				}

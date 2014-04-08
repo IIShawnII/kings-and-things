@@ -8,6 +8,7 @@ import server.logic.game.validators.MovementValidator;
 
 import com.google.common.eventbus.Subscribe;
 
+import common.Constants;
 import common.Logger;
 import common.event.network.CommandRejected;
 import common.event.network.HexStatesChanged;
@@ -45,6 +46,11 @@ public class MovementCommandHandler extends CommandHandler
 			firstHex.removeThingFromHex(thing);
 			lastHex.addThingToHex(thing);
 		}
+		
+		HexStatesChanged notification = new HexStatesChanged(2);
+		notification.getArray()[0] = firstHex;
+		notification.getArray()[1] = lastHex;
+		notification.postNetworkEvent(Constants.ALL_PLAYERS_ID);
 	}
 
 	@Subscribe

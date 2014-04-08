@@ -65,21 +65,26 @@ public abstract class MovementValidator
 		
 		boolean seaHexesExist = false;
 		
-		boolean hexNotOwned = true;
+		boolean notOwnedHexesExist = false;
 		
 		for (int i = 1; i < Hexes.size(); i++) {
 			ITileProperties hex = Hexes.get(i);
 			
 			if (i < Hexes.size() - 1) {
+				boolean hexNotOwned = true;
 				nextHex = currentState.getBoard().getHexStateForHex(Hexes.get(i));
 				pathOfHexes.add(nextHex);
 				for (Player p : currentState.getPlayers()) {
 					if (p.ownsHex(hex)) {
 						hexNotOwned = false;
 					}
+					if(p.getID() != playerNumber && nextHex.getFightingThingsInHexOwnedByPlayer(p).size()>0)
+					{
+						throw new IllegalArgumentException("Can not move through hexes with enemy counters with combat values");
+					}
 				}
 				if (hexNotOwned) {
-					throw new IllegalArgumentException("Can't move through unexplored hexes");
+					notOwnedHexesExist = true;
 				}
 			}
 			
@@ -107,6 +112,9 @@ public abstract class MovementValidator
 			}
 			if (!creature.isSpecialCreatureWithAbility(Ability.Fly) && seaHexesExist) {
 				throw new IllegalArgumentException("Can't move through sea hexes");
+			}
+			if (!creature.isSpecialCreatureWithAbility(Ability.Fly) && notOwnedHexesExist) {
+				throw new IllegalArgumentException("Can't move through unexplored hexes");
 			}
 			if(!firstHex.getThingsInHex().contains(creature))
 			{

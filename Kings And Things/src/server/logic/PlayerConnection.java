@@ -9,6 +9,7 @@ import server.event.internal.ApplyHitsCommand;
 import server.event.internal.BribeDefenderCommand;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.ExchangeThingsCommand;
+import server.event.internal.MoveThingsCommand;
 import server.event.internal.RemoveThingsFromHexCommand;
 import server.event.internal.ResolveCombatCommand;
 import server.event.internal.RetreatCommand;
@@ -147,6 +148,11 @@ public class PlayerConnection implements Runnable{
 							thingsToRemove.add(thing);
 						}
 						new RemoveThingsFromHexCommand((ITileProperties) event.getData(UpdateKey.Hex), thingsToRemove).postInternalEvent(ID);
+						break;
+					case MoveThings:
+						Collection<ITileProperties> hexes = (Collection<ITileProperties>) event.getData(UpdateKey.Hex);
+						Collection<ITileProperties> things = (Collection<ITileProperties>) event.getData(UpdateKey.ThingArray);
+						new MoveThingsCommand(things, hexes).postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
