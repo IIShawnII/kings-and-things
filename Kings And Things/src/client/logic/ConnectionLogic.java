@@ -21,6 +21,7 @@ import common.event.network.HexNeedsThingsRemoved;
 import common.event.network.HexStatesChanged;
 import common.event.network.InitiateCombat;
 import common.event.network.PlayerTargetChanged;
+import common.event.network.RackPlacement;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
@@ -236,6 +237,11 @@ public class ConnectionLogic implements Runnable {
 						}
 					}
 				}
+				else if(event instanceof RackPlacement)
+				{
+					update.addInstruction(UpdateInstruction.RackChanged);
+					update.putData(UpdateKey.Rack, ((RackPlacement)event).getArray());
+				}
 				else {
 					Logger.getStandardLogger().warn( "\tNO Handel for: " + event);
 					throw new IllegalStateException("NO handle for: " + event);
@@ -243,9 +249,6 @@ public class ConnectionLogic implements Runnable {
 				/*
 				else if( event instanceof PlayerOrderList){
 					new BoardUpdate(((PlayerOrderList)event).getList(), this).postInternalEvent(BOARD|player.getID());
-				}
-				else if( event instanceof RackPlacement){
-					new BoardUpdate(((RackPlacement)event).getArray(), this).postInternalEvent(BOARD|player.getID());
 				}
 				else if(event instanceof HexStatesChanged){
 					

@@ -120,6 +120,13 @@ public class CombatCommandHandler extends CommandHandler
 			{
 				getCurrentState().setCurrentCombatPhase(CombatPhase.DEFENDER_RETREAT);
 				advanceOrEnd();
+				for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+				{
+					if(!tp.isFaceUp() && !tp.isSpecialCharacter())
+					{
+						tp.flip();
+					}
+				}
 				new InitiateCombat(getCurrentState().getCombatHex(), getCurrentState().getPlayersStillFightingInCombatHex(), getCurrentState().getDefendingPlayerNumber(), getCurrentState().getPlayerOrder(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
 			}
 			else
@@ -134,7 +141,7 @@ public class CombatCommandHandler extends CommandHandler
 		{
 			for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
 			{
-				if(!tp.isFaceUp())
+				if(!tp.isFaceUp() && !tp.isSpecialCharacter())
 				{
 					tp.flip();
 				}
@@ -393,6 +400,14 @@ public class CombatCommandHandler extends CommandHandler
 	{
 		getCurrentState().setCurrentCombatPhase(CombatPhase.DEFENDER_RETREAT);
 		advanceToNextCombatPhase();
+
+		for(ITileProperties tp : getCurrentState().getCombatHex().getFightingThingsInHex())
+		{
+			if(!tp.isFaceUp() && !tp.isSpecialCharacter())
+			{
+				tp.flip();
+			}
+		}
 		new InitiateCombat(getCurrentState().getCombatHex(), getCurrentState().getPlayersStillFightingInCombatHex(), getCurrentState().getDefendingPlayerNumber(), getCurrentState().getPlayerOrder(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(getCurrentState().getPlayersInCombatIDMask());
 	}
 

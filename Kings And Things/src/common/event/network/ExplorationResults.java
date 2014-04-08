@@ -38,6 +38,10 @@ public class ExplorationResults extends AbstractNetwrokEvent
 		{
 			if(!explorer.ownsThingOnBoard(thing))
 			{
+				if(!thing.isFaceUp())
+				{
+					thing.flip();
+				}
 				things.add(thing);
 			}
 		}

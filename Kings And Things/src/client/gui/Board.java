@@ -334,6 +334,7 @@ public class Board extends JPanel implements CanvasParent{
 			bound.translate( -TILE_X_SHIFT, 0);
 			//set final destination for tile to be animated later
 			tile.setDestination( bound.x+TILE_SIZE.width/2, bound.y+TILE_SIZE.height/2);
+			tile.flip();
 			list[count] = tile;
 		}
 		return list;
@@ -651,6 +652,9 @@ public class Board extends JPanel implements CanvasParent{
 					} catch (Throwable t) {
 						Logger.getErrorLogger().error("Problem processing exploration results command: ", t);
 					}
+					break;
+				case RackChanged:
+					animateRackPlacement((ITileProperties[])update.getData(UpdateKey.Rack));
 					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
