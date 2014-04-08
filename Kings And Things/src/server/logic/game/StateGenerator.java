@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import server.logic.exceptions.NoMoreTilesException;
-
 import common.Constants;
+import common.Constants.BuildableBuilding;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
@@ -22,12 +22,12 @@ import common.game.PlayerInfo;
 
 public class StateGenerator
 {
-	public enum GeneratorType{EXPLORATION, MOVEMENT}
+	public enum GeneratorType{EXPLORATION, MOVEMENT, CONSTRUCTION}
 	
 	private final String fileName;
 	private final boolean isLoadOperation;
 	private final GameState generatedState;
-	private final GeneratorType type = GeneratorType.MOVEMENT;
+	private final GeneratorType type = GeneratorType.CONSTRUCTION;
 	
 	public StateGenerator(String fileName, boolean load) throws ClassNotFoundException, FileNotFoundException, IOException
 	{
@@ -59,6 +59,8 @@ public class StateGenerator
 				return generateExplorationState();
 			case MOVEMENT:
 				return generateMovementState();
+			case CONSTRUCTION:
+				return generateConstructionState();
 		}
 		
 		return null;
@@ -71,7 +73,80 @@ public class StateGenerator
 			return (GameState) ois.readObject();
 		}
 	}
-	
+
+	private GameState generateConstructionState() throws IOException
+	{
+		Player p1 = new Player(new PlayerInfo("Erik",Constants.PLAYER_1_ID,true));
+		Player p2 = new Player(new PlayerInfo("Archit",Constants.PLAYER_2_ID,true));
+		Player p3 = new Player(new PlayerInfo("Shariar",Constants.PLAYER_3_ID,true));
+		Player p4 = new Player(new PlayerInfo("Nadra",Constants.PLAYER_4_ID,true));
+		
+		HashSet<Player> players = new HashSet<Player>();
+		players.add(p1);
+		players.add(p2);
+		players.add(p3);
+		players.add(p4);
+		
+		ArrayList<Integer> playerOrder = new ArrayList<>();
+		playerOrder.add(p1.getID());
+		playerOrder.add(p2.getID());
+		playerOrder.add(p3.getID());
+		playerOrder.add(p4.getID());
+		GameState state = new GameState(true, players, playerOrder, SetupPhase.EXCHANGE_SEA_HEXES, RegularPhase.RECRUITING_CHARACTERS, p1.getID(), p1.getID(),
+				CombatPhase.NO_COMBAT, Constants.PUBLIC, null);
+		
+		p1.addOwnedHex(state.getBoard().getHexByXY(1, 2).getHex());
+		p1.addOwnedHex(state.getBoard().getHexByXY(3, 6).getHex());
+		p1.addOwnedHex(state.getBoard().getHexByXY(2, 5).getHex());
+		p1.addOwnedHex(state.getBoard().getHexByXY(2, 7).getHex());
+		p1.addOwnedHex(state.getBoard().getHexByXY(4, 5).getHex());
+		
+		p2.addOwnedHex(state.getBoard().getHexByXY(5, 2).getHex());
+		p3.addOwnedHex(state.getBoard().getHexByXY(1, 10).getHex());
+		p4.addOwnedHex(state.getBoard().getHexByXY(5, 10).getHex());
+		
+		p1.addGold(50);
+		
+		ITileProperties tower1 = BuildableBuildingGenerator.createBuildingTileForType(BuildableBuilding.Tower);
+		ITileProperties tower2 = BuildableBuildingGenerator.createBuildingTileForType(BuildableBuilding.Tower);
+		ITileProperties keep = BuildableBuildingGenerator.createBuildingTileForType(BuildableBuilding.Keep);
+		ITileProperties castle = BuildableBuildingGenerator.createBuildingTileForType(BuildableBuilding.Castle);
+		ITileProperties citadel = BuildableBuildingGenerator.createBuildingTileForType(BuildableBuilding.Citadel);
+			
+		state.getBoard().getHexByXY(1, 2).addThingToHex(tower1);
+		state.getBoard().getHexByXY(3, 6).addThingToHex(tower2);
+		state.getBoard().getHexByXY(2, 5).addThingToHex(keep);
+		state.getBoard().getHexByXY(2, 7).addThingToHex(castle);
+		state.getBoard().getHexByXY(4, 5).addThingToHex(citadel);
+			
+		p1.addOwnedThingOnBoard(tower1);
+		p1.addOwnedThingOnBoard(tower2);
+		p1.addOwnedThingOnBoard(keep);
+		p1.addOwnedThingOnBoard(castle);
+		p1.addOwnedThingOnBoard(citadel);
+			
+		state.setCurrentSetupPhase(SetupPhase.SETUP_FINISHED);
+		state.setCurrentRegularPhase(RegularPhase.CONSTRUCTION);
+		state.setActivePhasePlayer(p1.getID());
+		state.setActiveTurnPlayer(p1.getID());
+		
+		for(Player p : players)
+		{
+			for(ITileProperties tp : p.getOwnedHexes())
+			{
+				state.getBoard().getHexStateForHex(tp).setMarker(Constants.getPlayerMarker( p.getID()));
+			}
+		}
+		
+		try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
+		{
+			os.writeObject(state);
+			os.flush();
+			
+			return state;
+		}
+	}
+
 	private GameState generateExplorationState() throws IOException
 	{
 		Player p1 = new Player(new PlayerInfo("Erik",Constants.PLAYER_1_ID,true));

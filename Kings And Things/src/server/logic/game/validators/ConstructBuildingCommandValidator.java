@@ -91,7 +91,11 @@ public abstract class ConstructBuildingCommandValidator
 					throw new IllegalArgumentException("Can't build citadel unless you have a castle");
 				}
 				break;
-			default:
+			case Tower:
+				if(hexState.getBuilding() != null)
+				{
+					throw new IllegalArgumentException("Can only build towers in hexes with no buildings");
+				}
 				break;
 			}
 			

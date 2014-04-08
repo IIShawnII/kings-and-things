@@ -7,6 +7,7 @@ import java.util.HashSet;
 import server.event.PlayerUpdated;
 import server.event.internal.ApplyHitsCommand;
 import server.event.internal.BribeDefenderCommand;
+import server.event.internal.ConstructBuildingCommand;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.ExchangeThingsCommand;
 import server.event.internal.MoveThingsCommand;
@@ -21,6 +22,7 @@ import server.event.internal.TargetPlayerCommand;
 
 import com.google.common.eventbus.Subscribe;
 
+import common.Constants.BuildableBuilding;
 import common.Logger;
 import common.network.Connection;
 import common.Constants.UpdateKey;
@@ -153,6 +155,11 @@ public class PlayerConnection implements Runnable{
 						Collection<ITileProperties> hexes = (Collection<ITileProperties>) event.getData(UpdateKey.Hex);
 						Collection<ITileProperties> things = (Collection<ITileProperties>) event.getData(UpdateKey.ThingArray);
 						new MoveThingsCommand(things, hexes).postInternalEvent(ID);
+						break;
+					case ConstructBuilding:
+						BuildableBuilding toBuild = (BuildableBuilding) event.getData(UpdateKey.Tile);
+						ITileProperties hex = (ITileProperties) event.getData(UpdateKey.Hex);
+						new ConstructBuildingCommand(toBuild,hex).postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());

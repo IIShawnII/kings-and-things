@@ -63,6 +63,8 @@ import client.gui.util.undo.UndoManager;
 import client.gui.util.undo.UndoTileMovement;
 import common.Constants;
 import common.Constants.Ability;
+import common.Constants.BuildableBuilding;
+import common.Constants.Building;
 import common.Constants.Category;
 import common.Constants.CombatPhase;
 import common.Constants.Permissions;
@@ -721,6 +723,7 @@ public class Board extends JPanel implements CanvasParent{
 				jtfStatus.setText( "Select combat to resolve, if any");
 				break;
 			case CONSTRUCTION:
+				controller.setPermission(Permissions.MoveTower);
 				jtfStatus.setText( "Construct or upgrade buildings, if any");
 				break;
 			case MOVEMENT:
@@ -1016,11 +1019,14 @@ public class Board extends JPanel implements CanvasParent{
 					tryToRoll( e);
 					break;
 				case ResolveCombat:
-					showContextMenu(e,true);
+					showContextMenu(e,true,false);
+					break;
+				case MoveTower:
+					showContextMenu(e,false,true);
 					break;
 				case NoMove:
 				default:
-					showContextMenu(e,false);
+					showContextMenu(e,false,false);
 					return;
 			}
 		}
@@ -1102,7 +1108,7 @@ public class Board extends JPanel implements CanvasParent{
 			}
 		}
 		
-		private void showContextMenu(MouseEvent e, boolean resolveCombatPermission)
+		private void showContextMenu(MouseEvent e, boolean resolveCombatPermission, boolean upgradeBuildingPermission)
 		{
 			if(SwingUtilities.isRightMouseButton(e))
 			{
@@ -1147,6 +1153,38 @@ public class Board extends JPanel implements CanvasParent{
 							frame.setVisible(true);
 						}});
 					clickMenu.add(viewContents);
+
+					JMenuItem upgradeBuilding = new JMenuItem("Upgrade Building");
+					boolean canUpgrade = upgradeBuildingPermission && !isSomeoneElsesHex(source.getState()) && 
+							source.getState().hasBuilding() && source.getState().getBuilding().isBuildableBuilding() && !source.getState().getBuilding().getName().equals(Building.Citadel.name());
+					upgradeBuilding.setEnabled(canUpgrade);
+					upgradeBuilding.addActionListener(new ActionListener(){
+						@Override
+						public void actionPerformed(ActionEvent arg0)
+						{
+							BuildableBuilding toConstruct = null;
+							BuildableBuilding existing = null;
+							for(BuildableBuilding bb : BuildableBuilding.values())
+							{
+								if(bb.name().equals(source.getState().getBuilding().getName()))
+								{
+									existing = bb;
+									break;
+								}
+							}
+							for(BuildableBuilding bb : BuildableBuilding.values())
+							{
+								if(bb.ordinal() == 1+existing.ordinal())
+								{
+									toConstruct = bb;
+									break;
+								}
+							}
+							UpdatePackage msg = new UpdatePackage(UpdateInstruction.ConstructBuilding, UpdateKey.Hex, source.getState().getHex(), "Board " + currentPlayer.getID());
+							msg.putData(UpdateKey.Tile, toConstruct);
+							msg.postNetworkEvent(currentPlayer.getID());
+						}});
+					clickMenu.add(upgradeBuilding);
 					
 					//put move stuff in own section
 					clickMenu.add(new JSeparator());

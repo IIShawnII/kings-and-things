@@ -8,9 +8,11 @@ import com.google.common.eventbus.Subscribe;
 
 import common.Constants.BuildableBuilding;
 import common.Constants.SetupPhase;
+import common.Constants;
 import common.Logger;
 import common.event.network.CommandRejected;
 import common.event.network.HexStatesChanged;
+import common.event.network.PlayersList;
 import common.game.HexState;
 import common.game.ITileProperties;
 
@@ -43,8 +45,12 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 		getCurrentState().getPlayerByPlayerNumber(playerNumber).addOwnedThingOnBoard(buildingTile);
 		if (getCurrentState().getCurrentSetupPhase() == SetupPhase.SETUP_FINISHED) {
 			getCurrentState().getPlayerByPlayerNumber(playerNumber).removeGold(5);
+			new PlayersList(getCurrentState().getPlayers()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		}
 		getCurrentState().addHexToListOfConstructedHexes(hs);
+		HexStatesChanged msg = new HexStatesChanged(1);
+		msg.getArray()[0] = hs;
+		msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
 	}
 	
 	@Subscribe
