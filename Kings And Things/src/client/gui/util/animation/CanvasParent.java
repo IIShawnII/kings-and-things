@@ -16,5 +16,5 @@ public interface CanvasParent {
 	
 	public Lock getLock( Tile tile);
 	
-	public HexState placeOnHex( Tile tile);
+	public HexState placeTileOnHex( Tile tile);
 }

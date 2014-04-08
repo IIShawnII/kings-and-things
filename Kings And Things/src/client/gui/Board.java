@@ -21,35 +21,14 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
 
-import client.gui.components.CombatPanel;
-import client.gui.components.HexContentsPanel;
-import client.gui.components.ISelectionListener;
-import client.gui.components.RemoveThingsFromHexPanel;
-import client.gui.components.SelectThingsForMovementPanel;
-import client.gui.components.combat.ExplorationResultsPanel;
+import client.logic.Controller;
 import client.gui.die.DiceRoller;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
@@ -58,32 +37,12 @@ import client.gui.util.LockManager.Lock;
 import client.gui.util.animation.CanvasParent;
 import client.gui.util.animation.FlipAll;
 import client.gui.util.animation.MoveAnimation;
-import client.gui.util.undo.Parent;
-import client.gui.util.undo.UndoManager;
-import client.gui.util.undo.UndoTileMovement;
 import common.Constants;
 import common.Constants.Ability;
-import common.Constants.BuildableBuilding;
-import common.Constants.Building;
 import common.Constants.Category;
-import common.Constants.CombatPhase;
-import common.Constants.Permissions;
-import common.Constants.RegularPhase;
-import common.Constants.RollReason;
-import common.Constants.SetupPhase;
-import common.Constants.UpdateInstruction;
-import common.Constants.UpdateKey;
-import common.Logger;
-import common.event.AbstractUpdateReceiver;
-import common.event.UpdatePackage;
-import common.event.network.ExplorationResults;
-import common.event.network.HexNeedsThingsRemoved;
-import common.event.network.InitiateCombat;
 import common.game.HexState;
 import common.game.ITileProperties;
-import common.game.Player;
 import common.game.PlayerInfo;
-import common.game.Roll;
 import common.game.TileProperties;
 
 @SuppressWarnings("serial")
@@ -149,8 +108,6 @@ public class Board extends JPanel implements CanvasParent{
 		g2d.dispose();
 	}
 
-	private final boolean demo;
-	private volatile boolean useDice = false;
 	private volatile boolean isActive = false;
 	private volatile boolean phaseDone = false;
 
@@ -159,30 +116,24 @@ public class Board extends JPanel implements CanvasParent{
 	private LockManager locks;
 	private JTextField jtfStatus;
 	private Controller controller;
-	private RollReason lastRollReason;
-	private ITileProperties lastRollTarget;
 	private MoveAnimation moveAnimation;
 	private ITileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
-	private ITileProperties lastCombatResolvedHex;
-	private final HashSet<ITileProperties> lastMovementSelection;
-	private final LinkedHashSet<ITileProperties> hexMovementSelection;
 	
 	/**
 	 * basic super constructor warper for JPanel
 	 */
-	public Board( boolean demo){
+	public Board( boolean demo, PlayerInfo player){
 		super( null, true);
-		this.demo = demo;
-		lastMovementSelection = new HashSet<>();
-		hexMovementSelection = new LinkedHashSet<>();
+		setCurrentPlayer(player);
+		controller = new Controller( demo, locks, player.getID());
+		addMouseListener( controller);
+		addMouseWheelListener( controller);
+		addMouseMotionListener( controller);
 	}
 
 	public void setActive( boolean active) {
 		this.isActive = active;
-		/*if( !active){
-			controller.setPermission( Permissions.NoMove);
-		}*/
 	}
 	
 	/**
@@ -191,12 +142,7 @@ public class Board extends JPanel implements CanvasParent{
 	 */
 	public void init( int playerCount){
 		moveAnimation = new MoveAnimation( this);
-		
-		controller = new Controller();
-		addMouseListener( controller);
-		addMouseWheelListener( controller);
-		addMouseMotionListener( controller);
-		
+
 		dice = new DiceRoller();
 		dice.setBounds( HEX_BOARD_SIZE.width+DICE_SIZE, getHeight()-(DICE_SIZE*2)-10, DICE_SIZE, DICE_SIZE);
 		dice.init();
@@ -229,7 +175,10 @@ public class Board extends JPanel implements CanvasParent{
 		addTile( new Tile( new TileProperties( Category.Gold)), bound, true);
 		bound.translate( TILE_X_SHIFT, 0);
 		addTile( new Tile( new TileProperties( Category.Cup)), bound, true);
-		new UpdateReceiver();
+	}
+	
+	public void setPlayers( PlayerInfo[] players){
+		this.players = players;
 	}
 	
 	public void setCurrentPlayer( PlayerInfo player){
@@ -371,7 +320,7 @@ public class Board extends JPanel implements CanvasParent{
 	 * animate placement of hex tiles
 	 * @param hexes - list of HexState to populate the hexes on board
 	 */
-	private void animateHexPlacement( HexState[] hexes){
+	public void animateHexPlacement( HexState[] hexes){
 		addTile( new Hex( new HexState()), new Rectangle(8,8,HEX_SIZE.width,HEX_SIZE.height), true);
 		if( !isActive){
 			noneAnimatedPlacement( setupHexesForPlacement( hexes));
@@ -384,7 +333,7 @@ public class Board extends JPanel implements CanvasParent{
 	/**
 	 * animate placement of rack tiles
 	 */
-	private void animateRackPlacement( ITileProperties[] rack){
+	public void animateRackPlacement( ITileProperties[] rack){
 		if( !isActive){
 			noneAnimatedPlacement( setupTilesForRack( rack));
 			phaseDone = true;
@@ -396,7 +345,7 @@ public class Board extends JPanel implements CanvasParent{
 	/**
 	 * Flip all hexes
 	 */
-	private void FlipAllHexes(){
+	public void FlipAllHexes(){
 		if( !isActive){
 			noneAnimtedFlipAll();
 			phaseDone = true;
@@ -406,7 +355,7 @@ public class Board extends JPanel implements CanvasParent{
 	}
 	
 	private boolean firstMarker = true;
-	private void placeMarkers(){
+	public void placeMarkers(){
 		Point point = locks.getPermanentLock( Category.State).getCenter();
 		Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
 		if( firstMarker){
@@ -421,7 +370,7 @@ public class Board extends JPanel implements CanvasParent{
 	
 	private boolean firstTower = true;
 	private ITileProperties tower = null;
-	private void placeTower(){
+	public void placeTower(){
 		Point point = locks.getPermanentLock( Category.Buildable).getCenter();
 		Rectangle bound = new Rectangle( point.x-TILE_SIZE.width/2, point.y-TILE_SIZE.height/2,TILE_SIZE.width,TILE_SIZE.height);
 		if( firstTower){
@@ -438,834 +387,22 @@ public class Board extends JPanel implements CanvasParent{
 		}
 		addTile( new Tile( tower), bound, false).flip();
 	}
-	
-	private class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
-
-		protected UpdateReceiver() {
-			super( INTERNAL, Constants.BOARD, Board.this);
-		}
-
-		@Override
-		protected void handlePrivate( UpdatePackage update) {
-			updateBoard( update);
-		}
-
-		@Override
-		protected boolean verifyPrivate( UpdatePackage update) {
-			return update.isValidID(ID|currentPlayer.getID());
-		}
-	}
-	
-	/**
-	 * update the board with new information, such as
-	 * hex placement, flip all, player order and rack info.
-	 * @param update - event wrapper containing update information
-	 */
-	public void updateBoard( UpdatePackage update){
-		HexState hex = null;
-		for( UpdateInstruction instruction : update.getInstructions()){
-			switch( instruction){
-				case UpdatePlayers:
-					setCurrentPlayer( (PlayerInfo)update.getData( UpdateKey.Player));
-					players = (PlayerInfo[]) update.getData( UpdateKey.Players);
-					repaint();
-					phaseDone = true;
-					break;
-				case Rejected:
-					manageRejection( (UpdateInstruction)update.getData( UpdateKey.Instruction), (String)update.getData( UpdateKey.Message));
-					break;
-				case PlaceBoard:
-					animateHexPlacement( (HexState[]) update.getData( UpdateKey.Hex));
-					break;
-				case SetupPhase:
-					manageSetupPhase( (SetupPhase)update.getData( UpdateKey.Phase));
-					break;
-				case RegularPhase:
-					manageRegularPhase( (RegularPhase)update.getData( UpdateKey.Phase));
-					break;
-				case CombatPhase:
-					manageCombatPhase((CombatPhase)update.getData(UpdateKey.Phase));
-					break;
-				case DieValue:
-					Roll roll = (Roll)update.getData( UpdateKey.Roll);
-					dice.setResult( roll.getBaseRolls());
-					break;
-				case HexOwnership:
-					hex = (HexState)update.getData( UpdateKey.HexState);
-					locks.getLockForHex( hex.getLocation()).getHex().setState( hex);
-					break;
-				case HexStatesChanged:
-					for(HexState hs : (HexState[])update.getData(UpdateKey.HexState))
-					{
-						locks.getLockForHex(hs.getLocation()).getHex().setState(hs);
-					}
-					break;
-				case FlipAll:
-					FlipAllHexes();
-					break;
-				case SeaHexChanged:
-					hex = (HexState)update.getData( UpdateKey.HexState);
-					locks.getLockForHex( hex.getLocation()).getHex().setState( hex);
-					break;
-				case GameState:
-					animateHexPlacement( (HexState[]) update.getData( UpdateKey.Hex));
-					waitForPhase();
-					if( (boolean) update.getData( UpdateKey.Flipped)){
-						FlipAllHexes();
-					}
-					waitForPhase();
-					animateRackPlacement( (ITileProperties[]) update.getData( UpdateKey.Rack));
-					waitForPhase();
-
-					players = (PlayerInfo[]) update.getData( UpdateKey.Players);
-					setCurrentPlayer( (PlayerInfo)update.getData( UpdateKey.Player));
-					
-					SetupPhase currSetupPhase = (SetupPhase) update.getData(UpdateKey.Setup);
-					if(currSetupPhase.ordinal() > SetupPhase.DETERMINE_PLAYER_ORDER.ordinal())
-					{
-						placeMarkers();
-					}
-					if(currSetupPhase.ordinal() >= SetupPhase.PLACE_FREE_TOWER.ordinal())
-					{
-						placeTower();
-					}
-					if(currSetupPhase != SetupPhase.SETUP_FINISHED)
-					{
-						manageSetupPhase(currSetupPhase);
-					}
-					else
-					{
-						manageRegularPhase((RegularPhase) update.getData(UpdateKey.Regular));
-					}
-
-					repaint();
-					break;
-				case InitiateCombat:
-					final InitiateCombat combat = (InitiateCombat) update.getData(UpdateKey.Combat);
-					try {
-						SwingUtilities.invokeAndWait(new Runnable(){
-							@Override
-							public void run() {
-								HashSet<HexState> possibleRetreatHexes = new HashSet<>();
-								for(Point p : combat.getCombatHexState().getAdjacentLocations())
-								{
-									try
-									{
-										Lock l = locks.getLockForHex(p);
-										if(l != null)
-										{
-											if(l.getHex().getState().hasMarkerForPlayer(currentPlayer.getID()))
-											{
-												possibleRetreatHexes.add(l.getHex().getState());
-											}
-										}
-									}
-									catch(IndexOutOfBoundsException e)
-									{
-									}
-								}
-								Player player = null;
-								HashSet<Player> otherPlayers = new HashSet<>();
-								for(Player p : combat.getInvolvedPlayers())
-								{
-									if(p.getID() == currentPlayer.getID())
-									{
-										player = p;
-									}
-									else
-									{
-										otherPlayers.add(p);
-									}
-								}
-								
-								JFrame combatDialog = new JFrame("Combat!");
-								CombatPanel panel = new CombatPanel(combat.getCombatHexState(), possibleRetreatHexes, player, otherPlayers,
-										combat.getCurrentCombatPhase(), combat.getDefendingPlayer(), combat.getPlayerOrder(), combatDialog);
-								panel.init();
-								combatDialog.setContentPane(panel);
-								combatDialog.pack();
-								combatDialog.setLocationRelativeTo(null);
-								combatDialog.setVisible(true);
-							}});
-					} catch (Throwable t) {
-						Logger.getErrorLogger().error("Problem processing combat initiation command: ", t);
-					}
-					break;
-				case RemoveThingsFromHex:
-					final HexNeedsThingsRemoved evt = (HexNeedsThingsRemoved) update.getData(UpdateKey.HexState);
-					if(evt.isFirstNotificationForThisHex())
-					{
-						try
-						{
-							SwingUtilities.invokeAndWait(new Runnable()
-							{
-								@Override
-								public void run() {
-									JFrame removalDialog = new JFrame("Remove things");
-									JScrollPane scrollPane = new JScrollPane();
-									scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-									scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-									
-									RemoveThingsFromHexPanel panel = new RemoveThingsFromHexPanel(evt.getPlayerRemovingThings(), removalDialog, evt.getHex().getHex());
-									panel.init(evt.getHex().getThingsInHexOwnedByPlayer(evt.getPlayerRemovingThings()), evt.getNumToRemove());
-									scrollPane.setViewportView(panel);
-									removalDialog.setContentPane(scrollPane);
-									removalDialog.pack();
-									removalDialog.setLocationRelativeTo(null);
-									removalDialog.setVisible(true);
-								}});
-						} catch (Throwable t) {
-							Logger.getErrorLogger().error("Problem processing remove things from hex command: ", t);
-						}
-					}
-					break;
-				case ShowExplorationResults:
-					final ExplorationResults results = (ExplorationResults)update.getData(UpdateKey.Combat);
-
-					while(dice.isRolling())
-					{
-						try
-						{
-							Thread.sleep(100);
-						}
-						catch (InterruptedException e)
-						{
-						}
-					}
-					try
-					{
-						SwingUtilities.invokeAndWait(new Runnable()
-						{
-							@Override
-							public void run() {
-								JFrame resultsDialog = new JFrame("Exploration");
-								JScrollPane scrollPane = new JScrollPane();
-								scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-								scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-									
-								ExplorationResultsPanel panel = new ExplorationResultsPanel(results.getExplorer().getID(),results.getHex(),resultsDialog);
-								panel.init(results.results());
-								scrollPane.setViewportView(panel);
-								resultsDialog.setContentPane(scrollPane);
-								resultsDialog.pack();
-								resultsDialog.setLocationRelativeTo(null);
-								resultsDialog.setVisible(true);
-							}});
-					} catch (Throwable t) {
-						Logger.getErrorLogger().error("Problem processing exploration results command: ", t);
-					}
-					break;
-				case RackChanged:
-					animateRackPlacement((ITileProperties[])update.getData(UpdateKey.Rack));
-					break;
-				default:
-					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
-			}
-			while( !phaseDone){
-				try {
-					Thread.sleep( 100);
-				} catch ( InterruptedException e) {}
-			}
-		}
-	}
-
-	/**
-	 * used primarily for animation wait time.
-	 * thread sleeps till animation is over.
-	 */
-	private synchronized void waitForPhase(){
-		while( !phaseDone){
-			try {
-				Thread.sleep( 50);
-			} catch ( InterruptedException e) {}
-		}
-	}
-	
-	private void prepareForRollDice( int count, RollReason reason, String message, ITileProperties target){
-		useDice = true;
-		dice.setDiceCount( count);
-		jtfStatus.setText( message);
-		lastRollReason = reason;
-		lastRollTarget = target;
-	}
-	
-	private void manageRejection( UpdateInstruction data, String message) {
-		//TODO Handle More Rejections
-		if(data == null)
-		{
-			return;
-		}
-		switch( data){
-			case Skip:
-				controller.setPermission( Permissions.NoMove);
-				jtfStatus.setText( "Cannot skip this phase");
-				break;
-			case TieRoll:
-				controller.setPermission( Permissions.Roll);
-				prepareForRollDice(2, lastRollReason, "Tie Roll, Roll again", lastRollTarget);
-				break;
-			case SeaHexChanged:
-				controller.setPermission( Permissions.ExchangeHex);
-				JOptionPane.showMessageDialog( this, message, "Rejceted", JOptionPane.ERROR_MESSAGE);
-				jtfStatus.setText( "Sea Hex exchange not possible");
-				controller.undo();
-				break;
-			case HexOwnership:
-				controller.setPermission( Permissions.MoveMarker);
-				jtfStatus.setText( "WARN - cannot own this hex");
-				controller.undo();
-				break;
-			default:
-				throw new IllegalStateException( "No handle for rejection of: " + data);
-		}
-	}
-	
-	private void manageRegularPhase( RegularPhase phase) {
-		switch( phase){
-			case COMBAT:
-				controller.setPermission(Permissions.ResolveCombat);
-				jtfStatus.setText( "Select combat to resolve, if any");
-				break;
-			case CONSTRUCTION:
-				controller.setPermission(Permissions.MoveTower);
-				jtfStatus.setText( "Construct or upgrade buildings, if any");
-				break;
-			case MOVEMENT:
-				jtfStatus.setText( "Move things on board, if any");
-				break;
-			case RANDOM_EVENTS:
-				jtfStatus.setText( "Play random event, if any");
-				break;
-			case RECRUITING_CHARACTERS:
-				jtfStatus.setText( "Select hero to recruit, if any");
-				break;
-			case RECRUITING_THINGS:
-				jtfStatus.setText( "Recruit things");
-				break;
-			case SPECIAL_POWERS:
-				jtfStatus.setText( "Use hero abilities, if any");
-				break;
-			default:
-				break;
-		}
-	}
-	
-	private void manageCombatPhase(CombatPhase phase)
-	{
-		switch(phase)
-		{
-			case PLACE_THINGS:
-				jtfStatus.setText( "Place things in combat hex");
-				break;
-			case DETERMINE_DEFENDERS:
-				controller.setPermission(Permissions.Roll);
-				prepareForRollDice(1,RollReason.EXPLORE_HEX, "Roll to explore hex", lastCombatResolvedHex);
-				break;
-			default:
-				break;
-		}
-	}
-
-	private void manageSetupPhase( SetupPhase phase){
-		switch( phase){
-			case DETERMINE_PLAYER_ORDER:
-				controller.setPermission( Permissions.Roll);
-				prepareForRollDice(2, RollReason.DETERMINE_PLAYER_ORDER, "Roll dice to determine order", null);
-				break;
-			case EXCHANGE_SEA_HEXES:
-				controller.setPermission( Permissions.ExchangeHex);
-				jtfStatus.setText( "Exchange sea hexes, if any");
-				break;
-			case EXCHANGE_THINGS:
-				controller.setPermission( Permissions.ExchangeThing);
-				jtfStatus.setText( "Exchange things, if any");
-				break;
-			case PICK_FIRST_HEX:
-				controller.setPermission( Permissions.MoveMarker);
-				placeMarkers();
-				jtfStatus.setText( "Pick your first Hex");
-				break;
-			case PICK_SECOND_HEX:
-				controller.setPermission( Permissions.MoveMarker);
-				jtfStatus.setText( "Pick your second Hex");
-				break;
-			case PICK_THIRD_HEX:
-				controller.setPermission( Permissions.MoveMarker);
-				jtfStatus.setText( "Pick your third Hex");
-				break;
-			case PLACE_EXCHANGED_THINGS:
-				controller.setPermission( Permissions.MoveFromRack);
-				jtfStatus.setText( "Place exchanged things on board, if any");
-				break;
-			case PLACE_FREE_THINGS:
-				controller.setPermission( Permissions.MoveFromRack);
-				jtfStatus.setText( "Place things on board, if any");
-				break;
-			case PLACE_FREE_TOWER:
-				controller.setPermission( Permissions.MoveTower);
-				placeTower();
-				jtfStatus.setText( "Place one free tower on board");
-				break;
-			case SETUP_FINISHED:
-				controller.setPermission( Permissions.NoMove);
-				jtfStatus.setText( "Setup Phase Complete");
-				break;
-			default:
-				break;
-		}
-	}
 
 	/**
 	 * place any tile on hex, however only battle and markers will be drawn
 	 * current Tile will be removed and added as TileProperties to the Hex
 	 * @param tile - thing to be placed
 	 */
-	private HexState placeTileOnHex( Tile tile) {
+	@Override
+	public HexState placeTileOnHex( Tile tile) {
 		if( tile.isTile() && tile.hasLock() && tile.getLock().canHold( tile) ){
 			return tile.getLock().getHex().getState().addThingToHexGUI( tile.getProperties());
 		}
 		return null;
 	}
 	
-	/**
-	 * input class for mouse, used for like assignment and current testing phases suck as placement
-	 */
-	private class Controller extends MouseAdapter implements ActionListener, Parent{
-
-		private UndoManager undoManger;
-		private Rectangle bound, boardBound;
-		private Lock newLock;
-		private Tile currentTile;
-		private Point lastPoint;
-		private HexState movingState;
-		private Permissions permission;
-		
-		public Controller(){
-			this.undoManger = new UndoManager( this);
-		}
-		
-		public void undo(){
-			undoManger.undo( moveAnimation);
-		}
-		
-		public void setPermission( Permissions permission){
-			this.permission = permission;
-		}
-		
-		/**
-		 * checks to see if movement is still inside the board,
-		 * check to see if a new lock can be placed,	`
-		 * check to see if old lock can be released/
-		 */
-		@Override
-	    public void mouseDragged(MouseEvent e){
-			if( !canMove()){
-				return;
-			}
-			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
-			if( phaseDone && currentTile!=null){
-				boardBound = getBounds();
-				bound = currentTile.getBounds();
-				lastPoint = bound.getLocation();
-				//TODO adjust click to prevent centering all the time
-				bound.x = e.getX()-(bound.width/2);
-				if( !boardBound.contains( bound)){
-					bound.x = lastPoint.x;
-				}
-				bound.y = e.getY()-(bound.height/2);
-				if( !boardBound.contains( bound)){
-					bound.y= lastPoint.y;
-				}
-				if( currentTile.hasLock()){
-					if( locks.canLeaveLock( currentTile, e.getPoint())){
-						currentTile.removeLock();
-						currentTile.setBounds( bound);
-					}
-				}else{
-					switch( permission){
-						case MoveFromCup:
-						case MoveFromRack:
-						case MoveMarker:
-						case MoveTower:
-							newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
-							break;
-						case ExchangeHex:
-						case ExchangeThing:
-							newLock = locks.getDropLock( currentTile);
-							break;
-						default:
-							return;
-					}
-					if( newLock!=null){
-						currentTile.setLockArea( newLock);
-						Point center = newLock.getCenter();
-						bound.setLocation( center.x-(bound.width/2), center.y-(bound.height/2));
-					}
-					currentTile.setBounds( bound);
-				}
-			}
-		}
-		
-		@Override
-		public void mouseReleased( MouseEvent e){
-			if( !canMove()){
-				return;
-			}
-			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
-			//TODO this condition might need to be updated for future phases
-			if(currentTile!=null){
-				if( newLock==null){
-					undo();
-				}else{
-					switch( permission){
-						case MoveMarker:
-							if( newLock.canHold( currentTile)){
-								HexState hex = placeTileOnHex( currentTile);
-								if( hex!=null){
-									undoManger.addUndo( new UndoTileMovement(currentTile, hex));
-									removeCurrentTile();
-									new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( currentPlayer.getID());
-								}
-							}
-							break;
-						case ExchangeThing:
-							break;
-						case ExchangeHex:
-							if( newLock.canTempHold( currentTile)){
-								undoManger.addUndo( new UndoTileMovement(currentTile));
-								removeCurrentTile();
-								new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( currentPlayer.getID());
-							}
-							break;
-						case MoveFromCup:
-							break;
-						case MoveFromRack:
-							break;
-						case MoveTower:
-							break;
-						default:
-							return;
-					}
-				}
-			}
-			prepareForNextMouseRelease();
-		}
-
-		/**
-		 * record initial mouse press for later drag, locking and move
-		 */
-		@Override
-		public void mousePressed( MouseEvent e){
-			if( !canMove()){
-				return;
-			}
-			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
-			Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
-			if( phaseDone && deepestComponent!=null && deepestComponent instanceof Tile){
-				currentTile = (Tile) deepestComponent;
-				if( !checkTilePermission( currentTile)){
-					return;
-				}
-				//move the component to the top, prevents overlapping
-				remove( currentTile);
-				add( currentTile, 0);
-				revalidate();
-				repaint();
-				switch( permission){
-					case MoveMarker:break;//nothing to do
-					case ExchangeHex:break;//nothing to do
-					case ExchangeThing:
-						break;
-					case MoveFromCup:
-						break;
-					case MoveFromRack:
-						break;
-					case MoveTower:
-						break;
-					default:
-						return;
-				}
-				if( currentPlayer!=null){
-					undoManger.addUndo( new UndoTileMovement( currentTile, currentTile.getCenter()));
-				}
-				//code for moving stack, need update
-				/*newLock = currentTile.getLock();
-				movingState = newLock.getHex().getState();
-				if( movingState.hasMarker()){
-					if( movingState.hasThings()){
-						lastPoint = newLock.getCenter();
-						Rectangle bound = new Rectangle( TILE_SIZE);
-						bound.setLocation( lastPoint.x-(TILE_SIZE.width/2), lastPoint.y-(TILE_SIZE.height/2));
-						currentTile = addTile( new Tile( playerMarker), bound, false);
-						currentTile.setLockArea( newLock);
-						currentTile.flip();
-						revalidate();
-						moveStack = true;
-					} else {
-						currentTile = null;
-					}
-				}*/
-			}
-			
-		}
-		
-		@Override
-		public void mouseExited(MouseEvent e){
-			if( e.getSource()==dice){
-				dice.shrink();
-			}
-		}
-
-		@Override
-		public void mouseClicked( MouseEvent e){
-			switch( permission){
-				case Roll:
-					tryToRoll( e);
-					break;
-				case ResolveCombat:
-					showContextMenu(e,true,false);
-					break;
-				case MoveTower:
-					showContextMenu(e,false,true);
-					break;
-				case NoMove:
-				default:
-					showContextMenu(e,false,false);
-					return;
-			}
-		}
-
-		@Override
-		public void actionPerformed( ActionEvent e) {
-			new UpdatePackage( UpdateInstruction.Skip, "Board.Input").postNetworkEvent( currentPlayer.getID());
-		}
-		
-		private void removeCurrentTile(){
-			remove( currentTile);
-			revalidate();
-			repaint();
-		}
-		
-		private void prepareForNextMouseRelease(){
-			currentTile = null; 
-			lastPoint = null;
-			newLock = null;
-			bound = null;
-			repaint();
-		}
-		
-		private boolean checkTilePermission( Tile tile){
-			switch( permission){
-				case ExchangeHex:
-				case ResolveCombat:
-					return !tile.isTile();
-				case ExchangeThing:
-				case MoveFromCup:
-				case MoveFromRack:
-				case MoveMarker:
-				case MoveTower:
-					return tile.isTile();
-				default:
-					throw new IllegalStateException(" Encountered none tile permission: " + permission);
-			}
-		}
-		
-		private void tryToRoll( MouseEvent e){
-			if( SwingUtilities.isLeftMouseButton(e)){
-				if( e.getSource()==dice){
-					if( useDice && dice.canRoll()){
-						useDice = false;
-						int rollValue = 0;
-						if(demo){
-							try{
-								rollValue = Integer.parseInt(JOptionPane.showInputDialog(Board.this, "Select desired roll value", "RollValue", JOptionPane.PLAIN_MESSAGE));
-							}catch(NumberFormatException ex){
-								rollValue = 0;
-							}
-						}
-						if( rollValue<dice.getDiceCount()*Constants.MIN_DICE_FACE || rollValue>dice.getDiceCount()*Constants.MAX_DICE_FACE){
-							jtfStatus.setText( "value must be between " + (dice.getDiceCount()*Constants.MIN_DICE_FACE) + " and " + (dice.getDiceCount()*Constants.MAX_DICE_FACE));
-							return;
-						}
-						Roll roll = new Roll( dice.getDiceCount(), lastRollTarget, lastRollReason, currentPlayer.getID(), rollValue);
-						new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+currentPlayer.getID()).postNetworkEvent( currentPlayer.getID());
-						dice.roll();
-						new Thread( new Runnable() {
-							@Override
-							public void run() {
-								while( dice.isRolling()){
-									try {
-										Thread.sleep( 10);
-									} catch ( InterruptedException e) {}
-								}
-								jtfStatus.setText( "Done Rolling: " + dice.getResults());
-								if(lastRollReason != RollReason.EXPLORE_HEX)
-								{
-									new UpdatePackage( UpdateInstruction.DoneRolling, "Board.Input").postNetworkEvent( currentPlayer.getID());
-								}
-							}
-						}, "Dice Wait").start();
-					}else{
-						dice.expand();
-					}
-				}
-			}
-		}
-		
-		private void showContextMenu(MouseEvent e, boolean resolveCombatPermission, boolean upgradeBuildingPermission)
-		{
-			if(SwingUtilities.isRightMouseButton(e))
-			{
-				e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, Board.this);
-				Component deepestComponent = SwingUtilities.getDeepestComponentAt( Board.this, e.getX(), e.getY());
-				if(deepestComponent instanceof Hex)
-				{
-					final Hex source = (Hex) deepestComponent;
-					e = SwingUtilities.convertMouseEvent(Board.this, e, source);
-					final ITileProperties hex = source.getState().getHex();
-					JPopupMenu clickMenu = new JPopupMenu("Select Action");
-					
-					JMenuItem initiateCombat = new JMenuItem("Resolve Combat");
-					initiateCombat.setEnabled(resolveCombatPermission);
-					initiateCombat.addActionListener(new ActionListener(){
-						@Override
-						public void actionPerformed(ActionEvent arg0) {
-							lastCombatResolvedHex = hex;
-							new UpdatePackage(UpdateInstruction.InitiateCombat, UpdateKey.Hex,hex,"Board " + currentPlayer.getID()).postNetworkEvent(currentPlayer.getID());
-						}});
-					clickMenu.add(initiateCombat);
-					
-					JMenuItem removeThings = new JMenuItem("Remove Things");
-					removeThings.setEnabled(!isSomeoneElsesHex(source.getState()));
-					removeThings.addActionListener(new ActionListener(){
-						@Override
-						public void actionPerformed(ActionEvent arg0)
-						{
-							// TODO let player remove special income counter/heroes in hex
-						}});
-					clickMenu.add(removeThings);
-
-					JMenuItem viewContents = new JMenuItem("See Contents");
-					viewContents.addActionListener(new ActionListener(){
-						@Override
-						public void actionPerformed(ActionEvent arg0)
-						{
-							JFrame frame = new JFrame("Hex Contents");
-							frame.setContentPane(new HexContentsPanel(source.getState(),!isSomeoneElsesHex(source.getState())));
-							frame.pack();
-							frame.setLocationRelativeTo(null);
-							frame.setVisible(true);
-						}});
-					clickMenu.add(viewContents);
-
-					JMenuItem upgradeBuilding = new JMenuItem("Upgrade Building");
-					boolean canUpgrade = upgradeBuildingPermission && !isSomeoneElsesHex(source.getState()) && 
-							source.getState().hasBuilding() && source.getState().getBuilding().isBuildableBuilding() && !source.getState().getBuilding().getName().equals(Building.Citadel.name());
-					upgradeBuilding.setEnabled(canUpgrade);
-					upgradeBuilding.addActionListener(new ActionListener(){
-						@Override
-						public void actionPerformed(ActionEvent arg0)
-						{
-							BuildableBuilding toConstruct = null;
-							BuildableBuilding existing = null;
-							for(BuildableBuilding bb : BuildableBuilding.values())
-							{
-								if(bb.name().equals(source.getState().getBuilding().getName()))
-								{
-									existing = bb;
-									break;
-								}
-							}
-							for(BuildableBuilding bb : BuildableBuilding.values())
-							{
-								if(bb.ordinal() == 1+existing.ordinal())
-								{
-									toConstruct = bb;
-									break;
-								}
-							}
-							UpdatePackage msg = new UpdatePackage(UpdateInstruction.ConstructBuilding, UpdateKey.Hex, source.getState().getHex(), "Board " + currentPlayer.getID());
-							msg.putData(UpdateKey.Tile, toConstruct);
-							msg.postNetworkEvent(currentPlayer.getID());
-						}});
-					clickMenu.add(upgradeBuilding);
-					
-					//put move stuff in own section
-					clickMenu.add(new JSeparator());
-					
-					JMenuItem moveThings = new JMenuItem("Start Movement");
-					moveThings.setEnabled(!isSomeoneElsesHex(source.getState()));
-					moveThings.addActionListener(new ActionListener(){
-						@Override
-						public void actionPerformed(ActionEvent arg0)
-						{
-							hexMovementSelection.clear();
-							hexMovementSelection.add(source.getState().getHex());
-							JFrame movementSelector = new JFrame("Movement");
-							movementSelector.setContentPane(new SelectThingsForMovementPanel(movementSelector,source.getState().getCreaturesInHex(),new ISelectionListener<ITileProperties>(){
-								@Override
-								public void selectionChanged(Collection<ITileProperties> newSelection)
-								{
-									lastMovementSelection.clear();
-									lastMovementSelection.addAll(newSelection);
-									jtfStatus.setText("Select Hexes To Move Through");
-								}}));
-							movementSelector.pack();
-							movementSelector.setLocationRelativeTo(null);
-							movementSelector.setVisible(true);
-						}});
-					clickMenu.add(moveThings);
-					
-					JMenuItem addMoveHex = new JMenuItem("Add to Movement Path");
-					addMoveHex.setEnabled(lastMovementSelection.size()>0);
-					addMoveHex.addActionListener(new ActionListener(){
-						@Override
-						public void actionPerformed(ActionEvent arg0)
-						{
-							hexMovementSelection.add(source.getState().getHex());
-						}});
-					clickMenu.add(addMoveHex);
-
-					JMenuItem finishMoveHex = new JMenuItem("Finish Movement Here");
-					finishMoveHex.setEnabled(lastMovementSelection.size()>0);
-					finishMoveHex.addActionListener(new ActionListener(){
-						@Override
-						public void actionPerformed(ActionEvent arg0)
-						{
-							hexMovementSelection.add(source.getState().getHex());
-							UpdatePackage msg = new UpdatePackage(UpdateInstruction.MoveThings, UpdateKey.Hex, new ArrayList<>(hexMovementSelection), "Board " + currentPlayer);
-							msg.putData(UpdateKey.ThingArray, new ArrayList<>(lastMovementSelection));
-							msg.postNetworkEvent(currentPlayer.getID());
-							hexMovementSelection.clear();
-							lastMovementSelection.clear();
-						}});
-					clickMenu.add(finishMoveHex);
-					
-					clickMenu.show(source, e.getX(), e.getY());
-				}
-			}
-		}
-		
-		private boolean isSomeoneElsesHex(HexState hs)
-		{
-			for(PlayerInfo pi : players)
-			{
-				if(hs.hasMarkerForPlayer(pi.getID()) && pi.getID() != currentPlayer.getID())
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		private boolean canMove(){
-			return permission!=Permissions.NoMove && permission!=Permissions.Roll;
-		}
-
-		@Override
-		public void addTile(Tile tile) {
-			Board.this.add(tile);
-		}
+	public void setStatusMessage( String message){
+		jtfStatus.setText(message);
 	}
 
 	@Override
@@ -1292,9 +429,20 @@ public class Board extends JPanel implements CanvasParent{
 	public Lock getLock(Tile tile) {
 		return locks.getLock(tile);
 	}
+	
+	public MoveAnimation getAnimator(){
+		return moveAnimation;
+	}
+	
+	public boolean isPhaseDone(){
+		return phaseDone;
+	}
+	
+	public DiceRoller getDice(){
+		return dice;
+	}
 
-	@Override
-	public HexState placeOnHex(Tile tile) {
-		return placeTileOnHex(tile);
+	public PlayerInfo[] getPlayers() {
+		return players;
 	}
 }

@@ -77,7 +77,7 @@ public class MoveAnimation implements ActionListener{
 			xTemp=-1;
 			tile.setLocation( end.x-size.width/2, end.y-size.height/2);
 			tile.setLockArea( parent.getLock( tile));
-			parent.placeOnHex( tile);
+			parent.placeTileOnHex( tile);
 		}
 		parent.repaintCanvas();
 	}

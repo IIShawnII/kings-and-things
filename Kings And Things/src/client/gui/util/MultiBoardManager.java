@@ -29,11 +29,10 @@ public class MultiBoardManager {
 		}
 		boards = new Board[players.length];
 		for( int i=0; i<boards.length; i++){
-			boards[ i] = new Board( demo);
+			boards[ i] = new Board( demo, players[i]);
 			boards[ i].setPreferredSize( Constants.BOARD_SIZE);
 			boards[ i].setSize( Constants.BOARD_SIZE);
 			boards[ i].init( boards.length);
-			boards[ i].setCurrentPlayer( players[i]);
 		}
 		created = true;
 	}
