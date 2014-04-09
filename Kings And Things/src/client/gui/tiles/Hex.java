@@ -52,6 +52,8 @@ public class Hex extends Tile{
 	
 	public void setState( HexState state){
 		this.state = state;
+		this.prop = state.getHex();
+		updateImage();
 		repaint();
 	}
 	

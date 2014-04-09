@@ -131,9 +131,9 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 	 * sea hex can not be exchanged according to game rules
 	 * @throws IllegalStateException If it is nor the proper phase for exchanging sea hexes
 	 */
-	public void exchangeSeaHex(ITileProperties hex, int playerNumber) throws NoMoreTilesException{
+	public void exchangeSeaHex(ITileProperties hex, int playerNumber, boolean isOwned) throws NoMoreTilesException{
 		SetupPhaseValidator.validateCanExchangeSeaHex(hex, playerNumber, getCurrentState());
-		makeSeaHexExchanged(hex, playerNumber);
+		makeSeaHexExchanged(hex, playerNumber, isOwned);
 	}
 
 	private void applyRollEffects()
@@ -253,7 +253,7 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 		makeHexOwnedByPlayer(hex,secondPlayerNumber);
 	}
 
-	private void makeSeaHexExchanged(ITileProperties hex, int playerNumber) throws NoMoreTilesException
+	private void makeSeaHexExchanged(ITileProperties hex, int playerNumber, boolean isOwned) throws NoMoreTilesException
 	{
 		getCurrentState().getBoardGenerator().placeHexAside(hex);
 		ITileProperties replacement = getCurrentState().getBank().drawTile();
@@ -263,7 +263,9 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 			if(hs.getHex().equals(hex))
 			{
 				hs.setHex(replacement);
-				hs.setMarker( Constants.getPlayerMarker( playerNumber));
+				if( isOwned){
+					hs.setMarker( Constants.getPlayerMarker( playerNumber));
+				}
 				ExchangedSeaHex msg = new ExchangedSeaHex(hs);
 				msg.postNetworkEvent(ALL_PLAYERS_ID);
 				break;
@@ -308,7 +310,7 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 		{
 			try
 			{
-				exchangeSeaHex(command.getHex(), command.getID());
+				exchangeSeaHex(command.getHex(), command.getID(), command.isOwned());
 			}
 			catch(Throwable t)
 			{

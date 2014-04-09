@@ -618,11 +618,26 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 
 	@Override
 	public void placeNewHexOnBOard(HexState state) {
-		Lock start = locks.getPermanentLock( state.getHex().getCategory());
-		Tile hex = board.addTile( new Hex( state), new Rectangle( start.getCenter(),HEX_SIZE), false);
-		Lock end = locks.getLockForHex( hex.getLocation());
-		hex.setDestination(end.getCenter());
-		board.getAnimator().start(hex);
+		Lock end = locks.getLockForHex( state.getLocation());
+		if( !state.getHex().isFaceUp()){
+			state.getHex().flip();
+		}
+		if(end.isInUse()){
+			end.getHex().setState( state);
+		}else{
+			Lock start = locks.getPermanentLock( state.getHex().getCategory());
+			Tile hex = board.addTile( new Hex( state), new Rectangle( start.getCenter(),HEX_SIZE), false);
+			hex.setDestination(end.getCenter());
+			hex.flip();
+			if( board.isActive()){
+				board.getAnimator().start(hex);
+			}else{
+				//TODO this code more than likely will never be reached, not tested
+				hex.setLocation( end.getCenterOffSet( HEX_SIZE));
+				hex.setLockArea( end);
+			}
+		}
+		
 	}
 
 	@Override

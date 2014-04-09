@@ -1,6 +1,7 @@
 package client.gui.util;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -253,6 +254,10 @@ public class LockManager {
 		
 		public boolean canLeave( int x, int y){
 			return !lock.contains( x,y);
+		}
+		
+		public Point getCenterOffSet( Dimension point){
+			return new Point( center.x-point.width/2, center.y-point.height/2);
 		}
 		
 		public Point getCenter(){

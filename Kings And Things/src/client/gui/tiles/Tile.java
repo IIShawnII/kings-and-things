@@ -17,7 +17,7 @@ public class Tile extends JComponent{
 	private boolean hasLock = false;
 	protected Image drawTile = null;
 	protected Lock lockArea = null;
-	private ITileProperties prop = null;
+	protected ITileProperties prop = null;
 	private Point destination;
 	private boolean canAnimate = true;
 	
@@ -75,6 +75,15 @@ public class Tile extends JComponent{
 
 	public void flip() {
 		if( prop!=null && !prop.isFake()){
+			if( !prop.isFaceUp()){
+				prop.flip();
+			}
+			updateImage();
+		}
+	}
+	
+	protected void updateImage(){
+		if( prop.isFaceUp()){
 			if(prop.isHexTile())
 			{
 				//in demo mode there are infinite tiles, which screws with the hash code mappings
