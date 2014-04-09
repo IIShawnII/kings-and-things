@@ -3,6 +3,8 @@ package server.logic.game.handlers;
 import static common.Constants.ALL_PLAYERS_ID;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -16,15 +18,18 @@ import server.event.internal.DoneRollingCommand;
 import server.event.internal.EndPlayerTurnCommand;
 import server.event.internal.RemoveThingsFromHexCommand;
 import server.event.internal.RollDiceCommand;
+import server.event.internal.ViewHexContentsCommand;
 import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.GameState;
 import server.logic.game.RollModification;
 import server.logic.game.validators.CommandValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants;
 import common.Constants.Biome;
 import common.Constants.CombatPhase;
+import common.Constants.HexContentsTarget;
 import common.Constants.RegularPhase;
 import common.Constants.RollReason;
 import common.Constants.SetupPhase;
@@ -39,6 +44,7 @@ import common.event.network.HexOwnershipChanged;
 import common.event.network.HexStatesChanged;
 import common.event.network.PlayersList;
 import common.event.network.RackPlacement;
+import common.event.network.ViewHexContentsResponse;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -99,6 +105,53 @@ public abstract class CommandHandler
 	{
 		CommandValidator.validateCanRollDice(roll, currentState);
 		makeDiceRoll(roll);
+	}
+	
+	public void viewHexContents(int playerNumber, ITileProperties hex, HexContentsTarget target)
+	{
+		new ViewHexContentsResponse(prepareHexForViewingByPlayer(hex,playerNumber).getThingsInHex(),target).postNetworkEvent(playerNumber);
+	}
+	
+	protected HexState prepareHexForViewingByPlayer(ITileProperties hex, int playerNumber)
+	{
+		HexState hs = currentState.getBoard().getHexStateForHex(hex).clone();
+		HashSet<Player> otherPlayers = new HashSet<>(currentState.getPlayers());
+		
+		Iterator<Player> it = otherPlayers.iterator();
+		while(it.hasNext())
+		{
+			Player p = it.next();
+			if(p.getID() == playerNumber)
+			{
+				it.remove();
+				break;
+			}
+		}
+		for(ITileProperties thing : hs.getThingsInHex())
+		{
+			if(!thing.isBuilding() && !thing.isSpecialCharacter())
+			{
+				boolean ownedByOthers = false;
+				for(Player p : otherPlayers)
+				{
+					if(p.ownsThingOnBoard(thing))
+					{
+						ownedByOthers = true;
+						if(thing.isFaceUp())
+						{
+							thing.flip();
+						}
+						break;
+					}
+				}
+				if(!ownedByOthers && !thing.isFaceUp())
+				{
+					thing.flip();
+				}
+			}
+		}
+		
+		return hs;
 	}
 	
 	public void removeThingsFromBoard(int playerNumber, ITileProperties hex, Set<ITileProperties> thingsToRemove)
@@ -594,6 +647,23 @@ public abstract class CommandHandler
 			{
 				Logger.getErrorLogger().error("Unable to process RollDieCommand due to: ", t);
 				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.NeedRoll).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			}
+		}
+	}
+
+	@Subscribe
+	public void receiveViewHexContentsCommand(ViewHexContentsCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				viewHexContents(command.getID(), command.getHex(), command.getTarget());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process ViewHexContentsCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.ViewContents).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

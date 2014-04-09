@@ -1,40 +1,40 @@
 package server.logic;
 
+import static common.Constants.MAX_PLAYERS;
+import static common.Constants.SERVER_PORT;
+
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.ArrayList;
-import java.net.Socket;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 import server.event.EndServer;
 import server.event.GameStarted;
 import server.event.PlayerUpdated;
 import server.event.internal.StartSetupPhaseCommand;
+import server.logic.game.CommandHandlerManager;
 import server.logic.game.GameState;
 import server.logic.game.StateGenerator;
-import server.logic.game.CommandHandlerManager;
+import server.logic.game.StateGenerator.GeneratorType;
 
 import com.google.common.eventbus.Subscribe;
-
-import common.Logger;
 import common.Constants;
 import common.Constants.Level;
 import common.Constants.UpdateKey;
-import common.game.Player;
-import common.game.PlayerInfo;
-import common.game.LoadResources;
-import common.network.Connection;
+import common.Logger;
 import common.event.ConsoleMessage;
 import common.event.EventDispatch;
 import common.event.UpdatePackage;
-import common.event.network.StartGame;
+import common.event.network.CommandRejected;
 import common.event.network.PlayerState;
 import common.event.network.PlayersList;
-import common.event.network.CommandRejected;
-
-import static common.Constants.SERVER_PORT;
-import static common.Constants.MAX_PLAYERS;
+import common.event.network.StartGame;
+import common.game.LoadResources;
+import common.game.Player;
+import common.game.PlayerInfo;
+import common.network.Connection;
 
 public class ConnectionLobby implements Runnable {
 
@@ -46,13 +46,14 @@ public class ConnectionLobby implements Runnable {
 	private final boolean generateStateFile;
 	private final boolean loadStateFile;
 	private final String stateFileName;
+	private final boolean generateAll;
 	
-	public ConnectionLobby( boolean isDemoMode, boolean loadStateFile, boolean generateStateFile, String stateFileName) throws IOException{
+	public ConnectionLobby( boolean isDemoMode, boolean loadStateFile, boolean generateStateFile, String stateFileName, boolean generateAll) throws IOException{
 		if( isDemoMode){
 			Logger.getStandardLogger().info("Server started in demo mode.");
 			new ConsoleMessage( "Starting in demo mode.", Level.Notice, this).postInternalEvent();
 		}
-		
+		this.generateAll = generateAll;
 		demoMode = isDemoMode;
 		this.generateStateFile = generateStateFile;
 		this.loadStateFile = loadStateFile;
@@ -168,11 +169,31 @@ public class ConnectionLobby implements Runnable {
 				set.add( pc.getPlayer());
 			}
 			new StartGame( set.size()).postNetworkEvent( Constants.ALL_PLAYERS_ID);
-			if(loadStateFile || generateStateFile)
+			if(generateAll)
 			{
 				try
 				{
-					GameState state = new StateGenerator(stateFileName, loadStateFile).getGeneratedState();
+					new StateGenerator("MinimalDemo", false, GeneratorType.MINIMAL_DEMO).getGeneratedState();
+					new StateGenerator("AverageDemo", false, GeneratorType.AVERAGE_DEMO).getGeneratedState();
+					GameState state = new StateGenerator("SuperiorDemo", false, GeneratorType.SUPERIOR_DEMO).getGeneratedState();
+					new StateGenerator("Construction", false, GeneratorType.CONSTRUCTION).getGeneratedState();
+					new StateGenerator("Exploration", false, GeneratorType.EXPLORATION).getGeneratedState();
+					new StateGenerator("Movement", false, GeneratorType.MOVEMENT).getGeneratedState();
+
+					new GameStarted(demoMode, state).postInternalEvent();
+					state.notifyClientsOfState();
+				}
+				catch (ClassNotFoundException | IOException e)
+				{
+					Logger.getErrorLogger().error("Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: ", e);
+					new CommandRejected(null, null, null, "Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: " + e,null).postNetworkEvent(Constants.ALL_PLAYERS_ID);
+				}
+			}
+			else if(loadStateFile || generateStateFile)
+			{
+				try
+				{
+					GameState state = new StateGenerator(stateFileName, loadStateFile, GeneratorType.SUPERIOR_DEMO).getGeneratedState();
 					new GameStarted(demoMode, state).postInternalEvent();
 					state.notifyClientsOfState();
 				}

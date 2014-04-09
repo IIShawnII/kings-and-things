@@ -76,7 +76,7 @@ public class RetreatPanel extends JPanel
 			constraints.gridy++;
 			constraints.weighty = 1;
 			constraints.gridwidth = 2;
-			contentsPanel.add(new HexContentsPanel(hs,true),constraints);
+			contentsPanel.add(new HexContentsPanel(hs.getThingsInHex()),constraints);
 			
 			constraints.gridy++;
 			constraints.weighty = 0;

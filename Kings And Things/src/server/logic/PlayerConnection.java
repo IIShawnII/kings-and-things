@@ -20,10 +20,12 @@ import server.event.internal.DoneRollingCommand;
 import server.event.internal.EndPlayerTurnCommand;
 import server.event.internal.GiveHexToPlayerCommand;
 import server.event.internal.TargetPlayerCommand;
+import server.event.internal.ViewHexContentsCommand;
 
 import com.google.common.eventbus.Subscribe;
 
 import common.Constants.BuildableBuilding;
+import common.Constants.HexContentsTarget;
 import common.Logger;
 import common.network.Connection;
 import common.Constants.UpdateKey;
@@ -165,6 +167,9 @@ public class PlayerConnection implements Runnable{
 					case CallBluff:
 						ITileProperties thing = (ITileProperties) event.getData(UpdateKey.ThingArray);
 						new CallBluffCommand(thing).postInternalEvent(ID);
+						break;
+					case ViewContents:
+						new ViewHexContentsCommand((ITileProperties) event.getData(UpdateKey.Hex), (HexContentsTarget) event.getData(UpdateKey.Category)).postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());

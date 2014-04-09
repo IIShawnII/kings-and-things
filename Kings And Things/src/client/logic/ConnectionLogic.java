@@ -32,6 +32,7 @@ import common.event.network.ExchangedSeaHex;
 import common.event.network.GameStateProgress;
 import common.event.network.SpecialCharUpdate;
 import common.event.network.HexOwnershipChanged;
+import common.event.network.ViewHexContentsResponse;
 
 public class ConnectionLogic implements Runnable {
 
@@ -210,6 +211,14 @@ public class ConnectionLogic implements Runnable {
 						update.addInstruction(UpdateInstruction.ShowExplorationResults);
 						update.putData(UpdateKey.Combat, event);
 					}
+				}
+				else if(event instanceof ViewHexContentsResponse)
+				{
+					ViewHexContentsResponse evt = (ViewHexContentsResponse)event;
+					evt.postInternalEvent();
+					update.addInstruction(UpdateInstruction.ViewContents);
+					update.putData(UpdateKey.Hex, evt.getContents());
+					update.putData(UpdateKey.Category, evt.getTarget());
 				}
 				else if(event instanceof PlayerTargetChanged || event instanceof CombatHits || event instanceof HexStatesChanged)
 				{

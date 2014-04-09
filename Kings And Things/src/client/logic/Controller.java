@@ -21,21 +21,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
-import common.Constants;
-import common.Constants.BuildableBuilding;
-import common.Constants.Building;
-import common.Constants.Permissions;
-import common.Constants.RollReason;
-import common.Constants.UpdateInstruction;
-import common.Constants.UpdateKey;
-import common.event.UpdatePackage;
-import common.game.HexState;
-import common.game.ITileProperties;
-import common.game.PlayerInfo;
-import common.game.Roll;
 import client.gui.Board;
-import client.gui.components.HexContentsPanel;
 import client.gui.components.ISelectionListener;
 import client.gui.components.SelectThingsForMovementPanel;
 import client.gui.tiles.Hex;
@@ -45,6 +33,23 @@ import client.gui.util.LockManager.Lock;
 import client.gui.util.undo.Parent;
 import client.gui.util.undo.UndoManager;
 import client.gui.util.undo.UndoTileMovement;
+
+import com.google.common.eventbus.Subscribe;
+import common.Constants;
+import common.Constants.BuildableBuilding;
+import common.Constants.Building;
+import common.Constants.HexContentsTarget;
+import common.Constants.Permissions;
+import common.Constants.RollReason;
+import common.Constants.UpdateInstruction;
+import common.Constants.UpdateKey;
+import common.event.EventDispatch;
+import common.event.UpdatePackage;
+import common.event.network.ViewHexContentsResponse;
+import common.game.HexState;
+import common.game.ITileProperties;
+import common.game.PlayerInfo;
+import common.game.Roll;
 
 /**
  * input class for mouse, used for like assignment and current testing phases suck as placement
@@ -395,11 +400,9 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					@Override
 					public void actionPerformed(ActionEvent arg0)
 					{
-						JFrame frame = new JFrame("Hex Contents");
-						frame.setContentPane(new HexContentsPanel(source.getState(),!isSomeoneElsesHex(source.getState())));
-						frame.pack();
-						frame.setLocationRelativeTo(null);
-						frame.setVisible(true);
+						UpdatePackage msg = new UpdatePackage(UpdateInstruction.ViewContents, UpdateKey.Hex,hex,"Board " + PLAYER_ID);
+						msg.putData(UpdateKey.Category, HexContentsTarget.VIEW);
+						msg.postNetworkEvent(PLAYER_ID);
 					}});
 				clickMenu.add(viewContents);
 
@@ -427,20 +430,53 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					@Override
 					public void actionPerformed(ActionEvent arg0)
 					{
-						hexMovementSelection.clear();
-						hexMovementSelection.add(source.getState().getHex());
-						JFrame movementSelector = new JFrame("Movement");
-						movementSelector.setContentPane(new SelectThingsForMovementPanel(movementSelector,source.getState().getCreaturesInHex(),new ISelectionListener<ITileProperties>(){
+						SwingWorker<Void,Void> movementDialogBuilder = new SwingWorker<Void,Void>(){
+							private volatile ViewHexContentsResponse response = null;
+							
 							@Override
-							public void selectionChanged(Collection<ITileProperties> newSelection)
+							protected Void doInBackground() throws Exception
 							{
-								lastMovementSelection.clear();
-								lastMovementSelection.addAll(newSelection);
-								board.setStatusMessage( "Select Hexes To Move Through");
-							}}));
-						movementSelector.pack();
-						movementSelector.setLocationRelativeTo(null);
-						movementSelector.setVisible(true);
+								UpdatePackage msg = new UpdatePackage(UpdateInstruction.ViewContents, UpdateKey.Hex,hex,"Board " + PLAYER_ID);
+								msg.putData(UpdateKey.Category, HexContentsTarget.MOVEMENT);
+								msg.postNetworkEvent(PLAYER_ID);
+
+								while(response==null)
+								{
+									Thread.sleep(100);
+								}
+								return null;
+							}
+							
+							@Override
+							protected void done()
+							{
+								hexMovementSelection.clear();
+								hexMovementSelection.add(source.getState().getHex());
+								JFrame movementSelector = new JFrame("Movement");
+								movementSelector.setContentPane(new SelectThingsForMovementPanel(movementSelector,response.getContents(),new ISelectionListener<ITileProperties>(){
+									@Override
+									public void selectionChanged(Collection<ITileProperties> newSelection)
+									{
+										lastMovementSelection.clear();
+										lastMovementSelection.addAll(newSelection);
+										board.setStatusMessage( "Select Hexes To Move Through");
+									}}));
+								movementSelector.pack();
+								movementSelector.setLocationRelativeTo(null);
+								movementSelector.setVisible(true);
+								EventDispatch.unregisterFromInternalEvents(this);
+							}
+							
+							@Subscribe
+							public void recieveHexContents(ViewHexContentsResponse response)
+							{
+								if(response.getTarget() == HexContentsTarget.MOVEMENT)
+								{
+									this.response = response;
+								}
+							}};
+						EventDispatch.registerOnInternalEvents(movementDialogBuilder);
+						movementDialogBuilder.execute();
 					}});
 				clickMenu.add(moveThings);
 				

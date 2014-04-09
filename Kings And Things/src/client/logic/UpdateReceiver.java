@@ -1,37 +1,40 @@
 package client.logic;
 
 import java.awt.Point;
+import java.util.Collection;
 import java.util.HashSet;
 
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 
-import client.gui.util.LockManager.Lock;
 import client.gui.components.CombatPanel;
+import client.gui.components.HexContentsPanel;
 import client.gui.components.RemoveThingsFromHexPanel;
 import client.gui.components.combat.ExplorationResultsPanel;
+import client.gui.util.LockManager.Lock;
 
-import common.Logger;
-import common.game.Roll;
-import common.game.Player;
-import common.game.HexState;
-import common.game.PlayerInfo;
-import common.game.ITileProperties;
 import common.Constants;
-import common.Constants.UpdateKey;
-import common.Constants.RollReason;
-import common.Constants.SetupPhase;
 import common.Constants.CombatPhase;
+import common.Constants.HexContentsTarget;
 import common.Constants.Permissions;
 import common.Constants.RegularPhase;
+import common.Constants.RollReason;
+import common.Constants.SetupPhase;
 import common.Constants.UpdateInstruction;
-import common.event.UpdatePackage;
+import common.Constants.UpdateKey;
+import common.Logger;
 import common.event.AbstractUpdateReceiver;
-import common.event.network.InitiateCombat;
+import common.event.UpdatePackage;
 import common.event.network.ExplorationResults;
 import common.event.network.HexNeedsThingsRemoved;
+import common.event.network.InitiateCombat;
+import common.game.HexState;
+import common.game.ITileProperties;
+import common.game.Player;
+import common.game.PlayerInfo;
+import common.game.Roll;
 
 public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 
@@ -248,6 +251,23 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 							}});
 					} catch (Throwable t) {
 						Logger.getErrorLogger().error("Problem processing exploration results command: ", t);
+					}
+					break;
+				case ViewContents:
+					if((HexContentsTarget)update.getData(UpdateKey.Category) == HexContentsTarget.VIEW)
+					{
+						@SuppressWarnings("unchecked")
+						final Collection<ITileProperties> thingsInHex = (Collection<ITileProperties>) update.getData(UpdateKey.Hex);
+						SwingUtilities.invokeLater(new Runnable(){
+							@Override
+							public void run()
+							{
+								JFrame frame = new JFrame("Hex Contents");
+								frame.setContentPane(new HexContentsPanel(thingsInHex));
+								frame.pack();
+								frame.setLocationRelativeTo(null);
+								frame.setVisible(true);
+							}});
 					}
 					break;
 				case RackChanged:

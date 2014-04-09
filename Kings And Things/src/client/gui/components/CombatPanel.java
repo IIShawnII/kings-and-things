@@ -18,6 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 
 import client.gui.Board;
@@ -31,12 +32,14 @@ import com.google.common.eventbus.Subscribe;
 
 import common.Constants;
 import common.Constants.CombatPhase;
+import common.Constants.HexContentsTarget;
 import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
 import common.event.EventDispatch;
 import common.event.UpdatePackage;
 import common.event.network.CurrentPhase;
 import common.event.network.HexStatesChanged;
+import common.event.network.ViewHexContentsResponse;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -203,11 +206,56 @@ public class CombatPanel extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				JFrame retreatDialog = new JFrame("Retreat!");
-				retreatDialog.add(new RetreatPanel(adjacentPlayerOwnedHexes,hs,playerPanel.getPlayerID(),retreatDialog));
-				retreatDialog.pack();
-				retreatDialog.setLocationRelativeTo(null);
-				retreatDialog.setVisible(true);
+				SwingWorker<Void,Void> retreatDialogBuilder = new SwingWorker<Void,Void>(){
+					private volatile ViewHexContentsResponse response = null;
+					
+					@Override
+					protected Void doInBackground() throws Exception
+					{
+						for(HexState hs : adjacentPlayerOwnedHexes)
+						{
+							UpdatePackage msg = new UpdatePackage(UpdateInstruction.ViewContents, UpdateKey.Hex, hs.getHex(), "Retreat Panel for player number: " + playerPanel.getPlayerID());
+							msg.putData(UpdateKey.Category,HexContentsTarget.RETREAT);
+							msg.postNetworkEvent(playerPanel.getPlayerID());
+							while(response==null)
+							{
+								Thread.sleep(100);
+							}
+							HashSet<ITileProperties> thingsInHex = new HashSet<>(hs.getThingsInHex());
+							for(ITileProperties thing : thingsInHex)
+							{
+								hs.removeThingFromHex(thing);
+							}
+							for(ITileProperties thing : response.getContents())
+							{
+								hs.addThingToHex(thing);
+							}
+							response = null;
+						}
+						return null;
+					}
+					
+					@Override
+					protected void done()
+					{
+						JFrame retreatDialog = new JFrame("Retreat!");
+						retreatDialog.add(new RetreatPanel(adjacentPlayerOwnedHexes,hs,playerPanel.getPlayerID(),retreatDialog));
+						retreatDialog.pack();
+						retreatDialog.setLocationRelativeTo(null);
+						retreatDialog.setVisible(true);
+						EventDispatch.unregisterFromInternalEvents(this);
+					}
+					
+					@Subscribe
+					public void recieveHexContents(ViewHexContentsResponse response)
+					{
+						if(response.getTarget() == HexContentsTarget.RETREAT)
+						{
+							this.response = response;
+						}
+					}};
+				EventDispatch.registerOnInternalEvents(retreatDialogBuilder);
+				retreatDialogBuilder.execute();
 			}});
 
 		EventDispatch.registerOnInternalEvents(this);

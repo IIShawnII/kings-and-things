@@ -435,7 +435,7 @@ public class CombatCommandHandler extends CommandHandler
 		if(creatureCount>Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX && !(getCurrentState().getBoard().getHexStateForHex(destinationHex).hasBuilding() && getCurrentState().getBoard().getHexStateForHex(destinationHex).getBuilding().getName().equals(Building.Citadel)))
 		{
 			getCurrentState().addHexThatNeedsThingsRemoved(getCurrentState().getBoard().getHexStateForHex(destinationHex), creatureCount - Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX);
-			new HexNeedsThingsRemoved(getCurrentState().getBoard().getHexStateForHex(destinationHex), creatureCount - Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX, true,coward).postNetworkEvent(playerNumber);
+			new HexNeedsThingsRemoved(prepareHexForViewingByPlayer(destinationHex,playerNumber), creatureCount - Constants.MAX_FRIENDLY_CREATURES_FOR_NON_CITADEL_HEX, true,coward).postNetworkEvent(playerNumber);
 		}
 		else
 		{
@@ -468,7 +468,7 @@ public class CombatCommandHandler extends CommandHandler
 				msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
 				
 				getCurrentState().updateHexThatNeedsThingsRemoved(hs, getCurrentState().getThingsToRemoveFromHex(hs) - things.size());
-				new HexNeedsThingsRemoved(hs, getCurrentState().getThingsToRemoveFromHex(hs), false,getCurrentState().getPlayerByPlayerNumber(playerNumber)).postNetworkEvent(playerNumber);
+				new HexNeedsThingsRemoved(prepareHexForViewingByPlayer(hex,playerNumber), getCurrentState().getThingsToRemoveFromHex(hs), false,getCurrentState().getPlayerByPlayerNumber(playerNumber)).postNetworkEvent(playerNumber);
 				if(!getCurrentState().hasHexesThatNeedThingsRemoved())
 				{
 					advanceOrEnd();

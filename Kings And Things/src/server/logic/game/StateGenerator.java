@@ -27,12 +27,13 @@ public class StateGenerator
 	private final String fileName;
 	private final boolean isLoadOperation;
 	private final GameState generatedState;
-	private final GeneratorType type = GeneratorType.SUPERIOR_DEMO;
+	private final GeneratorType type;
 	
-	public StateGenerator(String fileName, boolean load) throws ClassNotFoundException, FileNotFoundException, IOException
+	public StateGenerator(String fileName, boolean load, GeneratorType type) throws ClassNotFoundException, FileNotFoundException, IOException
 	{
 		this.fileName = fileName;
 		isLoadOperation = load;
+		this.type = type;
 		generatedState = load? loadStateFromFile() : saveStateToFile();
 	}
 	

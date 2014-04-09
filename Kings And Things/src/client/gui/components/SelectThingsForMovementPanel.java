@@ -48,10 +48,6 @@ public class SelectThingsForMovementPanel extends JPanel
 		
 		for(ITileProperties thing : thingsInHex)
 		{
-			if(!thing.isFaceUp() && thing.isCreature() && !thing.isSpecialCharacter())
-			{
-				thing.flip();
-			}
 			final TileButton tile = new TileButton(thing);
 			tile.setBorder(null);
 			tile.addActionListener(new ActionListener(){
