@@ -84,7 +84,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 			TileProperties tile = createTile( file.getFileName().toString());
 			switch( currentCategory){
 				case Building:
-					if( tile.getName().equals( Building.City) || tile.getName().equals( Building.Village)){
+					if( tile.getName().equals( Building.City.name()) || tile.getName().equals( Building.Village.name())){
 						tile.setCategory( Category.Building);
 						for(int i=0; i<6; i++){
 							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
