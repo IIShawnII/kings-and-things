@@ -78,6 +78,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 		hexMovementSelection = new LinkedHashSet<>();
 		this.receiver = new UpdateReceiver( this, ID);
 		this.undoManger = new UndoManager( this);
+		permission = Permissions.NoMove;
 	}
 	
 	public void undo(){
