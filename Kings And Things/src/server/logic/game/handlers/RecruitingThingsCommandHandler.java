@@ -202,6 +202,12 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			p.placeThingFromHandOnBoard(thing);
 		}
 		moveThingsFromHandToTray(p);
+		
+		HexStatesChanged msg = new HexStatesChanged(1);
+		msg.getArray()[0] = hs;
+		msg.postNetworkEvent(Constants.ALL_PLAYERS_ID);
+		
+		notifyClientsOfPlayerTray(playerNumber);
 	}
 	
 	@Subscribe

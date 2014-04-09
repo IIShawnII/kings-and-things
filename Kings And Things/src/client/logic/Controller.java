@@ -186,6 +186,15 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					case MoveFromCup:
 						break;
 					case MoveFromRack:
+						if( newLock.canHold( currentTile)){
+							//TODO need to update undo manager
+							removeCurrentTile();
+							UpdatePackage update = new UpdatePackage( "Controll.input", null);
+							update.addInstruction( UpdateInstruction.PlaceBoard);
+							update.putData( UpdateKey.Tile, currentTile.getProperties());
+							update.putData( UpdateKey.Hex, newLock.getHex().getState().getHex());
+							update.postNetworkEvent( PLAYER_ID);
+						}
 						break;
 					case MoveTower:
 						if( newLock.canHold( currentTile)){

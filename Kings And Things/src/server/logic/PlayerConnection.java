@@ -12,6 +12,7 @@ import server.event.internal.ConstructBuildingCommand;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.ExchangeThingsCommand;
 import server.event.internal.MoveThingsCommand;
+import server.event.internal.PlaceThingOnBoardCommand;
 import server.event.internal.RemoveThingsFromHexCommand;
 import server.event.internal.ResolveCombatCommand;
 import server.event.internal.RetreatCommand;
@@ -170,6 +171,9 @@ public class PlayerConnection implements Runnable{
 						break;
 					case ViewContents:
 						new ViewHexContentsCommand((ITileProperties) event.getData(UpdateKey.Hex), (HexContentsTarget) event.getData(UpdateKey.Category)).postInternalEvent(ID);
+						break;
+					case PlaceBoard:
+						new PlaceThingOnBoardCommand((ITileProperties) event.getData(UpdateKey.Tile), (ITileProperties) event.getData(UpdateKey.Hex)).postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
