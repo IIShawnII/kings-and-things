@@ -73,7 +73,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 		this.PLAYER_ID = ID;
 		lastMovementSelection = new HashSet<>();
 		hexMovementSelection = new LinkedHashSet<>();
-		this.receiver = new UpdateReceiver( this, 1);
+		this.receiver = new UpdateReceiver( this, ID);
 		this.undoManger = new UndoManager( this);
 	}
 	
