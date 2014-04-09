@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import server.logic.exceptions.NoMoreTilesException;
-
 import common.Constants;
+import common.Constants.Ability;
+import common.Constants.Building;
 import common.game.ITileProperties;
+import common.game.TileProperties;
+import common.game.TwoSidedTileProperties;
 
 /**
  * this class encapsulates the logic of drawing tiles from the cup, and placing
@@ -15,6 +18,8 @@ import common.game.ITileProperties;
 public class CupManager extends AbstractTileManager
 {
 	private static final long serialVersionUID = 1998393393444664606L;
+	private static final int CITY_COUNT = 6;
+	private static int id = 2;
 	
 	private final boolean isDemoMode;
 	private int numDraws;
@@ -29,6 +34,8 @@ public class CupManager extends AbstractTileManager
 		super(Constants.CUP.values(),"cup");
 		this.isDemoMode = isDemoMode;
 		numDraws = 0;
+		generateBuildingTilesInCup(Building.Village);
+		generateBuildingTilesInCup(Building.City);
 	}
 	
 	public CupManager(CupManager other)
@@ -178,6 +185,37 @@ public class CupManager extends AbstractTileManager
 			
 			tiles.clear();
 			tiles.addAll(newDeckOrder);
+		}
+	}
+
+	private void generateBuildingTilesInCup(Building b)
+	{
+		for(int i=0; i<CITY_COUNT; i++)
+		{
+			TileProperties buildingFaceUp = null;
+			TileProperties buildingFaceDown = null;
+			
+			for(TileProperties tp : Constants.BUILDING.values())
+			{
+				if(tp.getName().equals(b.name()))
+				{
+					if(tp.hasAbility(Ability.Neutralised))
+					{
+						buildingFaceDown = tp;
+					}
+					else
+					{
+						buildingFaceUp = tp;
+					}
+				}
+			}
+			
+			if(buildingFaceUp == null || buildingFaceDown == null)
+			{
+				throw new IllegalArgumentException("No building tiles found for type: " + b);
+			}
+			
+			reInsertTile(new TwoSidedTileProperties(new TileProperties(buildingFaceUp,id++),new TileProperties(buildingFaceDown,id++)));
 		}
 	}
 	
