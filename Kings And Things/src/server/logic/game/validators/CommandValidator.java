@@ -228,6 +228,10 @@ public abstract class CommandValidator
 				throw new IllegalStateException("You can not remove special income counters from your hexes during the combat phase.");
 			}
 		}
+		else if(thingsToRemove.size()==1 && thingsToRemove.iterator().next().isSpecialCharacter() && currentState.getThingsToRemoveFromHex(hex)==0)
+		{
+			validateIsPlayerActive(playerNumber,currentState);
+		}
 		else
 		{
 			if(currentState.getThingsToRemoveFromHex(hex) < thingsToRemove.size())

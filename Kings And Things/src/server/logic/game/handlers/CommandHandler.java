@@ -157,13 +157,15 @@ public abstract class CommandHandler
 	public void removeThingsFromBoard(int playerNumber, ITileProperties hex, Set<ITileProperties> thingsToRemove)
 	{
 		CommandValidator.validateCanRemoveThingsFromHex(playerNumber, hex, thingsToRemove, getCurrentState());
-		if(thingsToRemove.size() == 1 && thingsToRemove.iterator().next().isSpecialIncomeCounter())
+		if(thingsToRemove.size() == 1 && (thingsToRemove.iterator().next().isSpecialIncomeCounter() || 
+				(thingsToRemove.iterator().next().isSpecialCharacter() && currentState.getThingsToRemoveFromHex(currentState.getBoard().getHexStateForHex(hex))==0)))
 		{
 			//just remove it ourselves
-			ITileProperties counter = thingsToRemove.iterator().next();
-			currentState.getBoard().getHexStateForHex(hex).removeSpecialIncomeCounterFromHex();
-			currentState.getPlayerByPlayerNumber(playerNumber).removeOwnedThingOnBoard(counter);
-			currentState.getCup().reInsertTile(counter);
+			removePlayerThingFromBoard(playerNumber,hex,thingsToRemove.iterator().next());
+			
+			HexStatesChanged msg = new HexStatesChanged(1);
+			msg.getArray()[0] = currentState.getBoard().getHexStateForHex(hex);
+			msg.postNetworkEvent(ALL_PLAYERS_ID);
 		}
 		else
 		{

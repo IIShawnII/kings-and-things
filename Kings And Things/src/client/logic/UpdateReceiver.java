@@ -204,7 +204,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 									scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 									scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 									
-									RemoveThingsFromHexPanel panel = new RemoveThingsFromHexPanel(evt.getPlayerRemovingThings(), removalDialog, evt.getHex().getHex());
+									RemoveThingsFromHexPanel panel = new RemoveThingsFromHexPanel(evt.getPlayerRemovingThings().getID(), removalDialog, evt.getHex().getHex(), true);
 									panel.init(evt.getHex().getThingsInHexOwnedByPlayer(evt.getPlayerRemovingThings()), evt.getNumToRemove());
 									scrollPane.setViewportView(panel);
 									removalDialog.setContentPane(scrollPane);

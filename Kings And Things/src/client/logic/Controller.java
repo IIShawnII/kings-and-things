@@ -19,12 +19,15 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import client.gui.Board;
 import client.gui.components.ISelectionListener;
+import client.gui.components.RemoveThingsFromHexPanel;
 import client.gui.components.SelectThingsForMovementPanel;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
@@ -35,6 +38,7 @@ import client.gui.util.undo.UndoManager;
 import client.gui.util.undo.UndoTileMovement;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants;
 import common.Constants.BuildableBuilding;
 import common.Constants.Building;
@@ -391,7 +395,51 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					@Override
 					public void actionPerformed(ActionEvent arg0)
 					{
-						// TODO let player remove special income counter/heroes in hex
+						SwingWorker<Void,Void> removalDialogBuilder = new SwingWorker<Void,Void>(){
+							private volatile ViewHexContentsResponse response = null;
+							
+							@Override
+							protected Void doInBackground() throws Exception
+							{
+								UpdatePackage msg = new UpdatePackage(UpdateInstruction.ViewContents, UpdateKey.Hex,hex,"Board " + PLAYER_ID);
+								msg.putData(UpdateKey.Category, HexContentsTarget.REMOVAL);
+								msg.postNetworkEvent(PLAYER_ID);
+
+								while(response==null)
+								{
+									Thread.sleep(100);
+								}
+								return null;
+							}
+							
+							@Override
+							protected void done()
+							{
+								JFrame removalDialog = new JFrame("Remove things");
+								JScrollPane scrollPane = new JScrollPane();
+								scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+								scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+								
+								RemoveThingsFromHexPanel panel = new RemoveThingsFromHexPanel(PLAYER_ID, removalDialog, hex, false);
+								panel.init(response.getContents(), 0);
+								scrollPane.setViewportView(panel);
+								removalDialog.setContentPane(scrollPane);
+								removalDialog.pack();
+								removalDialog.setLocationRelativeTo(null);
+								removalDialog.setVisible(true);
+								EventDispatch.unregisterFromInternalEvents(this);
+							}
+							
+							@Subscribe
+							public void recieveHexContents(ViewHexContentsResponse response)
+							{
+								if(response.getTarget() == HexContentsTarget.REMOVAL)
+								{
+									this.response = response;
+								}
+							}};
+						EventDispatch.registerOnInternalEvents(removalDialogBuilder);
+						removalDialogBuilder.execute();
 					}});
 				clickMenu.add(removeThings);
 

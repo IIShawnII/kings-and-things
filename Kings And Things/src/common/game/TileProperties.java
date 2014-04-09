@@ -307,7 +307,6 @@ public class TileProperties implements ITileProperties{
 	@Override
 	public boolean isSpecialIncomeCounter()
 	{
-		
 		return (restrictions.contains(Restriction.Treasure) && isRestrictedToBiome()) || (isBuilding() && !isBuildableBuilding());
 	}
 

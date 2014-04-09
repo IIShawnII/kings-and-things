@@ -40,7 +40,7 @@ public final class Constants {
 		NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState, Special, Rejected, InitiateCombat, TargetPlayer, ThingChanged, 
 		ApplyHit, Retreat, RemoveThingsFromHex, HexStatesChanged, BribeCreature, ShowExplorationResults, MoveThings, RackChanged, ConstructBuilding, CallBluff, ViewContents}
 	
-	public enum HexContentsTarget{RETREAT,MOVEMENT,VIEW}
+	public enum HexContentsTarget{RETREAT,MOVEMENT,VIEW,REMOVAL}
 	
 	//Regular turn phases
 	public enum RegularPhase {RECRUITING_CHARACTERS, RECRUITING_THINGS, RANDOM_EVENTS, MOVEMENT, COMBAT, CONSTRUCTION, SPECIAL_POWERS}

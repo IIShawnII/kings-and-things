@@ -286,13 +286,21 @@ public class TwoSidedTileProperties implements ITileProperties {
 	@Override
 	public boolean isTreasure()
 	{
-		return false;
+		if( isFaceUp()){
+			return faceUp.isTreasure();
+		}else{
+			return faceDown.isTreasure();
+		}
 	}
 
 	@Override
 	public boolean isSpecialIncomeCounter()
 	{
-		return false;
+		if( isFaceUp()){
+			return faceUp.isSpecialIncomeCounter();
+		}else{
+			return faceDown.isSpecialIncomeCounter();
+		}
 	}
 
 	@Override

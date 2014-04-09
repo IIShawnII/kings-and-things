@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import server.logic.exceptions.NoMoreTilesException;
+
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Building;
@@ -18,7 +19,6 @@ import common.game.TwoSidedTileProperties;
 public class CupManager extends AbstractTileManager
 {
 	private static final long serialVersionUID = 1998393393444664606L;
-	private static final int CITY_COUNT = 6;
 	private static int id = 2;
 	
 	private final boolean isDemoMode;
@@ -190,32 +190,34 @@ public class CupManager extends AbstractTileManager
 
 	private void generateBuildingTilesInCup(Building b)
 	{
-		for(int i=0; i<CITY_COUNT; i++)
+		ArrayList<TileProperties> faceUpBuildings = new ArrayList<>(6);
+		ArrayList<TileProperties> faceDownBuildings = new ArrayList<>(6);
+		
+		for(TileProperties tp : Constants.BUILDING.values())
 		{
-			TileProperties buildingFaceUp = null;
-			TileProperties buildingFaceDown = null;
-			
-			for(TileProperties tp : Constants.BUILDING.values())
+			if(tp.getName().equals(b.name()))
 			{
-				if(tp.getName().equals(b.name()))
+				if(tp.hasAbility(Ability.Neutralised))
 				{
-					if(tp.hasAbility(Ability.Neutralised))
-					{
-						buildingFaceDown = tp;
-					}
-					else
-					{
-						buildingFaceUp = tp;
-					}
+					faceDownBuildings.add(tp);
+				}
+				else
+				{
+					faceUpBuildings.add(tp);
 				}
 			}
-			
-			if(buildingFaceUp == null || buildingFaceDown == null)
+		}
+		
+		for(int i=0; i<faceUpBuildings.size(); i++)
+		{
+			TileProperties faceUp = faceUpBuildings.get(i);
+			TileProperties faceDown = faceDownBuildings.get(i);
+			if(faceUp == null || faceDown == null)
 			{
 				throw new IllegalArgumentException("No building tiles found for type: " + b);
 			}
 			
-			reInsertTile(new TwoSidedTileProperties(new TileProperties(buildingFaceUp,id++),new TileProperties(buildingFaceDown,id++)));
+			reInsertTile(new TwoSidedTileProperties(new TileProperties(faceUp,id++),new TileProperties(faceDown,id++)));
 		}
 	}
 	

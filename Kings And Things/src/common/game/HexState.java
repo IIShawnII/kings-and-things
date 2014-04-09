@@ -313,7 +313,7 @@ public class HexState implements Serializable{
 		{
 			throw new IllegalArgumentException("Can not add more than one special income counter to a hex");
 		}
-		if(tile.isSpecialIncomeCounter() && tile.getBiomeRestriction() != getHex().getBiomeRestriction())
+		if(tile.isSpecialIncomeCounter() && tile.isRestrictedToBiome() && tile.getBiomeRestriction() != getHex().getBiomeRestriction())
 		{
 			throw new IllegalArgumentException("The special income counter is not keyed for this terrain type");
 		}

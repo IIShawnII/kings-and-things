@@ -88,7 +88,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 						tile.setCategory( Category.Building);
 						for(int i=0; i<6; i++){
 							TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
-							Constants.BUILDING.put( tile.hashCode(), tile);
+							Constants.BUILDING.put( tileCopy.hashCode(), tileCopy);
 							//Constants.CUP.put( tileCopy.hashCode(), tileCopy);
 							addImage(tileCopy.hashCode(), file);
 						}

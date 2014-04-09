@@ -18,7 +18,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
 import common.event.EventDispatch;
@@ -27,23 +26,27 @@ import common.event.network.HexNeedsThingsRemoved;
 import common.event.network.HexStatesChanged;
 import common.game.HexState;
 import common.game.ITileProperties;
-import common.game.Player;
 
 public class RemoveThingsFromHexPanel extends JPanel
 {
 	private static final long serialVersionUID = 5623429760419172554L;
 	private final HashMap<ITileProperties,JButton> thingsInHex;
-	private final Player p;
+	private final int playerID;
 	private final JLabel thingsToRemoveLabel;
 	private final JFrame parent;
 	private final ITileProperties hex;
+	private final boolean isMandatory;
 	
-	public RemoveThingsFromHexPanel(Player player, JFrame parent, ITileProperties hex)
+	public RemoveThingsFromHexPanel(int playerID, JFrame parent, ITileProperties hex, boolean isMandatory)
 	{
-		p = player;
+		this.playerID = playerID;
+		this.isMandatory = isMandatory;
 		this.parent = parent;
 		this.hex = hex;
-		parent.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		if(isMandatory)
+		{
+			parent.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		}
 		thingsInHex = new HashMap<>();
 		
 		thingsToRemoveLabel = new JLabel();
@@ -78,9 +81,9 @@ public class RemoveThingsFromHexPanel extends JPanel
 			thingButton.addActionListener(new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					UpdatePackage msg = new UpdatePackage(UpdateInstruction.RemoveThingsFromHex, UpdateKey.ThingArray, new ITileProperties[]{thing}, "RemoveThingsFromHex panel for player " + p);
+					UpdatePackage msg = new UpdatePackage(UpdateInstruction.RemoveThingsFromHex, UpdateKey.ThingArray, new ITileProperties[]{thing}, "RemoveThingsFromHex panel for player " + playerID);
 					msg.putData(UpdateKey.Hex, hex);
-					msg.postNetworkEvent(p.getID());
+					msg.postNetworkEvent(playerID);
 				}});
 			this.thingsInHex.put(thing, thingButton);
 			add(thingButton,constraints);
@@ -92,7 +95,7 @@ public class RemoveThingsFromHexPanel extends JPanel
 	
 	private void updateRemoveCountLabel(int removeCount)
 	{
-		thingsToRemoveLabel.setText("Select " + removeCount + " things to remove from this hex");
+		thingsToRemoveLabel.setText("Select " + (isMandatory? removeCount : "") + " things to remove from this hex");
 	}
 	
 	private void removeStuffNotInList(Collection<ITileProperties> things)
@@ -128,11 +131,11 @@ public class RemoveThingsFromHexPanel extends JPanel
 				@Override
 				public void run() {
 					int newCount = evt.getNumToRemove();
-					if(newCount == 0)
+					if(newCount == 0 && isMandatory)
 					{
 						close();
 					}
-					else
+					else if(isMandatory)
 					{
 						updateRemoveCountLabel(evt.getNumToRemove());
 					}
@@ -158,7 +161,7 @@ public class RemoveThingsFromHexPanel extends JPanel
 				Runnable logic = new Runnable(){
 					@Override
 					public void run() {
-						removeStuffNotInList(hs.getThingsInHexOwnedByPlayer(p));
+						removeStuffNotInList(hs.getThingsInHex());
 					}};
 					if(!SwingUtilities.isEventDispatchThread())
 					{
