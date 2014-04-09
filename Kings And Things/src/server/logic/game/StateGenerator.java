@@ -22,12 +22,12 @@ import common.game.PlayerInfo;
 
 public class StateGenerator
 {
-	public enum GeneratorType{EXPLORATION, MOVEMENT, CONSTRUCTION, MINIMAL_DEMO, AVERAGE_DEMO}
+	public enum GeneratorType{EXPLORATION, MOVEMENT, CONSTRUCTION, MINIMAL_DEMO, AVERAGE_DEMO, SUPERIOR_DEMO}
 	
 	private final String fileName;
 	private final boolean isLoadOperation;
 	private final GameState generatedState;
-	private final GeneratorType type = GeneratorType.AVERAGE_DEMO;
+	private final GeneratorType type = GeneratorType.SUPERIOR_DEMO;
 	
 	public StateGenerator(String fileName, boolean load) throws ClassNotFoundException, FileNotFoundException, IOException
 	{
@@ -75,6 +75,16 @@ public class StateGenerator
 				try
 				{
 					return generateAverageFunctionalityDemoState();
+				}
+				catch (NoMoreTilesException e)
+				{
+					e.printStackTrace();
+				}
+				break;
+			case SUPERIOR_DEMO:
+				try
+				{
+					return generateSuperiorFunctionalityDemoState();
 				}
 				catch (NoMoreTilesException e)
 				{
@@ -321,6 +331,71 @@ public class StateGenerator
 
 		removeBuildingFromHex(1,10,p3,state);
 		addThingByNameToHexForPlayer("City", new Point(1,10), p3, state);
+
+		removeBuildingFromHex(0,5,p4,state);
+		addThingByNameToHexForPlayer("Village", new Point(0,5), p4, state);
+		
+		addThingByNameToRackForPlayer("Diamond_Field", p1, state);
+		addThingByNameToRackForPlayer("Peat_Bog", p1, state);
+
+		addThingByNameToRackForPlayer("Copper_Mine", p2, state);
+		addThingByNameToRackForPlayer("Gold_Mine", p2, state);
+		addThingByNameToRackForPlayer("Pearl", p2, state);
+		
+		try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
+		{
+			os.writeObject(state);
+			os.flush();
+			
+			return state;
+		}
+	}
+
+	private GameState generateSuperiorFunctionalityDemoState() throws IOException, NoMoreTilesException
+	{
+		GameState state = generateHexesAndBuildings();
+		
+		Player p1 = state.getPlayerByPlayerNumber(state.getPlayerOrder().get(0));
+		Player p2 = state.getPlayerByPlayerNumber(state.getPlayerOrder().get(1));
+		Player p3 = state.getPlayerByPlayerNumber(state.getPlayerOrder().get(2));
+		Player p4 = state.getPlayerByPlayerNumber(state.getPlayerOrder().get(3));
+
+		removeBuildingFromHex(4,1,p1,state);
+		addThingByNameToHexForPlayer("Village", new Point(4,1), p1, state);
+		addThingByNameToHexForPlayer("Flying_Squirrel", new Point(4,5), p1, state);
+		addThingByNameToHexForPlayer("Pixies", new Point(4,5), p1, state);
+		addThingByNameToHexForPlayer("Giant_Spider", new Point(4,5), p1, state);
+		addThingByNameToHexForPlayer("Killer_Racoon", new Point(4,5), p1, state);
+		addThingByNameToHexForPlayer("Farmers", new Point(4,5), p1, state);
+		addThingByNameToHexForPlayer("Ice_Giant", new Point(4,5), p1, state);
+		addThingByNameToHexForPlayer("White_Dragon", new Point(4,5), p1, state);
+		addThingByNameToHexForPlayer("Head_Hunter", new Point(4,5), p1, state);
+		addThingByNameToHexForPlayer("Ghost", new Point(4,5), p1, state);
+		addThingByNameToHexForPlayer("Dark_Wizard", new Point(4,5), p1, state);
+
+		removeBuildingFromHex(6,7,p2,state);
+		addThingByNameToHexForPlayer("Village", new Point(6,7), p2, state);
+		addThingByNameToHexForPlayer("Thing", new Point(4,7), p2, state);
+		addThingByNameToHexForPlayer("Unicorn", new Point(4,7), p2, state);
+		addThingByNameToHexForPlayer("Bears", new Point(4,7), p2, state);
+		addThingByNameToHexForPlayer("Camel_Corps", new Point(4,7), p2, state);
+		addThingByNameToHexForPlayer("Sandworm", new Point(4,7), p2, state);
+		addThingByNameToHexForPlayer("Black_Knight", new Point(4,7), p2, state);
+		addThingByNameToHexForPlayer("Dervish", new Point(4,7), p2, state);
+		addThingByNameToHexForPlayer("Forester", new Point(4,7), p2, state);
+		addThingByNameToHexForPlayer("Pterodactyl_Warriors", new Point(4,7), p2, state);
+		addThingByNameToHexForPlayer("Bird_Of_Paradise", new Point(4,7), p2, state);
+
+		addThingByNameToHexForPlayer("Nomads", new Point(5,6), p2, state);
+		addThingByNameToHexForPlayer("Dervish", new Point(5,6), p2, state);
+		addThingByNameToHexForPlayer("Giant_Spider", new Point(5,6), p2, state);
+
+		removeBuildingFromHex(1,10,p3,state);
+		addThingByNameToHexForPlayer("City", new Point(1,10), p3, state);
+		addThingByNameToHexForPlayer("Walking_Tree", new Point(2,7), p3, state);
+		addThingByNameToHexForPlayer("Wild_Cat", new Point(2,7), p3, state);
+		addThingByNameToHexForPlayer("Elves", new Point(2,7), p3, state);
+		addThingByNameToHexForPlayer("Great_Owl", new Point(2,7), p3, state);
 
 		removeBuildingFromHex(0,5,p4,state);
 		addThingByNameToHexForPlayer("Village", new Point(0,5), p4, state);
