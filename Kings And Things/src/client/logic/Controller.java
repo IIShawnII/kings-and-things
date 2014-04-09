@@ -185,7 +185,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 							UpdatePackage update = new UpdatePackage( "Controll.input", null);
 							update.addInstruction( UpdateInstruction.ConstructBuilding);
 							update.putData( UpdateKey.Tile, currentTile.getProperties().getBuildable());
-							update.putData( UpdateKey.Hex, newLock.getHex());
+							update.putData( UpdateKey.Hex, newLock.getHex().getState().getHex());
 							update.postNetworkEvent( PLAYER_ID);
 						}
 						break;
@@ -412,7 +412,6 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					public void actionPerformed(ActionEvent arg0)
 					{
 						BuildableBuilding toConstruct = source.getState().getBuilding().getNextBuilding();
-						BuildableBuilding existing = source.getState().getBuilding().getBuildable();
 						UpdatePackage msg = new UpdatePackage(UpdateInstruction.ConstructBuilding, UpdateKey.Hex, source.getState().getHex(), "Board " + PLAYER_ID);
 						msg.putData(UpdateKey.Tile, toConstruct);
 						msg.postNetworkEvent(PLAYER_ID);
