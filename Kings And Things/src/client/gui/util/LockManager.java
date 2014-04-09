@@ -122,7 +122,7 @@ public class LockManager {
 		}else{
 			lock = getPermanentLock( Category.Hex);
 		}
-		return lock.canTempHold( tile)?lock:null;
+		return lock.contains(tile.getCenter())&&lock.canTempHold( tile)?lock:null;
 	}
 	
 	private Lock lookThroughLocks( Lock[][] locks, Point point, boolean isTile){

@@ -1,5 +1,7 @@
 package client.logic;
 
+import static common.Constants.HEX_SIZE;
+
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -63,14 +65,15 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private RollReason lastRollReason;
 	private Rectangle bound, boardBound;
 	private ITileProperties lastRollTarget;
-	private volatile boolean useDice = false;
 	private ITileProperties lastCombatResolvedHex;
 	private final HashSet<ITileProperties> lastMovementSelection;
 	private final LinkedHashSet<ITileProperties> hexMovementSelection;
 	
-	public Controller(boolean demo, LockManager locks, final int ID){
+	public Controller(Board board, boolean demo, LockManager locks, final int ID){
+		this.board = board;
 		this.locks = locks;
 		this.PLAYER_ID = ID;
+		this.demo = demo;
 		lastMovementSelection = new HashSet<>();
 		hexMovementSelection = new LinkedHashSet<>();
 		this.receiver = new UpdateReceiver( this, ID);
@@ -306,7 +309,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private void tryToRoll( MouseEvent e){
 		if( SwingUtilities.isLeftMouseButton(e)){
 			if( e.getSource()==board.getDice()){
-				if( useDice && board.getDice().canRoll()){
+				if( board.getDice().canRoll()){
 					int rollValue = 0;
 					if(demo){
 						try{
@@ -314,12 +317,11 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 						}catch(NumberFormatException ex){
 							rollValue = 0;
 						}
+						if( rollValue<board.getDice().getDiceCount()*Constants.MIN_DICE_FACE || rollValue>board.getDice().getDiceCount()*Constants.MAX_DICE_FACE){
+							board.setStatusMessage( "value must be between " + (board.getDice().getDiceCount()*Constants.MIN_DICE_FACE) + " and " + (board.getDice().getDiceCount()*Constants.MAX_DICE_FACE));
+							return;
+						}
 					}
-					if( rollValue<board.getDice().getDiceCount()*Constants.MIN_DICE_FACE || rollValue>board.getDice().getDiceCount()*Constants.MAX_DICE_FACE){
-						board.setStatusMessage( "value must be between " + (board.getDice().getDiceCount()*Constants.MIN_DICE_FACE) + " and " + (board.getDice().getDiceCount()*Constants.MAX_DICE_FACE));
-						return;
-					}
-					useDice = false;
 					Roll roll = new Roll( board.getDice().getDiceCount(), lastRollTarget, lastRollReason, PLAYER_ID, rollValue);
 					new UpdatePackage( UpdateInstruction.NeedRoll, UpdateKey.Roll, roll,"Board "+PLAYER_ID).postNetworkEvent( PLAYER_ID);
 					board.getDice().roll();
@@ -612,5 +614,19 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	@Override
 	public void animateRackPlacement(ITileProperties[] tiles) {
 		board.animateRackPlacement(tiles);
+	}
+
+	@Override
+	public void placeNewHexOnBOard(HexState state) {
+		Lock start = locks.getPermanentLock( state.getHex().getCategory());
+		Tile hex = board.addTile( new Hex( state), new Rectangle( start.getCenter(),HEX_SIZE), false);
+		Lock end = locks.getLockForHex( hex.getLocation());
+		hex.setDestination(end.getCenter());
+		board.getAnimator().start(hex);
+	}
+
+	@Override
+	public void resetPhase() {
+		board.phaseDone();
 	}
 }

@@ -107,7 +107,7 @@ public class Board extends JPanel implements CanvasParent{
 		TILE_OUTLINE.setLocation( 0, 0);
 		g2d.dispose();
 	}
-
+	private final boolean demo;
 	private volatile boolean isActive = false;
 	private volatile boolean phaseDone = false;
 
@@ -125,11 +125,8 @@ public class Board extends JPanel implements CanvasParent{
 	 */
 	public Board( boolean demo, PlayerInfo player){
 		super( null, true);
-		setCurrentPlayer(player);
-		controller = new Controller( demo, locks, player.getID());
-		addMouseListener( controller);
-		addMouseWheelListener( controller);
-		addMouseMotionListener( controller);
+		this.demo = demo;
+		setCurrentPlayer( player);
 	}
 
 	public void setActive( boolean active) {
@@ -142,6 +139,11 @@ public class Board extends JPanel implements CanvasParent{
 	 */
 	public void init( int playerCount){
 		moveAnimation = new MoveAnimation( this);
+		locks = new LockManager( playerCount);
+		controller = new Controller( this, demo, locks, currentPlayer.getID());
+		addMouseListener( controller);
+		addMouseWheelListener( controller);
+		addMouseMotionListener( controller);
 
 		dice = new DiceRoller();
 		dice.setBounds( HEX_BOARD_SIZE.width+DICE_SIZE, getHeight()-(DICE_SIZE*2)-10, DICE_SIZE, DICE_SIZE);
@@ -149,7 +151,6 @@ public class Board extends JPanel implements CanvasParent{
 		dice.addMouseListener( controller);
 		add( dice);
 		
-		locks = new LockManager( playerCount);
 		jtfStatus = new JTextField("Welcome to Kings & Things");
 		jtfStatus.setBounds( 10, getHeight()-40, HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING, 35);
 		jtfStatus.setEditable( false);
@@ -197,7 +198,7 @@ public class Board extends JPanel implements CanvasParent{
 	 * @param lock - if true this tile is fake and cannot be animated, and uses a Permanent Lock
 	 * @return fully created tile that was added to board
 	 */
-	private Tile addTile( Tile tile, Rectangle bound, boolean lock){
+	public Tile addTile( Tile tile, Rectangle bound, boolean lock){
 		tile.init();
 		tile.setBounds( bound);
 		tile.setLockArea( locks.getPermanentLock( tile));
@@ -246,16 +247,14 @@ public class Board extends JPanel implements CanvasParent{
 	 * @return array of tiles in order they were created
 	 */
 	private Tile[] setupHexesForPlacement( HexState[] hexes) {
-		Tile tile = null;
-		int x, y, hexCount = hexes==null?Constants.MAX_HEXES_ON_BOARD:hexes.length;
+		int x, y, hexCount = hexes.length;
 		Tile[] list = new Tile[hexCount];
 		for(int ring=0, drawIndex=0; ring<BOARD_LOAD_ROW.length&&drawIndex<hexCount; ring++){
 			for( int count=0; count<BOARD_LOAD_ROW[ring].length&&drawIndex<hexCount; count++, drawIndex++){
-				tile = addTile( new Hex( hexes==null?new HexState():hexes[drawIndex]), new Rectangle( 8,8,HEX_SIZE.width, HEX_SIZE.height), false);
+				list[drawIndex] = addTile( new Hex( hexes[drawIndex]), new Rectangle( 8,8,HEX_SIZE.width, HEX_SIZE.height), false);
 				x = (WIDTH_SEGMENT*Constants.BOARD_LOAD_COL[ring][count]);
 				y = (HEIGHT_SEGMENT*BOARD_LOAD_ROW[ring][count])+Constants.BOARD_TOP_PADDING;
-				tile.setDestination( x, y);
-				list[drawIndex] = tile;
+				list[drawIndex].setDestination( x, y);
 			}
 		}
 		return list;
@@ -267,8 +266,7 @@ public class Board extends JPanel implements CanvasParent{
 	 * @return array of tiles in order they were created
 	 */
 	private Tile[] setupTilesForRack( ITileProperties[] prop) {
-		Tile tile = null;
-		Tile[] list = new Tile[Constants.MAX_RACK_SIZE];
+		Tile[] list = new Tile[ prop.length];
 		Lock lock = locks.getPermanentLock( Category.Cup);
 		Point center = lock.getCenter();
 		//create bound for starting position of tile
@@ -276,17 +274,16 @@ public class Board extends JPanel implements CanvasParent{
 		addTile( new Tile( new TileProperties( Category.Cup)), start, true);
 		//create bound for destination location, this bound starts from outside of board
 		Rectangle bound = new Rectangle( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-TILE_SIZE.height-PADDING, TILE_SIZE.width, TILE_SIZE.height);
-		for( int count=0; count<Constants.MAX_RACK_SIZE; count++){
-			tile = addTile( new Tile( prop==null || count>=prop.length?new TileProperties(Category.Cup):prop[count]), start, false);
+		for( int count=0; count<prop.length; count++){
+			list[count] = addTile( new Tile( prop==null || count>=prop.length?new TileProperties(Category.Cup):prop[count]), start, false);
 			if( count==5){
 				// since rack is two rows of five, at half all bounds must be shifted up, this bound starts from outside of board
 				bound.setLocation( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-(2*TILE_OUTLINE.height)-(PADDING*2));
 			}
 			bound.translate( -TILE_X_SHIFT, 0);
 			//set final destination for tile to be animated later
-			tile.setDestination( bound.x+TILE_SIZE.width/2, bound.y+TILE_SIZE.height/2);
-			tile.flip();
-			list[count] = tile;
+			list[count].setDestination( bound.x+TILE_SIZE.width/2, bound.y+TILE_SIZE.height/2);
+			list[count].flip();
 		}
 		return list;
 	}

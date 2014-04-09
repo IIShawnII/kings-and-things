@@ -13,6 +13,8 @@ import common.game.PlayerInfo;
 public interface Control {
 	
 	public void undo();
+
+	public void resetPhase();
 	
 	public void placeTowers();
 	
@@ -41,6 +43,8 @@ public interface Control {
 	public void setPlayers( PlayerInfo[] players);
 	
 	public void setDiceResult( List<Integer> list);
+	
+	public void placeNewHexOnBOard( HexState state);
 
 	public void setCurrentPlayer( PlayerInfo player);
 	

@@ -61,6 +61,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 	 */
 	public void updateBoard( UpdatePackage update){
 		HexState hex = null;
+		controller.resetPhase();
 		for( UpdateInstruction instruction : update.getInstructions()){
 			switch( instruction){
 				case UpdatePlayers:
@@ -100,9 +101,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 					controller.flipAllHexes();
 					break;
 				case SeaHexChanged:
-					hex = (HexState)update.getData( UpdateKey.HexState);
-					controller.getLockForHex( hex.getLocation()).getHex().setState( hex);
-					
+					controller.placeNewHexOnBOard( (HexState)update.getData( UpdateKey.HexState));
 					break;
 				case GameState:
 					controller.animateHexPlacement( (HexState[]) update.getData( UpdateKey.Hex));
