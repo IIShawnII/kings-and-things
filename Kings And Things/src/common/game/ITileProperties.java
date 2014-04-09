@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import common.Constants.Ability;
 import common.Constants.Biome;
+import common.Constants.BuildableBuilding;
+import common.Constants.Building;
 import common.Constants.Category;
 import common.Constants.Restriction;
 
@@ -42,6 +44,9 @@ public interface ITileProperties extends Serializable
 	boolean hasRestriction( Restriction restriction);
 	boolean hasRestriction();
 	ITileProperties clone();
+	BuildableBuilding getBuildable();
+	Building getBuilding();
+	BuildableBuilding getNextBuilding();
 	//used only on the client side
 	boolean isFake();
 }

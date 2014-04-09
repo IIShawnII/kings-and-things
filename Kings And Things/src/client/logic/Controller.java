@@ -161,7 +161,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 							if( hex!=null){
 								undoManger.addUndo( new UndoTileMovement(currentTile, hex));
 								removeCurrentTile();
-								new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Board.Input").postNetworkEvent( PLAYER_ID);
+								new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Controll.Input").postNetworkEvent( PLAYER_ID);
 							}
 						}
 						break;
@@ -171,7 +171,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 						if( newLock.canTempHold( currentTile)){
 							undoManger.addUndo( new UndoTileMovement(currentTile));
 							removeCurrentTile();
-							new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Board.Input").postNetworkEvent( PLAYER_ID);
+							new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Controll.Input").postNetworkEvent( PLAYER_ID);
 						}
 						break;
 					case MoveFromCup:
@@ -179,6 +179,15 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					case MoveFromRack:
 						break;
 					case MoveTower:
+						if( newLock.canHold( currentTile)){
+							//TODO need to update undo manager
+							removeCurrentTile();
+							UpdatePackage update = new UpdatePackage( "Controll.input", null);
+							update.addInstruction( UpdateInstruction.ConstructBuilding);
+							update.putData( UpdateKey.Tile, currentTile.getProperties().getBuildable());
+							update.putData( UpdateKey.Hex, newLock.getHex());
+							update.postNetworkEvent( PLAYER_ID);
+						}
 						break;
 					default:
 						return;
@@ -402,24 +411,8 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					@Override
 					public void actionPerformed(ActionEvent arg0)
 					{
-						BuildableBuilding toConstruct = null;
-						BuildableBuilding existing = null;
-						for(BuildableBuilding bb : BuildableBuilding.values())
-						{
-							if(bb.name().equals(source.getState().getBuilding().getName()))
-							{
-								existing = bb;
-								break;
-							}
-						}
-						for(BuildableBuilding bb : BuildableBuilding.values())
-						{
-							if(bb.ordinal() == 1+existing.ordinal())
-							{
-								toConstruct = bb;
-								break;
-							}
-						}
+						BuildableBuilding toConstruct = source.getState().getBuilding().getNextBuilding();
+						BuildableBuilding existing = source.getState().getBuilding().getBuildable();
 						UpdatePackage msg = new UpdatePackage(UpdateInstruction.ConstructBuilding, UpdateKey.Hex, source.getState().getHex(), "Board " + PLAYER_ID);
 						msg.putData(UpdateKey.Tile, toConstruct);
 						msg.postNetworkEvent(PLAYER_ID);

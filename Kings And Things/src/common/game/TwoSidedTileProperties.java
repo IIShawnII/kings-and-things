@@ -2,6 +2,8 @@ package common.game;
 
 import common.Constants.Ability;
 import common.Constants.Biome;
+import common.Constants.BuildableBuilding;
+import common.Constants.Building;
 import common.Constants.Category;
 import common.Constants.Restriction;
 
@@ -297,5 +299,32 @@ public class TwoSidedTileProperties implements ITileProperties {
 	public boolean isFake()
 	{
 		return false;
+	}
+
+	@Override
+	public BuildableBuilding getBuildable() {
+		if( isFaceUp()){
+			return faceUp.getBuildable();
+		}else{
+			return faceDown.getBuildable();
+		}
+	}
+
+	@Override
+	public Building getBuilding() {
+		if( isFaceUp()){
+			return faceUp.getBuilding();
+		}else{
+			return faceDown.getBuilding();
+		}
+	}
+
+	@Override
+	public BuildableBuilding getNextBuilding() {
+		if( isFaceUp()){
+			return faceUp.getNextBuilding();
+		}else{
+			return faceDown.getNextBuilding();
+		}
 	}
 }

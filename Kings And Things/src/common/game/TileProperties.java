@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Biome;
+import common.Constants.BuildableBuilding;
+import common.Constants.Building;
 import common.Constants.Category;
 import common.Constants.Restriction;
 
@@ -24,6 +26,8 @@ public class TileProperties implements ITileProperties{
 	private ArrayList< Ability> abilities;
 	private ArrayList< Restriction> restrictions;
 	private Category tileType;
+	private BuildableBuilding buildable;
+	private Building building;
 	private Biome biome;
 	
 	private final long id;
@@ -36,7 +40,7 @@ public class TileProperties implements ITileProperties{
 	 */
 	public TileProperties( Category category){
 		fake = true;
-		tileType = category;
+		setCategory( category);
 		baseValue = 0;
 		this.abilities = new ArrayList<>();
 		this.restrictions = new ArrayList<>();
@@ -53,7 +57,7 @@ public class TileProperties implements ITileProperties{
 		hasFlip = tile.hasFlip;
 		specialFlip = tile.specialFlip;
 		moveSpeed = tile.moveSpeed;
-		tileType = tile.tileType;
+		setCategory( tile.tileType);
 		isFaceUp = tile.isFaceUp;
 		biome = tile.biome;
 	}
@@ -84,7 +88,7 @@ public class TileProperties implements ITileProperties{
 		isFaceUp = other.isFaceUp;
 		abilities = new ArrayList<>(other.abilities);
 		restrictions = new ArrayList<>(other.restrictions);
-		tileType = other.tileType;
+		setCategory( other.tileType);
 		biome = other.biome;
 		id = other.id;
 		fake = other.fake;
@@ -103,6 +107,16 @@ public class TileProperties implements ITileProperties{
 	
 	protected void setCategory( Category category){
 		tileType = category;
+		switch( tileType){
+			case Buildable:
+				buildable = BuildableBuilding.valueOf( name);
+				break;
+			case Building:
+				building = Building.valueOf( name);
+				break;
+			default:
+				break;
+		}
 	}
 	
 	@Override
@@ -332,5 +346,25 @@ public class TileProperties implements ITileProperties{
 	@Override
 	public boolean hasRestriction( Restriction restriction){
 		return restrictions.contains( restriction);
+	}
+
+	@Override
+	public BuildableBuilding getBuildable() {
+		return buildable;
+	}
+
+	@Override
+	public Building getBuilding() {
+		return building;
+	}
+
+	@Override
+	public BuildableBuilding getNextBuilding() {
+		int next = buildable.ordinal()+1;
+		BuildableBuilding[] bb = BuildableBuilding.values();
+		if( next >= bb.length ){
+			return null;
+		}
+		return bb[next];
 	}
 }
