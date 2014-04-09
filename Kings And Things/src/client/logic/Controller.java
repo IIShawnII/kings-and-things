@@ -56,9 +56,9 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private Point lastPoint;
 	private Tile currentTile;
 	private LockManager locks;
-	private HexState movingState;
 	private UndoManager undoManger;
 	private Permissions permission;
+	@SuppressWarnings("unused")
 	private UpdateReceiver receiver;
 	private RollReason lastRollReason;
 	private Rectangle bound, boardBound;
@@ -101,7 +101,6 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			boardBound = board.getBounds();
 			bound = currentTile.getBounds();
 			lastPoint = bound.getLocation();
-			//TODO adjust click to prevent centering all the time
 			bound.x = e.getX()-(bound.width/2);
 			if( !boardBound.contains( bound)){
 				bound.x = lastPoint.x;
@@ -530,8 +529,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 
 	@Override
 	public void setStatusMessage(String message) {
-		// TODO Auto-generated method stub
-		
+		board.setStatusMessage(message);
 	}
 
 	@Override
@@ -553,76 +551,66 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 
 	@Override
 	public void placeTowers() {
-		// TODO Auto-generated method stub
-		
+		board.placeTower();
 	}
 
 	@Override
 	public boolean isRolling() {
-		// TODO Auto-generated method stub
-		return false;
+		return board.getDice().isRolling();
 	}
 
 	@Override
 	public void placeMarkers() {
-		// TODO Auto-generated method stub
-		
+		board.placeMarkers();
 	}
 
 	@Override
 	public void flipAllHexes() {
-		// TODO Auto-generated method stub
-		
+		board.FlipAllHexes();
 	}
 
 	@Override
 	public void requestRepaint() {
-		// TODO Auto-generated method stub
-		
+		board.repaint();
 	}
 
 	@Override
 	public void setDiceCount(int count) {
-		// TODO Auto-generated method stub
-		
+		board.getDice().setDiceCount(count);
 	}
 
 	@Override
 	public RollReason getLastRollReason() {
-		// TODO Auto-generated method stub
-		return null;
+		return lastRollReason;
 	}
 
 	@Override
 	public Lock getLockForHex(Point point) {
-		// TODO Auto-generated method stub
-		return null;
+		return locks.getLockForHex(point);
 	}
 
 	@Override
 	public ITileProperties getLastRollTarget() {
-		// TODO Auto-generated method stub
-		return null;
+		return lastRollTarget;
 	}
 
 	@Override
 	public void setDiceResult(List<Integer> list) {
-		// TODO Auto-generated method stub
+		board.getDice().setResult(list);
 	}
 
 	@Override
 	public ITileProperties getLastCombatResolvedHex() {
-		// TODO Auto-generated method stub
-		return null;
+		return lastCombatResolvedHex;
 	}
 
 	@Override
 	public void animateHexPlacement(HexState[] tiles) {
-		// TODO Auto-generated method stub
+		board.animateHexPlacement(tiles);
 	}
 
 	@Override
 	public void animateRackPlacement(ITileProperties[] tiles) {
-		// TODO Auto-generated method stub
+		board.animateRackPlacement(tiles);
 	}
 }
