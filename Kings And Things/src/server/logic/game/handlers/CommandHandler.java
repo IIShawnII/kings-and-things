@@ -16,6 +16,7 @@ import server.event.PlayerWaivedRetreat;
 import server.event.internal.CallBluffCommand;
 import server.event.internal.DoneRollingCommand;
 import server.event.internal.EndPlayerTurnCommand;
+import server.event.internal.GetAvailableHeroesCommand;
 import server.event.internal.PlayTreasureCommand;
 import server.event.internal.RemoveThingsFromHexCommand;
 import server.event.internal.RollDiceCommand;
@@ -41,6 +42,7 @@ import common.event.network.CommandRejected;
 import common.event.network.CurrentPhase;
 import common.event.network.DieRoll;
 import common.event.network.Flip;
+import common.event.network.GetAvailableHeroesResponse;
 import common.event.network.HexOwnershipChanged;
 import common.event.network.HexStatesChanged;
 import common.event.network.PlayersList;
@@ -111,6 +113,12 @@ public abstract class CommandHandler
 	public void viewHexContents(int playerNumber, ITileProperties hex, HexContentsTarget target)
 	{
 		new ViewHexContentsResponse(prepareHexForViewingByPlayer(hex,playerNumber).getThingsInHex(),target).postNetworkEvent(playerNumber);
+	}
+	
+	public void getAvailableHeroes(int playerNumber)
+	{
+		//no reason to ever deny access
+		new GetAvailableHeroesResponse(currentState.getBankHeroes().getAvailableHeroes()).postNetworkEvent(playerNumber);
 	}
 	
 	protected HexState prepareHexForViewingByPlayer(ITileProperties hex, int playerNumber)
@@ -690,6 +698,23 @@ public abstract class CommandHandler
 			{
 				Logger.getErrorLogger().error("Unable to process ViewHexContentsCommand due to: ", t);
 				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.ViewContents).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			}
+		}
+	}
+
+	@Subscribe
+	public void receiveGetAvailableHeroesCommand(GetAvailableHeroesCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				getAvailableHeroes(command.getID());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process GetAvailableHeroesCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.GetHeroes).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

@@ -11,6 +11,7 @@ import server.event.internal.CallBluffCommand;
 import server.event.internal.ConstructBuildingCommand;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.ExchangeThingsCommand;
+import server.event.internal.GetAvailableHeroesCommand;
 import server.event.internal.MoveThingsCommand;
 import server.event.internal.PlaceThingOnBoardCommand;
 import server.event.internal.PlayTreasureCommand;
@@ -178,6 +179,9 @@ public class PlayerConnection implements Runnable{
 						break;
 					case PlayTreasure:
 						new PlayTreasureCommand((ITileProperties)event.getData(UpdateKey.Tile)).postInternalEvent(ID);
+						break;
+					case GetHeroes:
+						new GetAvailableHeroesCommand().postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());

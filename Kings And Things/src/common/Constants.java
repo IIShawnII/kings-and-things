@@ -38,7 +38,8 @@ public final class Constants {
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea, Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray, None}
 	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers, Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, PlayTreasure,
 		NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState, Special, Rejected, InitiateCombat, TargetPlayer, ThingChanged, 
-		ApplyHit, Retreat, RemoveThingsFromHex, HexStatesChanged, BribeCreature, ShowExplorationResults, MoveThings, RackChanged, ConstructBuilding, CallBluff, ViewContents}
+		ApplyHit, Retreat, RemoveThingsFromHex, HexStatesChanged, BribeCreature, ShowExplorationResults, MoveThings, RackChanged, ConstructBuilding, CallBluff, ViewContents,
+		GetHeroes}
 	
 	public enum HexContentsTarget{RETREAT,MOVEMENT,VIEW,REMOVAL}
 	
