@@ -180,7 +180,7 @@ public final class Constants {
 																												.put("Swordmaster","Mountain_King")
 																												.put("Lord_Of_Eagles","Master_Theif")
 																												.put("Jungle_Lord","Arch_Cleric")
-																												.put("Baron_Munchausen","Desert_Master")
+																												.put("Desert_Master","Baron_Munchausen")
 																												.put("Elf_Lord","Ice_Lord")
 																												.put("Arch_Mage","Ghaog_II")
 																												.put("Dwarf_King","Warlord")

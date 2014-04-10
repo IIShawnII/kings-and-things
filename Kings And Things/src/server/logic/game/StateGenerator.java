@@ -548,7 +548,7 @@ public class StateGenerator
 		}
 		for(ITileProperties thing : removedThings)
 		{
-			state.getCup().reInsertTile(thing);
+			state.getCup().hackReInsertTile(thing);
 		}
 		state.getBoard().getHexByXY(loc.x, loc.y).addThingToHexForExploration(nextThing);
 	}
@@ -569,7 +569,7 @@ public class StateGenerator
 		}
 		for(ITileProperties thing : removedThings)
 		{
-			state.getCup().reInsertTile(thing);
+			state.getCup().hackReInsertTile(thing);
 		}
 	}
 	
@@ -594,7 +594,7 @@ public class StateGenerator
 		
 		for(ITileProperties thing : removedThings)
 		{
-			state.getCup().reInsertTile(thing);
+			state.getCup().hackReInsertTile(thing);
 		}
 	}
 	
@@ -618,7 +618,7 @@ public class StateGenerator
 		
 		for(ITileProperties thing : removedThings)
 		{
-			state.getCup().reInsertTile(thing);
+			state.getCup().hackReInsertTile(thing);
 		}
 	}
 }

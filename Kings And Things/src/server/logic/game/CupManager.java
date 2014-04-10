@@ -233,6 +233,11 @@ public class CupManager extends AbstractTileManager
 		}
 	}
 	
+	void hackReInsertTile(ITileProperties tile)
+	{
+		super.reInsertTile(tile);
+	}
+	
 	public boolean isEmpty()
 	{
 		synchronized(tiles)
