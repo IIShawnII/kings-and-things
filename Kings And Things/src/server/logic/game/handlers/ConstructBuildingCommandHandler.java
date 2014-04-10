@@ -49,6 +49,7 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 			}
 			new PlayersList(getCurrentState().getPlayers()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		}
+		getCurrentState().setWillingWorkersPlayed(false);
 		getCurrentState().addHexToListOfConstructedHexes(hs);
 		HexStatesChanged msg = new HexStatesChanged(1);
 		msg.getArray()[0] = hs;

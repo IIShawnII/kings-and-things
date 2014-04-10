@@ -446,7 +446,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			case PlayTreasure:
 				return tile.getProperties().isTreasure() && !tile.getProperties().isSpecialIncomeCounter();
 			case RandomEvents:
-				return tile.isTile() && tile.getProperties().isEvent();
+				return tile.isTile() && (tile.getProperties().isEvent() || tile.getProperties().isBuildableBuilding());
 			default:
 				throw new IllegalStateException(" Encountered none tile permission: " + permission);
 		}
