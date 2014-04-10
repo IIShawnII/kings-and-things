@@ -228,7 +228,10 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				 else if (targetHex.getBuilding().getName().equals(BuildableBuilding.Keep.name())) {
 					new ConstructBuildingCommand(BuildableBuilding.Castle, targetOfEvent).postInternalEvent(playerID);
 				 }
-				break;
+				getCurrentState().setWillingWorkersPlayed(true);
+				playerApplyingRandomEvent.removeThingFromTray(randomEventTile);
+				notifyClientsOfPlayerTray(playerID);
+ 				break;
 		}
 	}
 	

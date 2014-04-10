@@ -34,6 +34,10 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 		{
 			advanceActivePhasePlayer();
 		}
+		if(getCurrentState().hasWillingWorkersPlayed())
+		{
+			
+		}
 	}
 
 	private void makeBuildingConstructed(BuildableBuilding building, int playerNumber, ITileProperties hex)
@@ -44,7 +48,9 @@ public class ConstructBuildingCommandHandler extends CommandHandler
 		hs.addThingToHex(buildingTile);
 		getCurrentState().getPlayerByPlayerNumber(playerNumber).addOwnedThingOnBoard(buildingTile);
 		if (getCurrentState().getCurrentSetupPhase() == SetupPhase.SETUP_FINISHED) {
-			getCurrentState().getPlayerByPlayerNumber(playerNumber).removeGold(5);
+			if (!getCurrentState().hasWillingWorkersPlayed()) {
+				getCurrentState().getPlayerByPlayerNumber(playerNumber).removeGold(5);
+			}
 			new PlayersList(getCurrentState().getPlayers()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 		}
 		getCurrentState().addHexToListOfConstructedHexes(hs);

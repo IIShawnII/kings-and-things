@@ -58,6 +58,7 @@ public class GameState implements Serializable
 	private final HashMap<HexState,Integer> hexesThatNeedThingsRemoved;
 	private final HashMap<Integer,Integer> playerTargets;
 	private boolean recruitedOnce;
+	private boolean willingWorkersPlayed;
 
 	/**
 	 * Creates a new GameState object
@@ -231,6 +232,16 @@ public class GameState implements Serializable
 	public void setRecruitedOnce(boolean newVal)
 	{
 		recruitedOnce = newVal;
+	}
+	
+	public boolean hasWillingWorkersPlayed() 
+	{
+		return willingWorkersPlayed;
+	}
+	
+	public void setWillingWorkersPlayed(boolean newVal) 
+	{
+		willingWorkersPlayed = newVal;
 	}
 	
 	public CupManager getCup()
