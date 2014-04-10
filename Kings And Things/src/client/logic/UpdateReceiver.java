@@ -292,7 +292,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 		//TODO Handle More Rejections
 		switch( data){
 			case Skip:
-				controller.setPermission( Permissions.NoMove);
+				//controller.setPermission( Permissions.NoMove);
 				controller.setStatusMessage( "Cannot skip this phase");
 				break;
 			case TieRoll:
@@ -310,6 +310,8 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 				controller.setStatusMessage( "WARN - cannot own this hex");
 				controller.undo();
 				break;
+			case RecruitThings:
+				controller.setHasRecruited(false);
 			default:
 				controller.setStatusMessage( "WARN - Inavlid move");
 				Logger.getStandardLogger().warn( "No handle for rejection of: " + data);
@@ -340,6 +342,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 				break;
 			case RECRUITING_THINGS:
 				controller.setPermission(Permissions.RecruitThings);
+				controller.setHasRecruited(false);
 				controller.setStatusMessage( "Recruit things");
 				break;
 			case SPECIAL_POWERS:

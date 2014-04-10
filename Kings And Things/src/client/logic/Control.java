@@ -61,5 +61,7 @@ public interface Control {
 	
 	public void showErrorMessage( String title, String message);
 	
+	public void setHasRecruited(boolean newVal);
+	
 	public void prepareForRollDice( int count, RollReason reason, String message, ITileProperties target);
 }

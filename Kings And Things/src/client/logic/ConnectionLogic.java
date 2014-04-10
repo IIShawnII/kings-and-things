@@ -188,6 +188,9 @@ public class ConnectionLogic implements Runnable {
 							case Skip:
 								update.putData(UpdateKey.Instruction, instruction);
 								break;
+							case RecruitThings:
+								update.putData(UpdateKey.Instruction, instruction);
+								break;
 							default:
 								Logger.getErrorLogger().fatal("Logic.Receive " + (player!=null?player.getID():"-1") + ": No Support for rejection: " + instruction);
 								break;

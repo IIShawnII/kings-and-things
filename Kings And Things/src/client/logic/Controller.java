@@ -87,6 +87,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private volatile boolean isHandVisible = false;
 	private volatile int goldAmount = 0;
 	private final HashSet<ITileProperties> thingsToExchange = new HashSet<>();
+	private boolean hasRecruited = false;
 	
 	public Controller(Board board, boolean demo, LockManager locks, final int ID){
 		this.board = board;
@@ -145,16 +146,39 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					case MoveMarker:
 					case MoveTower:
 					case PlayTreasure:
-					case RecruitThings:
-					case RandomEvents:
+					case ResolveCombat:
 						newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
+						break;
+					case RecruitThings:
+						newLock = hasRecruited? locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2)) : locks.getPermanentLock( currentTile);
+						if(newLock!=null && !newLock.contains(currentTile.getCenter()))
+						{
+							newLock = null;
+						}
 						break;
 					case ExchangeHex:
 					case ExchangeThing:
+					case RandomEvents:
 						newLock = locks.getDropLock( currentTile);
 						break;
 					default:
-						return;
+						break;
+				}
+				if(currentTile.getProperties().isTreasure() && !currentTile.getProperties().isSpecialIncomeCounter())
+				{
+					newLock = locks.getPermanentLock( currentTile);
+					if(newLock!=null && !newLock.contains(currentTile.getCenter()))
+					{
+						newLock = null;
+					}
+				}
+				else if(currentTile.getProperties().isEvent())
+				{
+					newLock = locks.getPermanentLock( currentTile);
+					if(newLock!=null && !newLock.contains(currentTile.getCenter()))
+					{
+						newLock = null;
+					}
 				}
 				if( newLock!=null){
 					currentTile.setLockArea( newLock);
@@ -198,7 +222,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 							break;
 						case RecruitThings:
 						case ExchangeThing:
-							if(SwingUtilities.getDeepestComponentAt(board, e.getX(), e.getY()) instanceof Hex)
+							if(newLock.getHex()!=null)
 							{
 								if( newLock.canHold( currentTile)){
 									//TODO need to update undo manager
@@ -237,15 +261,17 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 							}
 							break;
 						case RandomEvents:
-							if( newLock.canHold( currentTile)){
-								//TODO need to update undo manager
-								removeCurrentTile();
-								UpdatePackage update = new UpdatePackage( "Controll.input", null);
-								update.addInstruction( UpdateInstruction.RandomEvent);
-								update.putData( UpdateKey.Tile, currentTile.getProperties());
-								update.postNetworkEvent( PLAYER_ID);
-							}
+						{
+							//if( newLock.canTempHold( currentTile)){
+							//TODO need to update undo manager
+							removeCurrentTile();
+							UpdatePackage update = new UpdatePackage( "Controll.input", null);
+							update.addInstruction( UpdateInstruction.RandomEvent);
+							update.putData( UpdateKey.Tile, currentTile.getProperties());
+							update.postNetworkEvent( PLAYER_ID);
+							//}
 							break;
+						}
 						case MoveTower:
 							if( newLock.canHold( currentTile)){
 								//TODO need to update undo manager
@@ -385,7 +411,6 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private boolean checkTilePermission( Tile tile){
 		switch( permission){
 			case ExchangeHex:
-			case ResolveCombat:
 				return !tile.isTile() || tile.getProperties().isTreasure() && !tile.getProperties().isSpecialIncomeCounter();
 			case ExchangeThing:
 			case MoveFromCup:
@@ -393,6 +418,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			case RecruitThings:
 			case MoveMarker:
 			case MoveTower:
+			case ResolveCombat:
 				return tile.isTile();
 			case Roll:
 			case PlayTreasure:
@@ -416,6 +442,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 				}
 				else
 				{
+					hasRecruited = true;
 					UpdatePackage msg = new UpdatePackage(UpdateInstruction.RecruitThings,UpdateKey.ThingArray,thingsToExchange,"Controller: " + PLAYER_ID);
 					msg.putData(UpdateKey.Gold, goldAmount);
 					msg.postNetworkEvent(PLAYER_ID);
@@ -993,6 +1020,12 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			}
 		}
 		
+	}
+	
+	@Override
+	public void setHasRecruited(boolean newVal)
+	{
+		hasRecruited= newVal;
 	}
 
 	@Override
