@@ -57,7 +57,7 @@ public class HexState implements Serializable{
 	{
 		location = new Point( other.location);
 		markerImage = other.markerImage;
-		marker = other.marker.clone();
+		marker = other.marker==null? null : other.marker.clone();
 		hex = other.hex.clone();
 		thingsInHex = Constants.deepCloneCollection(other.thingsInHex, new HashSet<ITileProperties>());
 		isInBattle = other.isInBattle;

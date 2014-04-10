@@ -12,10 +12,12 @@ import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.validators.RecruitingThingsPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants;
 import common.Constants.Category;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
+import common.Constants.UpdateInstruction;
 import common.Logger;
 import common.event.network.CommandRejected;
 import common.event.network.HexStatesChanged;
@@ -218,8 +220,6 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			try
 			{
 				exchangeThings(command.getThings(), command.getID());
-				//notify client
-				notifyClientsOfPlayerTray(command.getID());
 			}
 			catch(Throwable t)
 			{
@@ -237,17 +237,11 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			try
 			{
 				placeThingOnBoard(command.getThing(), command.getID(), command.getHex());
-				
-				HexStatesChanged changedHex = new HexStatesChanged(1);
-				changedHex.getArray()[0] = getCurrentState().getBoard().getHexStateForHex(command.getHex());
-				changedHex.postNetworkEvent();
-				//notify client
-				notifyClientsOfPlayerTray(command.getID());
 			}
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process PlaceThingOnBoardCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.PlaceBoard).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}
@@ -260,8 +254,6 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			try
 			{
 				recruitThings(command.getGold(), command.getThingsToExchange(), command.getID());
-				//notify client
-				notifyClientsOfPlayerTray(command.getID());
 			}
 			catch(Throwable t)
 			{
@@ -280,8 +272,6 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			try
 			{
 				discardThings(command.getThingToDiscard(),command.getID());
-				//notify client
-				notifyClientsOfPlayerTray(command.getID());
 			}
 			catch(Throwable t)
 			{
