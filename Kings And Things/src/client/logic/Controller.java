@@ -258,6 +258,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 							break;
 						case MoveFromCup:
 							break;
+						case ResolveCombat:
 						case MoveFromRack:
 							if( newLock.canHold( currentTile)){
 								//TODO need to update undo manager
