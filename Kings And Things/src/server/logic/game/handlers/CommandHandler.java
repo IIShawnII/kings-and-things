@@ -30,6 +30,7 @@ import com.google.common.eventbus.Subscribe;
 
 import common.Constants;
 import common.Constants.Biome;
+import common.Constants.Category;
 import common.Constants.CombatPhase;
 import common.Constants.HexContentsTarget;
 import common.Constants.RegularPhase;
@@ -228,6 +229,7 @@ public abstract class CommandHandler
 			toClient.getArray()[i++] = tp;
 		}
 		toClient.postNetworkEvent(playerNumber);
+		new HandPlacement(currentState.getPlayerByPlayerNumber(playerNumber).getCardsInHand()).postNetworkEvent(playerNumber);
 	}
 
 	protected void makeHexOwnedByPlayer(ITileProperties hex, int playerNumber)
@@ -509,6 +511,26 @@ public abstract class CommandHandler
 			}
 		}
 	}
+
+	protected void moveThingsFromHandToTray(Player p)
+	{
+		Iterator<ITileProperties> handThings = p.getCardsInHand().iterator();
+		for(int i=p.getTrayThings().size(); i<Constants.MAX_RACK_SIZE && handThings.hasNext(); i++)
+		{
+			ITileProperties handThing = handThings.next();
+			while(handThing.getCategory() != Category.Cup && handThings.hasNext())
+			{
+				handThing = handThings.next();
+			}
+			if(handThing.getCategory() == Category.Cup)
+			{
+				p.removeCardFromHand(handThing);
+				p.addThingToTrayOrHand(handThing);
+			}
+		}
+		
+		notifyClientsOfPlayerTray(p.getID());
+	}
 	
 	private void makeTreasurePlayed(int playerNumber, ITileProperties treasure)
 	{
@@ -521,6 +543,7 @@ public abstract class CommandHandler
 		{
 			p.removeCardFromHand(treasure);
 		}
+		moveThingsFromHandToTray(p);
 		currentState.getPlayerByPlayerNumber(playerNumber).addGold(treasure.getValue());
 		currentState.getCup().reInsertTile(treasure);
 		this.notifyClientsOfPlayerTray(playerNumber);

@@ -2,7 +2,6 @@ package server.logic.game.handlers;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import server.event.internal.DiscardThingsCommand;
 import server.event.internal.ExchangeThingsCommand;
@@ -12,7 +11,6 @@ import server.logic.exceptions.NoMoreTilesException;
 import server.logic.game.validators.RecruitingThingsPhaseValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants;
 import common.Constants.Category;
 import common.Constants.RegularPhase;
@@ -41,6 +39,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		paidRecruits(gold,playerNumber);
 		exchangeThings(thingsToExchange,playerNumber);
 		drawFreeThings(playerNumber);
+		notifyClientsOfPlayerTray(playerNumber);
 	}
 	
 	/**
@@ -60,6 +59,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		{
 			advanceActivePhasePlayer();
 		}
+		notifyClientsOfPlayerTray(playerNumber);
 	}
 
 	/**
@@ -157,24 +157,6 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			}
 		}
 		moveThingsFromHandToTray(p);
-	}
-	
-	private void moveThingsFromHandToTray(Player p)
-	{
-		Iterator<ITileProperties> handThings = p.getCardsInHand().iterator();
-		for(int i=p.getTrayThings().size(); i<Constants.MAX_RACK_SIZE && handThings.hasNext(); i++)
-		{
-			ITileProperties handThing = handThings.next();
-			while(handThing.getCategory() != Category.Cup && handThings.hasNext())
-			{
-				handThing = handThings.next();
-			}
-			if(handThing.getCategory() == Category.Cup)
-			{
-				p.removeCardFromHand(handThing);
-				p.addThingToTrayOrHand(handThing);
-			}
-		}
 	}
 	
 	private void drawFreeThings(int playerNumber) throws NoMoreTilesException

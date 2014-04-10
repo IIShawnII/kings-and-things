@@ -234,6 +234,7 @@ public class ConnectionLogic implements Runnable {
 				}
 				else if(event instanceof HandPlacement)
 				{
+					event.postInternalEvent();
 					update.addInstruction(UpdateInstruction.HandChanged);
 					update.putData(UpdateKey.ThingArray, ((HandPlacement)event).getCardsInHand());
 				}

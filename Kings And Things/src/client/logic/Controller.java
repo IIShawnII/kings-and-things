@@ -42,6 +42,7 @@ import client.gui.util.undo.UndoTileMovement;
 import com.google.common.eventbus.Subscribe;
 
 import common.Constants;
+import common.Logger;
 import common.Constants.BuildableBuilding;
 import common.Constants.Building;
 import common.Constants.Category;
@@ -53,6 +54,7 @@ import common.Constants.UpdateKey;
 import common.event.EventDispatch;
 import common.event.UpdatePackage;
 import common.event.network.GetAvailableHeroesResponse;
+import common.event.network.HandPlacement;
 import common.event.network.ViewHexContentsResponse;
 import common.game.HexState;
 import common.game.ITileProperties;
@@ -69,7 +71,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private Board board;
 	private Lock newLock;
 	private Point lastPoint;
-	private Tile currentTile;
+	private volatile Tile currentTile;
 	private LockManager locks;
 	private UndoManager undoManger;
 	private Permissions permission;
@@ -82,6 +84,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private final HashSet<ITileProperties> lastMovementSelection;
 	private final LinkedHashSet<ITileProperties> hexMovementSelection;
 	private volatile ITileProperties selectedHero;
+	private volatile boolean isHandVisible = false;
 	
 	public Controller(Board board, boolean demo, LockManager locks, final int ID){
 		this.board = board;
@@ -721,6 +724,20 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	public boolean isRolling() {
 		return board.getDice().isRolling();
 	}
+	
+	private void waitForDiceToFinish(){
+		while(isRolling())
+		{
+			try
+			{
+				Thread.sleep(100);
+			}
+			catch (InterruptedException e)
+			{
+				Logger.getStandardLogger().warn("Ignoring interrupt: ", e);
+			}
+		}
+	}
 
 	@Override
 	public void placeMarkers() {
@@ -780,40 +797,78 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	@Override
 	public void animateHandPlacement(final Collection<ITileProperties> tiles)
 	{
-		SwingUtilities.invokeLater(new Runnable(){
+		
+		new SwingWorker<Void,Void>(){
 		@Override
-		public void run()
+		public Void doInBackground(){
+			waitForDiceToFinish();
+			return null;
+		}
+		@Override
+		public void done()
 		{
-			final JFrame handCards = new JFrame("Cards in Hand");
-			handCards.setContentPane(new TileSelectionPanel(handCards,"Use or Discard Cards",tiles,new ISelectionListener<ITileProperties>(){
-				@Override
-				public void selectionChanged(Collection<ITileProperties> newSelection)
-				{
-					Iterator<ITileProperties> it = newSelection.iterator();
-					while(it.hasNext())
+			if(!isHandVisible && tiles.size()>0)
+			{
+				final JFrame handCards = new JFrame("Cards in Hand");
+				final TileSelectionPanel panel = new TileSelectionPanel(handCards,"Use or Discard Cards",tiles,new ISelectionListener<ITileProperties>(){
+					@Override
+					public void selectionChanged(Collection<ITileProperties> newSelection)
 					{
-						selectedHero = it.next();
+						Iterator<ITileProperties> it = newSelection.iterator();
+						while(it.hasNext())
+						{
+							selectedHero = it.next();
+						}
+						
+						if(currentTile!=null)
+						{
+							removeCurrentTile();
+						}
+	
+						currentTile = new Tile(selectedHero);
+						permission = Permissions.MoveFromRack;
+						currentTile.init();
+						currentTile.flip();
+						Lock lock = locks.getPermanentLock( Category.Cup);
+						Point center = lock.getCenter();
+						//create bound for starting position of tile
+						Rectangle start = new Rectangle( center.x-TILE_SIZE.width/2, center.y-TILE_SIZE.height/2, TILE_SIZE.width, TILE_SIZE.height);
+						currentTile.setBounds(start);
+						
+						board.add( currentTile, 0);
+						board.revalidate();
+						board.repaint();
 					}
+				}){
+					private static final long serialVersionUID = -6907660542799932930L;
 
-					currentTile = new Tile(selectedHero);
-					permission = Permissions.MoveFromRack;
-					currentTile.init();
-					currentTile.flip();
-					Lock lock = locks.getPermanentLock( Category.Cup);
-					Point center = lock.getCenter();
-					//create bound for starting position of tile
-					Rectangle start = new Rectangle( center.x-TILE_SIZE.width/2, center.y-TILE_SIZE.height/2, TILE_SIZE.width, TILE_SIZE.height);
-					currentTile.setBounds(start);
-					
-					board.add( currentTile, 0);
-					board.revalidate();
-					board.repaint();
-					handCards.dispose();
-				}}));
-			handCards.pack();
-			handCards.setLocationRelativeTo(null);
-			handCards.setVisible(true);
-		}});
+					@Subscribe
+					public void handChanged(final HandPlacement placement)
+					{
+						SwingUtilities.invokeLater(new Runnable(){
+							@Override
+							public void run()
+							{
+								removeThingsNotInList(placement.getCardsInHand());
+								if(getNumThingsRemaining()==0)
+								{
+									EventDispatch.unregisterFromInternalEvents(this);
+									handCards.dispose();
+									isHandVisible = false;
+								}
+							}
+						});
+					}
+				};
+				handCards.setAlwaysOnTop(true);
+				EventDispatch.registerOnInternalEvents(panel);
+				handCards.setContentPane(panel);
+				handCards.pack();
+				handCards.setLocationRelativeTo(null);
+				handCards.setVisible(true);
+				isHandVisible = true;
+			}
+		}}.execute();
 	}
 
 	@Override

@@ -7,7 +7,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,10 +24,14 @@ public class TileSelectionPanel extends JPanel
 {
 	private static final long serialVersionUID = 2315187271759152079L;
 	private final HashSet<ITileProperties> selectedThings;
+	private final HashMap<ITileProperties,TileButton> buttons;
+	private final JFrame parent;
 	
 	public TileSelectionPanel(final JFrame parent, String headerLabel, Collection<ITileProperties> thingsInHex,final ISelectionListener<ITileProperties> listener)
 	{
 		selectedThings = new HashSet<>();
+		buttons = new HashMap<>();
+		this.parent = parent;
 
 		setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -68,7 +75,38 @@ public class TileSelectionPanel extends JPanel
 					listener.selectionChanged(Collections.unmodifiableSet(selectedThings));
 				}});
 			add(tile,constraints);
+			buttons.put(thing,tile);
 			constraints.gridx++;
 		}
+		parent.validate();
+	}
+	
+	public void removeThingsNotInList(Collection<ITileProperties> things)
+	{
+		Iterator<Entry<ITileProperties,TileButton>> it = buttons.entrySet().iterator();
+		while(it.hasNext())
+		{
+			Entry<ITileProperties,TileButton> nextEntry = it.next();
+			if(!things.contains(nextEntry.getKey()))
+			{
+				remove(nextEntry.getValue());
+				it.remove();
+			}
+		}
+		
+		Iterator<ITileProperties> iter = selectedThings.iterator();
+		while(iter.hasNext())
+		{
+			if(!things.contains(iter.next()))
+			{
+				iter.remove();
+			}
+		}
+		parent.validate();
+	}
+	
+	public int getNumThingsRemaining()
+	{
+		return buttons.size();
 	}
 }
