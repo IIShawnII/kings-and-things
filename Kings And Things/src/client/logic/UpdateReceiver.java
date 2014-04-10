@@ -14,7 +14,6 @@ import client.gui.components.HexContentsPanel;
 import client.gui.components.RemoveThingsFromHexPanel;
 import client.gui.components.combat.ExplorationResultsPanel;
 import client.gui.util.LockManager.Lock;
-
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.HexContentsTarget;
@@ -269,6 +268,20 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 								frame.setVisible(true);
 							}});
 					}
+					break;
+				case GetHeroes:
+					@SuppressWarnings("unchecked")
+					final Collection<ITileProperties> heroes = (Collection<ITileProperties>) update.getData(UpdateKey.ThingArray);
+					SwingUtilities.invokeLater(new Runnable(){
+						@Override
+						public void run()
+						{
+							JFrame frame = new JFrame("Available Heroes");
+							frame.setContentPane(new HexContentsPanel(heroes));
+							frame.pack();
+							frame.setLocationRelativeTo(null);
+							frame.setVisible(true);
+						}});
 					break;
 				case RackChanged:
 					controller.animateRackPlacement((ITileProperties[])update.getData(UpdateKey.Rack));

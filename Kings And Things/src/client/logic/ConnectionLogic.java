@@ -17,6 +17,7 @@ import common.event.network.CombatHits;
 import common.event.network.ExplorationResults;
 import common.event.network.Flip;
 import common.event.network.DieRoll;
+import common.event.network.GetAvailableHeroesResponse;
 import common.event.network.HexNeedsThingsRemoved;
 import common.event.network.HexStatesChanged;
 import common.event.network.InitiateCombat;
@@ -219,6 +220,12 @@ public class ConnectionLogic implements Runnable {
 					update.addInstruction(UpdateInstruction.ViewContents);
 					update.putData(UpdateKey.Hex, evt.getContents());
 					update.putData(UpdateKey.Category, evt.getTarget());
+				}
+				else if(event instanceof GetAvailableHeroesResponse)
+				{
+					GetAvailableHeroesResponse evt = (GetAvailableHeroesResponse)event;
+					update.addInstruction(UpdateInstruction.GetHeroes);
+					update.putData(UpdateKey.ThingArray, evt.getHeroes());
 				}
 				else if(event instanceof PlayerTargetChanged || event instanceof CombatHits || event instanceof HexStatesChanged)
 				{

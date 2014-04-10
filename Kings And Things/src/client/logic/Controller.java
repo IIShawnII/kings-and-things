@@ -393,12 +393,21 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 		{
 			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, board);
 			Component deepestComponent = SwingUtilities.getDeepestComponentAt( board, e.getX(), e.getY());
+			JPopupMenu clickMenu = new JPopupMenu("Select Action");
+
+			JMenuItem seeHeroes = new JMenuItem("View Available Heroes");
+			seeHeroes.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					new UpdatePackage(UpdateInstruction.GetHeroes,"Board " + PLAYER_ID).postNetworkEvent(PLAYER_ID);
+				}});
+			clickMenu.add(seeHeroes);
+			
 			if(deepestComponent instanceof Hex)
 			{
 				final Hex source = (Hex) deepestComponent;
 				e = SwingUtilities.convertMouseEvent(board, e, source);
 				final ITileProperties hex = source.getState().getHex();
-				JPopupMenu clickMenu = new JPopupMenu("Select Action");
 				
 				JMenuItem initiateCombat = new JMenuItem("Resolve Combat");
 				initiateCombat.setEnabled(resolveCombatPermission);
@@ -573,9 +582,8 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 						lastMovementSelection.clear();
 					}});
 				clickMenu.add(finishMoveHex);
-				
-				clickMenu.show(source, e.getX(), e.getY());
 			}
+			clickMenu.show(deepestComponent, e.getX(), e.getY());
 		}
 	}
 	

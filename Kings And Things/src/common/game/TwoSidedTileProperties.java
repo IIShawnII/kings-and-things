@@ -326,6 +326,18 @@ public class TwoSidedTileProperties implements ITileProperties {
 			return faceDown.getBuilding();
 		}
 	}
+	
+	public int getFaceUpHashCode()
+	{
+		if(isFaceUp())
+		{
+			return faceUp.hashCode();
+		}
+		else
+		{
+			return faceDown.hashCode();
+		}
+	}
 
 	@Override
 	public BuildableBuilding getNextBuilding() {

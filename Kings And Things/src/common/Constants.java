@@ -18,8 +18,10 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import com.google.common.collect.ImmutableBiMap;
+
 import common.game.ITileProperties;
 import common.game.TileProperties;
+import common.game.TwoSidedTileProperties;
 
 public final class Constants {
 	
@@ -242,7 +244,12 @@ public final class Constants {
 		}
 		else
 		{
-			if(tile.isFaceUp() || tile.isSpecialCharacter() || !tile.isCreature())
+			if(tile.isSpecialCharacter())
+			{
+				TwoSidedTileProperties hero = (TwoSidedTileProperties) tile;
+				return Constants.IMAGES.get(hero.getFaceUpHashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT);
+			}
+			if(tile.isFaceUp() || !tile.isCreature())
 			{
 				return Constants.IMAGES.get(tile.hashCode()).getScaledInstance(Constants.TILE_SIZE.width, Constants.TILE_SIZE.height, Image.SCALE_DEFAULT);
 			}
