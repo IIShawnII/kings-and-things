@@ -42,7 +42,7 @@ public final class Constants {
 	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers, Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, PlayTreasure,
 		NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState, Special, Rejected, InitiateCombat, TargetPlayer, ThingChanged, 
 		ApplyHit, Retreat, RemoveThingsFromHex, HexStatesChanged, BribeCreature, ShowExplorationResults, MoveThings, RackChanged, ConstructBuilding, CallBluff, ViewContents,
-		GetHeroes, HandChanged, BribeHero}
+		GetHeroes, HandChanged, BribeHero, RecruitThings, ExchangeThings}
 	
 	public enum HexContentsTarget{RETREAT,MOVEMENT,VIEW,REMOVAL}
 	
@@ -55,7 +55,7 @@ public final class Constants {
 	//Combat phases
 	public enum CombatPhase {DETERMINE_DEFENDERS, BRIBE_CREATURES, SELECT_TARGET_PLAYER, MAGIC_ATTACK, APPLY_MAGIC_HITS, RANGED_ATTACK, APPLY_RANGED_HITS, MELEE_ATTACK, APPLY_MELEE_HITS, ATTACKER_ONE_RETREAT, ATTACKER_TWO_RETREAT, ATTACKER_THREE_RETREAT, DEFENDER_RETREAT, DETERMINE_DAMAGE, PLACE_THINGS, NO_COMBAT}
 	//Control permissions for client GUI
-	public enum Permissions { Roll, NoMove, MoveMarker, ExchangeThing, ExchangeHex, MoveFromCup, MoveTower, MoveFromRack, ResolveCombat, PlayTreasure};
+	public enum Permissions { Roll, NoMove, MoveMarker, ExchangeThing, ExchangeHex, MoveFromCup, MoveTower, MoveFromRack, ResolveCombat, PlayTreasure, RecruitThings};
 	
 	//Resources
 	public static final Image IMAGE_SKIP;

@@ -297,6 +297,7 @@ public abstract class CommandHandler
 		currentState.recordRollForSpecialCharacter(null);
 		currentState.setDefendingPlayerNumber(Constants.PUBLIC);
 		currentState.clearAllPlayerTargets();
+		currentState.setRecruitedOnce(false);
 		
 		if( nextSetupPhase != SetupPhase.SETUP_FINISHED){
 			new CurrentPhase<SetupPhase>( currentState.getPlayerInfoArray(), nextSetupPhase).postNetworkEvent( ALL_PLAYERS_ID);

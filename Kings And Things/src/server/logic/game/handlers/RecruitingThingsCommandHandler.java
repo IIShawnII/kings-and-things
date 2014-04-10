@@ -39,7 +39,6 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		paidRecruits(gold,playerNumber);
 		exchangeThings(thingsToExchange,playerNumber);
 		drawFreeThings(playerNumber);
-		notifyClientsOfPlayerTray(playerNumber);
 	}
 	
 	/**
@@ -59,7 +58,6 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		{
 			advanceActivePhasePlayer();
 		}
-		notifyClientsOfPlayerTray(playerNumber);
 	}
 
 	/**
@@ -71,7 +69,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 	 * according to the game rules
 	 * @throws IllegalStateException If it is not the right phase for recruiting things
 	 */
-	public void paidRecruits(int gold, int playerNumber) throws NoMoreTilesException {
+	private void paidRecruits(int gold, int playerNumber) throws NoMoreTilesException {
 		RecruitingThingsPhaseValidator.validateCanPurchaseRecruits(gold, playerNumber, getCurrentState());
 		
 		// retrieve player with the passed in player number
@@ -132,6 +130,8 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		{
 			player.addThingToTrayOrHand(newThing);
 		}
+		
+		getCurrentState().setRecruitedOnce(true);
 	}
 
 	private void makeThingsDiscarded(Collection<ITileProperties> things, int playerNumber)
@@ -204,9 +204,10 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process ExchangeThingsCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.ExchangeThings).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
+		notifyClientsOfPlayerTray(command.getID());
 	}
 
 	@Subscribe
@@ -222,6 +223,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			{
 				Logger.getErrorLogger().error("Unable to process PlaceThingOnBoardCommand due to: ", t);
 				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.PlaceBoard).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				notifyClientsOfPlayerTray(command.getID());
 			}
 		}
 	}
@@ -238,9 +240,10 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 			catch(Throwable t)
 			{
 				Logger.getErrorLogger().error("Unable to process RecruitThingsCommand due to: ", t);
-				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.RecruitThings).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
+		notifyClientsOfPlayerTray(command.getID());
 	}
 
 

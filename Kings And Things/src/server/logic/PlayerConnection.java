@@ -16,6 +16,7 @@ import server.event.internal.ModifyRollForSpecialCharacterCommand;
 import server.event.internal.MoveThingsCommand;
 import server.event.internal.PlaceThingOnBoardCommand;
 import server.event.internal.PlayTreasureCommand;
+import server.event.internal.RecruitThingsCommand;
 import server.event.internal.RemoveThingsFromHexCommand;
 import server.event.internal.ResolveCombatCommand;
 import server.event.internal.RetreatCommand;
@@ -188,6 +189,15 @@ public class PlayerConnection implements Runnable{
 						ITileProperties target = (ITileProperties) event.getData(UpdateKey.Tile);
 						int goldAmount = (int) event.getData(UpdateKey.Gold);
 						new ModifyRollForSpecialCharacterCommand(goldAmount,target).postInternalEvent(ID);
+						break;
+					case ExchangeThings:
+						Collection<ITileProperties> thingsToExchange = (Collection<ITileProperties>) event.getData(UpdateKey.ThingArray);
+						new ExchangeThingsCommand(thingsToExchange).postInternalEvent(ID);
+						break;
+					case RecruitThings:
+						Collection<ITileProperties> thingsToTrade = (Collection<ITileProperties>) event.getData(UpdateKey.ThingArray);
+						int gold = (int) event.getData(UpdateKey.Gold);
+						new RecruitThingsCommand(gold,thingsToTrade).postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());

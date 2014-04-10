@@ -266,18 +266,13 @@ public class Board extends JPanel implements CanvasParent{
 	 * @param prop - list of tiles to be placed, if null fakes will be created
 	 * @return array of tiles in order they were created
 	 */
-	private boolean firstRackAnimation = true;
 	private Tile[] setupTilesForRack( ITileProperties[] prop) {
 		Tile[] list = new Tile[ prop.length];
 		Lock lock = locks.getPermanentLock( Category.Cup);
 		Point center = lock.getCenter();
 		//create bound for starting position of tile
 		Rectangle start = new Rectangle( center.x-TILE_SIZE.width/2, center.y-TILE_SIZE.height/2, TILE_SIZE.width, TILE_SIZE.height);
-		if(firstRackAnimation)
-		{
-			addTile( new Tile( new TileProperties( Category.Cup)), start, true);
-			firstRackAnimation = false;
-		}
+		addTile( new Tile( new TileProperties( Category.Cup)), start, true);
 		for(Tile t : rack)
 		{
 			if(t!=null)

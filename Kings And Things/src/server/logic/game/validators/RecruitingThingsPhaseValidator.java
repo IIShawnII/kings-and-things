@@ -30,6 +30,10 @@ public abstract class RecruitingThingsPhaseValidator
 		CommandValidator.validateIsPlayerActive(playerNumber,currentState);
 		CommandValidator.validateNoPendingRolls(currentState);
 		CommandValidator.validateCollection(things,"things");
+		if(currentState.hasRecruitedOnce())
+		{
+			throw new IllegalStateException("Can not exchange things more than once");
+		}
 		
 		SetupPhase sp = currentState.getCurrentSetupPhase();
 		RegularPhase rp = currentState.getCurrentRegularPhase();
@@ -75,6 +79,10 @@ public abstract class RecruitingThingsPhaseValidator
 	 */
 	public static void validateCanPurchaseRecruits(int amountToSpend, int playerNumber, GameState currentState)
 	{
+		if(currentState.hasRecruitedOnce())
+		{
+			throw new IllegalStateException("Can not recruit things more than once");
+		}
 		CommandValidator.validateIsPlayerActive(playerNumber,currentState);
 		CommandValidator.validateNoPendingRolls(currentState);
 		RegularPhase regularPhase = currentState.getCurrentRegularPhase();

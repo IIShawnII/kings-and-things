@@ -16,6 +16,13 @@ public class HandPlacement extends AbstractNetwrokEvent
 	public HandPlacement(Collection<ITileProperties> cardsInHand)
 	{
 		this.cardsInHand = new HashSet<>(cardsInHand);
+		for(ITileProperties card : cardsInHand)
+		{
+			if(!card.isBuilding() && !card.isSpecialCharacter() && !card.isFaceUp())
+			{
+				card.flip();
+			}
+		}
 	}
 	
 	public Set<ITileProperties> getCardsInHand()

@@ -57,6 +57,7 @@ public class GameState implements Serializable
 	private Roll recordedRollForSpecialCharacter;
 	private final HashMap<HexState,Integer> hexesThatNeedThingsRemoved;
 	private final HashMap<Integer,Integer> playerTargets;
+	private boolean recruitedOnce;
 
 	/**
 	 * Creates a new GameState object
@@ -81,6 +82,7 @@ public class GameState implements Serializable
 		this.currentCombatPhase = currentCombatPhase;
 		this.defenderPlayerNumber = defenderPlayerNumber;
 		this.combatLocation = combatLocation;
+		recruitedOnce = false;
 		rolls = new ArrayList<>();
 		confirmedRolls = new HashSet<>();
 		rollModifications = new ArrayList<RollModification>();
@@ -124,6 +126,7 @@ public class GameState implements Serializable
 		bankHeroes = other.bankHeroes.clone();
 		board = other.board.clone();
 		players = new HashSet<>(other.players.size());
+		recruitedOnce = other.recruitedOnce;
 		for(Player p : other.players)
 		{
 			players.add(p.clone());
@@ -218,6 +221,16 @@ public class GameState implements Serializable
 	public SetupPhase getCurrentSetupPhase()
 	{
 		return currentSetupPhase;
+	}
+	
+	public boolean hasRecruitedOnce()
+	{
+		return recruitedOnce;
+	}
+	
+	public void setRecruitedOnce(boolean newVal)
+	{
+		recruitedOnce = newVal;
 	}
 	
 	public CupManager getCup()

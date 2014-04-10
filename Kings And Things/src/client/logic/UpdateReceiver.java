@@ -336,7 +336,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 				controller.setStatusMessage( "Select hero to recruit, if any");
 				break;
 			case RECRUITING_THINGS:
-				controller.setPermission(Permissions.PlayTreasure);
+				controller.setPermission(Permissions.RecruitThings);
 				controller.setStatusMessage( "Recruit things");
 				break;
 			case SPECIAL_POWERS:

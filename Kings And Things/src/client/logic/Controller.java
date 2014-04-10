@@ -86,6 +86,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private volatile ITileProperties selectedHero;
 	private volatile boolean isHandVisible = false;
 	private volatile int goldAmount = 0;
+	private final HashSet<ITileProperties> thingsToExchange = new HashSet<>();
 	
 	public Controller(Board board, boolean demo, LockManager locks, final int ID){
 		this.board = board;
@@ -144,6 +145,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					case MoveMarker:
 					case MoveTower:
 					case PlayTreasure:
+					case RecruitThings:
 						newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
 						break;
 					case ExchangeHex:
@@ -193,7 +195,25 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 								}
 							}
 							break;
+						case RecruitThings:
 						case ExchangeThing:
+							if(SwingUtilities.getDeepestComponentAt(board, e.getX(), e.getY()) instanceof Hex)
+							{
+								if( newLock.canHold( currentTile)){
+									//TODO need to update undo manager
+									removeCurrentTile();
+									UpdatePackage update = new UpdatePackage( "Controll.input", null);
+									update.addInstruction( UpdateInstruction.PlaceBoard);
+									update.putData( UpdateKey.Tile, currentTile.getProperties());
+									update.putData( UpdateKey.Hex, newLock.getHex().getState().getHex());
+									update.postNetworkEvent( PLAYER_ID);
+								}
+							}
+							else
+							{
+								thingsToExchange.add(currentTile.getProperties());
+								removeCurrentTile();
+							}
 							break;
 						case ExchangeHex:
 							if( newLock.canTempHold( currentTile)){
@@ -316,6 +336,14 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			case MoveFromRack:
 				showContextMenu(e,false,false);
 				break;
+			case ExchangeThing:
+				tryToRecruitThings(e,true);
+				showContextMenu(e,false,false);
+				break;
+			case RecruitThings:
+				tryToRecruitThings(e,false);
+				showContextMenu(e,false,false);
+				break;
 			case NoMove:
 			default:
 				showContextMenu(e,false,false);
@@ -350,6 +378,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			case ExchangeThing:
 			case MoveFromCup:
 			case MoveFromRack:
+			case RecruitThings:
 			case MoveMarker:
 			case MoveTower:
 				return tile.isTile();
@@ -358,6 +387,28 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 				return tile.getProperties().isTreasure() && !tile.getProperties().isSpecialIncomeCounter();
 			default:
 				throw new IllegalStateException(" Encountered none tile permission: " + permission);
+		}
+	}
+
+	private void tryToRecruitThings( MouseEvent e, boolean isExchangeOnly){
+		if( SwingUtilities.isLeftMouseButton(e)){
+			e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, board);
+			if(locks.getPermanentLock(Category.Cup).contains(e.getPoint()))
+			{
+				if(isExchangeOnly)
+				{
+					new UpdatePackage(UpdateInstruction.ExchangeThings,UpdateKey.ThingArray,thingsToExchange,"Controller: " + PLAYER_ID).postNetworkEvent(PLAYER_ID);
+					thingsToExchange.clear();
+				}
+				else
+				{
+					UpdatePackage msg = new UpdatePackage(UpdateInstruction.RecruitThings,UpdateKey.ThingArray,thingsToExchange,"Controller: " + PLAYER_ID);
+					msg.putData(UpdateKey.Gold, goldAmount);
+					msg.postNetworkEvent(PLAYER_ID);
+					goldAmount = 0;
+					thingsToExchange.clear();
+				}
+			}
 		}
 	}
 	
