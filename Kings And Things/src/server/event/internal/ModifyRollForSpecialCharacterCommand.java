@@ -3,12 +3,12 @@ package server.event.internal;
 import common.event.AbstractInternalEvent;
 import common.game.ITileProperties;
 
-public class ModifyRollForSpecialCharacter extends AbstractInternalEvent {
+public class ModifyRollForSpecialCharacterCommand extends AbstractInternalEvent {
 	
 	private final int goldAmount;
 	private final ITileProperties target;
 	
-	public ModifyRollForSpecialCharacter (int goldAmount, ITileProperties target){
+	public ModifyRollForSpecialCharacterCommand (int goldAmount, ITileProperties target){
 		super();
 		this.goldAmount = goldAmount;
 		this.target = target;

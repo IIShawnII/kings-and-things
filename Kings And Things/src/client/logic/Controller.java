@@ -85,6 +85,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private final LinkedHashSet<ITileProperties> hexMovementSelection;
 	private volatile ITileProperties selectedHero;
 	private volatile boolean isHandVisible = false;
+	private volatile int goldAmount = 0;
 	
 	public Controller(Board board, boolean demo, LockManager locks, final int ID){
 		this.board = board;
@@ -442,6 +443,14 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 									{
 										selectedHero = it.next();
 									}
+
+									if(goldAmount>0)
+									{
+										UpdatePackage msg = new UpdatePackage(UpdateInstruction.BribeHero,UpdateKey.Tile,selectedHero,"Controller.input");
+										msg.putData(UpdateKey.Gold, goldAmount);
+										msg.postNetworkEvent(PLAYER_ID);
+										goldAmount = 0;
+									}
 									prepareForRollDice(2, RollReason.RECRUIT_SPECIAL_CHARACTER, "Roll to Recruit " + selectedHero.getName(), selectedHero);
 									heroSelector.dispose();
 								}}));
@@ -460,6 +469,32 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					selectHeroDialogBuilder.execute();
 				}});
 			clickMenu.add(seeHeroes);
+
+			JMenuItem payGold = new JMenuItem("Spend Gold");
+			payGold.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					String newVal = JOptionPane.showInputDialog(board, "Enter amount to pay", "" + goldAmount);
+					if(newVal != null)
+					{
+						try
+						{
+							goldAmount = Integer.parseInt(newVal);
+							if(selectedHero != null)
+							{
+								UpdatePackage msg = new UpdatePackage(UpdateInstruction.BribeHero,UpdateKey.Tile,selectedHero,"Controller.input");
+								msg.putData(UpdateKey.Gold, goldAmount);
+								msg.postNetworkEvent(PLAYER_ID);
+								goldAmount = 0;
+							}
+						}
+						catch(NumberFormatException e)
+						{
+							goldAmount = 0;
+						}
+					}
+				}});
+			clickMenu.add(payGold);
 			
 			if(deepestComponent instanceof Hex)
 			{

@@ -3,14 +3,18 @@ package server.logic.game.handlers;
 import java.util.ArrayList;
 
 import server.event.DiceRolled;
-import server.event.internal.ModifyRollForSpecialCharacter;
+import server.event.internal.ModifyRollForSpecialCharacterCommand;
 import server.logic.game.RollModification;
 import server.logic.game.validators.RecruitSpecialCharacterValidator;
 
 import com.google.common.eventbus.Subscribe;
+
+import common.Constants;
 import common.Constants.RollReason;
+import common.Constants.UpdateInstruction;
 import common.Logger;
 import common.event.network.CommandRejected;
+import common.event.network.PlayersList;
 import common.game.ITileProperties;
 import common.game.Roll;
 
@@ -19,6 +23,7 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 	public void handleSpecialCharacterRollModification(ITileProperties target, int playerNumber, int goldAmount)
 	{
 		RecruitSpecialCharacterValidator.validateCanModifySpecialCharacterRoll(target, playerNumber, goldAmount, getCurrentState());
+		getCurrentState().getPlayerByPlayerNumber(playerNumber).removeGold(goldAmount);
 		int modificationAmount = 0;
 		if(getCurrentState().hasRecordedRollForSpecialCharacter())
 		{
@@ -34,8 +39,14 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 			newRoll.addRollModificationFor(0, modificationAmount);
 			
 			int totalRoll = newRoll.getFinalTotal();
+
+			int goalValue = (2*newRoll.getRollTarget().getValue());
+			if(newRoll.getRollTarget().getName().equals("Marksman"))
+			{
+				goalValue = 10;
+			}
 			
-			if(totalRoll >= (2*newRoll.getRollTarget().getValue()))
+			if(totalRoll >= goalValue)
 			{
 				givePlayerSpecialCharacterAndNotifyClients(newRoll.getRollingPlayerID(), newRoll.getRollTarget());
 			}
@@ -44,7 +55,7 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 		{
 			getCurrentState().addRollModification(new RollModification(new Roll(2, target, RollReason.RECRUIT_SPECIAL_CHARACTER, playerNumber), modificationAmount, 0));
 		}
-		getCurrentState().getPlayerByPlayerNumber(playerNumber).removeGold(goldAmount);
+		new PlayersList(getCurrentState().getPlayers()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 	}
 	
 	private void applyRollEffects()
@@ -61,7 +72,13 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 					
 					int totalRoll = r.getFinalTotal();
 					
-					if(totalRoll >= (2*r.getRollTarget().getValue()))
+					int goalValue = (2*r.getRollTarget().getValue());
+					if(r.getRollTarget().getName().equals("Marksman"))
+					{
+						goalValue = 10;
+					}
+					
+					if(totalRoll >= goalValue)
 					{
 						givePlayerSpecialCharacterAndNotifyClients(r.getRollingPlayerID(), r.getRollTarget());
 					}
@@ -96,7 +113,7 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 	}
 	
 	@Subscribe
-	public void receiveModifyRollForSpecialCharacterCommand(ModifyRollForSpecialCharacter command)
+	public void receiveModifyRollForSpecialCharacterCommand(ModifyRollForSpecialCharacterCommand command)
 	{
 		try
 		{
@@ -105,7 +122,7 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 		catch(Throwable t)
 		{
 			Logger.getErrorLogger().error("Unable to process ModifyRollForSpecialCharacter due to: ", t);
-			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.BribeHero).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 		}
 	}
 }

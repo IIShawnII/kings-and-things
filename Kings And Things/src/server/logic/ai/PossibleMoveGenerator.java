@@ -14,7 +14,7 @@ import server.event.internal.EndPlayerTurnCommand;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.ExchangeThingsCommand;
 import server.event.internal.GiveHexToPlayerCommand;
-import server.event.internal.ModifyRollForSpecialCharacter;
+import server.event.internal.ModifyRollForSpecialCharacterCommand;
 import server.event.internal.MoveThingsCommand;
 import server.event.internal.PlaceThingOnBoardCommand;
 import server.event.internal.RecruitThingsCommand;
@@ -377,7 +377,7 @@ public abstract class PossibleMoveGenerator
 					{
 						try
 						{
-							ModifyRollForSpecialCharacter command = new ModifyRollForSpecialCharacter(goldAmount, hero);
+							ModifyRollForSpecialCharacterCommand command = new ModifyRollForSpecialCharacterCommand(goldAmount, hero);
 							command.setID(p.getID());
 							GameState clonedState = state.clone();
 							RecruitSpecialCharacterCommandHandler handler = new RecruitSpecialCharacterCommandHandler();

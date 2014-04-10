@@ -12,6 +12,7 @@ import server.event.internal.ConstructBuildingCommand;
 import server.event.internal.ExchangeSeaHexCommand;
 import server.event.internal.ExchangeThingsCommand;
 import server.event.internal.GetAvailableHeroesCommand;
+import server.event.internal.ModifyRollForSpecialCharacterCommand;
 import server.event.internal.MoveThingsCommand;
 import server.event.internal.PlaceThingOnBoardCommand;
 import server.event.internal.PlayTreasureCommand;
@@ -182,6 +183,11 @@ public class PlayerConnection implements Runnable{
 						break;
 					case GetHeroes:
 						new GetAvailableHeroesCommand().postInternalEvent(ID);
+						break;
+					case BribeHero:
+						ITileProperties target = (ITileProperties) event.getData(UpdateKey.Tile);
+						int goldAmount = (int) event.getData(UpdateKey.Gold);
+						new ModifyRollForSpecialCharacterCommand(goldAmount,target).postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
