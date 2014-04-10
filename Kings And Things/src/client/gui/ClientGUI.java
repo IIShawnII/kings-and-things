@@ -34,6 +34,7 @@ import common.Logger;
 public class ClientGUI extends JFrame implements Runnable, ActionListener{
 
 	private JCheckBox jcbActive;
+	private PlayerInfo player;
 	private PlayerInfo[] players;
 	private JButton jbNext, jbPrev;
 	private MultiBoardManager boards;
@@ -97,13 +98,22 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.gridx = 0;
 		constraints.gridy = 0;
-
-		boards = new MultiBoardManager( jpMain, constraints, demo);
-		boards.creatBoards( players);
-		boards.show( -1);
 		
-		for(PlayerInfo player:players){
-			jcbPlayers.addItem( player);
+		if( demo){
+			boards = new MultiBoardManager( jpMain, constraints, demo);
+			boards.creatBoards( players);
+			boards.show( -1);
+			
+			for(PlayerInfo player:players){
+				jcbPlayers.addItem( player);
+			}
+		}else{
+			Board board = new Board( demo, player);
+			board.setPreferredSize( Constants.BOARD_SIZE);
+			board.setSize( Constants.BOARD_SIZE);
+			board.init( players.length);
+			board.setActive( true);
+			jpMain.add( board, constraints);
 		}
 
 		JScrollPane jsp = new JScrollPane( jpMain);
@@ -209,8 +219,9 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 	private void changeBoad( UpdatePackage update){
 		switch( update.peekFirstInstruction()){
 			case UpdatePlayers:
+				player = (PlayerInfo)update.getData( UpdateKey.Player);
 				players = (PlayerInfo[])update.getData( UpdateKey.Players);
-				if( boards!=null && jcbActive.isSelected()){
+				if( demo && boards!=null && jcbActive.isSelected()){
 					for( PlayerInfo player :players){
 						if( player.isActive()){
 							boards.show( player);
