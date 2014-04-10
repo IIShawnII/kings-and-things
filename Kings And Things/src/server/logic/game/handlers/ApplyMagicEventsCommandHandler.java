@@ -1,11 +1,10 @@
 package server.logic.game.handlers;
 
-import server.event.internal.ApplyRandomEventsCommand;
+import server.event.internal.ApplyMagicEventsCommand;
 
 import com.google.common.eventbus.Subscribe;
-
-import common.Logger;
 import common.Constants.MagicEvent;
+import common.Logger;
 import common.event.network.CommandRejected;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -83,7 +82,7 @@ public class ApplyMagicEventsCommandHandler extends CommandHandler {
 	}
 
 	@Subscribe
-	public void receiveApplyEventsCommand (ApplyRandomEventsCommand magicEvent) {
+	public void receiveApplyEventsCommand (ApplyMagicEventsCommand magicEvent) {
 		try {
 			applyRandomEventEffect(magicEvent.getEventOfPlayer(), magicEvent.getTargetOfEvent(), magicEvent.getID());
 		} catch (Throwable t) {

@@ -128,6 +128,10 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 						playerApplyingRandomEvent.addGold(2*specialIncomeCounter.getValue());
 					}
 				}
+				playerApplyingRandomEvent.removeThingFromTray(randomEventTile);
+				getCurrentState().getCup().reInsertTile(randomEventTile);
+				new PlayersList(getCurrentState().getPlayers()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
+				notifyClientsOfPlayerTray(playerID);
 				break;
 			case Teenie_Pox:
 				/**

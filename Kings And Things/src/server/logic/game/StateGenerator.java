@@ -403,11 +403,12 @@ public class StateGenerator
 		
 		addThingByNameToRackForPlayer("Diamond_Field", p1, state);
 		addThingByNameToRackForPlayer("Peat_Bog", p1, state);
-		addThingByNameToRackForPlayer("Good_Harvest", p1, state);
+		addThingByNameToRackForPlayer("Mother_Lode", p1, state);
 
 		addThingByNameToRackForPlayer("Copper_Mine", p2, state);
 		addThingByNameToRackForPlayer("Gold_Mine", p2, state);
 		addThingByNameToRackForPlayer("Pearl", p2, state);
+		addThingByNameToRackForPlayer("Good_Harvest", p2, state);
 		
 		try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
 		{
