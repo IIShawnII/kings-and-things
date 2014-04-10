@@ -119,6 +119,7 @@ public class Board extends JPanel implements CanvasParent{
 	private MoveAnimation moveAnimation;
 	private ITileProperties playerMarker;
 	private PlayerInfo players[], currentPlayer;
+	private final Tile[] rack = new Tile[Constants.MAX_RACK_SIZE];
 	
 	/**
 	 * basic super constructor warper for JPanel
@@ -265,13 +266,25 @@ public class Board extends JPanel implements CanvasParent{
 	 * @param prop - list of tiles to be placed, if null fakes will be created
 	 * @return array of tiles in order they were created
 	 */
+	private boolean firstRackAnimation = true;
 	private Tile[] setupTilesForRack( ITileProperties[] prop) {
 		Tile[] list = new Tile[ prop.length];
 		Lock lock = locks.getPermanentLock( Category.Cup);
 		Point center = lock.getCenter();
 		//create bound for starting position of tile
 		Rectangle start = new Rectangle( center.x-TILE_SIZE.width/2, center.y-TILE_SIZE.height/2, TILE_SIZE.width, TILE_SIZE.height);
-		addTile( new Tile( new TileProperties( Category.Cup)), start, true);
+		if(firstRackAnimation)
+		{
+			addTile( new Tile( new TileProperties( Category.Cup)), start, true);
+			firstRackAnimation = false;
+		}
+		for(Tile t : rack)
+		{
+			if(t!=null)
+			{
+				remove(t);
+			}
+		}
 		//create bound for destination location, this bound starts from outside of board
 		Rectangle bound = new Rectangle( BOARD_SIZE.width-PADDING, BOARD_SIZE.height-TILE_SIZE.height-PADDING, TILE_SIZE.width, TILE_SIZE.height);
 		for( int count=0; count<prop.length; count++){
@@ -284,6 +297,7 @@ public class Board extends JPanel implements CanvasParent{
 			//set final destination for tile to be animated later
 			list[count].setDestination( bound.x+TILE_SIZE.width/2, bound.y+TILE_SIZE.height/2);
 			list[count].flip();
+			rack[count] = list[count];
 		}
 		return list;
 	}

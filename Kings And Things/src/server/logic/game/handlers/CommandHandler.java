@@ -546,7 +546,6 @@ public abstract class CommandHandler
 		moveThingsFromHandToTray(p);
 		currentState.getPlayerByPlayerNumber(playerNumber).addGold(treasure.getValue());
 		currentState.getCup().reInsertTile(treasure);
-		this.notifyClientsOfPlayerTray(playerNumber);
 		new PlayersList(currentState.getPlayers()).postNetworkEvent(ALL_PLAYERS_ID);
 	}
 
