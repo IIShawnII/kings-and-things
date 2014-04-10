@@ -6,6 +6,7 @@ import server.event.DiceRolled;
 import server.event.internal.ApplyRandomEventsCommand;
 import server.event.internal.ConstructBuildingCommand;
 import server.logic.exceptions.NoMoreTilesException;
+import server.logic.game.validators.ApplyRandomEventsValidator;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -14,9 +15,11 @@ import common.Constants.BuildableBuilding;
 import common.Constants.RandomEvent;
 import common.Constants.RollReason;
 import common.Constants.UpdateInstruction;
+import common.Constants;
 import common.Logger;
 import common.event.network.CommandRejected;
 import common.event.network.HandPlacement;
+import common.event.network.PlayersList;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -25,6 +28,7 @@ import common.game.Roll;
 public class ApplyRandomEventsCommandHandler extends CommandHandler {
 	
 	public void applyRandomEventEffect (ITileProperties randomEventTile, ITileProperties targetOfEvent, int playerID) {
+		ApplyRandomEventsValidator.validateCanPlayRandomEvent(playerID, randomEventTile, targetOfEvent, getCurrentState());
 		
 		String randomEventName = randomEventTile.getName();
 		RandomEvent evt = RandomEvent.valueOf(randomEventName);
@@ -90,7 +94,11 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				 * Player collects gold except from special income counters
 				 */
 				//Apply gold collection only for the player applying Good_Harvest
+				playerApplyingRandomEvent.removeThingFromTray(randomEventTile);
+				getCurrentState().getCup().reInsertTile(randomEventTile);
 				playerApplyingRandomEvent.addGold(playerApplyingRandomEvent.getSpecialEventIncome());
+				new PlayersList(getCurrentState().getPlayers()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
+				notifyClientsOfPlayerTray(playerID);
 				break;
 			case Mother_Lode:
 				/**
@@ -273,7 +281,7 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 			applyRandomEventEffect(randomEvent.getEventOfPlayer(), randomEvent.getTargetOfEvent(), randomEvent.getID());
 		} catch (Throwable t) {
 			Logger.getErrorLogger().error("Unable to apply random event due to: ",t);
-			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),null).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.RandomEvent).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 		}
 	}
 }

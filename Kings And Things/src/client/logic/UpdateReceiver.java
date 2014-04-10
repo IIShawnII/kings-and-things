@@ -328,7 +328,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 				controller.setStatusMessage( "Move things on board, if any");
 				break;
 			case RANDOM_EVENTS:
-				controller.setPermission(Permissions.PlayTreasure);
+				controller.setPermission(Permissions.RandomEvents);
 				controller.setStatusMessage( "Play random event, if any");
 				break;
 			case RECRUITING_CHARACTERS:

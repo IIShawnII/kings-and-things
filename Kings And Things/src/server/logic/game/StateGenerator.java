@@ -403,6 +403,7 @@ public class StateGenerator
 		
 		addThingByNameToRackForPlayer("Diamond_Field", p1, state);
 		addThingByNameToRackForPlayer("Peat_Bog", p1, state);
+		addThingByNameToRackForPlayer("Good_Harvest", p1, state);
 
 		addThingByNameToRackForPlayer("Copper_Mine", p2, state);
 		addThingByNameToRackForPlayer("Gold_Mine", p2, state);

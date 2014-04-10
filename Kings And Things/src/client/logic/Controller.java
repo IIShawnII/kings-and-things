@@ -146,6 +146,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					case MoveTower:
 					case PlayTreasure:
 					case RecruitThings:
+					case RandomEvents:
 						newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
 						break;
 					case ExchangeHex:
@@ -232,6 +233,16 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 								update.addInstruction( UpdateInstruction.PlaceBoard);
 								update.putData( UpdateKey.Tile, currentTile.getProperties());
 								update.putData( UpdateKey.Hex, newLock.getHex().getState().getHex());
+								update.postNetworkEvent( PLAYER_ID);
+							}
+							break;
+						case RandomEvents:
+							if( newLock.canHold( currentTile)){
+								//TODO need to update undo manager
+								removeCurrentTile();
+								UpdatePackage update = new UpdatePackage( "Controll.input", null);
+								update.addInstruction( UpdateInstruction.RandomEvent);
+								update.putData( UpdateKey.Tile, currentTile.getProperties());
 								update.postNetworkEvent( PLAYER_ID);
 							}
 							break;
@@ -385,6 +396,8 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			case Roll:
 			case PlayTreasure:
 				return tile.getProperties().isTreasure() && !tile.getProperties().isSpecialIncomeCounter();
+			case RandomEvents:
+				return tile.isTile() && tile.getProperties().isEvent();
 			default:
 				throw new IllegalStateException(" Encountered none tile permission: " + permission);
 		}

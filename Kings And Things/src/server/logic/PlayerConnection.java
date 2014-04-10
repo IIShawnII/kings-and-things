@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 import server.event.PlayerUpdated;
 import server.event.internal.ApplyHitsCommand;
+import server.event.internal.ApplyRandomEventsCommand;
 import server.event.internal.BribeDefenderCommand;
 import server.event.internal.CallBluffCommand;
 import server.event.internal.ConstructBuildingCommand;
@@ -198,6 +199,10 @@ public class PlayerConnection implements Runnable{
 						Collection<ITileProperties> thingsToTrade = (Collection<ITileProperties>) event.getData(UpdateKey.ThingArray);
 						int gold = (int) event.getData(UpdateKey.Gold);
 						new RecruitThingsCommand(gold,thingsToTrade).postInternalEvent(ID);
+						break;
+					case RandomEvent:
+						ITileProperties randomEvent = (ITileProperties) event.getData(UpdateKey.Tile);
+						new ApplyRandomEventsCommand(randomEvent, null).postInternalEvent(ID);
 						break;
 					default:
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
