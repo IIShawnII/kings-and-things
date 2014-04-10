@@ -27,5 +27,4 @@ public class ApplyMagicEventsCommand extends AbstractInternalEvent {
 	public ITileProperties getTargetOfEvent () {
 		return targetOfEvent;
 	}
-
 }
