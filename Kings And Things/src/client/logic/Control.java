@@ -29,6 +29,8 @@ public interface Control {
 	
 	public void requestRepaint();
 	
+	public int getPlayerCount();
+	
 	public void setDiceCount( int count);
 	
 	public RollReason getLastRollReason();
@@ -64,4 +66,5 @@ public interface Control {
 	public void setHasRecruited(boolean newVal);
 	
 	public void prepareForRollDice( int count, RollReason reason, String message, ITileProperties target);
+
 }

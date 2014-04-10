@@ -141,7 +141,7 @@ public class Board extends JPanel implements CanvasParent{
 	public void init( int playerCount){
 		moveAnimation = new MoveAnimation( this);
 		locks = new LockManager( playerCount);
-		controller = new Controller( this, demo, locks, currentPlayer.getID());
+		controller = new Controller( this, demo, locks, currentPlayer.getID(), playerCount);
 		addMouseListener( controller);
 		addMouseWheelListener( controller);
 		addMouseMotionListener( controller);

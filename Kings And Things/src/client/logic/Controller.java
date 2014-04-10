@@ -67,6 +67,7 @@ import common.game.Roll;
 public class Controller extends MouseAdapter implements ActionListener, Parent, Control{
 
 	private final int PLAYER_ID;
+	private final int PLAYER_COUNT;
 	private boolean demo;
 	private Board board;
 	private Lock newLock;
@@ -89,10 +90,11 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private final HashSet<ITileProperties> thingsToExchange = new HashSet<>();
 	private boolean hasRecruited = false;
 	
-	public Controller(Board board, boolean demo, LockManager locks, final int ID){
+	public Controller(Board board, boolean demo, LockManager locks, final int ID, final int COUNT){
 		this.board = board;
 		this.locks = locks;
 		this.PLAYER_ID = ID;
+		this.PLAYER_COUNT = COUNT;
 		this.demo = demo;
 		lastMovementSelection = new HashSet<>();
 		hexMovementSelection = new LinkedHashSet<>();
@@ -1031,5 +1033,10 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	@Override
 	public void resetPhase() {
 		board.phaseDone();
+	}
+
+	@Override
+	public int getPlayerCount() {
+		return PLAYER_COUNT;
 	}
 }
