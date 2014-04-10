@@ -41,7 +41,7 @@ public final class Constants {
 	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers, Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, PlayTreasure,
 		NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState, Special, Rejected, InitiateCombat, TargetPlayer, ThingChanged, 
 		ApplyHit, Retreat, RemoveThingsFromHex, HexStatesChanged, BribeCreature, ShowExplorationResults, MoveThings, RackChanged, ConstructBuilding, CallBluff, ViewContents,
-		GetHeroes}
+		GetHeroes, HandChanged}
 	
 	public enum HexContentsTarget{RETREAT,MOVEMENT,VIEW,REMOVAL}
 	

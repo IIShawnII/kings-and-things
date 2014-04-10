@@ -3,6 +3,7 @@ package client.logic;
 import java.awt.Point;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -14,6 +15,7 @@ import client.gui.components.HexContentsPanel;
 import client.gui.components.RemoveThingsFromHexPanel;
 import client.gui.components.combat.ExplorationResultsPanel;
 import client.gui.util.LockManager.Lock;
+
 import common.Constants;
 import common.Constants.CombatPhase;
 import common.Constants.HexContentsTarget;
@@ -269,22 +271,13 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 							}});
 					}
 					break;
-				case GetHeroes:
-					@SuppressWarnings("unchecked")
-					final Collection<ITileProperties> heroes = (Collection<ITileProperties>) update.getData(UpdateKey.ThingArray);
-					SwingUtilities.invokeLater(new Runnable(){
-						@Override
-						public void run()
-						{
-							JFrame frame = new JFrame("Available Heroes");
-							frame.setContentPane(new HexContentsPanel(heroes));
-							frame.pack();
-							frame.setLocationRelativeTo(null);
-							frame.setVisible(true);
-						}});
-					break;
 				case RackChanged:
 					controller.animateRackPlacement((ITileProperties[])update.getData(UpdateKey.Rack));
+					break;
+				case HandChanged:
+					@SuppressWarnings("unchecked")
+					final Set<ITileProperties> hand = (Set<ITileProperties>) update.getData(UpdateKey.ThingArray);
+					controller.animateHandPlacement(hand);
 					break;
 				default:
 					throw new IllegalStateException( "ERROR - No handle for " + update.peekFirstInstruction());
@@ -339,7 +332,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 				controller.setStatusMessage( "Play random event, if any");
 				break;
 			case RECRUITING_CHARACTERS:
-				controller.setPermission(Permissions.PlayTreasure);
+				controller.setPermission(Permissions.Roll);
 				controller.setStatusMessage( "Select hero to recruit, if any");
 				break;
 			case RECRUITING_THINGS:

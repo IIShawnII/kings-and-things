@@ -1,6 +1,7 @@
 package client.logic;
 
 import static common.Constants.HEX_SIZE;
+import static common.Constants.TILE_SIZE;
 
 import java.awt.Component;
 import java.awt.Point;
@@ -12,6 +13,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -28,7 +30,7 @@ import javax.swing.SwingWorker;
 import client.gui.Board;
 import client.gui.components.ISelectionListener;
 import client.gui.components.RemoveThingsFromHexPanel;
-import client.gui.components.SelectThingsForMovementPanel;
+import client.gui.components.TileSelectionPanel;
 import client.gui.tiles.Hex;
 import client.gui.tiles.Tile;
 import client.gui.util.LockManager;
@@ -42,6 +44,7 @@ import com.google.common.eventbus.Subscribe;
 import common.Constants;
 import common.Constants.BuildableBuilding;
 import common.Constants.Building;
+import common.Constants.Category;
 import common.Constants.HexContentsTarget;
 import common.Constants.Permissions;
 import common.Constants.RollReason;
@@ -49,6 +52,7 @@ import common.Constants.UpdateInstruction;
 import common.Constants.UpdateKey;
 import common.event.EventDispatch;
 import common.event.UpdatePackage;
+import common.event.network.GetAvailableHeroesResponse;
 import common.event.network.ViewHexContentsResponse;
 import common.game.HexState;
 import common.game.ITileProperties;
@@ -77,6 +81,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private ITileProperties lastCombatResolvedHex;
 	private final HashSet<ITileProperties> lastMovementSelection;
 	private final LinkedHashSet<ITileProperties> hexMovementSelection;
+	private volatile ITileProperties selectedHero;
 	
 	public Controller(Board board, boolean demo, LockManager locks, final int ID){
 		this.board = board;
@@ -88,6 +93,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 		this.receiver = new UpdateReceiver( this, ID);
 		this.undoManger = new UndoManager( this);
 		permission = Permissions.NoMove;
+		selectedHero = null;
 	}
 	
 	public void undo(){
@@ -295,12 +301,16 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 		switch( permission){
 			case Roll:
 				tryToRoll( e);
+				showContextMenu(e,false,false);
 				break;
 			case ResolveCombat:
 				showContextMenu(e,true,false);
 				break;
 			case MoveTower:
 				showContextMenu(e,false,true);
+				break;
+			case MoveFromRack:
+				showContextMenu(e,false,false);
 				break;
 			case NoMove:
 			default:
@@ -332,13 +342,14 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 		switch( permission){
 			case ExchangeHex:
 			case ResolveCombat:
-				return !tile.isTile();
+				return !tile.isTile() || tile.getProperties().isTreasure() && !tile.getProperties().isSpecialIncomeCounter();
 			case ExchangeThing:
 			case MoveFromCup:
 			case MoveFromRack:
 			case MoveMarker:
 			case MoveTower:
 				return tile.isTile();
+			case Roll:
 			case PlayTreasure:
 				return tile.getProperties().isTreasure() && !tile.getProperties().isSpecialIncomeCounter();
 			default:
@@ -399,7 +410,51 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			seeHeroes.addActionListener(new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					new UpdatePackage(UpdateInstruction.GetHeroes,"Board " + PLAYER_ID).postNetworkEvent(PLAYER_ID);
+					SwingWorker<Void,Void> selectHeroDialogBuilder = new SwingWorker<Void,Void>(){
+						private volatile GetAvailableHeroesResponse response = null;
+						
+						@Override
+						protected Void doInBackground() throws Exception
+						{
+							new UpdatePackage(UpdateInstruction.GetHeroes,"Board " + PLAYER_ID).postNetworkEvent(PLAYER_ID);
+
+							while(response==null)
+							{
+								Thread.sleep(100);
+							}
+							return null;
+						}
+						
+						@Override
+						protected void done()
+						{
+							selectedHero = null;
+							final JFrame heroSelector = new JFrame("Available Heroes");
+							heroSelector.setContentPane(new TileSelectionPanel(heroSelector,"Select hero to recruit",response.getHeroes(),new ISelectionListener<ITileProperties>(){
+								@Override
+								public void selectionChanged(Collection<ITileProperties> newSelection)
+								{
+									Iterator<ITileProperties> it = newSelection.iterator();
+									while(it.hasNext())
+									{
+										selectedHero = it.next();
+									}
+									prepareForRollDice(2, RollReason.RECRUIT_SPECIAL_CHARACTER, "Roll to Recruit " + selectedHero.getName(), selectedHero);
+									heroSelector.dispose();
+								}}));
+							heroSelector.pack();
+							heroSelector.setLocationRelativeTo(null);
+							heroSelector.setVisible(true);
+							EventDispatch.unregisterFromInternalEvents(this);
+						}
+						
+						@Subscribe
+						public void recieveHeroes(GetAvailableHeroesResponse response)
+						{
+							this.response = response;
+						}};
+					EventDispatch.registerOnInternalEvents(selectHeroDialogBuilder);
+					selectHeroDialogBuilder.execute();
 				}});
 			clickMenu.add(seeHeroes);
 			
@@ -531,7 +586,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 								hexMovementSelection.clear();
 								hexMovementSelection.add(source.getState().getHex());
 								JFrame movementSelector = new JFrame("Movement");
-								movementSelector.setContentPane(new SelectThingsForMovementPanel(movementSelector,response.getContents(),new ISelectionListener<ITileProperties>(){
+								movementSelector.setContentPane(new TileSelectionPanel(movementSelector,"Select things to move",response.getContents(),new ISelectionListener<ITileProperties>(){
 									@Override
 									public void selectionChanged(Collection<ITileProperties> newSelection)
 									{
@@ -600,7 +655,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	}
 	
 	private boolean canMove(){
-		return permission!=Permissions.NoMove && permission!=Permissions.Roll;
+		return permission!=Permissions.NoMove;
 	}
 
 	@Override
@@ -720,6 +775,45 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	@Override
 	public void animateRackPlacement(ITileProperties[] tiles) {
 		board.animateRackPlacement(tiles);
+	}
+
+	@Override
+	public void animateHandPlacement(final Collection<ITileProperties> tiles)
+	{
+		SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run()
+		{
+			final JFrame handCards = new JFrame("Cards in Hand");
+			handCards.setContentPane(new TileSelectionPanel(handCards,"Use or Discard Cards",tiles,new ISelectionListener<ITileProperties>(){
+				@Override
+				public void selectionChanged(Collection<ITileProperties> newSelection)
+				{
+					Iterator<ITileProperties> it = newSelection.iterator();
+					while(it.hasNext())
+					{
+						selectedHero = it.next();
+					}
+
+					currentTile = new Tile(selectedHero);
+					permission = Permissions.MoveFromRack;
+					currentTile.init();
+					currentTile.flip();
+					Lock lock = locks.getPermanentLock( Category.Cup);
+					Point center = lock.getCenter();
+					//create bound for starting position of tile
+					Rectangle start = new Rectangle( center.x-TILE_SIZE.width/2, center.y-TILE_SIZE.height/2, TILE_SIZE.width, TILE_SIZE.height);
+					currentTile.setBounds(start);
+					
+					board.add( currentTile, 0);
+					board.revalidate();
+					board.repaint();
+					handCards.dispose();
+				}}));
+			handCards.pack();
+			handCards.setLocationRelativeTo(null);
+			handCards.setVisible(true);
+		}});
 	}
 
 	@Override

@@ -16,6 +16,7 @@ import common.Constants.RollReason;
 import common.Constants.UpdateInstruction;
 import common.Logger;
 import common.event.network.CommandRejected;
+import common.event.network.HandPlacement;
 import common.game.HexState;
 import common.game.ITileProperties;
 import common.game.Player;
@@ -223,6 +224,7 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				
 				// Adds special character to player's hand
 				getCurrentState().getPlayerByPlayerNumber(defectionUser.getRollingPlayerID()).addCardToHand(defectionUser.getRollTarget());
+				new HandPlacement(getCurrentState().getPlayerByPlayerNumber(defectionUser.getRollingPlayerID()).getCardsInHand()).postNetworkEvent(defectionUser.getRollingPlayerID());
 			}
 			// Removes handled rolls for player applying DEFECTION
 			getCurrentState().removeRoll(defectionUser);

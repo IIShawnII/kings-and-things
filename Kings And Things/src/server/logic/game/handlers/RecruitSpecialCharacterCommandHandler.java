@@ -8,12 +8,10 @@ import server.logic.game.RollModification;
 import server.logic.game.validators.RecruitSpecialCharacterValidator;
 
 import com.google.common.eventbus.Subscribe;
-
 import common.Constants.RollReason;
 import common.Logger;
 import common.event.network.CommandRejected;
 import common.game.ITileProperties;
-import common.game.Player;
 import common.game.Roll;
 
 public class RecruitSpecialCharacterCommandHandler extends CommandHandler
@@ -39,7 +37,7 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 			
 			if(totalRoll >= (2*newRoll.getRollTarget().getValue()))
 			{
-				getCurrentState().getPlayerByPlayerNumber(playerNumber).addCardToHand(newRoll.getRollTarget());
+				givePlayerSpecialCharacterAndNotifyClients(newRoll.getRollingPlayerID(), newRoll.getRollTarget());
 			}
 		}
 		else
@@ -61,17 +59,11 @@ public class RecruitSpecialCharacterCommandHandler extends CommandHandler
 				{
 					handledRolls.add(r);
 					
-					Player rollingPlayer = getCurrentState().getPlayerByPlayerNumber(r.getRollingPlayerID());
+					int totalRoll = r.getFinalTotal();
 					
-					int totalRoll = 0;
-					
-					for(int roll : r.getFinalRolls())
-					{
-						totalRoll += roll;
-					}
 					if(totalRoll >= (2*r.getRollTarget().getValue()))
 					{
-						rollingPlayer.addCardToHand(r.getRollTarget());
+						givePlayerSpecialCharacterAndNotifyClients(r.getRollingPlayerID(), r.getRollTarget());
 					}
 					else
 					{

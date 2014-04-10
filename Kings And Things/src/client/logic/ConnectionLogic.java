@@ -18,6 +18,7 @@ import common.event.network.ExplorationResults;
 import common.event.network.Flip;
 import common.event.network.DieRoll;
 import common.event.network.GetAvailableHeroesResponse;
+import common.event.network.HandPlacement;
 import common.event.network.HexNeedsThingsRemoved;
 import common.event.network.HexStatesChanged;
 import common.event.network.InitiateCombat;
@@ -221,13 +222,7 @@ public class ConnectionLogic implements Runnable {
 					update.putData(UpdateKey.Hex, evt.getContents());
 					update.putData(UpdateKey.Category, evt.getTarget());
 				}
-				else if(event instanceof GetAvailableHeroesResponse)
-				{
-					GetAvailableHeroesResponse evt = (GetAvailableHeroesResponse)event;
-					update.addInstruction(UpdateInstruction.GetHeroes);
-					update.putData(UpdateKey.ThingArray, evt.getHeroes());
-				}
-				else if(event instanceof PlayerTargetChanged || event instanceof CombatHits || event instanceof HexStatesChanged)
+				else if(event instanceof PlayerTargetChanged || event instanceof CombatHits || event instanceof HexStatesChanged || event instanceof GetAvailableHeroesResponse)
 				{
 					event.postInternalEvent();
 					if(event instanceof HexStatesChanged)
@@ -236,6 +231,11 @@ public class ConnectionLogic implements Runnable {
 						update.addInstruction(UpdateInstruction.HexStatesChanged);
 						update.putData(UpdateKey.HexState, evt.getArray());
 					}
+				}
+				else if(event instanceof HandPlacement)
+				{
+					update.addInstruction(UpdateInstruction.HandChanged);
+					update.putData(UpdateKey.ThingArray, ((HandPlacement)event).getCardsInHand());
 				}
 				else if(event instanceof HexNeedsThingsRemoved)
 				{

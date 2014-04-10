@@ -17,12 +17,12 @@ import javax.swing.border.LineBorder;
 
 import common.game.ITileProperties;
 
-public class SelectThingsForMovementPanel extends JPanel
+public class TileSelectionPanel extends JPanel
 {
 	private static final long serialVersionUID = 2315187271759152079L;
 	private final HashSet<ITileProperties> selectedThings;
 	
-	public SelectThingsForMovementPanel(final JFrame parent, Collection<ITileProperties> thingsInHex,final ISelectionListener<ITileProperties> listener)
+	public TileSelectionPanel(final JFrame parent, String headerLabel, Collection<ITileProperties> thingsInHex,final ISelectionListener<ITileProperties> listener)
 	{
 		selectedThings = new HashSet<>();
 
@@ -37,7 +37,7 @@ public class SelectThingsForMovementPanel extends JPanel
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		
-		JLabel header = new JLabel("Select things to move");
+		JLabel header = new JLabel(headerLabel);
 		header.setHorizontalAlignment(SwingConstants.CENTER);
 		header.setHorizontalTextPosition(SwingConstants.CENTER);
 		add(header,constraints);

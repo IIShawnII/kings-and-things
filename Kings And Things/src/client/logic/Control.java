@@ -1,6 +1,7 @@
 package client.logic;
 
 import java.awt.Point;
+import java.util.Collection;
 import java.util.List;
 
 import client.gui.util.LockManager.Lock;
@@ -55,6 +56,8 @@ public interface Control {
 	public void animateHexPlacement( HexState[] tiles);
 	
 	public void animateRackPlacement( ITileProperties[] tiles);
+	
+	public void animateHandPlacement(Collection<ITileProperties> tiles);
 	
 	public void showErrorMessage( String title, String message);
 	

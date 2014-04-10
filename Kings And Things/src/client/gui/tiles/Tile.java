@@ -91,7 +91,7 @@ public class Tile extends JComponent{
 			}
 			else
 			{
-				drawTile = Constants.IMAGES.get( prop.hashCode());
+				drawTile = Constants.getImageForTile(prop);
 			}
 		}
 	}

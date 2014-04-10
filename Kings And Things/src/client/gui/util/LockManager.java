@@ -70,8 +70,8 @@ public class LockManager {
 				return goldLock;
 			case Hex:
 				return hexLock;
-			/*case Special:
-				return specialLock;*/
+			case Special:
+				return cupLock;
 			case State:
 				return markerLock;
 			default:

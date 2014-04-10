@@ -43,6 +43,7 @@ import common.event.network.CurrentPhase;
 import common.event.network.DieRoll;
 import common.event.network.Flip;
 import common.event.network.GetAvailableHeroesResponse;
+import common.event.network.HandPlacement;
 import common.event.network.HexOwnershipChanged;
 import common.event.network.HexStatesChanged;
 import common.event.network.PlayersList;
@@ -161,6 +162,20 @@ public abstract class CommandHandler
 		}
 		
 		return hs;
+	}
+	
+	protected void givePlayerSpecialCharacterAndNotifyClients(int playerNumber, ITileProperties hero)
+	{
+		currentState.getPlayerByPlayerNumber(playerNumber).addCardToHand(hero);
+		try
+		{
+			getCurrentState().getBankHeroes().drawTileByName(hero.getName());
+		}
+		catch (NoMoreTilesException e)
+		{
+			Logger.getErrorLogger().error("Unable to remove special character from bank due to: ", e);
+		}
+		new HandPlacement(currentState.getPlayerByPlayerNumber(playerNumber).getCardsInHand()).postNetworkEvent(playerNumber);
 	}
 	
 	public void removeThingsFromBoard(int playerNumber, ITileProperties hex, Set<ITileProperties> thingsToRemove)
@@ -583,7 +598,7 @@ public abstract class CommandHandler
 		new DieRoll(rollToAddTo).postNetworkEvent( roll.getRollingPlayerID());
 		
 		//combat phase doesn't need doneRolling mechanism
-		if(getCurrentState().getCurrentRegularPhase() == RegularPhase.COMBAT)
+		if(getCurrentState().getCurrentSetupPhase() == SetupPhase.SETUP_FINISHED)
 		{
 			if(!currentState.isWaitingForRolls())
 			{
