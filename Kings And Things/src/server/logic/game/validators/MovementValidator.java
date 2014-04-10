@@ -64,6 +64,14 @@ public abstract class MovementValidator
 		CommandValidator.validateCreatureLimitInHexNotExceeded(playerNumber, Hexes.get(Hexes.size() - 1), currentState, Creatures);
 		
 		boolean seaHexesExist = false;
+		boolean haveDeerHunter = false;
+		for(ITileProperties thing : Creatures)
+		{
+			if(thing.getName().equals("Deerhunter"))
+			{
+				haveDeerHunter = true;
+			}
+		}
 		
 		boolean notOwnedHexesExist = false;
 		
@@ -78,7 +86,7 @@ public abstract class MovementValidator
 					if (p.ownsHex(hex)) {
 						hexNotOwned = false;
 					}
-					if(p.getID() != playerNumber && nextHex.getFightingThingsInHexOwnedByPlayer(p).size()>0)
+					if(p.getID() != playerNumber && nextHex.getFightingThingsInHexOwnedByPlayer(p).size()>0 && !(haveDeerHunter && i==1))
 					{
 						throw new IllegalArgumentException("Can not move through hexes with enemy counters with combat values");
 					}
@@ -88,7 +96,7 @@ public abstract class MovementValidator
 				}
 			}
 			
-			moveSpeedTotal += hex.getMoveSpeed();
+			moveSpeedTotal += haveDeerHunter? 1 : hex.getMoveSpeed();
 			
 			if (!hex.isHexTile()) {
 				throw new IllegalArgumentException("Can't move through non hexes");

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import common.Constants;
+import common.Constants.Biome;
 
 /**
  * This class represents a player in the game
@@ -432,17 +433,46 @@ public class Player implements Serializable{
 			
 		int buildingGold = 0;		//keeps track of gold pieces for each fort player controls
 		int specialIncomeGold = 0;	//keeps track of gold pieces for each special income counter
-			
+		int specialCharacterGold = 0;
+		int landHexGold = 0;
+		
+		boolean hasDwarfKing = false;
+		
+		for(ITileProperties thing : ownedThingsOnBoard)
+		{
+			if(thing.getName().equals("Dwarf_King"))
+			{
+				hasDwarfKing = true;
+			}
+		}
+		
 			//
 		for (ITileProperties thing : ownedThingsOnBoard) {
 			if( !event && thing.isSpecialIncomeCounter()) {
-				specialIncomeGold += thing.getValue();
+				int multiplier = 1;
+				if(hasDwarfKing && thing.isRestrictedToBiome() && thing.getBiomeRestriction() == Biome.Mountain)
+				{
+					multiplier = 2;
+				}
+				specialIncomeGold += (thing.getValue() * multiplier);
 			} else if (thing.isBuildableBuilding()) {
 				buildingGold += thing.getValue();
 			}
+			else if(thing.isSpecialCharacter())
+			{
+				specialCharacterGold++;
+			}
+		}
+		
+		for(ITileProperties hex : ownedHexes)
+		{
+			if(hex.getBiomeRestriction() != Biome.Sea)
+			{
+				landHexGold++;
+			}
 		}
 			
-		return ownedHexes.size() + buildingGold + specialIncomeGold;
+		return ownedHexes.size() + buildingGold + specialIncomeGold + specialCharacterGold + landHexGold;
 	}
 	
 	private static void validateIsHex(ITileProperties tile)
