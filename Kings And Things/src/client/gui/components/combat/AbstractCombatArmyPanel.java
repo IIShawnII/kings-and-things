@@ -38,7 +38,7 @@ public abstract class AbstractCombatArmyPanel extends JPanel
 	{
 		this.playerName = playerName;
 		this.targetPlayerName = targetPlayerName;
-		this.army = new HashMap<>();
+		this.army = new HashMap<ITileProperties,JButton>();
 		this.playerID = playerID;
 		
 		armyLabel = new JLabel(playerName + "'s rag tag army");

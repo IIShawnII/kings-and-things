@@ -51,7 +51,7 @@ public abstract class MovementValidator
 	private static void validateMovementConditions(int playerNumber, GameState currentState, List<ITileProperties> Hexes, Collection<ITileProperties> Creatures) {
 		
 		int moveSpeedTotal = 0;
-		HashSet<HexState> pathOfHexes = new HashSet<>();
+		HashSet<HexState> pathOfHexes = new HashSet<HexState>();
 		HexState nextHex = null;
 
 		HexState firstHex = currentState.getBoard().getHexStateForHex(Hexes.get(0));
@@ -130,7 +130,7 @@ public abstract class MovementValidator
 			}
 		}
 		
-		List<Player> players = new ArrayList<>();
+		List<Player> players = new ArrayList<Player>();
 		
 		for (Player player : currentState.getPlayers()) {
 			if (player.getID() != playerNumber) {
@@ -141,7 +141,7 @@ public abstract class MovementValidator
 		pathOfHexes.add(firstHex);
 		Player playerMoving = currentState.getPlayerByPlayerNumber(playerNumber);
 		
-		HashSet<ITileProperties> thingsInHex = new HashSet<>();
+		HashSet<ITileProperties> thingsInHex = new HashSet<ITileProperties>();
 		for (HexState newHex : pathOfHexes) {
 			thingsInHex.clear();
 			thingsInHex.addAll(newHex.getCreaturesInHex());

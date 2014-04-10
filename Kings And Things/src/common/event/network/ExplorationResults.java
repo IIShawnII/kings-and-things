@@ -33,7 +33,7 @@ public class ExplorationResults extends AbstractNetwrokEvent
 	
 	public Set<ITileProperties> results()
 	{
-		HashSet<ITileProperties> things = new HashSet<>();
+		HashSet<ITileProperties> things = new HashSet<ITileProperties>();
 		for(ITileProperties thing : hex.getThingsInHex())
 		{
 			if(!explorer.ownsThingOnBoard(thing))

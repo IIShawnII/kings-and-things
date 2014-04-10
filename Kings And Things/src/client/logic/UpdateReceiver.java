@@ -117,7 +117,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 				case GameState:
 					controller.animateHexPlacement( (HexState[]) update.getData( UpdateKey.Hex));
 					controller.waitForPhase();
-					if( (boolean) update.getData( UpdateKey.Flipped)){
+					if( (Boolean) update.getData( UpdateKey.Flipped)){
 						controller.flipAllHexes();
 					}
 					controller.waitForPhase();
@@ -152,7 +152,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 						SwingUtilities.invokeAndWait(new Runnable(){
 							@Override
 							public void run() {
-								HashSet<HexState> possibleRetreatHexes = new HashSet<>();
+								HashSet<HexState> possibleRetreatHexes = new HashSet<HexState>();
 								for(Point p : combat.getCombatHexState().getAdjacentLocations())
 								{
 									try
@@ -171,7 +171,7 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 									}
 								}
 								Player player = null;
-								HashSet<Player> otherPlayers = new HashSet<>();
+								HashSet<Player> otherPlayers = new HashSet<Player>();
 								for(Player p : combat.getInvolvedPlayers())
 								{
 									if(p.getID() == PLAYER_ID)

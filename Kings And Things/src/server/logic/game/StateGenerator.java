@@ -16,6 +16,7 @@ import common.Constants.BuildableBuilding;
 import common.Constants.CombatPhase;
 import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
+import common.Logger;
 import common.game.ITileProperties;
 import common.game.Player;
 import common.game.PlayerInfo;
@@ -96,12 +97,60 @@ public class StateGenerator
 		return null;
 	}
 	
-	private GameState loadStateFromFile() throws ClassNotFoundException, FileNotFoundException, IOException
-	{
-		try(FileInputStream fs = new FileInputStream(fileName);ObjectInputStream ois = new ObjectInputStream(fs))
+	private GameState toFile( GameState state){
+		/*try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
+		{
+			os.writeObject(state);
+			os.flush();
+			
+			return state;
+		}*/
+		ObjectOutputStream os = null;
+		try {
+			os = new ObjectOutputStream( new FileOutputStream(fileName));
+			os.writeObject(state);
+			os.flush();
+		} catch (IOException e) {
+			Logger.getErrorLogger().fatal( e.getMessage(), e);
+		}
+		if( os!=null){
+			try {
+				os.close();
+			} catch (IOException e) {
+				Logger.getErrorLogger().fatal( e.getMessage(), e);
+			}
+		}
+		return state;
+	}
+	
+	private GameState fromFile(){
+		/*try(FileInputStream fs = new FileInputStream(fileName);ObjectInputStream ois = new ObjectInputStream(fs))
 		{
 			return (GameState) ois.readObject();
+		}*/
+		ObjectInputStream ois = null;
+		GameState state = null;
+		try {
+			ois = new ObjectInputStream( new FileInputStream(fileName));
+			state = (GameState) ois.readObject();
+		} catch (IOException e) {
+			Logger.getErrorLogger().fatal( e.getMessage(), e);
+		} catch (ClassNotFoundException e) {
+			Logger.getErrorLogger().fatal( e.getMessage(), e);
 		}
+		if( ois!=null){
+			try {
+				ois.close();
+			} catch (IOException e) {
+				Logger.getErrorLogger().fatal( e.getMessage(), e);
+			}
+		}
+		return state;
+	}
+	
+	private GameState loadStateFromFile() throws ClassNotFoundException, FileNotFoundException, IOException
+	{
+		return fromFile();
 	}
 
 	private GameState generateConstructionState() throws IOException
@@ -117,7 +166,7 @@ public class StateGenerator
 		players.add(p3);
 		players.add(p4);
 		
-		ArrayList<Integer> playerOrder = new ArrayList<>();
+		ArrayList<Integer> playerOrder = new ArrayList<Integer>();
 		playerOrder.add(p1.getID());
 		playerOrder.add(p2.getID());
 		playerOrder.add(p3.getID());
@@ -168,13 +217,7 @@ public class StateGenerator
 			}
 		}
 		
-		try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
-		{
-			os.writeObject(state);
-			os.flush();
-			
-			return state;
-		}
+		return toFile(state);
 	}
 
 	private GameState generateMinimalFunctionalityDemoState() throws IOException, NoMoreTilesException
@@ -201,13 +244,7 @@ public class StateGenerator
 		addThingByNameToHexForPlayer("Camel_Corps", new Point(4,7), p2, state);
 		addThingByNameToHexForPlayer("Sandworm", new Point(4,7), p2, state);
 		
-		try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
-		{
-			os.writeObject(state);
-			os.flush();
-			
-			return state;
-		}
+		return toFile(state);
 	}
 	
 	private GameState generateHexesAndBuildings()
@@ -223,7 +260,7 @@ public class StateGenerator
 		players.add(p3);
 		players.add(p4);
 		
-		ArrayList<Integer> playerOrder = new ArrayList<>();
+		ArrayList<Integer> playerOrder = new ArrayList<Integer>();
 		playerOrder.add(p1.getID());
 		playerOrder.add(p2.getID());
 		playerOrder.add(p3.getID());
@@ -343,13 +380,7 @@ public class StateGenerator
 		addThingByNameToRackForPlayer("Gold_Mine", p2, state);
 		addThingByNameToRackForPlayer("Pearl", p2, state);
 		
-		try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
-		{
-			os.writeObject(state);
-			os.flush();
-			
-			return state;
-		}
+		return toFile(state);
 	}
 
 	private GameState generateSuperiorFunctionalityDemoState() throws IOException, NoMoreTilesException
@@ -412,13 +443,7 @@ public class StateGenerator
 
 		addThingByNameToRackForPlayer("Willing_Workers", p4, state);
 		
-		try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
-		{
-			os.writeObject(state);
-			os.flush();
-			
-			return state;
-		}
+		return toFile(state);
 	}
 
 	private GameState generateExplorationState() throws IOException
@@ -434,7 +459,7 @@ public class StateGenerator
 		players.add(p3);
 		players.add(p4);
 		
-		ArrayList<Integer> playerOrder = new ArrayList<>();
+		ArrayList<Integer> playerOrder = new ArrayList<Integer>();
 		playerOrder.add(p1.getID());
 		playerOrder.add(p2.getID());
 		playerOrder.add(p3.getID());
@@ -470,13 +495,7 @@ public class StateGenerator
 			}
 		}
 		
-		try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
-		{
-			os.writeObject(state);
-			os.flush();
-			
-			return state;
-		}
+		return toFile(state);
 	}
 
 	private GameState generateMovementState() throws IOException
@@ -492,7 +511,7 @@ public class StateGenerator
 		players.add(p3);
 		players.add(p4);
 		
-		ArrayList<Integer> playerOrder = new ArrayList<>();
+		ArrayList<Integer> playerOrder = new ArrayList<Integer>();
 		playerOrder.add(p1.getID());
 		playerOrder.add(p2.getID());
 		playerOrder.add(p3.getID());
@@ -532,19 +551,13 @@ public class StateGenerator
 			}
 		}
 		
-		try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
-		{
-			os.writeObject(state);
-			os.flush();
-			
-			return state;
-		}
+		return toFile(state);
 	}
 
 	private void addTreasureToHex(Point loc, GameState state) throws NoMoreTilesException
 	{
 		ITileProperties nextThing = state.getCup().drawTile();
-		ArrayList<ITileProperties> removedThings = new ArrayList<>();
+		ArrayList<ITileProperties> removedThings = new ArrayList<ITileProperties>();
 		while(!nextThing.isTreasure() || nextThing.isSpecialIncomeCounter())
 		{
 			removedThings.add(nextThing);
@@ -559,7 +572,7 @@ public class StateGenerator
 	
 	private void addThingsToHexForPlayer(int count, Point loc, Player p, GameState state) throws NoMoreTilesException
 	{
-		ArrayList<ITileProperties> removedThings = new ArrayList<>();
+		ArrayList<ITileProperties> removedThings = new ArrayList<ITileProperties>();
 		for(int i=0; i<count; i++)
 		{
 			ITileProperties thing = state.getCup().drawTile();
@@ -586,7 +599,7 @@ public class StateGenerator
 
 	private void addThingByNameToHexForPlayer(String name, Point loc, Player p, GameState state) throws NoMoreTilesException
 	{
-		ArrayList<ITileProperties> removedThings = new ArrayList<>();
+		ArrayList<ITileProperties> removedThings = new ArrayList<ITileProperties>();
 		ITileProperties nextThing = state.getCup().drawTile();
 		while(!nextThing.getName().equals(name))
 		{
@@ -611,7 +624,7 @@ public class StateGenerator
 
 	private void addThingByNameToRackForPlayer(String name, Player p, GameState state) throws NoMoreTilesException
 	{
-		ArrayList<ITileProperties> removedThings = new ArrayList<>();
+		ArrayList<ITileProperties> removedThings = new ArrayList<ITileProperties>();
 		ITileProperties nextThing = state.getCup().drawTile();
 		while(!nextThing.getName().equals(name))
 		{

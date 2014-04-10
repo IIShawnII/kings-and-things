@@ -27,7 +27,7 @@ public class Roll implements Serializable{
 		this.targetValue = targetValue;
 		this.rollTarget = tileToRollFor;
 		this.playerNumber = playerRolling;
-		rollModifications = new HashMap<>();
+		rollModifications = new HashMap<Integer,Integer>();
 		baseRolls = new ArrayList<Integer>();
 	}
 	
@@ -44,7 +44,7 @@ public class Roll implements Serializable{
 		playerNumber = other.playerNumber;
 		rollTarget = other.rollTarget.clone();
 		baseRolls = new ArrayList<Integer>(other.baseRolls);
-		rollModifications = new HashMap<>(other.rollModifications);
+		rollModifications = new HashMap<Integer,Integer>(other.rollModifications);
 	}
 	
 	@Override

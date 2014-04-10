@@ -49,7 +49,7 @@ public class ActiveCombatArmyPanel extends AbstractCombatArmyPanel
 		targetArmyButton = new JButton(new ImageIcon(Constants.CROSSHAIR.getScaledInstance(60, 60, Image.SCALE_DEFAULT)));
 		retreatButton = new JButton(new ImageIcon(Constants.RUN_AWAY));
 		fightOnButton = new JButton(new ImageIcon(Constants.FIGHT_ON));
-		rollerMap = new HashMap<>();
+		rollerMap = new HashMap<ITileProperties, DiceRoller>();
 	}
 
 	public void addRetreatButtonListener(ActionListener listener)

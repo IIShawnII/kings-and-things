@@ -17,7 +17,7 @@ public class ViewHexContentsResponse extends AbstractNetwrokEvent
 	
 	public ViewHexContentsResponse(Collection<ITileProperties> contents, HexContentsTarget target)
 	{
-		thingsInHex = new HashSet<>(contents);
+		thingsInHex = new HashSet<ITileProperties>(contents);
 		this.target = target;
 	}
 	

@@ -14,7 +14,7 @@ public class UndoManager {
 	private Deque< Undo> operations;
 	
 	public UndoManager( Parent parent){
-		operations = new ArrayDeque<>();
+		operations = new ArrayDeque<Undo>();
 		this.parent = parent;
 	}
 	

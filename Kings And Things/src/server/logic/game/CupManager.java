@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import server.logic.exceptions.NoMoreTilesException;
-
 import common.Constants;
 import common.Constants.Ability;
 import common.Constants.Building;
@@ -77,6 +76,7 @@ public class CupManager extends AbstractTileManager
 		}*/
 	}
 	
+	@SuppressWarnings("unused")
 	private void stackDeck() throws NoMoreTilesException
 	{
 		synchronized(tiles)
@@ -190,8 +190,8 @@ public class CupManager extends AbstractTileManager
 
 	private void generateBuildingTilesInCup(Building b)
 	{
-		ArrayList<TileProperties> faceUpBuildings = new ArrayList<>(6);
-		ArrayList<TileProperties> faceDownBuildings = new ArrayList<>(6);
+		ArrayList<TileProperties> faceUpBuildings = new ArrayList<TileProperties>(6);
+		ArrayList<TileProperties> faceDownBuildings = new ArrayList<TileProperties>(6);
 		
 		for(TileProperties tp : Constants.BUILDING.values())
 		{

@@ -43,7 +43,7 @@ public class ExplorationResultsPanel extends JPanel
 
 	public ExplorationResultsPanel(int explorerID, HexState hex, JFrame parent)
 	{
-		creatures = new HashMap<>();
+		creatures = new HashMap<ITileProperties,LabelButtonPair>();
 		this.explorerID = explorerID;
 		hs = hex;
 		this.parent = parent;

@@ -131,7 +131,12 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					addImage(tile.hashCode(), file);
 					break;
 				case Hex:
-					switch(tile.getName()){
+					if(tile.getName().equals("Swamp") || tile.getName().equals("Mountain") || tile.getName().equals("Forest") || tile.getName().equals("Jungle")){
+						tile.setMoveSpeed(2);
+					}else{
+						tile.setMoveSpeed(1);
+					}
+					/*switch(tile.getName()){
 						case "Swamp":
 						case "Mountain":
 						case "Forest":
@@ -140,7 +145,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 							break;
 						default:
 							tile.setMoveSpeed(1);
-					}
+					}*/
 					tile.setCategory( currentCategory);
 					for( int i=0; i<copyTile; i++){
 						TileProperties tileCopy = new TileProperties( tile, tile.getNumber()+i);
@@ -187,7 +192,21 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 		String[] array = name.substring( 0, name.lastIndexOf( ".")).split( " ");
 		TileProperties tile = new TileProperties();
 		for( int i=0; i<array.length-1; i++){
-			switch( array[i]){
+			if(array[i].equals("-n")){
+				tile.setName( array[++i]);
+			}else if(array[i].equals("-t")){
+				tile.addRestriction( Restriction.valueOf( array[++i]));
+			}else if(array[i].equals("-c")){
+				copyTile = Integer.parseInt( array[++i]);
+			}else if(array[i].equals("-s")){
+				tile.addAbilities( Ability.valueOf( array[++i]));
+			}else if(array[i].equals("-a")){
+				tile.setValue( Integer.parseInt( array[++i]));
+				tile.setBaseValue(tile.getValue());
+			}else{
+				throw new IllegalArgumentException("ERROR - incorrect file name \"" + name + "\n");
+			}
+			/*switch( array[i]){
 				case "-n": tile.setName( array[++i]);break;
 				case "-t": tile.addRestriction( Restriction.valueOf( array[++i]));break;
 				case "-c": copyTile = Integer.parseInt( array[++i]);break;
@@ -195,7 +214,7 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 				case "-a": tile.setValue( Integer.parseInt( array[++i])); tile.setBaseValue(tile.getValue());break;
 				default: 
 					throw new IllegalArgumentException("ERROR - incorrect file name \"" + name + "\n");
-			}
+			}*/
 		}
 		return tile;
 	}

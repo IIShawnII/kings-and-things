@@ -42,7 +42,7 @@ public class GameStateProgress extends AbstractNetwrokEvent{
 	public void setPlayersAndRacks( Set<Player> players){
 		int index = 0;
 		this.players = new PlayerInfo[ players.size()];
-		racks = new HashMap<>( players.size());
+		racks = new HashMap<Integer, Set<ITileProperties>>( players.size());
 		for( Player p : players){
 			this.players[index] = p.getPlayerInfo();
 			racks.put( p.getID(), p.getTrayThings());

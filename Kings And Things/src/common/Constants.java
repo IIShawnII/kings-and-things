@@ -68,13 +68,13 @@ public final class Constants {
 	public static final Image FIGHT_ON;
 	public static final Image RUN_AWAY;
 	public static final Image PICK_ME_KITTEN;
-	public static final HashMap< Integer, Image> IMAGES = new HashMap<>();
-	public static final HashMap< Integer, TileProperties> HEX = new HashMap<>();
-	public static final HashMap< Integer, TileProperties> CUP = new HashMap<>();
-	public static final HashMap< Integer, TileProperties> GOLD = new HashMap<>();
-	public static final HashMap< Integer, TileProperties> SPECIAL = new HashMap<>();
-	public static final HashMap< Integer, TileProperties> BUILDING = new HashMap<>();
-	public static final HashMap< Restriction, TileProperties> STATE = new HashMap<>();
+	public static final HashMap< Integer, Image> IMAGES = new HashMap< Integer, Image>();
+	public static final HashMap< Integer, TileProperties> HEX = new HashMap< Integer, TileProperties>();
+	public static final HashMap< Integer, TileProperties> CUP = new HashMap< Integer, TileProperties>();
+	public static final HashMap< Integer, TileProperties> GOLD = new HashMap< Integer, TileProperties>();
+	public static final HashMap< Integer, TileProperties> SPECIAL = new HashMap< Integer, TileProperties>();
+	public static final HashMap< Integer, TileProperties> BUILDING = new HashMap< Integer, TileProperties>();
+	public static final HashMap< Restriction, TileProperties> STATE = new HashMap< Restriction, TileProperties>();
 	
 	//Colors
 	public static final Color RED = new Color( 255, 0, 0);
@@ -322,7 +322,7 @@ public final class Constants {
 		}
 	}
 	
-	public static final HashMap< Restriction, Image> IMAGE_MARKERS = new HashMap<>(4);
+	public static final HashMap< Restriction, Image> IMAGE_MARKERS = new HashMap< Restriction, Image>(4);
 	public final static Image getMarkerImage( final int ID){
 		switch( ID){
 			case PUBLIC: return IMAGE_MARKERS.get( Restriction.Battle);

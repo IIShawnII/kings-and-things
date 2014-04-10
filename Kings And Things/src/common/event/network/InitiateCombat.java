@@ -26,8 +26,8 @@ public class InitiateCombat extends AbstractNetwrokEvent
 	{
 		this.combatHex = combatHex;
 		this.defenderID = defenderID;
-		this.playersInvolved = new HashSet<>(playersInvolved);
-		this.playerOrder = new ArrayList<>(playerOrder);
+		this.playersInvolved = new HashSet<Player>(playersInvolved);
+		this.playerOrder = new ArrayList<Integer>(playerOrder);
 		this.currPhase = currPhase;
 	}
 	

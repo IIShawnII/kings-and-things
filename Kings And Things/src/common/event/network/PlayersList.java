@@ -21,7 +21,7 @@ public class PlayersList extends AbstractNetwrokEvent{
 	}
 	
 	public PlayersList(){
-		players = new ArrayList<>();
+		players = new ArrayList<PlayerInfo>();
 	}
 	
 	public void addPlayer( PlayerInfo player){

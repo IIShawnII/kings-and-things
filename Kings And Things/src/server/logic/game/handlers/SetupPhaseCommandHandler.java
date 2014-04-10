@@ -152,7 +152,7 @@ public class SetupPhaseCommandHandler extends CommandHandler{
 			}
 		}
 		
-		ArrayList<Roll> tiedRolls = new ArrayList<>();
+		ArrayList<Roll> tiedRolls = new ArrayList<Roll>();
 		for(int i=0; i<handledRolls.size(); i++)
 		{
 			Roll nextRoll = handledRolls.get(i);

@@ -38,7 +38,20 @@ public class Server {
 		String serverGUITitle = "Kings And Things Server";
 		if( args!=null){
 			for(int i=0; i<args.length; i++){
-				switch(args[i]){
+				if( args[i].equals("-t")){
+					serverGUITitle = args[++i];
+				}else if( args[i].equals("-demo")){
+					isDemoMode = true;
+				}if( args[i].equals("-gsf")){
+					generateStateFile = true;
+					stateFileName = args[++i];
+				}if( args[i].equals("-all")){
+					generateAll = true;
+				}if( args[i].equals("-lst")){
+					loadStateFile = true;
+					stateFileName = args[++i];
+				}
+				/*switch(args[i]){
 					case "-t":
 						serverGUITitle = args[++i];
 						break;
@@ -58,7 +71,7 @@ public class Server {
 						break;
 					default:
 						break;
-				}
+				}*/
 			}
 		}
 		ServerGUI serverGUI = new ServerGUI( serverGUITitle);

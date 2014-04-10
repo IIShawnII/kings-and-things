@@ -289,7 +289,9 @@ public class ConnectionLogic implements Runnable {
 					update.postInternalEvent( ID);
 				}
 			}
-		} catch ( ClassNotFoundException | IOException e) {
+		} catch ( ClassNotFoundException ex){
+			Logger.getStandardLogger().warn( ex);
+		} catch ( IOException e) {
 			Logger.getStandardLogger().warn( e);
 		}
 		finished = true;
@@ -357,7 +359,9 @@ public class ConnectionLogic implements Runnable {
 									break;
 								}
 								startLogic( logic);
-							}catch(IllegalArgumentException | IOException ex){
+							}catch(IllegalArgumentException ex){
+								message += "\n" + ex.getMessage();
+							}catch(IOException ex){
 								message += "\n" + ex.getMessage();
 							}
 						}
@@ -367,7 +371,9 @@ public class ConnectionLogic implements Runnable {
 					}
 					try{
 						netaction = connect( ip, port, name);
-					}catch(IllegalArgumentException | IOException ex){
+					}catch(IllegalArgumentException ex){
+						message += "\n" + ex.getMessage();
+					}catch(IOException ex){
 						message += "\n" + ex.getMessage();
 					}
 				}

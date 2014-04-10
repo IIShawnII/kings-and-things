@@ -48,7 +48,7 @@ public class RollForDamagePanel extends JPanel
 	{
 		hex = hs;
 		this.p = p;
-		rollerMap = new HashMap<>(2);
+		rollerMap = new HashMap<ITileProperties, DiceRoller>(2);
 		this.parent = parent;
 		parent.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 	}

@@ -47,7 +47,7 @@ public class RemoveThingsFromHexPanel extends JPanel
 		{
 			parent.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		}
-		thingsInHex = new HashMap<>();
+		thingsInHex = new HashMap<ITileProperties,JButton>();
 		
 		thingsToRemoveLabel = new JLabel();
 		thingsToRemoveLabel.setHorizontalAlignment(SwingConstants.CENTER);

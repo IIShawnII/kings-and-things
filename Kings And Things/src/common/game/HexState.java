@@ -118,7 +118,7 @@ public class HexState implements Serializable{
 		int x = location.x;
 		int y = location.y;
 			
-		ArrayList<Point> coordsToTest = new ArrayList<>();
+		ArrayList<Point> coordsToTest = new ArrayList<Point>();
 		coordsToTest.add(new Point(x,y-2));
 		coordsToTest.add(new Point(x,y+2));
 		coordsToTest.add(new Point(x-1,y-1));
@@ -230,7 +230,7 @@ public class HexState implements Serializable{
 	 */
 	public Set<ITileProperties> getCreaturesInHex()
 	{
-		HashSet<ITileProperties> things = new HashSet<>();
+		HashSet<ITileProperties> things = new HashSet<ITileProperties>();
 		for(ITileProperties tp : thingsInHex)
 		{
 			if(tp.isCreature())
@@ -492,7 +492,7 @@ public class HexState implements Serializable{
 	
 	public Set<ITileProperties> getFightingThingsInHexNotOwnedByPlayers(Collection<Player> players)
 	{
-		HashSet<ITileProperties> unownedDefenders = new HashSet<>();
+		HashSet<ITileProperties> unownedDefenders = new HashSet<ITileProperties>();
 		for(ITileProperties thing : getFightingThingsInHex())
 		{
 			boolean owned = false;

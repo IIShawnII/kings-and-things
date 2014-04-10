@@ -132,7 +132,7 @@ public abstract class CommandHandler
 	protected HexState prepareHexForViewingByPlayer(ITileProperties hex, int playerNumber)
 	{
 		HexState hs = currentState.getBoard().getHexStateForHex(hex).clone();
-		HashSet<Player> otherPlayers = new HashSet<>(currentState.getPlayers());
+		HashSet<Player> otherPlayers = new HashSet<Player>(currentState.getPlayers());
 		
 		Iterator<Player> it = otherPlayers.iterator();
 		while(it.hasNext())

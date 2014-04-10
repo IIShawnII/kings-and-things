@@ -84,13 +84,13 @@ public class GameState implements Serializable
 		this.defenderPlayerNumber = defenderPlayerNumber;
 		this.combatLocation = combatLocation;
 		recruitedOnce = false;
-		rolls = new ArrayList<>();
-		confirmedRolls = new HashSet<>();
+		rolls = new ArrayList<Roll>();
+		confirmedRolls = new HashSet<Integer>();
 		rollModifications = new ArrayList<RollModification>();
 		
-		hitsToApply = new HashMap<>();
+		hitsToApply = new HashMap<Integer,Integer>();
 		this.hexesContainingBuiltObjects = new HashSet<HexState>();
-		playerTargets = new HashMap<>();
+		playerTargets = new HashMap<Integer,Integer>();
 		for(Player p : players)
 		{
 			hitsToApply.put(p.getID(), 0);
@@ -98,7 +98,7 @@ public class GameState implements Serializable
 		}
 		this.setActivePhasePlayer(activePhasePlayerNumber);
 		recordedRollForSpecialCharacter = null;
-		this.hexesThatNeedThingsRemoved = new HashMap<> ();
+		this.hexesThatNeedThingsRemoved = new HashMap<HexState,Integer> ();
 		
 
 		cup = new CupManager(demoMode);
@@ -126,47 +126,47 @@ public class GameState implements Serializable
 		boardGenerator = other.boardGenerator.clone();
 		bankHeroes = other.bankHeroes.clone();
 		board = other.board.clone();
-		players = new HashSet<>(other.players.size());
+		players = new HashSet<Player>(other.players.size());
 		recruitedOnce = other.recruitedOnce;
 		for(Player p : other.players)
 		{
 			players.add(p.clone());
 		}
-		playerOrder = new ArrayList<>(other.playerOrder);
+		playerOrder = new ArrayList<Integer>(other.playerOrder);
 		currentSetupPhase = other.currentSetupPhase;
 		currentRegularPhase = other.currentRegularPhase;
 		activeTurnPlayerNumber = other.activeTurnPlayerNumber;
 		currentCombatPhase = other.currentCombatPhase;
 		defenderPlayerNumber = other.defenderPlayerNumber;
 		combatLocation = new Point(other.combatLocation.x,other.combatLocation.y);
-		rolls = new ArrayList<>(other.rolls.size());
+		rolls = new ArrayList<Roll>(other.rolls.size());
 		for(Roll r : other.rolls)
 		{
 			rolls.add(r.clone());
 		}
-		confirmedRolls = new HashSet<>( other.confirmedRolls.size());
+		confirmedRolls = new HashSet<Integer>( other.confirmedRolls.size());
 		for( Integer ID : other.confirmedRolls)
 		{
 			confirmedRolls.add( new Integer( ID));
 		}
-		rollModifications = new ArrayList<>(other.rollModifications.size());
+		rollModifications = new ArrayList<RollModification>(other.rollModifications.size());
 		for(RollModification rm : other.rollModifications)
 		{
 			rollModifications.add(rm.clone());
 		}
-		hitsToApply = new HashMap<>(other.hitsToApply);
-		hexesContainingBuiltObjects = new HashSet<>(other.hexesContainingBuiltObjects.size());
+		hitsToApply = new HashMap<Integer, Integer>(other.hitsToApply);
+		hexesContainingBuiltObjects = new HashSet<HexState>(other.hexesContainingBuiltObjects.size());
 		for(HexState hs : other.hexesContainingBuiltObjects)
 		{
 			hexesContainingBuiltObjects.add(hs.clone());
 		}
 		recordedRollForSpecialCharacter = other.recordedRollForSpecialCharacter.clone();
-		hexesThatNeedThingsRemoved = new HashMap<>(other.hexesThatNeedThingsRemoved.size());
+		hexesThatNeedThingsRemoved = new HashMap<HexState, Integer>(other.hexesThatNeedThingsRemoved.size());
 		for(Entry<HexState,Integer> e : other.hexesThatNeedThingsRemoved.entrySet())
 		{
 			hexesThatNeedThingsRemoved.put(e.getKey().clone(), e.getValue());
 		}
-		playerTargets = new HashMap<>(other.playerTargets);
+		playerTargets = new HashMap<Integer,Integer>(other.playerTargets);
 	}
 	
 	@Override
@@ -339,7 +339,7 @@ public class GameState implements Serializable
 	
 	public HashSet<Player> getPlayersStillFightingInCombatHex()
 	{
-		HashSet<Player> fightingPlayers = new HashSet<>();
+		HashSet<Player> fightingPlayers = new HashSet<Player>();
 		for(ITileProperties thing : getCombatHex().getFightingThingsInHex())
 		{
 			for(Player p : players)

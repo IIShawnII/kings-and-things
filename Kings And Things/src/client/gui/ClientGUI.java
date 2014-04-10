@@ -131,7 +131,7 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 		constraints.anchor = GridBagConstraints.FIRST_LINE_START;
 		constraints.weightx = 1;
 		
-		jcbPlayers = new JComboBox<>();
+		jcbPlayers = new JComboBox<PlayerInfo>();
 		jcbPlayers.addActionListener( this);
 		constraints.gridx = 0;
 		jmb.add( jcbPlayers, constraints);

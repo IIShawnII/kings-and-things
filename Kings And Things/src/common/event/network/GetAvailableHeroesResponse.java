@@ -14,7 +14,7 @@ public class GetAvailableHeroesResponse extends AbstractNetwrokEvent
 	
 	public GetAvailableHeroesResponse(Collection<ITileProperties> heroes)
 	{
-		this.heroes = new HashSet<>(heroes);
+		this.heroes = new HashSet<ITileProperties>(heroes);
 	}
 	
 	public Set<ITileProperties> getHeroes()

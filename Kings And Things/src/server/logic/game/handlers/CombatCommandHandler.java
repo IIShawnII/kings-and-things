@@ -595,7 +595,7 @@ public class CombatCommandHandler extends CommandHandler
 	
 	private boolean needToChooseTargets(ITileProperties combatHex)
 	{
-		HashSet<Integer> playersStillFighting = new HashSet<>();
+		HashSet<Integer> playersStillFighting = new HashSet<Integer>();
 		for(ITileProperties thing : getCurrentState().getBoard().getHexStateForHex(combatHex).getFightingThingsInHex())
 		{
 			for(Player p : getCurrentState().getPlayers())
@@ -727,8 +727,8 @@ public class CombatCommandHandler extends CommandHandler
 						getCurrentState().setCurrentCombatPhase(CombatPhase.PLACE_THINGS);
 						new CurrentPhase<CombatPhase>(getCurrentState().getPlayerInfoArray(), getCurrentState().getCurrentCombatPhase()).postNetworkEvent(Constants.ALL_PLAYERS_ID);
 					} else {
-						List<ITileProperties> listOfThings = new ArrayList<>(roll_value);
-						List<ITileProperties> listOfSpecialIncomeCounters = new ArrayList<>();
+						List<ITileProperties> listOfThings = new ArrayList<ITileProperties>(roll_value);
+						List<ITileProperties> listOfSpecialIncomeCounters = new ArrayList<ITileProperties>();
 						ITileProperties nextTile;
 						for (int i = 0; i < roll_value; i++) {
 							try
@@ -860,7 +860,7 @@ public class CombatCommandHandler extends CommandHandler
 	
 	private void givePlayerExplorationHex(int playerID)
 	{
-		ArrayList<ITileProperties> thingsToRemove = new ArrayList<>();
+		ArrayList<ITileProperties> thingsToRemove = new ArrayList<ITileProperties>();
 		for(ITileProperties thing : getCurrentState().getCombatHex().getThingsInHex())
 		{
 			if(!thing.isCreature() && !thing.isBuilding() && !thing.isSpecialIncomeCounter())

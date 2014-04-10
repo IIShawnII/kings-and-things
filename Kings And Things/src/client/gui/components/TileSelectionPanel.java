@@ -29,8 +29,8 @@ public class TileSelectionPanel extends JPanel
 	
 	public TileSelectionPanel(final JFrame parent, String headerLabel, Collection<ITileProperties> thingsInHex,final ISelectionListener<ITileProperties> listener)
 	{
-		selectedThings = new HashSet<>();
-		buttons = new HashMap<>();
+		selectedThings = new HashSet<ITileProperties>();
+		buttons = new HashMap<ITileProperties,TileButton>();
 		this.parent = parent;
 
 		setLayout(new GridBagLayout());

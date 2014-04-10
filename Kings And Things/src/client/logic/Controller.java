@@ -87,7 +87,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 	private volatile ITileProperties selectedHero;
 	private volatile boolean isHandVisible = false;
 	private volatile int goldAmount = 0;
-	private final HashSet<ITileProperties> thingsToExchange = new HashSet<>();
+	private final HashSet<ITileProperties> thingsToExchange = new HashSet<ITileProperties>();
 	private boolean hasRecruited = false;
 	
 	public Controller(Board board, boolean demo, LockManager locks, final int ID, final int COUNT){
@@ -96,8 +96,8 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 		this.PLAYER_ID = ID;
 		this.PLAYER_COUNT = COUNT;
 		this.demo = demo;
-		lastMovementSelection = new HashSet<>();
-		hexMovementSelection = new LinkedHashSet<>();
+		lastMovementSelection = new HashSet<ITileProperties>();
+		hexMovementSelection = new LinkedHashSet<ITileProperties>();
 		this.receiver = new UpdateReceiver( this, ID);
 		this.undoManger = new UndoManager( this);
 		permission = Permissions.NoMove;
@@ -783,8 +783,8 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					public void actionPerformed(ActionEvent arg0)
 					{
 						hexMovementSelection.add(source.getState().getHex());
-						UpdatePackage msg = new UpdatePackage(UpdateInstruction.MoveThings, UpdateKey.Hex, new ArrayList<>(hexMovementSelection), "Board " + PLAYER_ID);
-						msg.putData(UpdateKey.ThingArray, new ArrayList<>(lastMovementSelection));
+						UpdatePackage msg = new UpdatePackage(UpdateInstruction.MoveThings, UpdateKey.Hex, new ArrayList<ITileProperties>(hexMovementSelection), "Board " + PLAYER_ID);
+						msg.putData(UpdateKey.ThingArray, new ArrayList<ITileProperties>(lastMovementSelection));
 						msg.postNetworkEvent(PLAYER_ID);
 						hexMovementSelection.clear();
 						lastMovementSelection.clear();

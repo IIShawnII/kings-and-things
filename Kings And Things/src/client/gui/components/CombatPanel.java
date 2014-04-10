@@ -69,21 +69,21 @@ public class CombatPanel extends JPanel
 		parent.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.hs = hs;
 		this.currentPhase = currentPhase;
-		HashSet<Player> allPlayers = new HashSet<>();
+		HashSet<Player> allPlayers = new HashSet<Player>();
 		allPlayers.add(p);
 		allPlayers.addAll(otherPlayers);
 		Set<ITileProperties> explorationDefenders = hs.getFightingThingsInHexNotOwnedByPlayers(allPlayers);
-		this.adjacentPlayerOwnedHexes = new HashSet<>(adjacentPlayerOwnedHexes.size());
+		this.adjacentPlayerOwnedHexes = new HashSet<HexState>(adjacentPlayerOwnedHexes.size());
 		for(HexState adjacentHs : adjacentPlayerOwnedHexes)
 		{
 			this.adjacentPlayerOwnedHexes.add(adjacentHs);
 		}
-		playerOrderList = new ArrayList<>(playerOrder.size());
+		playerOrderList = new ArrayList<Integer>(playerOrder.size());
 		for(Integer i : playerOrder)
 		{
 			playerOrderList.add(i);
 		}
-		allPlayersInCombat = new ArrayList<>();
+		allPlayersInCombat = new ArrayList<Player>();
 		allPlayersInCombat.add(p);
 		this.defendingPlayer = defendingPlayer;
 		
@@ -98,7 +98,7 @@ public class CombatPanel extends JPanel
 			playerPanel.init(hs.getFightingThingsInHexOwnedByPlayer(p));
 		}
 		
-		otherArmies = new ArrayList<>(otherPlayers.size());
+		otherArmies = new ArrayList<InactiveCombatArmyPanel>(otherPlayers.size());
 		for(Player otherPlayer : otherPlayers)
 		{
 			allPlayersInCombat.add(otherPlayer);
@@ -221,7 +221,7 @@ public class CombatPanel extends JPanel
 							{
 								Thread.sleep(100);
 							}
-							HashSet<ITileProperties> thingsInHex = new HashSet<>(hs.getThingsInHex());
+							HashSet<ITileProperties> thingsInHex = new HashSet<ITileProperties>(hs.getThingsInHex());
 							for(ITileProperties thing : thingsInHex)
 							{
 								hs.removeThingFromHex(thing);

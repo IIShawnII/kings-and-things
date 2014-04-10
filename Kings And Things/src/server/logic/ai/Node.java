@@ -22,8 +22,8 @@ public class Node
 	{
 		this.state = state;
 		this.parent = parent;
-		numWinsPerPlayer = new HashMap<>();
-		children = new HashMap<>();
+		numWinsPerPlayer = new HashMap<Integer,Long>();
+		children = new HashMap<Action,Node>();
 		for(Player p : state.getPlayers())
 		{
 			numWinsPerPlayer.put(p.getID(), 0L);

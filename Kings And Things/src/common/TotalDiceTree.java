@@ -45,7 +45,7 @@ public class TotalDiceTree {
         	this.roll = roll;
         	this.total = total;
         	this.depth = depth;
-        	children = new ArrayList<>( max);
+        	children = new ArrayList<Node>( max);
         }
         
         public boolean hasChildren(){

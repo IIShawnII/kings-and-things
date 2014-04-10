@@ -137,8 +137,8 @@ public class LoadingDialog extends JDialog implements Runnable{
 			jpMain.add( jpProgress, constraints);
 		}
 
-		listModel = new DefaultListModel<>();
-		JList<PlayerInfo> jlPlayers = new JList<>( listModel);
+		listModel = new DefaultListModel<PlayerInfo>();
+		JList<PlayerInfo> jlPlayers = new JList<PlayerInfo>( listModel);
 		JScrollPane jsp = new JScrollPane( jlPlayers);
 		jsp.setPreferredSize( Constants.CONSOLE_SIZE);
 		jsp.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);

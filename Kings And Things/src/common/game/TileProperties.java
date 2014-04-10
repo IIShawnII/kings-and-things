@@ -42,8 +42,8 @@ public class TileProperties implements ITileProperties{
 		fake = true;
 		setCategory( category);
 		baseValue = 0;
-		this.abilities = new ArrayList<>();
-		this.restrictions = new ArrayList<>();
+		this.abilities = new ArrayList<Ability>();
+		this.restrictions = new ArrayList<Restriction>();
 		isFaceUp = true;
 		id = counter++;
 	}
@@ -69,8 +69,8 @@ public class TileProperties implements ITileProperties{
 		baseValue = attack;
 		this.number = number;
 		this.specialFlip = false;
-		this.abilities = abilities==null? new ArrayList<Ability>() : new ArrayList<>( abilities);
-		this.restrictions = restrictions==null? new ArrayList<Restriction>() : new ArrayList<>( restrictions);
+		this.abilities = abilities==null? new ArrayList<Ability>() : new ArrayList<Ability>( abilities);
+		this.restrictions = restrictions==null? new ArrayList<Restriction>() : new ArrayList<Restriction>( restrictions);
 		isFaceUp = specialFlip;
 		biome = null;
 		id = counter++;
@@ -86,8 +86,8 @@ public class TileProperties implements ITileProperties{
 		hasFlip = other.hasFlip;
 		specialFlip = other.specialFlip;
 		isFaceUp = other.isFaceUp;
-		abilities = new ArrayList<>(other.abilities);
-		restrictions = new ArrayList<>(other.restrictions);
+		abilities = new ArrayList<Ability>(other.abilities);
+		restrictions = new ArrayList<Restriction>(other.restrictions);
 		setCategory( other.tileType);
 		biome = other.biome;
 		id = other.id;

@@ -139,7 +139,7 @@ public class PlayerConnection implements Runnable{
 						new ResolveCombatCommand((ITileProperties) event.getData(UpdateKey.Hex)).postInternalEvent(ID);
 						break;
 					case TargetPlayer:
-						new TargetPlayerCommand((int) event.getData(UpdateKey.Player)).postInternalEvent(ID);
+						new TargetPlayerCommand((Integer) event.getData(UpdateKey.Player)).postInternalEvent(ID);
 						break;
 					case SeaHexChanged:
 						new ExchangeSeaHexCommand( (HexState) event.getData(UpdateKey.HexState)).postInternalEvent(ID);
@@ -157,7 +157,7 @@ public class PlayerConnection implements Runnable{
 						new RetreatCommand((ITileProperties) event.getData(UpdateKey.Hex)).postInternalEvent(ID);
 						break;
 					case RemoveThingsFromHex:
-						HashSet<ITileProperties> thingsToRemove = new HashSet<>();
+						HashSet<ITileProperties> thingsToRemove = new HashSet<ITileProperties>();
 						for(ITileProperties thing : (ITileProperties[]) event.getData(UpdateKey.ThingArray))
 						{
 							thingsToRemove.add(thing);
@@ -192,7 +192,7 @@ public class PlayerConnection implements Runnable{
 						break;
 					case BribeHero:
 						ITileProperties target = (ITileProperties) event.getData(UpdateKey.Tile);
-						int goldAmount = (int) event.getData(UpdateKey.Gold);
+						int goldAmount = (Integer) event.getData(UpdateKey.Gold);
 						new ModifyRollForSpecialCharacterCommand(goldAmount,target).postInternalEvent(ID);
 						break;
 					case ExchangeThings:
@@ -201,7 +201,7 @@ public class PlayerConnection implements Runnable{
 						break;
 					case RecruitThings:
 						Collection<ITileProperties> thingsToTrade = (Collection<ITileProperties>) event.getData(UpdateKey.ThingArray);
-						int gold = (int) event.getData(UpdateKey.Gold);
+						int gold = (Integer) event.getData(UpdateKey.Gold);
 						new RecruitThingsCommand(gold,thingsToTrade).postInternalEvent(ID);
 						break;
 					case RandomEvent:
@@ -212,7 +212,9 @@ public class PlayerConnection implements Runnable{
 						throw new IllegalStateException("Error - no support for: " + event.peekFirstInstruction());
 				}
 			}
-		} catch ( ClassNotFoundException | IOException e) {
+		} catch ( ClassNotFoundException e) {
+				Logger.getStandardLogger().warn( e);
+		} catch ( IOException e) {
 			Logger.getStandardLogger().warn( e);
 		}
 		player.setIsPlaying(false);

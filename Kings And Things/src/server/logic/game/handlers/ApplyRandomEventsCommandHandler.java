@@ -116,7 +116,7 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				 * if player owns Dwarf King.
 				 */
 				boolean ownsDwarfKing = false;
-				ArrayList<ITileProperties> specialIncomeCounters = new ArrayList<>();
+				ArrayList<ITileProperties> specialIncomeCounters = new ArrayList<ITileProperties>();
 				
 				// checks if player owns Dwarf King and has special income counter
 				for (ITileProperties thing : playerApplyingRandomEvent.getOwnedThingsOnBoard()) {

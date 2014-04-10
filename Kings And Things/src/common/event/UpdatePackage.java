@@ -23,8 +23,8 @@ public class UpdatePackage extends AbstractEvent implements Serializable {
 	public UpdatePackage( String source, final Object OWNER){
 		super(OWNER);
 		this.source = source;
-		data = new HashMap<>();
-		instructions = new LinkedList<>();
+		data = new HashMap<UpdateKey, Object>();
+		instructions = new LinkedList<UpdateInstruction>();
 	}
 	
 	public UpdatePackage( UpdateInstruction instruction, String source, final Object OWNER){

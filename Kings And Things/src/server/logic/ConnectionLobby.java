@@ -60,7 +60,7 @@ public class ConnectionLobby implements Runnable {
 		this.generateStateFile = generateStateFile;
 		this.loadStateFile = loadStateFile;
 		this.stateFileName = stateFileName;
-		connectedPlayers = new ArrayList<>();
+		connectedPlayers = new ArrayList<PlayerConnection>();
 		game = new CommandHandlerManager();
 	}
 
@@ -170,7 +170,7 @@ public class ConnectionLobby implements Runnable {
 	@Subscribe
 	public void starGame( StartGameCommand command){
 		if( connectedPlayers.size() >= Constants.MIN_PLAYERS && connectedPlayers.size() <= Constants.MAX_PLAYERS){
-			HashSet< Player> set = new HashSet<>();
+			HashSet< Player> set = new HashSet<Player>();
 			for( PlayerConnection pc : connectedPlayers){
 				set.add( pc.getPlayer());
 			}
@@ -189,7 +189,12 @@ public class ConnectionLobby implements Runnable {
 					new GameStarted(demoMode, state).postInternalEvent();
 					state.notifyClientsOfState();
 				}
-				catch (ClassNotFoundException | IOException e)
+				catch (ClassNotFoundException e)
+				{
+					Logger.getErrorLogger().error("Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: ", e);
+					new CommandRejected(null, null, null, "Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: " + e,null).postNetworkEvent(Constants.ALL_PLAYERS_ID);
+				}
+				catch (IOException e)
 				{
 					Logger.getErrorLogger().error("Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: ", e);
 					new CommandRejected(null, null, null, "Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: " + e,null).postNetworkEvent(Constants.ALL_PLAYERS_ID);
@@ -203,7 +208,12 @@ public class ConnectionLobby implements Runnable {
 					new GameStarted(demoMode, state).postInternalEvent();
 					state.notifyClientsOfState();
 				}
-				catch (ClassNotFoundException | IOException e)
+				catch (ClassNotFoundException e)
+				{
+					Logger.getErrorLogger().error("Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: ", e);
+					new CommandRejected(null, null, null, "Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: " + e,null).postNetworkEvent(Constants.ALL_PLAYERS_ID);
+				}
+				catch (IOException e)
 				{
 					Logger.getErrorLogger().error("Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: ", e);
 					new CommandRejected(null, null, null, "Unable to " + (loadStateFile? "load" : "save") +" game state "+ (loadStateFile? "from" : "to") +" file: " + stateFileName + ", due to: " + e,null).postNetworkEvent(Constants.ALL_PLAYERS_ID);

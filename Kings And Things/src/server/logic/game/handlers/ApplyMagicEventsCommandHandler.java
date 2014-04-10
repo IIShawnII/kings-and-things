@@ -8,7 +8,6 @@ import common.Logger;
 import common.Constants.MagicEvent;
 import common.event.network.CommandRejected;
 import common.game.ITileProperties;
-import common.game.Player;
 
 public class ApplyMagicEventsCommandHandler extends CommandHandler {
 	
@@ -16,7 +15,7 @@ public class ApplyMagicEventsCommandHandler extends CommandHandler {
 		
 		String magicEventName = magicEventTile.getName();
 		MagicEvent evt = MagicEvent.valueOf(magicEventName);
-		Player playerApplyingMagicEvent = getCurrentState().getPlayerByPlayerNumber(playerID);
+		//Player playerApplyingMagicEvent = getCurrentState().getPlayerByPlayerNumber(playerID);
 		
 		switch (evt) {
 			case Balloon:
@@ -86,7 +85,7 @@ public class ApplyMagicEventsCommandHandler extends CommandHandler {
 		
 		String magicEventName = randomEventTile.getName();
 		MagicEvent evt = MagicEvent.valueOf(magicEventName);
-		Player playerApplyingMagicEvent = getCurrentState().getPlayerByPlayerNumber(playerID);
+		//Player playerApplyingMagicEvent = getCurrentState().getPlayerByPlayerNumber(playerID);
 		
 		switch (evt) {
 			case Balloon:

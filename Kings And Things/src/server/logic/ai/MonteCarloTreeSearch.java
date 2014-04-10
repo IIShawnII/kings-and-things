@@ -40,7 +40,7 @@ public class MonteCarloTreeSearch extends Thread
 						break;
 					}
 				}
-				ArrayList<Node> childrenToChooseFrom = new ArrayList<>();
+				ArrayList<Node> childrenToChooseFrom = new ArrayList<Node>();
 				double highestUCTValue = Double.MIN_VALUE;
 				for(Entry<Action,Node> child : nextNode.getChildren().entrySet())
 				{
@@ -51,7 +51,7 @@ public class MonteCarloTreeSearch extends Thread
 					}
 					else if(myUCTValue > highestUCTValue)
 					{
-						childrenToChooseFrom = new ArrayList<>();
+						childrenToChooseFrom = new ArrayList<Node>();
 						childrenToChooseFrom.add(child.getValue());
 						highestUCTValue = myUCTValue;
 					}
@@ -73,7 +73,7 @@ public class MonteCarloTreeSearch extends Thread
 	public Action getBestMoveForPlayer(int playerNumber)
 	{
 		long highestNumPlayouts = Long.MIN_VALUE;
-		ArrayList<Action> possibleMoves = new ArrayList<>();
+		ArrayList<Action> possibleMoves = new ArrayList<Action>();
 		for(Entry<Action,Node> child : latestPosition.getChildren().entrySet())
 		{
 			long myNumPlayouts = child.getValue().getNumPlayouts();
@@ -83,7 +83,7 @@ public class MonteCarloTreeSearch extends Thread
 			}
 			else if(myNumPlayouts > highestNumPlayouts)
 			{
-				possibleMoves = new ArrayList<>();
+				possibleMoves = new ArrayList<Action>();
 				possibleMoves.add(child.getKey());
 				highestNumPlayouts = myNumPlayouts;
 			}

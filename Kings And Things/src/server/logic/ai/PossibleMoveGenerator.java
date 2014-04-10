@@ -222,13 +222,13 @@ public abstract class PossibleMoveGenerator
 		}
 		if(p.hasCardsInHand() && p.getTrayThings().size() == Constants.MAX_RACK_SIZE)
 		{
-			HashSet<ITileProperties> discardableThings = new HashSet<>(p.getCardsInHand());
+			HashSet<ITileProperties> discardableThings = new HashSet<ITileProperties>(p.getCardsInHand());
 			discardableThings.addAll(p.getTrayThings());
 			for(ITileProperties tp : discardableThings)
 			{
 				try
 				{
-					ArrayList<ITileProperties> list = new ArrayList<>();
+					ArrayList<ITileProperties> list = new ArrayList<ITileProperties>();
 					list.add(tp);
 					DiscardThingsCommand command = new DiscardThingsCommand(list);
 					command.setID(p.getID());
@@ -304,7 +304,7 @@ public abstract class PossibleMoveGenerator
 		}
 		else if(state.getCurrentSetupPhase() == SetupPhase.SETUP_FINISHED && state.getCurrentRegularPhase() == RegularPhase.RECRUITING_THINGS)
 		{
-			HashSet<Set<ITileProperties>> possibleExchanges = new HashSet<>();
+			HashSet<Set<ITileProperties>> possibleExchanges = new HashSet<Set<ITileProperties>>();
 			for(Set<ITileProperties> s : getAllCombinations(p.getTrayThings()))
 			{
 				if(s.size() % 2 == 0)
@@ -312,7 +312,7 @@ public abstract class PossibleMoveGenerator
 					possibleExchanges.add(s);
 				}
 			}
-			HashSet<Integer> possiblePaymentValues = new HashSet<>();
+			HashSet<Integer> possiblePaymentValues = new HashSet<Integer>();
 			for(int i=0; i<=p.getGold() && i<=25; i+=5)
 			{
 				possiblePaymentValues.add(i);
@@ -366,7 +366,7 @@ public abstract class PossibleMoveGenerator
 			}
 			else
 			{
-				ArrayList<Integer> possibleGoldModifications = new ArrayList<>();
+				ArrayList<Integer> possibleGoldModifications = new ArrayList<Integer>();
 				for(int i=0; i<p.getGold(); i+=5)
 				{
 					possibleGoldModifications.add(i);
@@ -414,13 +414,13 @@ public abstract class PossibleMoveGenerator
 				Set<ITileProperties> playerThingsInHex = hs.getThingsInHexOwnedByPlayer(p);
 				if(!playerThingsInHex.isEmpty())
 				{
-					ArrayList<ArrayList<ITileProperties>> possibleMoveHexes = new ArrayList<>();
-					ArrayList<ITileProperties> startingPoint = new ArrayList<>();
+					ArrayList<ArrayList<ITileProperties>> possibleMoveHexes = new ArrayList<ArrayList<ITileProperties>>();
+					ArrayList<ITileProperties> startingPoint = new ArrayList<ITileProperties>();
 					startingPoint.add(hs.getHex());
 					possibleMoveHexes.add(startingPoint);
 					for(int i=0; i<Constants.MAX_MOVE_SPEED; i++)
 					{
-						ArrayList<ArrayList<ITileProperties>> movesToAdd = new ArrayList<>();
+						ArrayList<ArrayList<ITileProperties>> movesToAdd = new ArrayList<ArrayList<ITileProperties>>();
 						for(ArrayList<ITileProperties> moveChain : possibleMoveHexes)
 						{
 							if(moveChain.size() == i+1)
@@ -465,7 +465,7 @@ public abstract class PossibleMoveGenerator
 				}
 			}
 		}
-		HashSet<ITileProperties> thingsToPlace = new HashSet<>(p.getTrayThings());
+		HashSet<ITileProperties> thingsToPlace = new HashSet<ITileProperties>(p.getTrayThings());
 		thingsToPlace.addAll(p.getCardsInHand());
 		for(ITileProperties hex : p.getOwnedHexes())
 		{
@@ -490,7 +490,7 @@ public abstract class PossibleMoveGenerator
 			{
 				try
 				{
-					HashSet<ITileProperties> thingsToRemove = new HashSet<>();
+					HashSet<ITileProperties> thingsToRemove = new HashSet<ITileProperties>();
 					thingsToRemove.add(thing);
 					RemoveThingsFromHexCommand command = new RemoveThingsFromHexCommand(hex, thingsToRemove);
 					command.setID(p.getID());

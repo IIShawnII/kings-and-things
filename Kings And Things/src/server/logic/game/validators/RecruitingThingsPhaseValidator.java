@@ -151,7 +151,7 @@ public abstract class RecruitingThingsPhaseValidator
 			throw new IllegalArgumentException("Can only place things that the player owns in their tray or in their hand");
 		}
 		
-		ArrayList<ITileProperties> stuff = new ArrayList<>();
+		ArrayList<ITileProperties> stuff = new ArrayList<ITileProperties>();
 		stuff.add(thing);
 		CommandValidator.validateCreatureLimitInHexNotExceeded(playerNumber,hex,currentState,stuff);
 		
