@@ -95,7 +95,7 @@ public abstract class CommandValidator
 		{
 			throw new IllegalStateException("You must place the cards in your hand on the board, or return them to the cup.");
 		}
-		if(currentState.getCurrentRegularPhase() == RegularPhase.RECRUITING_THINGS && !currentState.hasRecruitedOnce())
+		if(currentState.getCurrentRegularPhase() == RegularPhase.RECRUITING_THINGS && !currentState.hasRecruitedOnce() && !currentState.getCup().isEmpty())
 		{
 			throw new IllegalStateException("You must recruit things first.");
 		}

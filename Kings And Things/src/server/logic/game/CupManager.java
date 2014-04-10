@@ -221,6 +221,26 @@ public class CupManager extends AbstractTileManager
 		}
 	}
 	
+	@Override
+	public void reInsertTile(ITileProperties tile)
+	{
+		synchronized(tiles)
+		{
+			if(!tiles.isEmpty())
+			{
+				super.reInsertTile(tile);
+			}
+		}
+	}
+	
+	public boolean isEmpty()
+	{
+		synchronized(tiles)
+		{
+			return tiles.isEmpty();
+		}
+	}
+	
 	private ITileProperties removeCreatureByNameAndAttack(String name, int attack) throws NoMoreTilesException
 	{
 		synchronized(tiles)

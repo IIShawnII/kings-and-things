@@ -69,7 +69,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 	 * according to the game rules
 	 * @throws IllegalStateException If it is not the right phase for recruiting things
 	 */
-	private void paidRecruits(int gold, int playerNumber) throws NoMoreTilesException {
+	private void paidRecruits(int gold, int playerNumber) {
 		RecruitingThingsPhaseValidator.validateCanPurchaseRecruits(gold, playerNumber, getCurrentState());
 		
 		// retrieve player with the passed in player number
@@ -80,7 +80,13 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		
 		// adds things to the players tray for every 5 gold pieces
 		for(int i = 0; i < (gold/5); i++) {
-			player.addThingToTrayOrHand(getCurrentState().getCup().drawTile());
+			try
+			{
+				player.addThingToTrayOrHand(getCurrentState().getCup().drawTile());
+			}
+			catch (NoMoreTilesException e)
+			{
+			}
 		}
 	}
 
@@ -106,7 +112,7 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		makeThingsDiscarded(things,playerNumber);
 	}
 	
-	private void makeThingsExchanged(Collection<ITileProperties> things, int playerNumber) throws NoMoreTilesException
+	private void makeThingsExchanged(Collection<ITileProperties> things, int playerNumber)
 	{
 		int newThingCount = things.size();
 		
@@ -120,7 +126,13 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		
 		for(int i=0; i<newThingCount; i++)
 		{
-			newThings.add(getCurrentState().getCup().drawTile());
+			try
+			{
+				newThings.add(getCurrentState().getCup().drawTile());
+			}
+			catch (NoMoreTilesException e)
+			{
+			}
 		}
 		for(ITileProperties oldThing : things)
 		{
@@ -159,13 +171,19 @@ public class RecruitingThingsCommandHandler extends CommandHandler
 		moveThingsFromHandToTray(p);
 	}
 	
-	private void drawFreeThings(int playerNumber) throws NoMoreTilesException
+	private void drawFreeThings(int playerNumber)
 	{
 		Player player = getCurrentState().getActivePhasePlayer();
 		int freeThings = (int) Math.ceil(((double)player.getOwnedHexes().size()) / (double)2);
 		for(int i=0; i<freeThings; i++)
 		{
-			player.addThingToTrayOrHand(getCurrentState().getCup().drawTile());
+			try
+			{
+				player.addThingToTrayOrHand(getCurrentState().getCup().drawTile());
+			}
+			catch (NoMoreTilesException e)
+			{
+			}
 		}
 	}
 
