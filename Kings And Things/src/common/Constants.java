@@ -184,7 +184,7 @@ public final class Constants {
 																												.put("Elf_Lord","Ice_Lord")
 																												.put("Arch_Mage","Ghaog_II")
 																												.put("Dwarf_King","Warlord")
-																												.put("Deerhunter","Grand_Duke")
+																												.put("Grand_Duke","Deerhunter")
 																												.put("Marksman","Forest_King")
 																												.put("Swamp_King","Sir_Lancealot").build();
 

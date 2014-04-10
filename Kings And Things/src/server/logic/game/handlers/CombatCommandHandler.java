@@ -148,6 +148,29 @@ public class CombatCommandHandler extends CommandHandler
 			}
 			getCurrentState().setDefendingPlayerNumber(defender.getID());
 			getCurrentState().setCurrentCombatPhase(CombatPhase.SELECT_TARGET_PLAYER);
+			
+			if(getCurrentState().getCombatHex().hasBuilding())
+			{
+				for(ITileProperties thing : getCurrentState().getCombatHex().getFightingThingsInHex())
+				{
+					if(thing.getName().equals("Baron_Munchausen") || thing.getName().equals("Grand_Duke"))
+					{
+						for(Player p : getCurrentState().getPlayers())
+						{
+							if(p.ownsThingOnBoard(thing) && !p.ownsThingOnBoard(getCurrentState().getCombatHex().getBuilding()))
+							{
+								getCurrentState().getCombatHex().getBuilding().setValue(getCurrentState().getCombatHex().getBuilding().getValue()-1);
+								if(getCurrentState().getCombatHex().getBuilding().getValue()==0)
+								{
+									getCurrentState().getCombatHex().getBuilding().flip();
+								}
+								break;
+							}
+						}
+					}
+				}
+			}
+			
 			if(!needToChooseTargets(hex))
 			{
 				autoDetermineTargets();
