@@ -95,13 +95,12 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 					break;
 				case HexOwnership:
 					hex = (HexState)update.getData( UpdateKey.HexState);
+					Point point = hex.getLocation();
 					if( controller.getPlayerCount()<Constants.MAX_PLAYERS){
-						Point point = hex.getLocation();
-						int x = point.x+1;
-						int y = point.y+2;
-						hex.setLocation( x, y);
+						point.x+=1;
+						point.y+=2;
 					}
-					controller.getLockForHex( hex.getLocation()).getHex().setState( hex);
+					controller.getLockForHex( point).getHex().setState( hex);
 					break;
 				case HexStatesChanged:
 					for(HexState hs : (HexState[])update.getData(UpdateKey.HexState))

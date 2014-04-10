@@ -1022,7 +1022,12 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 
 	@Override
 	public void placeNewHexOnBOard(HexState state) {
-		Lock end = locks.getLockForHex( state.getLocation());
+		Point point = state.getLocation();
+		if( getPlayerCount()<Constants.MAX_PLAYERS){
+			point.x+=1;
+			point.y+=2;
+		}
+		Lock end = locks.getLockForHex( point);
 		if( !state.getHex().isFaceUp()){
 			state.getHex().flip();
 		}
