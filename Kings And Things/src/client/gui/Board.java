@@ -91,7 +91,7 @@ public class Board extends JPanel implements CanvasParent{
 		}
 		//draw bank tiles
 		TILE_OUTLINE.translate( INITIAL_TILE_X_SHIFT, TILE_Y_SHIFT);
-		for( int i=0; i<4; i++){
+		for( int i=0; i<3; i++){
 			TILE_OUTLINE.translate( TILE_X_SHIFT, 0);
 			g2d.draw( TILE_OUTLINE);
 		}
@@ -174,8 +174,7 @@ public class Board extends JPanel implements CanvasParent{
 		bound.translate( TILE_X_SHIFT, 0);
 		//Marker
 		bound.translate( TILE_X_SHIFT, 0);
-		addTile( new Tile( new TileProperties( Category.Gold)), bound, true);
-		bound.translate( TILE_X_SHIFT, 0);
+		//removed gold
 		addTile( new Tile( new TileProperties( Category.Cup)), bound, true);
 	}
 	
@@ -224,6 +223,7 @@ public class Board extends JPanel implements CanvasParent{
 		if( players!=null && currentPlayer!=null){
 			for( int i=0, y=PLAYERS_STATE_PADDING; i<players.length; i++, y+=PLAYERS_STATE_PADDING){
 				if( players[i].getID()!=currentPlayer.getID()){
+					g2d.drawImage( Constants.getMarkerImage( players[i].getID()), HEX_BOARD_SIZE.width+5, y-PLAYERS_STATE_PADDING+6, 32, 32, null);
 					g2d.drawString( (players[i].isActive()?"*":"")+players[i].getName(), HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING, y);
 					g2d.drawString( "Gold: " + players[i].getGold(), HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING+165, y);
 					g2d.drawString( "Rack: " + players[i].getCradsOnRack(), HEX_BOARD_SIZE.width+BOARD_RIGHT_PADDING+355, y);
@@ -231,7 +231,8 @@ public class Board extends JPanel implements CanvasParent{
 					y-=PLAYERS_STATE_PADDING;
 				}
 			}
-			g2d.drawString( (currentPlayer.isActive()?"*":"")+currentPlayer.getName(), HEX_BOARD_SIZE.width+160, BOARD_SIZE.height-TILE_OUTLINE.height*2-PADDING*4);
+			g2d.drawImage( Constants.getMarkerImage( currentPlayer.getID()), HEX_BOARD_SIZE.width+160, BOARD_SIZE.height-TILE_OUTLINE.height*2-PADDING*7, 35, 35, null);
+			g2d.drawString( (currentPlayer.isActive()?"*":"")+currentPlayer.getName(), HEX_BOARD_SIZE.width+200, BOARD_SIZE.height-TILE_OUTLINE.height*2-PADDING*4);
 			g2d.drawString( "Gold: " + currentPlayer.getGold(), HEX_BOARD_SIZE.width+360, BOARD_SIZE.height-TILE_OUTLINE.height*2-PADDING*4);
 		}
 		if( Constants.DRAW_LOCKS){

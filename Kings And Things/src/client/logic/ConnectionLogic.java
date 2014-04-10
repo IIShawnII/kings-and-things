@@ -227,6 +227,7 @@ public class ConnectionLogic implements Runnable {
 				}
 				else if(event instanceof PlayerTargetChanged || event instanceof CombatHits || event instanceof HexStatesChanged || event instanceof GetAvailableHeroesResponse)
 				{
+					//TODO more specification needed, all UpdateReceivers are throwing cast exception and public no handle
 					event.postInternalEvent();
 					if(event instanceof HexStatesChanged)
 					{

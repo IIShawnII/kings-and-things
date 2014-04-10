@@ -160,7 +160,10 @@ public class LoadResources implements Runnable, FileVisitor< Path>{
 					tile.setInfinite();
 					tile.setCategory( currentCategory);
 					Constants.STATE.put( tile.getRestriction( 0), tile);
-					addImage(tile.hashCode(), file);
+					if( isClient){
+						Constants.IMAGE_MARKERS.put( tile.getRestriction( 0), ImageIO.read( file.toFile()));
+					}
+					addImage( tile.hashCode(), file);
 					break;
 					
 				case Resources:

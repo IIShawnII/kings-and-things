@@ -309,7 +309,8 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 				controller.undo();
 				break;
 			default:
-				throw new IllegalStateException( "No handle for rejection of: " + data);
+				controller.setStatusMessage( "WARN - Inavlid move");
+				Logger.getStandardLogger().warn( "No handle for rejection of: " + data);
 		}
 	}
 	

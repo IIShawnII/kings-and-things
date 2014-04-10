@@ -54,7 +54,7 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 		}catch( ClassCastException ex){
 			//temporary error that will be resolved by
 			//full implementation of UpatePakcage
-			Logger.getErrorLogger().warn( ex.getMessage() + ", Owner: " + OWNER, ex);
+			Logger.getErrorLogger().warn( ex.getMessage() + ", Owner: " + OWNER);
 		}catch( Exception ex){
 			Logger.getErrorLogger().fatal( ex.getMessage() + ", Owner: " + OWNER, ex);
 		}
@@ -89,7 +89,7 @@ public abstract class AbstractUpdateReceiver<T extends AbstractEvent> {
 	 * public events not private events.
 	 */
 	protected void handlePublic( T update){
-		Logger.getStandardLogger().warn( "No handle for: " + update + "\nOwner: " + OWNER);
+		Logger.getStandardLogger().warn( "No handle for public: " + update + "\nOwner: " + OWNER);
 	}
 	
 	/**

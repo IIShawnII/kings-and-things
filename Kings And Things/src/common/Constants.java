@@ -322,6 +322,19 @@ public final class Constants {
 				throw new IllegalArgumentException("ERROR - invalid ID for marker");
 		}
 	}
+	
+	public static final HashMap< Restriction, Image> IMAGE_MARKERS = new HashMap<>(4);
+	public final static Image getMarkerImage( final int ID){
+		switch( ID){
+			case PUBLIC: return IMAGE_MARKERS.get( Restriction.Battle);
+			case PLAYER_1_ID: return IMAGE_MARKERS.get( Restriction.Red);
+			case PLAYER_2_ID: return IMAGE_MARKERS.get( Restriction.Yellow);
+			case PLAYER_3_ID: return IMAGE_MARKERS.get( Restriction.Green);
+			case PLAYER_4_ID: return IMAGE_MARKERS.get( Restriction.Gray);
+			default:
+				throw new IllegalArgumentException("ERROR - invalid ID for marker");
+		}
+	}
 
 	public static List< Integer> convertToDice( int total, final int count){
 		if( count<=0 || total<=0){

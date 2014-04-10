@@ -279,6 +279,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 		if( board.isPhaseDone() && deepestComponent!=null && deepestComponent instanceof Tile){
 			currentTile = (Tile) deepestComponent;
 			if( !checkTilePermission( currentTile)){
+				prepareForNextMouseRelease();
 				return;
 			}
 			//move the component to the top, prevents overlapping

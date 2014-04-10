@@ -19,8 +19,8 @@ public class LockManager {
 	
 	private Lock[][] rackLocks;
 	private Lock[][] hexBoardLocks;
-	private Lock hexLock, fortLock, goldLock;
-	private Lock markerLock, cupLock;/*specialLock,*/ 
+	private Lock hexLock, fortLock;
+	private Lock markerLock, cupLock;/*specialLock, goldLock*/ 
 	
 	public LockManager( int playerCount){
 		hexLock = new Lock( 8+(Constants.HEX_SIZE.width/2)-LOCK_SIZE/2, 8+(Constants.HEX_SIZE.height/2)-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE, true, true);
@@ -30,8 +30,8 @@ public class LockManager {
 		bound.translate( Board.TILE_X_SHIFT, 0);
 		markerLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
 		bound.translate( Board.TILE_X_SHIFT, 0);
-		goldLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
-		bound.translate( Board.TILE_X_SHIFT, 0);
+		//goldLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
+		//bound.translate( Board.TILE_X_SHIFT, 0);
 		//specialLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
 		//bound.translate( Board.TILE_X_SHIFT, 0);
 		cupLock = new Lock( bound.x+TILE_SIZE.width/2-LOCK_SIZE/2, bound.y+TILE_SIZE.height/2-LOCK_SIZE/2, LOCK_SIZE, LOCK_SIZE);
@@ -57,6 +57,11 @@ public class LockManager {
 
 	public Lock getPermanentLock( Category category) {
 		switch( category){
+			case Gold:
+				//return goldLock;
+			case Special:
+				//return specialLock;
+				//cannot have Permanent lock
 			case Cup:
 			case Treasure:
 			case Magic:
@@ -66,12 +71,8 @@ public class LockManager {
 				return cupLock;
 			case Buildable:
 				return fortLock;
-			case Gold:
-				return goldLock;
 			case Hex:
 				return hexLock;
-			case Special:
-				return cupLock;
 			case State:
 				return markerLock;
 			default:
@@ -168,7 +169,7 @@ public class LockManager {
 		g2d.fill( hexLock.lock);
 		g2d.fill( fortLock.lock);
 		//g2d.fill( specialLock.lock);
-		g2d.fill( goldLock.lock);
+		//g2d.fill( goldLock.lock);
 		g2d.fill( cupLock.lock);
 		g2d.fill( markerLock.lock);
 		g2d.setColor( Color.BLUE);
