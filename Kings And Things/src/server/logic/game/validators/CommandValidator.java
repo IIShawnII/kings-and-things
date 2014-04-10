@@ -172,6 +172,19 @@ public abstract class CommandValidator
 		}
 	}
 	
+	public static void validateCanPlayTreasure(int playerNumber, ITileProperties treasure, GameState currentState)
+	{
+		validateIsPlayerActive(playerNumber,currentState);
+		if(!currentState.getPlayerByPlayerNumber(playerNumber).ownsTile(treasure))
+		{
+			throw new IllegalArgumentException("You do not own that tile");
+		}
+		if(!treasure.isTreasure() || treasure.isSpecialIncomeCounter())
+		{
+			throw new IllegalArgumentException("That is not a treasure card");
+		}
+	}
+	
 	public static void validateCanCallBluff(int playerNumber, ITileProperties creature, GameState currentState)
 	{
 		if(!creature.isFaceUp())

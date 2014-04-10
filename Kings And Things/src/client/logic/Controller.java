@@ -133,6 +133,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					case MoveFromRack:
 					case MoveMarker:
 					case MoveTower:
+					case PlayTreasure:
 						newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
 						break;
 					case ExchangeHex:
@@ -163,52 +164,61 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			if( newLock==null){
 				undo();
 			}else{
-				switch( permission){
-					case MoveMarker:
-						if( newLock.canHold( currentTile)){
-							HexState hex = board.placeTileOnHex( currentTile);
-							if( hex!=null){
-								undoManger.addUndo( new UndoTileMovement(currentTile, hex));
-								removeCurrentTile();
-								new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Controll.Input").postNetworkEvent( PLAYER_ID);
+				if(currentTile.getProperties().isTreasure() && !currentTile.getProperties().isSpecialIncomeCounter())
+				{
+					//TODO need to update undo manager
+					removeCurrentTile();
+					new UpdatePackage(UpdateInstruction.PlayTreasure,UpdateKey.Tile, currentTile.getProperties(), "Controller.Input").postNetworkEvent(PLAYER_ID);
+				}
+				else
+				{
+					switch( permission){
+						case MoveMarker:
+							if( newLock.canHold( currentTile)){
+								HexState hex = board.placeTileOnHex( currentTile);
+								if( hex!=null){
+									undoManger.addUndo( new UndoTileMovement(currentTile, hex));
+									removeCurrentTile();
+									new UpdatePackage( UpdateInstruction.HexOwnership, UpdateKey.HexState, hex, "Controll.Input").postNetworkEvent( PLAYER_ID);
+								}
 							}
-						}
-						break;
-					case ExchangeThing:
-						break;
-					case ExchangeHex:
-						if( newLock.canTempHold( currentTile)){
-							undoManger.addUndo( new UndoTileMovement(currentTile));
-							removeCurrentTile();
-							new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Controll.Input").postNetworkEvent( PLAYER_ID);
-						}
-						break;
-					case MoveFromCup:
-						break;
-					case MoveFromRack:
-						if( newLock.canHold( currentTile)){
-							//TODO need to update undo manager
-							removeCurrentTile();
-							UpdatePackage update = new UpdatePackage( "Controll.input", null);
-							update.addInstruction( UpdateInstruction.PlaceBoard);
-							update.putData( UpdateKey.Tile, currentTile.getProperties());
-							update.putData( UpdateKey.Hex, newLock.getHex().getState().getHex());
-							update.postNetworkEvent( PLAYER_ID);
-						}
-						break;
-					case MoveTower:
-						if( newLock.canHold( currentTile)){
-							//TODO need to update undo manager
-							removeCurrentTile();
-							UpdatePackage update = new UpdatePackage( "Controll.input", null);
-							update.addInstruction( UpdateInstruction.ConstructBuilding);
-							update.putData( UpdateKey.Tile, currentTile.getProperties().getBuildable());
-							update.putData( UpdateKey.Hex, newLock.getHex().getState().getHex());
-							update.postNetworkEvent( PLAYER_ID);
-						}
-						break;
-					default:
-						return;
+							break;
+						case ExchangeThing:
+							break;
+						case ExchangeHex:
+							if( newLock.canTempHold( currentTile)){
+								undoManger.addUndo( new UndoTileMovement(currentTile));
+								removeCurrentTile();
+								new UpdatePackage( UpdateInstruction.SeaHexChanged, UpdateKey.HexState, ((Hex)currentTile).getState(), "Controll.Input").postNetworkEvent( PLAYER_ID);
+							}
+							break;
+						case MoveFromCup:
+							break;
+						case MoveFromRack:
+							if( newLock.canHold( currentTile)){
+								//TODO need to update undo manager
+								removeCurrentTile();
+								UpdatePackage update = new UpdatePackage( "Controll.input", null);
+								update.addInstruction( UpdateInstruction.PlaceBoard);
+								update.putData( UpdateKey.Tile, currentTile.getProperties());
+								update.putData( UpdateKey.Hex, newLock.getHex().getState().getHex());
+								update.postNetworkEvent( PLAYER_ID);
+							}
+							break;
+						case MoveTower:
+							if( newLock.canHold( currentTile)){
+								//TODO need to update undo manager
+								removeCurrentTile();
+								UpdatePackage update = new UpdatePackage( "Controll.input", null);
+								update.addInstruction( UpdateInstruction.ConstructBuilding);
+								update.putData( UpdateKey.Tile, currentTile.getProperties().getBuildable());
+								update.putData( UpdateKey.Hex, newLock.getHex().getState().getHex());
+								update.postNetworkEvent( PLAYER_ID);
+							}
+							break;
+						default:
+							return;
+					}
 				}
 			}
 		}
@@ -329,6 +339,8 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			case MoveMarker:
 			case MoveTower:
 				return tile.isTile();
+			case PlayTreasure:
+				return tile.getProperties().isTreasure() && !tile.getProperties().isSpecialIncomeCounter();
 			default:
 				throw new IllegalStateException(" Encountered none tile permission: " + permission);
 		}

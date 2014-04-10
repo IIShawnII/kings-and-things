@@ -36,7 +36,7 @@ public final class Constants {
 	public enum MagicEvent {Balloon, Bow, Dispel_Magic, Dust_Of_Defense, Fan, Firewall, Golem, Lucky_Charm, Elixir, Sword, Talisman}
 	public enum UpdateKey {Category, Message, PlayerCount, Players, Name, Port, IP, Player, Hex, Phase, HexState, Roll, Tile, Flipped, Setup, Regular, Combat, Special, Rack, Instruction, ThingArray}
 	public enum Restriction { Gold, Magic, Treasure, Building, Event, Special, State, Battle, Sea, Desert, Forest, Frozen_Waste, Jungle, Mountain, Plains, Swamp, Yellow, Red, Green, Gray, None}
-	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers, Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase,
+	public enum UpdateInstruction {Connect, Disconnect, State, Start, UpdatePlayers, Category, End, Send, PlaceBoard, SetupPhase, RegularPhase, CombatPhase, PlayTreasure,
 		NeedRoll, HexOwnership, DieValue, DoneRolling, TieRoll, FlipAll, SeaHexChanged, Skip, GameState, Special, Rejected, InitiateCombat, TargetPlayer, ThingChanged, 
 		ApplyHit, Retreat, RemoveThingsFromHex, HexStatesChanged, BribeCreature, ShowExplorationResults, MoveThings, RackChanged, ConstructBuilding, CallBluff, ViewContents}
 	
@@ -51,7 +51,7 @@ public final class Constants {
 	//Combat phases
 	public enum CombatPhase {DETERMINE_DEFENDERS, BRIBE_CREATURES, SELECT_TARGET_PLAYER, MAGIC_ATTACK, APPLY_MAGIC_HITS, RANGED_ATTACK, APPLY_RANGED_HITS, MELEE_ATTACK, APPLY_MELEE_HITS, ATTACKER_ONE_RETREAT, ATTACKER_TWO_RETREAT, ATTACKER_THREE_RETREAT, DEFENDER_RETREAT, DETERMINE_DAMAGE, PLACE_THINGS, NO_COMBAT}
 	//Control permissions for client GUI
-	public enum Permissions { Roll, NoMove, MoveMarker, ExchangeThing, ExchangeHex, MoveFromCup, MoveTower, MoveFromRack, ResolveCombat};
+	public enum Permissions { Roll, NoMove, MoveMarker, ExchangeThing, ExchangeHex, MoveFromCup, MoveTower, MoveFromRack, ResolveCombat, PlayTreasure};
 	
 	//Resources
 	public static final Image IMAGE_SKIP;

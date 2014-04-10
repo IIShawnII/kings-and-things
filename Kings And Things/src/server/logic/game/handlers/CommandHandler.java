@@ -16,6 +16,7 @@ import server.event.PlayerWaivedRetreat;
 import server.event.internal.CallBluffCommand;
 import server.event.internal.DoneRollingCommand;
 import server.event.internal.EndPlayerTurnCommand;
+import server.event.internal.PlayTreasureCommand;
 import server.event.internal.RemoveThingsFromHexCommand;
 import server.event.internal.RollDiceCommand;
 import server.event.internal.ViewHexContentsCommand;
@@ -177,6 +178,12 @@ public abstract class CommandHandler
 	{
 		CommandValidator.validateCanCallBluff(playerNumber, creature, currentState);
 		makeBluffCalled(playerNumber, creature);
+	}
+
+	public void playTreasure(int playerNumber, ITileProperties treasure)
+	{
+		CommandValidator.validateCanPlayTreasure(playerNumber, treasure, currentState);
+		makeTreasurePlayed(playerNumber, treasure);
 	}
 
 	protected final GameState getCurrentState()
@@ -479,6 +486,23 @@ public abstract class CommandHandler
 			}
 		}
 	}
+	
+	private void makeTreasurePlayed(int playerNumber, ITileProperties treasure)
+	{
+		Player p = currentState.getPlayerByPlayerNumber(playerNumber);
+		if(p.ownsThingInTray(treasure))
+		{
+			p.removeThingFromTray(treasure);
+		}
+		else
+		{
+			p.removeCardFromHand(treasure);
+		}
+		currentState.getPlayerByPlayerNumber(playerNumber).addGold(treasure.getValue());
+		currentState.getCup().reInsertTile(treasure);
+		this.notifyClientsOfPlayerTray(playerNumber);
+		new PlayersList(currentState.getPlayers()).postNetworkEvent(ALL_PLAYERS_ID);
+	}
 
 	private void regularPhaseChanged(RegularPhase regularPhase)
 	{
@@ -666,6 +690,23 @@ public abstract class CommandHandler
 			{
 				Logger.getErrorLogger().error("Unable to process ViewHexContentsCommand due to: ", t);
 				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.ViewContents).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
+			}
+		}
+	}
+
+	@Subscribe
+	public void receivePlayTreasureCommand(PlayTreasureCommand command)
+	{
+		if(command.isUnhandled())
+		{
+			try
+			{
+				playTreasure(command.getID(), command.getTreasure());
+			}
+			catch(Throwable t)
+			{
+				Logger.getErrorLogger().error("Unable to process PlayTreasureCommand due to: ", t);
+				new CommandRejected(getCurrentState().getCurrentRegularPhase(),getCurrentState().getCurrentSetupPhase(),getCurrentState().getActivePhasePlayer().getPlayerInfo(),t.getMessage(),UpdateInstruction.PlayTreasure).postNetworkEvent(getCurrentState().getActivePhasePlayer().getID());
 			}
 		}
 	}

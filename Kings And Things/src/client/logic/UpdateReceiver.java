@@ -318,18 +318,23 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 				controller.setStatusMessage( "Construct or upgrade buildings, if any");
 				break;
 			case MOVEMENT:
+				controller.setPermission(Permissions.PlayTreasure);
 				controller.setStatusMessage( "Move things on board, if any");
 				break;
 			case RANDOM_EVENTS:
+				controller.setPermission(Permissions.PlayTreasure);
 				controller.setStatusMessage( "Play random event, if any");
 				break;
 			case RECRUITING_CHARACTERS:
+				controller.setPermission(Permissions.PlayTreasure);
 				controller.setStatusMessage( "Select hero to recruit, if any");
 				break;
 			case RECRUITING_THINGS:
+				controller.setPermission(Permissions.PlayTreasure);
 				controller.setStatusMessage( "Recruit things");
 				break;
 			case SPECIAL_POWERS:
+				controller.setPermission(Permissions.PlayTreasure);
 				controller.setStatusMessage( "Use hero abilities, if any");
 				break;
 			default:
