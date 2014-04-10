@@ -25,6 +25,7 @@ import server.event.internal.RollDiceCommand;
 import server.event.internal.DoneRollingCommand;
 import server.event.internal.EndPlayerTurnCommand;
 import server.event.internal.GiveHexToPlayerCommand;
+import server.event.internal.StartGameCommand;
 import server.event.internal.TargetPlayerCommand;
 import server.event.internal.ViewHexContentsCommand;
 
@@ -115,6 +116,9 @@ public class PlayerConnection implements Runnable{
 			while ((event = (UpdatePackage)connection.recieve())!=null){
 				Logger.getStandardLogger().info( "Received "+(player!=null?player.getID():"-1") + ": " + event);
 				switch( event.peekFirstInstruction()){
+					case Start:
+						new StartGameCommand().postInternalEvent( ID);
+						break;
 					case State: 
 						player.setIsPlaying( ((PlayerInfo)event.getData( UpdateKey.Player)).isReady());
 						new PlayerUpdated( player).postInternalEvent( ID);

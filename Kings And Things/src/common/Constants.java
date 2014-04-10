@@ -161,7 +161,7 @@ public final class Constants {
 	public static final int INFINITE_TILE = -1;
 	public static final int SERVER_TIMEOUT = 5;
 	public static final int SERVER_PORT = 12345;
-	public static final boolean PLAYER_READY = true;
+	public static final boolean PLAYER_READY = false;
 	public static final String SERVER_IP = "127.0.0.1";
 	public static final String RESOURCE_PATH = "Resources/";
 	public static final String GAME_TITLE = "Kings & Things";

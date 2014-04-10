@@ -13,6 +13,7 @@ import java.util.HashSet;
 import server.event.EndServer;
 import server.event.GameStarted;
 import server.event.PlayerUpdated;
+import server.event.internal.StartGameCommand;
 import server.event.internal.StartSetupPhaseCommand;
 import server.logic.game.CommandHandlerManager;
 import server.logic.game.GameState;
@@ -20,6 +21,7 @@ import server.logic.game.StateGenerator;
 import server.logic.game.StateGenerator.GeneratorType;
 
 import com.google.common.eventbus.Subscribe;
+
 import common.Constants;
 import common.Constants.Level;
 import common.Constants.UpdateKey;
@@ -163,7 +165,11 @@ public class ConnectionLobby implements Runnable {
 		if( connections.getPlayers().length>0){
 			connections.postNetworkEvent( Constants.ALL_PLAYERS_ID);
 		}
-		if( !anyUnReady && connectedPlayers.size()==Constants.MAX_PLAYERS){
+	}
+	
+	@Subscribe
+	public void starGame( StartGameCommand command){
+		if( connectedPlayers.size() >= Constants.MIN_PLAYERS && connectedPlayers.size() <= Constants.MAX_PLAYERS){
 			HashSet< Player> set = new HashSet<>();
 			for( PlayerConnection pc : connectedPlayers){
 				set.add( pc.getPlayer());

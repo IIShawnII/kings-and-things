@@ -68,6 +68,8 @@ public class UpdateReceiver extends AbstractUpdateReceiver<UpdatePackage>{
 		controller.resetPhase();
 		for( UpdateInstruction instruction : update.getInstructions()){
 			switch( instruction){
+				case Start:
+					break;//nothing to do
 				case UpdatePlayers:
 					controller.setCurrentPlayer( (PlayerInfo)update.getData( UpdateKey.Player));
 					controller.setPlayers( (PlayerInfo[]) update.getData( UpdateKey.Players));

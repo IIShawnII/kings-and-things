@@ -229,6 +229,8 @@ public class ClientGUI extends JFrame implements Runnable, ActionListener{
 					}
 				}
 				break;
+			case Start:
+				break;
 			default:
 				Logger.getStandardLogger().warn( "ClientGUI: NO handle for: " + update.peekFirstInstruction());
 		}

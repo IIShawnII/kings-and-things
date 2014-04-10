@@ -41,6 +41,8 @@ import common.event.network.ViewHexContentsResponse;
 
 public class ConnectionLogic implements Runnable {
 
+	private static boolean sentStart = false;
+	
 	private Connection connection;
 	private PlayerInfo player = null;
 	private boolean finished = false, gameStarted = false;
@@ -379,6 +381,12 @@ public class ConnectionLogic implements Runnable {
 				message = !player.isReady()? "Ready":"UnReady";
 				sendToServer( new UpdatePackage( UpdateInstruction.State, UpdateKey.Player, player, "Logic "+player.getID()));
 				break;
+			case Start:
+				if( !sentStart){
+					sendToServer( new UpdatePackage( UpdateInstruction.Start, "Logic "+player.getID()));
+					sentStart = true;
+				}
+				return;
 			default:
 				throw new IllegalArgumentException( "No handle for instruction: " + instruction);
 		}

@@ -40,7 +40,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 	private JPanel jpProgress;
 	private DefaultListModel< PlayerInfo> listModel;
 	private JTextField jtfIP, jtfPort, jtfName;
-	private JButton jbConnect, jbReady;
+	private JButton jbConnect, jbStart, jbReady;
 	private JProgressBar jpbHex, jpbCup, jpbBuilding;
 	private JProgressBar jpbGold, jpbSpecial, jpbState;
 	private boolean isConnected = false, progress, forceClose = true;
@@ -84,11 +84,17 @@ public class LoadingDialog extends JDialog implements Runnable{
 		constraints.gridy = 0;
 		jpMain.add( label, constraints);
 		
-		jbReady = new JButton( "UnReady");
+		jbReady = new JButton( "Ready");
 		jbReady.setEnabled( false);
 		jbReady.addActionListener( control);
 		constraints.gridy = 1;
 		jpMain.add( jbReady, constraints);
+		
+		jbStart = new JButton( "Start");
+		jbStart.setEnabled( false);
+		jbStart.addActionListener( control);
+		constraints.gridy = 2;
+		jpMain.add( jbStart, constraints);
 		
 		jbConnect = new JButton( "Connect");
 		jbConnect.setEnabled( false);
@@ -288,6 +294,9 @@ public class LoadingDialog extends JDialog implements Runnable{
 			}else if( isConnected && source==jbReady){
 				update.addInstruction( UpdateInstruction.State);
 				update.postInternalEvent(Constants.LOGIC);
+			}else if( isConnected && source==jbStart){
+				update.addInstruction( UpdateInstruction.Start);
+				update.postInternalEvent(Constants.LOGIC);
 			}
 		}
 		
@@ -342,7 +351,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 				close();
 				break;
 			case State:
-				jbReady.setText( (String)update.getData( UpdateKey.Message));
+				jbStart.setText( (String)update.getData( UpdateKey.Message));
 				break;
 			case UpdatePlayers:
 				if( listModel!=null){
@@ -355,7 +364,7 @@ public class LoadingDialog extends JDialog implements Runnable{
 			default:
 				return;
 		}
-		jbReady.setEnabled( isConnected);
+		jbStart.setEnabled( isConnected);
 	}
 	
 	private void updateProgress( UpdatePackage load) {
