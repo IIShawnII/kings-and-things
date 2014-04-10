@@ -161,7 +161,14 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 					case ExchangeHex:
 					case ExchangeThing:
 					case RandomEvents:
-						newLock = locks.getDropLock( currentTile);
+						if(permission == Permissions.RandomEvents && currentTile.getProperties().isBuildableBuilding())
+						{
+							newLock = locks.getLock( currentTile, bound.x+(bound.width/2), bound.y+(bound.height/2));
+						}
+						else
+						{
+							newLock = locks.getDropLock( currentTile);
+						}
 						break;
 					default:
 						break;
@@ -266,11 +273,23 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 						{
 							//if( newLock.canTempHold( currentTile)){
 							//TODO need to update undo manager
-							removeCurrentTile();
-							UpdatePackage update = new UpdatePackage( "Controll.input", null);
-							update.addInstruction( UpdateInstruction.RandomEvent);
-							update.putData( UpdateKey.Tile, currentTile.getProperties());
-							update.postNetworkEvent( PLAYER_ID);
+							if(currentTile.getProperties().isBuildableBuilding())
+							{
+								removeCurrentTile();
+								UpdatePackage update = new UpdatePackage( "Controll.input", null);
+								update.addInstruction( UpdateInstruction.ConstructBuilding);
+								update.putData( UpdateKey.Tile, currentTile.getProperties().getBuildable());
+								update.putData( UpdateKey.Hex, newLock.getHex().getState().getHex());
+								update.postNetworkEvent( PLAYER_ID);
+							}
+							else
+							{
+								removeCurrentTile();
+								UpdatePackage update = new UpdatePackage( "Controll.input", null);
+								update.addInstruction( UpdateInstruction.RandomEvent);
+								update.putData( UpdateKey.Tile, currentTile.getProperties());
+								update.postNetworkEvent( PLAYER_ID);
+							}
 							//}
 							break;
 						}
@@ -370,6 +389,7 @@ public class Controller extends MouseAdapter implements ActionListener, Parent, 
 			case ResolveCombat:
 				showContextMenu(e,true,false);
 				break;
+			case RandomEvents:
 			case MoveTower:
 				showContextMenu(e,false,true);
 				break;

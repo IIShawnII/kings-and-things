@@ -59,11 +59,11 @@ public class CupManager extends AbstractTileManager
 	@Override
 	public ITileProperties drawTile() throws NoMoreTilesException
 	{
-		if(!isDemoMode)
-		{
+		//if(!isDemoMode)
+		//{
 			return super.drawTile();
-		}
-		else
+		//}
+		/*else
 		{
 			synchronized(tiles)
 			{
@@ -74,7 +74,7 @@ public class CupManager extends AbstractTileManager
 				numDraws++;
 				return tiles.remove(0);
 			}
-		}
+		}*/
 	}
 	
 	private void stackDeck() throws NoMoreTilesException

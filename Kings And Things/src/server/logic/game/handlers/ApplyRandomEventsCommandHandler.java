@@ -227,20 +227,6 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				/**
 				 * Gain one additional fort level.
 				 */
-				// checks which hex needs to upgraded
-				HexState targetHex = getCurrentState().getBoard().getHexStateForHex(targetOfEvent);
-				// upgrades fort to tower
-				 if (!targetHex.hasBuilding()) {
-				 	new ConstructBuildingCommand(BuildableBuilding.Tower, targetOfEvent).postInternalEvent(playerID);
-				 }
-				 // upgrades tower to keep
-				 else if (targetHex.getBuilding().getName().equals(BuildableBuilding.Tower.name())) {
-					new ConstructBuildingCommand(BuildableBuilding.Keep, targetOfEvent).postInternalEvent(playerID);
-				 }
-				 // upgrades keep to castle
-				 else if (targetHex.getBuilding().getName().equals(BuildableBuilding.Keep.name())) {
-					new ConstructBuildingCommand(BuildableBuilding.Castle, targetOfEvent).postInternalEvent(playerID);
-				 }
 				getCurrentState().setWillingWorkersPlayed(true);
 				playerApplyingRandomEvent.removeThingFromTray(randomEventTile);
 				notifyClientsOfPlayerTray(playerID);

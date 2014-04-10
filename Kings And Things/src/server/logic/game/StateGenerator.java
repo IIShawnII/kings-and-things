@@ -409,6 +409,8 @@ public class StateGenerator
 		addThingByNameToRackForPlayer("Gold_Mine", p2, state);
 		addThingByNameToRackForPlayer("Pearl", p2, state);
 		addThingByNameToRackForPlayer("Good_Harvest", p2, state);
+
+		addThingByNameToRackForPlayer("Willing_Workers", p4, state);
 		
 		try(FileOutputStream fs = new FileOutputStream(fileName);ObjectOutputStream os = new ObjectOutputStream(fs))
 		{

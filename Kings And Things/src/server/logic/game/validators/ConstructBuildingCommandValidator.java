@@ -3,6 +3,7 @@ package server.logic.game.validators;
 import server.logic.game.BuildableBuildingGenerator;
 import server.logic.game.GameState;
 import common.Constants.BuildableBuilding;
+import common.Constants.RegularPhase;
 import common.Constants.SetupPhase;
 import common.game.HexState;
 import common.game.ITileProperties;
@@ -48,12 +49,16 @@ public abstract class ConstructBuildingCommandValidator
 		
 		if(currentState.getCurrentSetupPhase() == SetupPhase.SETUP_FINISHED)
 		{
-			if (owningPlayer.getGold() < 5) {
+			if(currentState.getCurrentRegularPhase() != RegularPhase.CONSTRUCTION && !currentState.hasWillingWorkersPlayed())
+			{
+				throw new IllegalStateException("Can not build things during this phase");
+			}
+			if (owningPlayer.getGold() < 5 && !currentState.hasWillingWorkersPlayed()) {
 				throw new IllegalArgumentException("You need more than 5 gold pieces to build a building");
 			}
 			
 			//Checks if a player is eligible to build a citadel
-			if(building == BuildableBuilding.Citadel)
+			if(building == BuildableBuilding.Citadel && currentState.getCurrentRegularPhase() != RegularPhase.CONSTRUCTION)
 			{
 				for(ITileProperties thing : owningPlayer.getOwnedThingsOnBoard())
 				{
