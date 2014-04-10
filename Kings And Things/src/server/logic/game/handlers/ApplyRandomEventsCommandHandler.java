@@ -1,6 +1,7 @@
 package server.logic.game.handlers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import server.event.DiceRolled;
 import server.event.internal.ApplyRandomEventsCommand;
@@ -87,6 +88,18 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 					
 				} else {
 					/*TODO Check which player is the defender*/
+					List<Integer> playerOrder = getCurrentState().getPlayerOrder();
+					int playerApplyingRandomEventIndex = playerOrder.indexOf(playerApplyingRandomEvent.getID());
+					int defendingPlayerID;
+					
+					if (playerApplyingRandomEventIndex == 0) {
+						defendingPlayerID = playerOrder.get(playerOrder.size()-1);
+						getCurrentState().addNeededRoll(new Roll(2, targetOfEvent, RollReason.DEFECTION_DEFENDER, defendingPlayerID));
+					}
+					else {
+						defendingPlayerID = playerOrder.get(playerApplyingRandomEventIndex - 1);
+						getCurrentState().addNeededRoll(new Roll(2, targetOfEvent, RollReason.DEFECTION_DEFENDER, defendingPlayerID));
+					}
 				}
 				break;
 			case Good_Harvest:
@@ -270,10 +283,6 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 			// Removes handled rolls for player being affected DEFECTION
 			getCurrentState().removeRoll(defectionDefender);
 		}
-	}
-	
-	private void applyBigJuju(HexState targetHex) {
-		
 	}
 	
 	@Subscribe
