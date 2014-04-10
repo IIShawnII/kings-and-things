@@ -2,6 +2,8 @@ package client.logic;
 
 import java.io.IOException;
 
+import javax.swing.JOptionPane;
+
 import common.Logger;
 import common.game.Player;
 import common.game.PlayerInfo;
@@ -23,6 +25,7 @@ import common.event.network.HexNeedsThingsRemoved;
 import common.event.network.HexStatesChanged;
 import common.event.network.InitiateCombat;
 import common.event.network.PlayerTargetChanged;
+import common.event.network.PlayerWon;
 import common.event.network.RackPlacement;
 import common.event.network.StartGame;
 import common.event.network.PlayerState;
@@ -231,6 +234,11 @@ public class ConnectionLogic implements Runnable {
 						update.addInstruction(UpdateInstruction.HexStatesChanged);
 						update.putData(UpdateKey.HexState, evt.getArray());
 					}
+				}
+				else if(event instanceof PlayerWon)
+				{
+					Player winner = ((PlayerWon)event).getWinner();
+					JOptionPane.showMessageDialog(null, winner.getName() + " has won the game!");
 				}
 				else if(event instanceof HandPlacement)
 				{

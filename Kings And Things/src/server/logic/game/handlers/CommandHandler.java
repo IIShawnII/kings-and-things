@@ -47,6 +47,7 @@ import common.event.network.GetAvailableHeroesResponse;
 import common.event.network.HandPlacement;
 import common.event.network.HexOwnershipChanged;
 import common.event.network.HexStatesChanged;
+import common.event.network.PlayerWon;
 import common.event.network.PlayersList;
 import common.event.network.RackPlacement;
 import common.event.network.ViewHexContentsResponse;
@@ -97,6 +98,11 @@ public abstract class CommandHandler
 		else
 		{
 			advanceActivePhasePlayer();
+		}
+		Player winner = currentState.getWinningPlayer();
+		if(winner != null)
+		{
+			new PlayerWon(winner).postNetworkEvent(ALL_PLAYERS_ID);
 		}
 	}
 
