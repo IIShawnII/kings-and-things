@@ -37,6 +37,15 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				 */
 				//TODO - need checks to see if target is current player's hex or enemy player's hex
 				//this.getCurrentState().getBoard().getHexStateForHex(targetOfEvent).setHex(hex);
+				/*
+				 * HexState targetHex;
+				 * 
+				 * for (creature : playerApplyingRandomEvent.listOfCreatures) {
+				 * 		if (creature is magic creature && targetHex < creature.combatValue) {
+				 * 			applyBigJuju(targetHex);
+				 * 	 	}
+				 * }
+				 */
 				break;
 			case Dark_Plague:
 				/**
@@ -75,16 +84,6 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				} else {
 					/*TODO Check which player is the defender*/
 				}
-				/*
-				 * if (player owns special character) {
-				 *		player and owner of special character roll twice
-				 *		if (player's roll > owner's roll) {
-				 *			player places special character in any hex player controls
-				 *		}
-				 *} else {
-				 *		player collects special character
-				 *}			 
-				*/
 				break;
 			case Good_Harvest:
 				/**
@@ -98,15 +97,10 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				 * Player collects double from all special income counters. Mines are quadrupled
 				 * if player owns Dwarf King.
 				 */
-				/*
-				 * player collects gold pieces (2*player's special income counters)
-				 * if (player owns Dwarf_King) {
-				 * 		mines are quadrupled
-				 * }
-				 */
-				// mines are quadrupled
 				boolean ownsDwarfKing = false;
 				ArrayList<ITileProperties> specialIncomeCounters = new ArrayList<>();
+				
+				// checks if player owns Dwarf King and has special income counter
 				for (ITileProperties thing : playerApplyingRandomEvent.getOwnedThingsOnBoard()) {
 					if (thing.getName().equals("Dwarf_King")) {
 						ownsDwarfKing = true;
@@ -115,10 +109,14 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 						specialIncomeCounters.add(thing);
 					}
 				}
+				
+				// Goes through income counters
 				for (ITileProperties specialIncomeCounter : specialIncomeCounters) {
 					if (specialIncomeCounter.getBiomeRestriction() == Biome.Mountain && ownsDwarfKing) {
+						// If player owns mines, player gets gold worth quadruple the amount of special income counter
 						playerApplyingRandomEvent.addGold(4*specialIncomeCounter.getValue());
 					} else {
+						// Player gets gold worth double the amount of special income counter
 						playerApplyingRandomEvent.addGold(2*specialIncomeCounter.getValue());
 					}
 				}
@@ -158,8 +156,22 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				 * 		Player rolls 2 die			 * 		
 				 * } while (player.rolls < 6 || player.rolls > 8)
 				 */
-				
+				// Current code in progress
+				/*
+				do {
+					// hex is chosen
+					this.getCurrentState().getBoard().getHexStateForHex(targetOfEvent);
+					// player rolls
+					getCurrentState().addNeededRoll(new Roll(2, targetOfEvent, RollReason.DEFECTION_USER, playerApplyingRandomEvent.getID()));
+					if () {
+						targetOfEvent.get
+						if (targetOfEvent.is) {
+							
+						}
+					}
+				} while ();
 				break;
+				*/
 			case Vandalism:
 				/**
 				 * One player loses a fort level (citadels are immune).
@@ -175,7 +187,15 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 				 * Place or move Black Cloud; all friendly counters under Cloud reduce Combat value by one.
 				 */
 				/*
-				 * 
+				 * for (creature : playerApplyingRandomEvent.listOfCreatures) {
+				 * 		if (creature is magic creature) {
+				 * 			if (targetHex.isOwned()) {
+				 * 				for (counter : OwningPlayer.counters) {
+				 * 						counter.combatValue()--;
+				 * 				}
+				 * 			}
+				 * 		}
+				 * }
 				 */
 				break;
 			case Willing_Workers:
@@ -231,6 +251,10 @@ public class ApplyRandomEventsCommandHandler extends CommandHandler {
 			// Removes handled rolls for player being affected DEFECTION
 			getCurrentState().removeRoll(defectionDefender);
 		}
+	}
+	
+	private void applyBigJuju(HexState targetHex) {
+		
 	}
 	
 	@Subscribe
