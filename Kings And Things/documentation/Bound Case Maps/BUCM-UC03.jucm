@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ucm.map="http:///ucm/map.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="Owner" created="April 10, 2014 10:26:41 PM EDT" modified="April 10, 2014 10:26:41 PM EDT" urnVersion="0.925" nextGlobalID="10">
+<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ucm.map="http:///ucm/map.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="Owner" created="April 10, 2014 10:26:41 PM EDT" modified="April 11, 2014 12:29:29 AM EDT" specVersion="2" urnVersion="0.925" nextGlobalID="67">
   <ucmspec>
     <scenarioGroups id="5" name="ScenarioGroup5">
       <scenarios id="6" name="ScenarioDef6"/>
@@ -14,7 +14,104 @@
     <indicatorGroup id="10" name="Flexibility" isRedesignCategory="true"/>
   </grlspec>
   <urndef>
-    <specDiagrams xsi:type="ucm.map:UCMmap" id="2" name="UCMmap2"/>
+    <responsibilities id="33" name="Player plays a turn" respRefs="//@urndef/@specDiagrams.0/@nodes.2"/>
+    <responsibilities id="34" name="Players optionally exchange things" respRefs="//@urndef/@specDiagrams.0/@nodes.11"/>
+    <responsibilities id="35" name="Players play initial things" respRefs="//@urndef/@specDiagrams.0/@nodes.8"/>
+    <responsibilities id="36" name="Players place inital tower" respRefs="//@urndef/@specDiagrams.0/@nodes.5"/>
+    <responsibilities id="37" name="Players are given initial gold" respRefs="//@urndef/@specDiagrams.0/@nodes.4"/>
+    <responsibilities id="38" name="Players optionally exchange sea hex" respRefs="//@urndef/@specDiagrams.0/@nodes.13"/>
+    <responsibilities id="39" name="Players place initial control marker" respRefs="//@urndef/@specDiagrams.0/@nodes.10"/>
+    <responsibilities id="40" name="Player rolls for player order" respRefs="//@urndef/@specDiagrams.0/@nodes.6"/>
+    <responsibilities id="41" name="Winner detected" respRefs="//@urndef/@specDiagrams.0/@nodes.9"/>
+    <specDiagrams xsi:type="ucm.map:UCMmap" id="2" name="UCMmap2">
+      <nodes xsi:type="ucm.map:OrFork" id="13" name="OrFork339" x="-232" y="681" succ="//@urndef/@specDiagrams.0/@connections.5 //@urndef/@specDiagrams.0/@connections.3" pred="//@urndef/@specDiagrams.0/@connections.18"/>
+      <nodes xsi:type="ucm.map:DirectionArrow" id="14" name="DirectionArrow292" x="205" y="550" contRef="//@urndef/@specDiagrams.0/@contRefs.4" succ="//@urndef/@specDiagrams.0/@connections.1" pred="//@urndef/@specDiagrams.0/@connections.8"/>
+      <nodes xsi:type="ucm.map:RespRef" id="15" name="RespRef115" x="282" y="524" contRef="//@urndef/@specDiagrams.0/@contRefs.4" succ="//@urndef/@specDiagrams.0/@connections.8" pred="//@urndef/@specDiagrams.0/@connections.16" respDef="//@urndef/@responsibilities.0">
+        <label deltaX="73" deltaY="-4"/>
+      </nodes>
+      <nodes xsi:type="ucm.map:DirectionArrow" id="12" name="DirectionArrow359" x="-49" y="514" succ="//@urndef/@specDiagrams.0/@connections.14" pred="//@urndef/@specDiagrams.0/@connections.5"/>
+      <nodes xsi:type="ucm.map:RespRef" id="24" name="RespRef32" x="-271" y="470" contRef="//@urndef/@specDiagrams.0/@contRefs.1" succ="//@urndef/@specDiagrams.0/@connections.13" pred="//@urndef/@specDiagrams.0/@connections.0" respDef="//@urndef/@responsibilities.4">
+        <label deltaX="84" deltaY="-46"/>
+      </nodes>
+      <nodes xsi:type="ucm.map:RespRef" id="23" name="RespRef34" x="190" y="193" contRef="//@urndef/@specDiagrams.0/@contRefs.2" succ="//@urndef/@specDiagrams.0/@connections.10" pred="//@urndef/@specDiagrams.0/@connections.13" respDef="//@urndef/@responsibilities.3">
+        <label deltaX="12" deltaY="6"/>
+      </nodes>
+      <nodes xsi:type="ucm.map:RespRef" id="28" name="RespRef28" x="-214" y="95" contRef="//@urndef/@specDiagrams.0/@contRefs.0" succ="//@urndef/@specDiagrams.0/@connections.6" pred="//@urndef/@specDiagrams.0/@connections.12" respDef="//@urndef/@responsibilities.7">
+        <label deltaX="-78" deltaY="-7"/>
+      </nodes>
+      <nodes xsi:type="ucm.map:OrJoin" id="17" name="OrJoin358" x="376" y="470" succ="//@urndef/@specDiagrams.0/@connections.15" pred="//@urndef/@specDiagrams.0/@connections.17 //@urndef/@specDiagrams.0/@connections.11"/>
+      <nodes xsi:type="ucm.map:RespRef" id="21" name="RespRef36" x="415" y="277" contRef="//@urndef/@specDiagrams.0/@contRefs.3" succ="//@urndef/@specDiagrams.0/@connections.7" pred="//@urndef/@specDiagrams.0/@connections.10" respDef="//@urndef/@responsibilities.2">
+        <label deltaX="-41" deltaY="12"/>
+      </nodes>
+      <nodes xsi:type="ucm.map:RespRef" id="31" name="RespRef122" x="-376" y="562" contRef="//@urndef/@specDiagrams.0/@contRefs.1" succ="//@urndef/@specDiagrams.0/@connections.4" pred="//@urndef/@specDiagrams.0/@connections.3" respDef="//@urndef/@responsibilities.8">
+        <label/>
+      </nodes>
+      <nodes xsi:type="ucm.map:RespRef" id="27" name="RespRef30" x="-207" y="207" contRef="//@urndef/@specDiagrams.0/@contRefs.0" succ="//@urndef/@specDiagrams.0/@connections.9" pred="//@urndef/@specDiagrams.0/@connections.6" respDef="//@urndef/@responsibilities.6">
+        <label deltaX="-100" deltaY="-3"/>
+      </nodes>
+      <nodes xsi:type="ucm.map:RespRef" id="19" name="RespRef99" x="590" y="326" contRef="//@urndef/@specDiagrams.0/@contRefs.3" succ="//@urndef/@specDiagrams.0/@connections.2" pred="//@urndef/@specDiagrams.0/@connections.7" respDef="//@urndef/@responsibilities.1">
+        <label deltaX="-45" deltaY="5"/>
+      </nodes>
+      <nodes xsi:type="ucm.map:StartPoint" id="29" name="Game Started" x="-411" y="73" succ="//@urndef/@specDiagrams.0/@connections.12">
+        <label/>
+        <precondition deltaX="40" deltaY="-17" label="" expression="true"/>
+      </nodes>
+      <nodes xsi:type="ucm.map:RespRef" id="25" name="RespRef63" x="-243" y="311" contRef="//@urndef/@specDiagrams.0/@contRefs.0" succ="//@urndef/@specDiagrams.0/@connections.0" pred="//@urndef/@specDiagrams.0/@connections.9" respDef="//@urndef/@responsibilities.5">
+        <label deltaX="-114" deltaY="-24"/>
+      </nodes>
+      <nodes xsi:type="ucm.map:DirectionArrow" id="30" name="DirectionArrow360" x="148" y="462" contRef="//@urndef/@specDiagrams.0/@contRefs.4" succ="//@urndef/@specDiagrams.0/@connections.11" pred="//@urndef/@specDiagrams.0/@connections.14"/>
+      <nodes xsi:type="ucm.map:EndPoint" id="32" name="Game has declared a winner" x="-461" y="638" pred="//@urndef/@specDiagrams.0/@connections.4">
+        <label deltaX="5" deltaY="-43"/>
+        <postcondition deltaX="-40" deltaY="-20" label="" expression="true"/>
+      </nodes>
+      <nodes xsi:type="ucm.map:DirectionArrow" id="64" name="DirectionArrow64" x="351" y="487" contRef="//@urndef/@specDiagrams.0/@contRefs.4" succ="//@urndef/@specDiagrams.0/@connections.16" pred="//@urndef/@specDiagrams.0/@connections.15"/>
+      <nodes xsi:type="ucm.map:DirectionArrow" id="65" name="DirectionArrow65" x="420" y="439" succ="//@urndef/@specDiagrams.0/@connections.17" pred="//@urndef/@specDiagrams.0/@connections.2"/>
+      <nodes xsi:type="ucm.map:DirectionArrow" id="66" name="DirectionArrow66" x="-20" y="630" succ="//@urndef/@specDiagrams.0/@connections.18" pred="//@urndef/@specDiagrams.0/@connections.1"/>
+      <contRefs xsi:type="ucm.map:ComponentRef" id="43" name="ComponentRef43" x="-274" y="54" width="277" height="291" contDef="//@urndef/@components.0" nodes="//@urndef/@specDiagrams.0/@nodes.6 //@urndef/@specDiagrams.0/@nodes.10 //@urndef/@specDiagrams.0/@nodes.13">
+        <label/>
+      </contRefs>
+      <contRefs xsi:type="ucm.map:ComponentRef" id="47" name="ComponentRef47" x="-477" y="449" width="228" height="143" contDef="//@urndef/@components.1" nodes="//@urndef/@specDiagrams.0/@nodes.4 //@urndef/@specDiagrams.0/@nodes.9">
+        <label/>
+      </contRefs>
+      <contRefs xsi:type="ucm.map:ComponentRef" id="51" name="ComponentRef51" x="42" y="90" width="239" height="118" contDef="//@urndef/@components.2" nodes="//@urndef/@specDiagrams.0/@nodes.5">
+        <label/>
+      </contRefs>
+      <contRefs xsi:type="ucm.map:ComponentRef" id="55" name="ComponentRef55" x="298" y="190" width="456" height="165" contDef="//@urndef/@components.3" nodes="//@urndef/@specDiagrams.0/@nodes.8 //@urndef/@specDiagrams.0/@nodes.11">
+        <label deltaX="-19" deltaY="4"/>
+      </contRefs>
+      <contRefs xsi:type="ucm.map:ComponentRef" id="61" name="ComponentRef61" x="65" y="442" width="419" height="197" contDef="//@urndef/@components.4" nodes="//@urndef/@specDiagrams.0/@nodes.2 //@urndef/@specDiagrams.0/@nodes.14 //@urndef/@specDiagrams.0/@nodes.1 //@urndef/@specDiagrams.0/@nodes.16">
+        <label/>
+      </contRefs>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.13" target="//@urndef/@specDiagrams.0/@nodes.4"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.1" target="//@urndef/@specDiagrams.0/@nodes.18"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.11" target="//@urndef/@specDiagrams.0/@nodes.17"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.0" target="//@urndef/@specDiagrams.0/@nodes.9">
+        <condition deltaX="33" deltaY="-50" label="Winner found" expression="true" description="Winner found"/>
+      </connections>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.9" target="//@urndef/@specDiagrams.0/@nodes.15"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.0" target="//@urndef/@specDiagrams.0/@nodes.3">
+        <condition deltaX="46" deltaY="44" label="no Winner" expression="false" description="no Winner"/>
+      </connections>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.6" target="//@urndef/@specDiagrams.0/@nodes.10"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.8" target="//@urndef/@specDiagrams.0/@nodes.11"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.2" target="//@urndef/@specDiagrams.0/@nodes.1"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.10" target="//@urndef/@specDiagrams.0/@nodes.13"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.5" target="//@urndef/@specDiagrams.0/@nodes.8"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.14" target="//@urndef/@specDiagrams.0/@nodes.7"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.12" target="//@urndef/@specDiagrams.0/@nodes.6"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.4" target="//@urndef/@specDiagrams.0/@nodes.5"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.3" target="//@urndef/@specDiagrams.0/@nodes.14"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.7" target="//@urndef/@specDiagrams.0/@nodes.16"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.16" target="//@urndef/@specDiagrams.0/@nodes.2"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.17" target="//@urndef/@specDiagrams.0/@nodes.7"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.18" target="//@urndef/@specDiagrams.0/@nodes.0"/>
+      <comments description="Playing a turn is handled by multiple classes in the server.logic.game.handlers package, all of which inherit from CommandHandler" x="265" y="543" width="198" height="90" fillColor="255,255,200"/>
+    </specDiagrams>
+    <components id="42" name="SetupPhaseCommandHandler" contRefs="//@urndef/@specDiagrams.0/@contRefs.0" kind="Object"/>
+    <components id="46" name="CommandHandler" contRefs="//@urndef/@specDiagrams.0/@contRefs.1" kind="Object"/>
+    <components id="50" name="ConstructBuildingCommandHandler" contRefs="//@urndef/@specDiagrams.0/@contRefs.2" kind="Object"/>
+    <components id="54" name="RecruitingThingsCommandHandler" contRefs="//@urndef/@specDiagrams.0/@contRefs.3" kind="Object"/>
+    <components id="60" name="server.logic.game.handlers" contRefs="//@urndef/@specDiagrams.0/@contRefs.4" kind="Other"/>
   </urndef>
   <metadata name="_Use0to100EvaluationRange" value="false"/>
 </urn:URNspec>

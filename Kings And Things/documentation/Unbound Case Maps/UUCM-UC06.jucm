@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ucm.map="http:///ucm/map.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="Owner" created="April 10, 2014 8:27:44 PM EDT" modified="April 10, 2014 10:07:37 PM EDT" specVersion="4" urnVersion="0.925" nextGlobalID="25">
+<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ucm.map="http:///ucm/map.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="Owner" created="April 10, 2014 8:27:44 PM EDT" modified="April 11, 2014 12:53:31 AM EDT" specVersion="5" urnVersion="0.925" nextGlobalID="26">
   <ucmspec>
     <scenarioGroups id="5" name="ScenarioGroup5">
       <scenarios id="6" name="ScenarioDef6"/>
@@ -20,7 +20,7 @@
         <label/>
         <precondition deltaX="40" deltaY="-17" label="" expression="true"/>
       </nodes>
-      <nodes xsi:type="ucm.map:EndPoint" id="13" name="Players have been played" x="716" y="207" pred="//@urndef/@specDiagrams.0/@connections.1">
+      <nodes xsi:type="ucm.map:EndPoint" id="13" name="Players things have been played" x="716" y="207" pred="//@urndef/@specDiagrams.0/@connections.1">
         <label/>
         <postcondition deltaX="-40" deltaY="-20" label="" expression="true"/>
       </nodes>
