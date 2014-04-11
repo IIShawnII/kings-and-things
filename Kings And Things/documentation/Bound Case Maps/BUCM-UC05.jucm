@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ucm.map="http:///ucm/map.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="Owner" created="April 10, 2014 10:27:27 PM EDT" modified="April 11, 2014 12:50:24 AM EDT" specVersion="2" urnVersion="0.925" nextGlobalID="85">
+<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ucm.map="http:///ucm/map.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="Owner" created="April 10, 2014 10:27:27 PM EDT" modified="April 11, 2014 1:17:44 AM EDT" specVersion="3" urnVersion="0.925" nextGlobalID="85">
   <ucmspec>
     <scenarioGroups id="5" name="ScenarioGroup5">
       <scenarios id="6" name="ScenarioDef6"/>
@@ -16,7 +16,7 @@
   <urndef>
     <responsibilities id="26" name="players obtain thing form the cup" respRefs="//@urndef/@specDiagrams.0/@nodes.5"/>
     <responsibilities id="27" name="players collect gold" respRefs="//@urndef/@specDiagrams.0/@nodes.7"/>
-    <responsibilities id="28" name="playes may exchange or purches things" respRefs="//@urndef/@specDiagrams.0/@nodes.3"/>
+    <responsibilities id="28" name="players may exchange or purches things" respRefs="//@urndef/@specDiagrams.0/@nodes.3"/>
     <specDiagrams xsi:type="ucm.map:UCMmap" id="2" name="UCMmap2">
       <nodes xsi:type="ucm.map:StartPoint" id="18" name="&quot;The Cup&quot; is not empty" x="14" y="269" succ="//@urndef/@specDiagrams.0/@connections.10">
         <label deltaX="5" deltaY="14"/>
