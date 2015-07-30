@@ -1,0 +1,1 @@
+Simulator of board game Kings And Things
